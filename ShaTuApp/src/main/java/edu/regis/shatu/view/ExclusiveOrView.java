@@ -539,7 +539,10 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
             verifyAnswer();
         }
     }
-
+/**
+ * XOR Example Request Added
+ * @return 
+ */
     @Override
     public NewExampleRequest newRequest() {
         NewExampleRequest ex = new NewExampleRequest();
