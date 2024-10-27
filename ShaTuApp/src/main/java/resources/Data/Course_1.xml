@@ -153,5 +153,14 @@ SHATU: SHA-256 Tutor
         <ExercisingLocation course="1" unit="0" task="0" step="0" />
     </KnowledgeComponent>
     
+    <KnowledgeComponent id="100" title="Choice Function Assessment" 
+             bloomLevel="Application" focus="Tutor" pedagogy="Other">
+        <Description>
+            Student has appropriately demonstrated understanding of the Choice.
+            Function
+        </Description>
+        <ExercisingLocation course="1" unit="0" task="0" step="0" />
+    </KnowledgeComponent>
+    
 </Course>
 
