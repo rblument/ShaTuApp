@@ -33,6 +33,7 @@ import edu.regis.shatu.model.aol.EncodeAsciiStep;
 import edu.regis.shatu.model.KnowledgeComponent;
 import edu.regis.shatu.model.Pad0Step;
 import edu.regis.shatu.model.MajorityStep;
+import edu.regis.shatu.model.MessageLenStep;
 import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.StepCompletionReply;
@@ -522,9 +523,68 @@ public class ShaTuTutor implements TutorSvc {
         
         return reply;
     }
-        
+    
+    /**
+     * Function that is called from the overrided stepCompletion method from the MessageLenView.  
+     * Checks the users answer with the correct answer and will provide the user
+     * with further guidance.
+     * @param completion
+     * @return 
+     */    
     public TutorReply completeAddMsgLenStep(StepCompletion completion) {
-        TutorReply reply = new TutorReply(":StepCompletionReply");
+        MessageLenStep completedMessageLenStep = gson.fromJson(completion.getData(), MessageLenStep.class);
+        
+        String userAnswer = completedMessageLenStep.getUserAnswer();
+        String correctAnswer = completedMessageLenStep.getResult();
+        
+        System.out.println("user answer: " + userAnswer); // Error checking
+        System.out.println("Correct answer: " + correctAnswer); // Error checking
+        
+        StepCompletionReply stepReply = new StepCompletionReply();
+        stepReply.setCorrectAnswer(correctAnswer);
+        stepReply.setResponse(userAnswer);
+        
+        if (userAnswer.equals(correctAnswer)) { // User was correct
+            System.out.println("Answer was correct, correct if branch taken."); // Error checking
+            stepReply.setIsCorrect(true);
+            stepReply.setIsRepeatStep(false);
+            stepReply.setIsNewStep(true);
+             
+            // ToDo: Use the student model to figure out whether we want
+            // to give the student another practice problem of the same
+            // type or move on to an entirely different problem.
+            stepReply.setIsNewTask(true);
+            
+            // ToDo: currently only one step in a task, so there isn't a next one???
+            stepReply.setIsNextStep(false);
+
+        } else { // User was wrong
+            System.out.println("Answer was not correct, correct if branch taken."); // Error checking
+            stepReply.setIsCorrect(false);
+            stepReply.setIsRepeatStep(true);
+            stepReply.setIsNewStep(false);
+            stepReply.setIsNewTask(false);
+            stepReply.setIsNextStep(false);
+        }
+        
+        Step step = new Step(1, 0, StepSubType.STEP_COMPLETION_REPLY);
+        step.setCurrentHintIndex(0);
+        step.setNotifyTutor(true);
+        step.setIsCompleted(false);
+        // ToDo: fix timeouts
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+        step.setData(gson.toJson(stepReply));
+        
+        Task task = new Task();
+        task.setKind(TaskKind.PROBLEM);
+        task.setType(ExampleType.STEP_COMPLETION_REPLY);
+        task.setDescription("Choose your next action");
+        task.addStep(step); 
+        
+        TutorReply reply = new TutorReply(":Success");
+    
+        reply.setData(gson.toJson(task));
         
         return reply;
     }  
@@ -1170,7 +1230,39 @@ public class ShaTuTutor implements TutorSvc {
      * @return a TutorReply
      */
     private TutorReply newAddMsgLenExample(TutoringSession session, String jsonData) {
+        System.out.println("Start tutor newAddMsgLenExample"); // Error checking
+
+        MessageLenStep subStep = gson.fromJson(jsonData, MessageLenStep.class);
+        
+        int messageLength = subStep.getMessageLength();
+        
+        String question = generateRandomString(messageLength);
+        
+        subStep.setQuestion(question);
+        
+        subStep.setResult(Integer.toBinaryString(messageLength * 8)); // Calculates the number of bits that the message length represents then converts that int to a binary string. (8 bits per char)
+        
+        System.out.println(subStep.getResult()); // Error checking
+        
+        Step step = new Step(1, 0, StepSubType.ADD_MSG_LENGTH);
+        step.setCurrentHintIndex(0);
+        step.setNotifyTutor(true);
+        step.setIsCompleted(false);
+        // ToDo: fix timeouts
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+
+        step.setData(gson.toJson(subStep));
+
+        Task task = new Task();
+        task.setKind(TaskKind.PROBLEM);
+        task.setType(ExampleType.ADD_MSG_LENGTH);
+        task.setDescription("Calculate the message length for the last 64 bits of the message length step");
+        task.addStep(step);
+
+        // ToDo: Add the task to the session and update it.
         TutorReply reply = new TutorReply(":Success");
+        reply.setData(gson.toJson(task));
 
         return reply;
     }
