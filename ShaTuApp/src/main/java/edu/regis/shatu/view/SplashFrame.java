@@ -17,6 +17,7 @@ import edu.regis.shatu.model.TutoringSession;
 import edu.regis.shatu.model.User;
 import java.awt.CardLayout;
 import java.awt.Dimension;
+import java.awt.Toolkit;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -263,7 +264,10 @@ public class SplashFrame extends JFrame {
         
         // Sets size of practice screen window.
         // Without this, the window opens too small.
-        this.setPreferredSize(new Dimension(1000, 800));
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        int width = (int) (screenSize.width * 0.8);
+        int height = (int) (screenSize.height * 0.8);
+        this.setPreferredSize(new Dimension(height, width));
         this.pack();
         
         // Switch to the tutoring session view
