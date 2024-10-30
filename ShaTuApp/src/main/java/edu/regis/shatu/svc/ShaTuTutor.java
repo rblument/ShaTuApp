@@ -21,6 +21,7 @@ import edu.regis.shatu.err.NonRecoverableException;
 import edu.regis.shatu.err.ObjNotFoundException;
 import edu.regis.shatu.model.Account;
 import edu.regis.shatu.model.AddOneStep;
+import edu.regis.shatu.model.aol.RotateStep;
 import edu.regis.shatu.model.BitShiftStep;
 import edu.regis.shatu.model.ChoiceFunctionStep;
 import edu.regis.shatu.model.Course;
@@ -319,7 +320,46 @@ public class ShaTuTutor implements TutorSvc {
     }
     
     public TutorReply completeRotateStep(StepCompletion completion) {
-        TutorReply reply = new TutorReply(":StepCompletionReply");
+        System.out.println("Tutor completeRotateStep");
+        RotateStep example = gson.fromJson(completion.getData(), RotateStep.class);
+        int amount = example.getAmount();
+        String data = example.getData();
+        
+        String expectedResult = performBitRotation(data, amount);
+        
+        StepCompletionReply stepReply = new StepCompletionReply();
+        String result = example.getUserResponse();
+        if (expectedResult.equals(result)) {
+            stepReply.setIsCorrect(true);
+            stepReply.setIsRepeatStep(false);
+            stepReply.setIsNewStep(true);
+            stepReply.setIsNewTask(true);
+            stepReply.setIsNextStep(false);
+        } else {
+            stepReply.setIsCorrect(false);
+            stepReply.setIsRepeatStep(true);
+            stepReply.setIsNewStep(false);
+            stepReply.setIsNewTask(false);
+            stepReply.setIsNextStep(false);
+        }
+
+        Step step = new Step(1, 0, StepSubType.STEP_COMPLETION_REPLY);
+        step.setCurrentHintIndex(0);
+        step.setNotifyTutor(true);
+        step.setIsCompleted(false);
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+        step.setData(gson.toJson(stepReply));
+
+        Task task = new Task();
+        task.setKind(TaskKind.PROBLEM);
+        task.setType(ExampleType.STEP_COMPLETION_REPLY);
+        task.setDescription("Choose your next action");
+        task.addStep(step); 
+
+        TutorReply reply = new TutorReply(":Success");
+
+        reply.setData(gson.toJson(task));
         
         return reply;
     }
@@ -996,12 +1036,47 @@ public class ShaTuTutor implements TutorSvc {
      *
      * @return a TutorReply
      */
-    private TutorReply newRotateBitsExample(TutoringSession session, String jsonData) {
+     private TutorReply newRotateBitsExample(TutoringSession session, String jsonData) {
         TutorReply reply = new TutorReply(":Success");
+        RotateStep example = gson.fromJson(jsonData, RotateStep.class);
 
+        // Check if the data (bit string) is provided, if not, generate it
+        if (example.getData() == null || example.getData().isEmpty()) {
+            String generatedData = generateInputString(example.getLength());
+            example.setData(generatedData);
+        }
+
+        Step step = new Step(1, 0, StepSubType.ROTATE_BITS);
+        step.setData(gson.toJson(example));
+        step.setIsCompleted(false);
+        step.setNotifyTutor(true);
+
+        Task task = new Task();
+        task.setKind(TaskKind.PROBLEM);
+        task.setType(ExampleType.ROTATE_BITS);
+        task.addStep(step);
+        
+        reply.setData(gson.toJson(task));
         return reply;
     }
+     /**
+      * Performs bit rotation on the example string to get correct answer for
+      *   comparison to user's answer.
+      * @param data
+      * @param amount
+      * @return result
+      */
+    private String performBitRotation(String data, int amount) {
+        String fdata = data.replaceAll("\\s+", "");
+        int length = fdata.length();
+        amount = amount % length;
 
+        if (amount < 0) {
+            amount = length + amount;
+        }
+           String result = fdata.substring(length - amount) + fdata.substring(0, length - amount);
+        return result;
+    }
     /**
      * Handles client requests for a new shift bits zeros example.
      *
