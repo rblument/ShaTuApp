@@ -92,7 +92,33 @@ public class StudentDAO extends MySqlDAO implements StudentSvc {
      */
     @Override
     public boolean exists(String userId) throws NonRecoverableException {
-        throw new UnsupportedOperationException("Not supported yet.");    
+        boolean exists = false;
+        
+        Connection conn = null;
+        PreparedStatement stmt1 = null;
+        
+        // SQL statement to check if userId exists in Student table
+        final String sql1 = "SELECT '" + userId + 
+                "' FROM Student WHERE UserId = '" + userId + "';";
+        
+        
+          
+        // Check if the UserId is in the Student Table
+        try {
+            conn = DriverManager.getConnection(URL);
+            stmt1 = conn.prepareStatement(sql1);
+
+            ResultSet rs = stmt1.executeQuery();
+            
+            exists = rs.isBeforeFirst();  
+            
+            System.out.println("The result of ResultSet is " + exists);
+       
+        } catch (SQLException e) {
+            throw new NonRecoverableException("StudentDAO-ERR-1" + e.toString(), e);
+        }
+        
+        return exists;
     }
     
    
