@@ -269,6 +269,7 @@ public class InitVarView extends UserRequestView implements ActionListener {
         h7.getDocument().addDocumentListener(docListener);
     }
     
+    // Displays the answers in the GUI
     private void showAnswer() {
         removeHints();
             if (answersVisible) {
@@ -285,6 +286,7 @@ public class InitVarView extends UserRequestView implements ActionListener {
         repaint();
     }
     
+    // Adds answers to GUI layout
     private void addAnswerLabels() {
         // Add rows for each label, text field, and correct answer
         addRowWithAnswer("H0: ", h0, "Correct: " + fieldValues.get(h0), 0, 1);
@@ -297,6 +299,7 @@ public class InitVarView extends UserRequestView implements ActionListener {
         addRowWithAnswer("H7: ", h7, "Correct: " + fieldValues.get(h7), 0, 8);
     }
     
+    // Adds hint to GUI layout for its cooresponding answer
     private void addHints(JTextField initVar) {
         String first = hint1.get(initVar);
         String second = hint2.get(initVar);
@@ -358,6 +361,7 @@ public class InitVarView extends UserRequestView implements ActionListener {
         else hintCount = 1;
     }
     
+    // Generates GUI hints and makes them visible to the user
     private void hint() {
         if (hintsVisible) {
             removeHints();  // Remove all previous hints before showing new ones
@@ -389,7 +393,15 @@ public class InitVarView extends UserRequestView implements ActionListener {
         repaint();
     }
 
-
+    
+    /**
+     * Adds a new row at the specified x and y values.
+     * @param labelText first field in each row, the label for the text field
+     * @param textField second field in each row, the text field accepting user input
+     * @param correctAnswer third field in each row, the correct answer for this row
+     * @param gridX the x coordinate for the row
+     * @param gridY the y coordinate for the row
+     */
     private void addRowWithAnswer(String labelText, JTextField textField, String correctAnswer, int gridX, int gridY) {
         JPanel rowPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0)); // 5px horizontal gap, no vertical gap
         JLabel label = new JLabel(labelText);
@@ -407,7 +419,10 @@ public class InitVarView extends UserRequestView implements ActionListener {
         gbc.anchor = GridBagConstraints.WEST;
         add(rowPanel, gbc);
     }
-
+    
+    /**
+     * Removes all generated answer labels from the GUI
+     */
     private void removeExistingAnswerLabels() {
         // Remove only labels that start with "Correct:" from each row JPanel
         for (int i = 0; i < getComponentCount(); i++) {
@@ -425,6 +440,7 @@ public class InitVarView extends UserRequestView implements ActionListener {
         }
     }
     
+    // Removes all generated hints from the GUI
     private void removeHints() {
         // Remove only labels that start with "Hint:" from each row JPanel
         for (int i = 0; i < getComponentCount(); i++) {
