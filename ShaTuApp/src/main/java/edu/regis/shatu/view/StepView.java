@@ -69,6 +69,8 @@ public class StepView extends JPanel {
     private StepCompletionReplyView stepReplyView;
     
     private TutoringSession model;
+    
+    private MessageLenView messageLenView;
 
 
     /**
@@ -177,6 +179,8 @@ public class StepView extends JPanel {
                     return stepReplyView;
             case XOR:
                 return exclusiveOrView;
+            case LENGTH:
+                return messageLenView;
    
             default:
 
@@ -210,6 +214,7 @@ public class StepView extends JPanel {
         exclusiveOrView = new ExclusiveOrView();
         choiceFunctionView = new ChoiceFunctionView();
         stepReplyView = new StepCompletionReplyView();
+        messageLenView = new MessageLenView();
     }
     
     /**
@@ -231,6 +236,7 @@ public class StepView extends JPanel {
         add(initVarView, StepSelection.INIT_VARS.toString());
         add(exclusiveOrView, StepSelection.XOR.toString());
         add(choiceFunctionView, StepSelection.CHOICE_FUNCTION.toString());
+        add(messageLenView, StepSelection.LENGTH.toString());
 
 
         add(stepReplyView, StepSelection.STEP_REPLY.toString());
