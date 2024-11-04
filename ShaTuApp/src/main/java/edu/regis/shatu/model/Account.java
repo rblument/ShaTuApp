@@ -62,6 +62,13 @@ public class Account {
         this.lastName = lastName;
     }
     
+     public void clear(){
+        this.userId = null;
+        this.password = null;
+        this.firstName = null;
+        this.lastName = null;
+    }
+    
     public Account() {
     }
 }

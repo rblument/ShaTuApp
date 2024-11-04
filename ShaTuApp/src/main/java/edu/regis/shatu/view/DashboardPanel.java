@@ -175,11 +175,11 @@ public class DashboardPanel extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void practiceButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_practiceButton1ActionPerformed
-     SplashFrame.instance().selectPracticeScreen();
+        SplashFrame.instance().selectPracticeScreen();
     }//GEN-LAST:event_practiceButton1ActionPerformed
 
     private void logOutButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_logOutButtonMouseClicked
-     SplashFrame.instance().selectSplash();
+        SplashFrame.instance().logout();
     }//GEN-LAST:event_logOutButtonMouseClicked
 
 

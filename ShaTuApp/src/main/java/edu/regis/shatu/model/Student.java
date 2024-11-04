@@ -49,7 +49,7 @@ public class Student extends User {
     public Student(String userId, String password) { 
         this.userId = userId;
         this.password = password;
-        studentModel = new StudentModel();
+        studentModel = new StudentModel(userId);
     }
 
     /**

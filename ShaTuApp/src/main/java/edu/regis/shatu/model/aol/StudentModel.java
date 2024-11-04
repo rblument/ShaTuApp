@@ -12,7 +12,6 @@
  */
 package edu.regis.shatu.model.aol;
 
-import edu.regis.shatu.model.Model;
 import java.util.HashMap;
 
 /**
@@ -21,7 +20,7 @@ import java.util.HashMap;
  * 
  * @author rickb
  */
-public class StudentModel extends Model {
+public class StudentModel {
     /**
      * Convenience reference to the user id (email) of the student associated
      * with this student model.
@@ -40,12 +39,14 @@ public class StudentModel extends Model {
     private ScaffoldLevel scaffoldLevel = ScaffoldLevel.EXTREME;
     
     /**
-     * Instantiate this student model with default information.
+     * Create a student model for the given user id and with default information.
+     * 
+     * @param userId the user id of the student whose model is being created.
      */
-    public StudentModel() {
-        super(DEFAULT_ID);
+    public StudentModel(String userId) {
+        this.userId = userId;
         
-        assessments = new HashMap<>();
+        assessments = new HashMap<>();   
     }
 
     public String getUserId() {
@@ -58,6 +59,10 @@ public class StudentModel extends Model {
     
     public void addAssessment(int knowledgeComponentId, Assessment assessment) {
         assessments.put(knowledgeComponentId, assessment);
+    }
+    
+    public void addAssessment(Assessment assessment) {
+        addAssessment(assessment.getOutcome().getId(), assessment);
     }
 
     /**

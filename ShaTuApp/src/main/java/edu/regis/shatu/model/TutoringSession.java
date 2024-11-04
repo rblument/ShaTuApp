@@ -32,6 +32,8 @@ public class TutoringSession {
      */
     private Account account;
     
+    private Student student;
+    
     /**
      * A summary of the course currently being taught in this session.
      */
@@ -75,6 +77,14 @@ public class TutoringSession {
 
     public void setSecurityToken(String securityToken) {
         this.securityToken = securityToken;
+    }
+
+    public Student getStudent() {
+        return student;
+    }
+
+    public void setStudent(Student student) {
+        this.student = student;
     }
 
     /**
