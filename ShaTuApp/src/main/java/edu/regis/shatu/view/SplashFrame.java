@@ -224,6 +224,30 @@ public class SplashFrame extends JFrame {
     }
     
     /**
+     * Clears the tutoringSession instance.
+     * Changes current user to an empty user instance.
+     * Clears splashPanel fields.
+     * Switches to splash screen for sign in.
+     */
+    public void logout() {        
+        // Ensure that tutoring session is not null before attempting to clear
+        if (this.tutoringSession != null && this.tutoringSession.getAccount() != null) {
+            // Clear account information
+            this.tutoringSession.getAccount().clear();
+        }
+
+        // Invalidate or set the tutoring session to null
+        this.tutoringSession = null;
+
+        // Clear the splash panel model by setting it to a new user and reset the fields
+        this.splashPanel.setModel(new User());  // Reset the splash panel model
+        this.splashPanel.clearFields();  // Clear the userId and password fields
+
+        // Swap to splash screen for login
+        this.selectSplash();
+    }
+
+    /**
      * Sets the current card panel to Dashboard.
      * @param session
      */

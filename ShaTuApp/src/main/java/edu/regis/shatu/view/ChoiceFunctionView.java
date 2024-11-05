@@ -507,9 +507,13 @@ public class ChoiceFunctionView extends UserRequestView implements ActionListene
 
     @Override
     protected void updateView() {
+        System.out.println("Choice function update view called."); // Error checking
+        
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
         Step step = model.currentTask().getCurrentStep();
+        
+        System.out.println("Choice value View substep from current step: " + step.getSubType()); // Error checking
 
         ChoiceFunctionStep example = gson.fromJson(step.getData(), ChoiceFunctionStep.class);
 
