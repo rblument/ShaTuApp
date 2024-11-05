@@ -14,7 +14,7 @@ package edu.regis.shatu.view;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import edu.regis.shatu.model.AddOneStep;
+import edu.regis.shatu.model.Pad0Step;
 import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.ExampleType;
@@ -40,12 +40,13 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 /**
- * A view that requests the student to add a single '1' bit to the byte prompt.
+ * A view that requests the student to figure out the number of zeros needed to 
+ * Pad a SHA256 message.
  * 
  * @author rickb
  */
-public class Add1View extends UserRequestView implements ActionListener {
-  
+public class Pad0View extends UserRequestView implements ActionListener {
+    
     private JTextPane descriptionTextPane;
     private JLabel questionLabel, instructionsLabel, messageLengthLabel;
     private JTextField messageLengthField;
@@ -56,12 +57,11 @@ public class Add1View extends UserRequestView implements ActionListener {
     private JScrollPane responseScrollPane, asciiTableScrollPane, feedbackScrollPane;
     private String question;
     private boolean wasHintRequested = false;
-
     
     /**
      * Initialize this view including creating and laying out its child components.
      */
-    public Add1View() { 
+    public Pad0View() { 
         
         initializeComponents();
         initializeLayout();
@@ -83,6 +83,7 @@ public class Add1View extends UserRequestView implements ActionListener {
             requestHint();
         }
     }
+    
 
     /**
      * Initializes all GUI components, setting up their properties and configurations.
@@ -143,8 +144,7 @@ public class Add1View extends UserRequestView implements ActionListener {
             this.feedbackArea.setText("Please provide an answer");
         }
         else {
-            // Nothing, maybe needed later in development, tutor should be handling things though.
-
+            // Do nothing, tutor should be handling everything, but will leave incase a use can be found in development.
         }
     }
     
@@ -155,8 +155,8 @@ public class Add1View extends UserRequestView implements ActionListener {
      * but may no longer be needed.
      */
     private void prepareNextQuestion() {
-        // Do nothing, tutor should be handling things, but leaving incase a use
-        // could be found later in development
+        // Do nothing, tutor should be handling things, will leave incase a use
+        // could be found during development.
     }
     
     /**
@@ -166,18 +166,27 @@ public class Add1View extends UserRequestView implements ActionListener {
      */
     public void requestHint() {
         
-        this.feedbackArea.setText("Hint: Check the ASCII Table to the right for guidance.");
+        //Adjust the hint as needed
+        this.feedbackArea.setText("Hint: Remember, the message must be padded to"
+                + " ensure its length is a multiple of 512 bits.  The message needs "
+                + "to be padded until its length is 448 (leaving room for the final "
+                + "64 bits in the message length step), including the binary coversion "
+                + "and the appended 1 from the previous step. "
+                + "Check the ASCII Table to the right for guidance, but for this step, "
+                + "its not needed, each character is a byte, so take each byte, "
+                + "add 1 more bit to your total, then subtract that from 448, "
+                + "that answer would be the number of zeros you need to pad with.");
         
-        if (!this.isAncestorOf(asciiTableScrollPane)) { // Adds the ASCII table if it doesnt exist.
+        if (!this.isAncestorOf(asciiTableScrollPane)) { // If the ASCII table isnt in the view, add it.
             addc(asciiTableScrollPane, 3, 0, GridBagConstraints.REMAINDER,
                     7, 2.0, 1.0, GridBagConstraints.CENTER, 
                     GridBagConstraints.BOTH, 5, 5, 5, 5);
             
-            this.wasHintRequested = true; // Used in the updateView function
+            this.wasHintRequested = true;
         }
         
-        this.revalidate(); // Refreshes the view
-        this.repaint(); // Refreshes the view
+        this.revalidate(); // refreshes the view
+        this.repaint(); // refreshes the view
     }
     
     /**
@@ -192,24 +201,18 @@ public class Add1View extends UserRequestView implements ActionListener {
         descriptionTextPane.setText(
                     "<html>" +
                     "<body>" +
-                    "<h2>Appending the '1' Bit</h2>" +
-                    "<p>The second step in SHA-256 preprocessing is appending a "
-                            + "single '1' bit to the end of the original message"
-                            + " in binary form. This step is crucial as it marks"
-                            + " the boundary between the original message and the"
-                            + " padding that follows. The '1' bit is added"
-                            + " immediately after the last character of the message,"
-                            + " before any zero padding. This ensures that the "
-                            + " padded message remains unique and distinguishable"
-                            + " from the original. Please use the format: "
-                            + "######## # or if message length is two: "
-                            + "######## ######## # and keep going depending on "
-                            + "the message length. The single # would be "
-                            + "the 1 you are suppose to add.</p>" +
+                    "<h2>Padding with 0's (Zeros)</h2>" +
+                    "<p>For this step, you need to pad the Sha256 message with zeros. <br> "
+                            + "1: Remember, the Sha256 message is a multiple of 512 bits <br>"
+                            + "2: The last 64 bits are for the message length that will be calculated in the next step. <br>"
+                            + "3: 512 - 64 = 448 bits, that means your message for this step"
+                            + " needs to be 448 bits long. <br>"
+                            + "4: With that in mind, how many bits is the question "
+                            + "(dont forget to add 1 bit like you learned in the previous step). <br>"
+                            + "5: Maybe subtract that from 448 to get your answer?</p>" +
                     "</body>" +
                     "</html>"
             );
-        
         descriptionTextPane.setEditable(false);
         descriptionTextPane.setBackground(null);
         descriptionTextPane.setBorder(null);
@@ -249,19 +252,16 @@ public class Add1View extends UserRequestView implements ActionListener {
     
     /**
      * Initializes the submit, next, and hint buttons and sets up action listeners
-     * 
      */
     private void setupButtons() {
         checkButton = new JButton(StepCompletionAction.instance());
         checkButton.addActionListener(this);
 
-        hintButton = new JButton("Hint"); // Needs to be adjusted once tutor can handle hints
+        hintButton = new JButton("Hint"); // Needs to be adjusted once the tutor can handle hints.
         hintButton.addActionListener(this);
 
         nextButton = new JButton(NewExampleAction.instance());
         nextButton.addActionListener(this);
-
-
     }
     
     /**
@@ -301,14 +301,13 @@ public class Add1View extends UserRequestView implements ActionListener {
     }
     
     /**
-     * Creates a label to tell the user what to do, like a extra hint/description.
+     * Creates the label for the instructions that the user may need.
      */
     private void setupInstructionLabel() {
-        instructionsLabel = new JLabel("Please separate your entries with spaces.");
+        instructionsLabel = new JLabel("Please submit your answer here.");
         instructionsLabel.setHorizontalAlignment(JLabel.CENTER);
     }
     
-
     /**
      * Initializes the ASCII table and its scroll pane
      */
@@ -361,54 +360,51 @@ public class Add1View extends UserRequestView implements ActionListener {
         that a example was created for.  If that enums related stepobject has
         similar variables, their may be a conflict causing a error.
         */
-        StepSubType type = StepSubType.ADD_ONE_BIT;
+        StepSubType type = StepSubType.PAD_ZEROS;
         
-        System.out.println("Add One Bit update display called"); // Error checking
+        System.out.println("Pad Zero update display called"); // Error checking
         
         Gson gson = new GsonBuilder().setPrettyPrinting().create(); // May not be needed here.
         
-        Step step = model.currentTask().getCurrentStep(); // Will be the last subtype a example was created for or empty
+        Step step = model.currentTask().getCurrentStep(); // will be the last step a example was created for.
         
-        System.out.println("Add 1 View substep from current step: " + step.getSubType()); // Error checking
-        System.out.println("add one bit type: " + type); // Error checking
+        System.out.println("Pad 0 View substep from current step: " + step.getSubType()); // Error checking.
         
-        AddOneStep newAddOneBit = gson.fromJson(step.getData(), AddOneStep.class); // Takes data to the class object created from the new example.
+        Pad0Step newPadZeroObject = gson.fromJson(step.getData(), Pad0Step.class); // Issues can happen here if the class contains similar named variables
         
         // Clear any existing feedback and response from the previous question.
         feedbackArea.setText("");
         responseArea.setText("");
         
-        if ((step.getSubType() == type)) { // Subtype was correct
-            System.out.println("If branch was taken, subtype was a addone bit"); // Error checking.
+        if (type == step.getSubType()) { // prevents data assignment issues if subtype is for a different class.
             
-            this.question = newAddOneBit.getQuestion();
-            
-            if (this.question == null) { // new example hasnt been created yet
+            this.question = newPadZeroObject.getQuestion();
+        
+            if (this.question == null) { // A example hasnt been created yet
                 questionLabel.setText("Please click new example button to get started");
                 checkButton.setEnabled(false);
                 hintButton.setEnabled(false);
             }
         
-            else { // example has been created.
-                questionLabel.setText(String.format("Convert the following "
-                            + "string to binary and append a 1 bit to it: %s", question));
+            else { // subtype matches and a example was already made
+                questionLabel.setText(String.format("Calculate the number of zero's "
+                        + "needed to pad the following string so it is "
+                        + "the proper length (448 bits): %s", question));
                 checkButton.setEnabled(true);
                 hintButton.setEnabled(true);
             }
         }
         
-        else { // subtype didnt match, new example needs to be created.
-            System.out.println("Else branch was taken, subtype not add one bit"); // Error checking.
-            
-            questionLabel.setText("Please click new example button to get started");
-            checkButton.setEnabled(false);
-            hintButton.setEnabled(false);
+        else { // Subtype differs, need to create a new example to correctly set it.
+                questionLabel.setText("Please click new example button to get started");
+                checkButton.setEnabled(false);
+                hintButton.setEnabled(false);
         }
         
-        if (this.wasHintRequested) { // If ASCII table exists, remove it from the view.
-                this.remove(this.asciiTableScrollPane);
-                this.revalidate();
-                this.repaint();
+        if (this.wasHintRequested) { // Removes the ASCII table from the view if exists
+            this.remove(this.asciiTableScrollPane);
+            this.revalidate(); // Refreshes the view
+            this.repaint(); // Refreshes the view
         }
     }
 
@@ -424,21 +420,21 @@ public class Add1View extends UserRequestView implements ActionListener {
     @Override
     public NewExampleRequest newRequest() {
         
-        NewExampleRequest ex = new NewExampleRequest();
+        NewExampleRequest ex = new NewExampleRequest(); // Will be sent to the tutor.
         
-        ex.setExampleType(ExampleType.ADD_ONE_BIT);
+        ex.setExampleType(ExampleType.PAD_ZEROS);
         
-        AddOneStep newAddOneStep = new AddOneStep(); // New class object.
+        Pad0Step newPad0Step = new Pad0Step(); // New Pad0Step class object to use for the question and answer.
         
-        newAddOneStep.setMessageLength(Integer.parseInt(messageLengthField.getText().trim())); // Number of characters the question needs to be
+        newPad0Step.setMessageLength(Integer.parseInt(messageLengthField.getText().trim())); // Number of characters the question should be.
         
-        System.out.println(newAddOneStep);
+        System.out.println(newPad0Step); // Error checking
         
-        ex.setData(gson.toJson(newAddOneStep));
+        ex.setData(gson.toJson(newPad0Step));
         
         return ex;
     }
-    
+
     /**
      * This method is suppose to be called when the check button is clicked,
      * it should take the users answer, assign it to the related class, then
@@ -450,15 +446,15 @@ public class Add1View extends UserRequestView implements ActionListener {
     @Override
     public StepCompletion stepCompletion() {
         
-        Step currentStep = model.currentTask().currentStep(); // step created from the new example.
+        Step currentStep = model.currentTask().currentStep();
         
-        AddOneStep completedAddOneStep = gson.fromJson(currentStep.getData(), AddOneStep.class); // Class object created from the new example.
+        Pad0Step completedPadZeroStep = gson.fromJson(currentStep.getData(), Pad0Step.class); // Assigns the class with the data assigned while creating the example.
         
-        String userResponse = this.responseArea.getText(); // Get the user's answer.
+        String userResponse = this.responseArea.getText().replaceAll("\\s", ""); // Gets the users answer and removes spaces
         
-        completedAddOneStep.setUserAnswer(userResponse); // User answer in the response area
+        completedPadZeroStep.setUserAnswer(userResponse);
         
-        StepCompletion step = new StepCompletion(currentStep, gson.toJson(completedAddOneStep));
+        StepCompletion step = new StepCompletion(currentStep, gson.toJson(completedPadZeroStep));
         
         step.setStep(currentStep); // Will be sent to the tutor.
         

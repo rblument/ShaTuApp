@@ -82,7 +82,7 @@ public class SignInAction extends ShaTuGuiAction {
     /**
      * Handle the user's request to sign-in by sending it to the DICE tutor.
      *
-     * If successful, the MaingFrame with the Courtroom View is displayed.
+     * If successful, the MainFrame with the Courtroom View is displayed.
      *
      * @param evt ignored
      */
@@ -93,13 +93,21 @@ public class SignInAction extends ShaTuGuiAction {
         ClientRequest request = new ClientRequest(ServerRequestType.SIGN_IN);
         request.setData(gson.toJson(user));
         TutorReply reply = SvcFacade.instance().tutorRequest(request);
+
         switch (reply.getStatus()) {
             case "Authenticated":
-                MainFrame frame = MainFrame.instance();
                 TutoringSession session = gson.fromJson(reply.getData(), TutoringSession.class);
-                SplashFrame.instance().setVisible(false);
-                frame.setVisible(true);
+                
+                // Initialize main frame instance.
+                // This is used after selecting a mode from the dashboard.
+                MainFrame frame = MainFrame.instance();
+                //frame.setVisible(true);
                 frame.setModel(session);
+                
+                // Transition to dashboard
+                SplashFrame.instance().selectDashboard(session);
+                SplashFrame.instance().setVisible(true); // Hide the SplashFrame
+                
                 break;
             case "InvalidPassword":
                 SplashFrame.instance().invalidPass();
@@ -108,7 +116,6 @@ public class SignInAction extends ShaTuGuiAction {
                 SplashFrame.instance().unknownUser();
                 break;
             default:
-                // If we get here, there is a coding error in the tutor svc
                 System.out.println("Coding error  status: " + reply.getStatus());
         }
     }

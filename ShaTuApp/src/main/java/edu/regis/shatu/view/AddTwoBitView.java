@@ -16,19 +16,22 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
-import edu.regis.shatu.model.aol.BitOpExample;
 import edu.regis.shatu.model.aol.BitOpStep;
 import edu.regis.shatu.model.aol.ExampleType;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.view.act.NewExampleAction;
 import edu.regis.shatu.view.act.StepCompletionAction;
-import javax.swing.*;
-import java.awt.*;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.math.BigInteger;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JTextField;
 
 /**
  * AddTwoBitView class represents a GUI view for adding two binary numbers modulo 2^m.
@@ -44,13 +47,16 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
      */
     private final int m = 8; // will be changed and dynamically updated
 
-    private String binary1 = "101100";
-    private String binary2 = "011011";
+    private String binary1 = "";
+    private String binary2 = "";
+    private String result = "";
     
     private JTextField answerField;
     private JLabel instructionLabel;
     private JLabel stringLabel1;
     private JLabel stringLabel2;
+    private JLabel stringLabel3;
+    private JLabel stringLabel4; // Only for testing that view is communicating with server
     private JButton checkButton; // Add the check button
     private JButton hintButton;
     private JButton nextQuestionButton;
@@ -85,8 +91,10 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
     private void initializeComponents() {
         instructionLabel = new JLabel("Add two binary numbers using modulo 2^"+ m + " addition");
         
-        stringLabel1 = new JLabel("binary number1 : " + binary1);
-        stringLabel2 = new JLabel("binary number2 : " + binary2);
+        stringLabel1 = new JLabel("binary number1 : " );
+        stringLabel2 = new JLabel("binary number2 : " );
+        stringLabel3 = new JLabel("Hit New Example to get set of binary numbers" );
+        stringLabel4 = new JLabel();  //only for testing that view is communicating with server
         
         answerField = new JTextField(10);
         answerField.addKeyListener(this);
@@ -123,6 +131,15 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
 
         // Add binaryNumberTwoLabel centered below binaryNumberOneLabel
         addc(stringLabel2, 0, 2, 1, 1, 0.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                5, 5, 5, 5);
+        
+        addc(stringLabel3, 0, 3, 1, 1, 0.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                5, 5, 5, 5);
+        
+        // To provide answer for easier testing during build of application
+        addc(stringLabel4, 0, 9, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
 
@@ -251,9 +268,7 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
     private void onCheckButton() {
         if (answerField.getText().equals("")) {
             JOptionPane.showMessageDialog(this, "Please provide an answer");
-        } else {
-            verifyAnswer();
-        }
+        } 
     }
 
     /**
@@ -265,15 +280,15 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
     @Override
     public NewExampleRequest newRequest() {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        
+
         NewExampleRequest ex = new NewExampleRequest();
-        
+
         ex.setExampleType(ExampleType.ADD_BITS);
-        
+
         BitOpStep newStep = new BitOpStep();
-        
+
         ex.setData(gson.toJson(newStep));
-        
+
         return ex;
     }
 
@@ -288,9 +303,9 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
         Step currentStep = model.currentTask().currentStep();
 
         BitOpStep example = gson.fromJson(currentStep.getData(), BitOpStep.class);
-
+        
         String userResponse = answerField.getText().replaceAll("\\s", "");
-
+        
         example.getExample().setResult(userResponse);
 
         StepCompletion step = new StepCompletion(currentStep, gson.toJson(example));
@@ -306,18 +321,30 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
      */
     @Override
     protected void updateView() {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        if (model != null) {
+            // ****TO-DO*****
+            // Update the view's information from the model
+            // Debugging dynamic updates to the model can be done here.
+            System.out.println("InitVarView");
+            
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
 
         Step step = model.currentTask().getCurrentStep();
-
+        
         BitOpStep example = gson.fromJson(step.getData(), BitOpStep.class);
         
-        binary1 = example.getExample().getOperand1();
-        binary2 = example.getExample().getOperand2();
-
+        try {
+            binary1 = example.getExample().getOperand1();
+            binary2 = example.getExample().getOperand2();
+            result = calculateModulo(binary1, binary2); 
+        }
+        catch (NullPointerException e) {
+            System.out.println("Example is empty.");
+        }
+        
         stringLabel1.setText("binary number1: " + binary1);
         stringLabel2.setText("binary number2: " + binary2);
-
-    }
-    
+        }
+    }    
 }

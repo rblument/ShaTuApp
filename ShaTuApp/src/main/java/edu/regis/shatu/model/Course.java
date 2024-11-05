@@ -135,6 +135,14 @@ public class Course extends TitledModel {
         this.outcomes = outcomes;
     }
     
+    public KnowledgeComponent findOutcome(int knowledgeComponentId) {
+        for (KnowledgeComponent outcome : outcomes) 
+            if (outcome.getId() == knowledgeComponentId)
+                return outcome;
+        
+        return null;
+    }
+    
     /**
      * Return the knowledge component, if any, in this entity with the given
      * component id.

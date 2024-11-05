@@ -30,7 +30,7 @@ public class BitOpExample {
     /**
      * The bit-level operation demonstrated in this example.
      */
-    private ExampleType operation = ExampleType.XOR_BITS;
+    private ExampleType operation;
     
     /**
      * The number of bits in this example's initial operands.
@@ -160,6 +160,7 @@ public class BitOpExample {
      * @param result ignored
      */
     public void setResult(String result) {
+        this.result = result;
     }
 
     public long getResultVal() {

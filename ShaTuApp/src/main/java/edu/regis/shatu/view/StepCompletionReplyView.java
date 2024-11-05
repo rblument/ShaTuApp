@@ -167,7 +167,22 @@ public class StepCompletionReplyView extends UserRequestView implements ActionLi
         addc(buttonPanel, 0, 1, 1, 1, 0.0, 0.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
                 5, 5, 5, 5);
-    } 
+    }
+    
+    @Override
+    /**
+     * Updates the description, question, and hints from the model
+     * 
+     * TODO: THIS IS A PLACEHOLDER UNTIl WE HAVE HAVE THE MODEL CODE COMPLETED
+     */
+    protected void updateView() {
+        if (model != null) {
+            // ****TO-DO*****
+            // Update the view's information from the model
+            // Debugging dynamic updates to the model can be done here.
+            System.out.println("StepCompletionReplyView");
+        }
+    }
 
     @Override
     public NewExampleRequest newRequest() {

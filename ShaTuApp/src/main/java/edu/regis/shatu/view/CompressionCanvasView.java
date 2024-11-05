@@ -1,3 +1,4 @@
+
 /*
  * SHATU: SHA-256 Tutor
  * 
@@ -15,6 +16,7 @@ package edu.regis.shatu.view;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Point;
 
@@ -71,6 +73,10 @@ public class CompressionCanvasView extends UserRequestView {
     private BitOpLabel sigma1Label;
     private BitOpLabel chLabel;
     private BitOpLabel majLabel;
+    private VariableLabel wLabel;
+    private VariableLabel kLabel;
+    private VariableLabel temp1Label;
+    private VariableLabel temp2Label;
 
     public CompressionCanvasView() {
         setLayout(null);
@@ -90,6 +96,7 @@ public class CompressionCanvasView extends UserRequestView {
         super.paintComponent(g);
         
         Point p;
+        Point p2;
         int x, y, x2, y2;
 
         this.setForeground(Color.BLACK);
@@ -108,6 +115,28 @@ public class CompressionCanvasView extends UserRequestView {
             drawArrowLine(g, x, y + 300, x2, p.y, 6, 6);
         }
         
+        // Lines going into working variables
+        for (int i = 0; i < inWorkingVars.length; i++) {
+            p = inWorkingVars[i].getLocation();
+
+            x = p.x + WorkingVarLabel.HALF_SIZE;
+            y = p.y + WorkingVarLabel.SIZE;
+
+            g.drawLine(x, y, x, y - 60);
+            
+            drawArrowLine(g, x, y -60, x, p.y, 6, 6);
+        }
+        
+        // Lines going out of working variables at the bottom
+        for (int i = 0; i < inWorkingVars.length; i++) {
+            p = outWorkingVars[i].getLocation();
+
+            x = p.x + WorkingVarLabel.HALF_SIZE;
+            y = p.y + WorkingVarLabel.SIZE * 2;
+
+            drawArrowLine(g, x, y - 60, x, y, 6, 6);
+        }
+        
         // hide the 'd' to 'e' connection behind the modulo addition
         modAdditions[0].repaint();
         
@@ -117,6 +146,62 @@ public class CompressionCanvasView extends UserRequestView {
         y = p.y + WorkingVarLabel.SIZE;
         p = modAdditions[1].getLocation();
         drawArrowLine(g, x, y, p.x, p.y, 6, 6);
+        
+        // The arrow from 'e' line to Ch
+        p = inWorkingVars[4].getLocation();
+        p2 = chLabel.getLocation();
+        x = p.x + WorkingVarLabel.HALF_SIZE;
+        y = p2.y + 5;
+        drawArrowLine(g, x, y, p2.x, y, 6, 6);
+        
+        // The arrow from 'f' line to Ch
+        p = inWorkingVars[5].getLocation();
+        p2 = chLabel.getLocation();
+        x = p.x + WorkingVarLabel.HALF_SIZE;
+        y = p2.y + BitOpLabel.HALF_SIZE;
+        drawArrowLine(g, x, y, p2.x, y, 6, 6);
+        
+        // The arrow from 'g' line to Ch
+        p = inWorkingVars[6].getLocation();
+        p2 = chLabel.getLocation();
+        x = p.x + WorkingVarLabel.HALF_SIZE;
+        y = p2.y + BitOpLabel.SIZE - 5;
+        drawArrowLine(g, x, y, p2.x, y, 6, 6);
+        
+        // The arrow from 'e' line to Sigma1
+        p = inWorkingVars[4].getLocation();
+        p2 = sigma1Label.getLocation();
+        x = p.x + WorkingVarLabel.HALF_SIZE;
+        y = p2.y + BitOpLabel.HALF_SIZE;
+        drawArrowLine(g, x, y, p2.x, y, 6, 6);
+        
+        // The arrow from 'a' line to Maj
+        p = inWorkingVars[0].getLocation();
+        p2 = majLabel.getLocation();
+        x = p.x + WorkingVarLabel.HALF_SIZE;
+        y = p2.y + 5;
+        drawArrowLine(g, x, y, p2.x, y, 6, 6);
+        
+        // The arrow from 'b' line to Maj
+        p = inWorkingVars[1].getLocation();
+        p2 = majLabel.getLocation();
+        x = p.x + WorkingVarLabel.HALF_SIZE;
+        y = p2.y + BitOpLabel.HALF_SIZE;
+        drawArrowLine(g, x, y, p2.x, y, 6, 6);
+        
+        // The arrow from 'c' line to Maj
+        p = inWorkingVars[2].getLocation();
+        p2 = majLabel.getLocation();
+        x = p.x + WorkingVarLabel.HALF_SIZE;
+        y = p2.y + BitOpLabel.SIZE - 5;
+        drawArrowLine(g, x, y, p2.x, y, 6, 6);
+        
+        // The arrow from 'a' line to Sigma0
+        p = inWorkingVars[0].getLocation();
+        p2 = sigma0Label.getLocation();
+        x = p.x + WorkingVarLabel.HALF_SIZE;
+        y = p2.y + BitOpLabel.HALF_SIZE;
+        drawArrowLine(g, x, y, p2.x, y, 6, 6);
         
         // Arrow from Ch to modAdditions[1]
         p = chLabel.getLocation();
@@ -161,6 +246,53 @@ public class CompressionCanvasView extends UserRequestView {
         
         drawArrowLine(g, x2, y2, x2, p.y , 6, 6);
         
+        // Arrow from Wt to modAdditions[2]
+        p = modAdditions[2].getLocation();
+        x = p.x + AddMod256Label.HALF_SIZE;
+        y = p.y;
+        g.drawLine(x, y, x, y - 40);
+        drawArrowLine(g, x, y -40, x, p.y, 6, 6);
+        
+        // Arrow from Kt to modAdditions[2]
+        p = modAdditions[2].getLocation();
+        x = p.x + 60;
+        y = p.y + AddMod256Label.HALF_SIZE;
+        drawArrowLine(g, x, y, x - 40, y, 6, 6);
+        
+        
+        // Arrow from Temporary Variable 1 to modAdditions[0]
+        p = modAdditions[3].getLocation();
+        x = p.x + AddMod256Label.HALF_SIZE;
+        p = modAdditions[0].getLocation();
+        x2 = p.x + AddMod256Label.SIZE;
+        y = p.y + AddMod256Label.HALF_SIZE;
+        drawArrowLine(g, x, y, x2, y, 6, 6);
+        
+        // Arrow from Sigma0 to modAdditions[4]
+        p = sigma0Label.getLocation();
+        x = p.x + BitOpLabel.SIZE;
+        y = p.y + BitOpLabel.HALF_SIZE;
+        p = modAdditions[4].getLocation();
+        x2 = p.x;
+        drawArrowLine(g, x, y, x2, y, 6, 6);
+        
+        // Arrow from modAdditions[4] to modAdditions[5]
+        p = modAdditions[4].getLocation();
+        x = p.x + AddMod256Label.SIZE;
+        y = p.y + AddMod256Label.HALF_SIZE;
+        p = modAdditions[5].getLocation();
+        x2 = p.x;
+        drawArrowLine(g, x, y, x2, y, 6, 6);
+        
+        // Arrow from Maj to modAdditions[4]
+        p = majLabel.getLocation();
+        x = p.x + BitOpLabel.SIZE;
+        y = p.y + BitOpLabel.HALF_SIZE;
+        p = modAdditions[4].getLocation();
+        x2 = p.x + AddMod256Label.HALF_SIZE;
+        y2 = p.y;
+        g.drawLine(x, y, x2, y);
+        drawArrowLine(g, x2, y, x2, y2, 6, 6);
     }
 
     /**
@@ -181,15 +313,32 @@ public class CompressionCanvasView extends UserRequestView {
         for (int i = 0; i < modAdditions.length; i++) {
             modAdditions[i] = new AddMod256Label();
         }
-
-        sigma1Label = new BitOpLabel("s1");
-        sigma0Label = new BitOpLabel("s0");
-        chLabel = new BitOpLabel("ch");
-        majLabel = new BitOpLabel("maj");
-
+        int sigma = 931;
+        sigma1Label = new BitOpLabel((char)sigma + "\u2081");
+        sigma0Label = new BitOpLabel((char) sigma + "\u2080");
+        chLabel = new BitOpLabel("Ch");
+        majLabel = new BitOpLabel("Maj");
+        
+        sigma1Label.setFont(new Font("", Font.PLAIN, 16));
+        sigma0Label.setFont(new Font("", Font.PLAIN, 16));
+        
+        wLabel = new VariableLabel("W\u209C");
+        kLabel = new VariableLabel("K\u209C");
+        
+        
+        wLabel.setFont(new Font("", Font.PLAIN, 16));
+        kLabel.setFont(new Font("", Font.PLAIN, 16));
+        
+        temp1Label = new VariableLabel("T\u2081");
+        temp2Label = new VariableLabel("T\u2082");
+        
+        temp1Label.setFont(new Font("", Font.PLAIN, 16));
+        temp2Label.setFont(new Font("", Font.PLAIN, 16));
     }
 
     private void layoutComponents() {
+        Color white = new Color(255,255,255);
+        setBackground(white);
         Point p;
         int x, y;
         
@@ -242,11 +391,34 @@ public class CompressionCanvasView extends UserRequestView {
         modAdditions[2].setLocation(new Point(x+ AddMod256Label.SIZE + 100, y));
         add(modAdditions[2]);
         
-        // Has Sigma1 inputs and centered on it
+        // W input location
+        x = modAdditions[2].getLocation().x;
+        y = modAdditions[2].getLocation().y;
+        x -= VariableLabel.HALF_SIZE - 10;
+        y -= VariableLabel.SIZE + 20;
+        wLabel.setLocation(x, y);
+        add(wLabel);
+        
+        // K input location
+        x = modAdditions[2].getLocation().x;
+        y = modAdditions[2].getLocation().y;
+        x += VariableLabel.SIZE;
+        y -= VariableLabel.HALF_SIZE;
+        kLabel.setLocation(x, y);
+        add(kLabel);
+        
+        // Third mod addition has Sigma1 inputs and centered on it
         x = sigma1Label.getLocation().x + BitOpLabel.HALF_SIZE - AddMod256Label.HALF_SIZE + 150;
         y = sigma1Label.getLocation().y + BitOpLabel.HALF_SIZE - AddMod256Label.HALF_SIZE;
         modAdditions[3].setLocation(new Point(x, y));
         add(modAdditions[3]);
+        
+        // Temporary Variable 1 location under third mod addition
+        x = modAdditions[3].getLocation().x;
+        y = modAdditions[0].getLocation().y;
+        y -= AddMod256Label.SIZE;
+        temp1Label.setLocation(x, y);
+        add(temp1Label);
         
         // Has input from sigma0 Centered on Sigma0
         x = sigma0Label.getLocation().x + BitOpLabel.HALF_SIZE - AddMod256Label.HALF_SIZE + 75;
@@ -257,6 +429,14 @@ public class CompressionCanvasView extends UserRequestView {
         x = sigma0Label.getLocation().x + BitOpLabel.HALF_SIZE - AddMod256Label.HALF_SIZE + 150;
         modAdditions[5].setLocation(new Point(x, y));
         add(modAdditions[5]);
+        
+        // Temporary Variable 2 location between fourth and fifth mod addition
+        x = modAdditions[4].getLocation().x;
+        y = modAdditions[4].getLocation().y;
+        x += AddMod256Label.SIZE;
+        y += AddMod256Label.HALF_SIZE - 10;
+        temp2Label.setLocation(x, y);
+        add(temp2Label);
     }
 
     /**
@@ -293,6 +473,21 @@ public class CompressionCanvasView extends UserRequestView {
         g.drawPolygon(xpoints, ypoints, 3); // Rickb
     }
 
+    @Override
+    /**
+     * Updates the description, question, and hints from the model
+     * 
+     * TODO: THIS IS A PLACEHOLDER UNTIl WE HAVE HAVE THE MODEL CODE COMPLETED
+     */
+    protected void updateView() {
+        if (model != null) {
+            // ****TO-DO*****
+            // Update the view's information from the model
+            // Debugging dynamic updates to the model can be done here.
+            System.out.println("CompressionCanvasView");
+        }
+    }
+    
     @Override
     public NewExampleRequest newRequest() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody

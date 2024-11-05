@@ -158,13 +158,61 @@ public class StepCompletionAction extends ShaTuGuiAction {
                                                     task.setType(ExampleType.ADD_ONE_BIT);
                                                     StepSelection.ADD1.getLabel().select();
                                                 }
+                                                case ADD1 -> {
+                                                    task.setType(ExampleType.PAD_ZEROS);
+                                                    StepSelection.PAD.getLabel().select();
+                                                }
+                                                case PAD -> {
+                                                    task.setType(ExampleType.ADD_MSG_LENGTH);
+                                                    StepSelection.LENGTH.getLabel().select();
+                                                }
+                                                case LENGTH -> {
+                                                    task.setType(ExampleType.PREPARE_SCHEDULE);
+                                                    StepSelection.PREPARE.getLabel().select();
+                                                }
+                                                case PREPARE -> {
+                                                    task.setType(ExampleType.INITIALIZE_VARS);
+                                                    StepSelection.INIT_VARS.getLabel().select();
+                                                }
+                                                case INIT_VARS -> {
+                                                    task.setType(ExampleType.COMPRESS_ROUND);
+                                                    StepSelection.COMPRESS.getLabel().select();
+                                                }
+                                                case COMPRESS -> {
+                                                    task.setType(ExampleType.ROTATE_BITS);
+                                                    StepSelection.ROTATE_BITS.getLabel().select();
+                                                }
+                                                case ROTATE_BITS -> {
+                                                    task.setType(ExampleType.SHIFT_BITS);
+                                                    StepSelection.SHIFT_RIGHT.getLabel().select();
+                                                }
                                                 case SHIFT_RIGHT -> {
                                                     task.setType(ExampleType.XOR_BITS);
                                                     StepSelection.XOR.getLabel().select();
                                                 }
+                                                case XOR -> {
+                                                    task.setType(ExampleType.ADD_BITS);
+                                                    StepSelection.ADD_TWO_BIT.getLabel().select();
+                                                }
+                                                case ADD_TWO_BIT -> {
+                                                    task.setType(ExampleType.CHOICE_FUNCTION);
+                                                    StepSelection.CHOICE_FUNCTION.getLabel().select();
+                                                }
                                                 case CHOICE_FUNCTION -> {
                                                     task.setType(ExampleType.MAJORITY_FUNCTION);
                                                     StepSelection.MAJ_FUNCTION.getLabel().select();
+                                                }
+                                                case MAJ_FUNCTION -> {
+                                                    task.setType(ExampleType.SHA_ZERO);
+                                                    StepSelection.SHA_ZERO.getLabel().select();
+                                                }
+                                                case SHA_ZERO -> {
+                                                    task.setType(ExampleType.SHA_ONE);
+                                                    StepSelection.SHA_ONE.getLabel().select();
+                                                }
+                                                case SHA_ONE -> {
+                                                    // This is the last step
+                                                    System.out.println("All steps completed");
                                                 }
                                             }
                                         }
@@ -186,19 +234,16 @@ public class StepCompletionAction extends ShaTuGuiAction {
 
                                 switch (choice)
                                 {
-                                    case 0 -> System.out.println("try again");
                                     case 1 -> {
                                         System.out.println("try similar problem");
                                         NewExampleAction.instance().actionPerformed(null);
                                     }
-                                    default -> {
+                                    case 2 -> {
                                         System.out.println("show answer");
                                         JOptionPane.showMessageDialog(MainFrame.instance(),
                                         stepReply.getCorrectAnswer(), "Tutor Reply", JOptionPane.INFORMATION_MESSAGE);
                                     }
-
-
-
+                                    default -> System.out.println("try again");
                                 }
                             }
 

@@ -16,25 +16,25 @@ package edu.regis.shatu.model;
  *
  * @author rickb
  */
-public class AddOneStep {
+public class MessageLenStep {
     
     private int messageLength;
     
     private String question;
     
-    private String result; // Correct Answer
+    private String result;
     
     private String userAnswer;
-   
+    
     /**
      * Constructor
      */
-    public AddOneStep() {
+    public MessageLenStep() {
         
     }
-
+    
     /**
-     * Setter method for message length
+     * Setter method for the message length
      * @param messageLength 
      */
     public void setMessageLength(int messageLength) {
@@ -42,7 +42,7 @@ public class AddOneStep {
     }
     
     /**
-     * Getter method for message length
+     * Getter method for the message length
      * @return 
      */
     public int getMessageLength() {
@@ -66,7 +66,7 @@ public class AddOneStep {
     }
     
     /**
-     * Setter method for the correct answer (result)
+     * Setter method for the correct answer
      * @param newResult 
      */
     public void setResult(String newResult) {
@@ -74,7 +74,7 @@ public class AddOneStep {
     }
     
     /**
-     * Getter method for the correct answer (result)
+     * Getter method for the correct answer
      * @return 
      */
     public String getResult() {
@@ -90,7 +90,7 @@ public class AddOneStep {
     }
     
     /**
-     * Getter method for the user answer
+     * Getter method for the user's answer
      * @return 
      */
     public String getUserAnswer() {

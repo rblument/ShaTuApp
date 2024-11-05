@@ -12,6 +12,8 @@
  */
 package edu.regis.shatu.view;
 
+import edu.regis.shatu.model.Account;
+import edu.regis.shatu.model.TutoringSession;
 import edu.regis.shatu.model.User;
 import edu.regis.shatu.svc.SHA_256;
 import edu.regis.shatu.view.act.NewUserAction;
@@ -24,6 +26,7 @@ import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -82,7 +85,8 @@ public class SplashPanel extends GPanel {
 	layoutComponents();
         
         // ToDo: TMP DEBUGGING (saves me typing), remove this for real
-        userId.setText("");
+        userId.setText("test@regis.edu");
+        password.setText("TestP@ss");
     }
     
     /**
@@ -137,6 +141,32 @@ public class SplashPanel extends GPanel {
         return signInBut;
     }
     
+    public void clearFields(){
+        userId.setText("");  // Clear user ID field
+        password.setText("");  // Clear password field
+    }
+    
+    /**
+     * Creates an account instance for the user upon successful sign-in.
+     * @param userId
+     * @param encryptedPass
+     * @return A TutoringSession instance set with the signed-in user's account instance.
+     * Null otherwise.
+     */
+    private TutoringSession authenticateUser(String userId, String encryptedPass) {
+        // Simulate server-side authentication and session creation
+        if (userId != null && encryptedPass.equals("validEncryptedPassword")) {
+            TutoringSession session = new TutoringSession();
+            Account account = new Account();
+            account.setUserId(userId);
+            account.setPassword(encryptedPass);
+            session.setAccount(account);
+            return session;
+        }
+        return null;
+    }
+    
+    
     /**
      * Create the primary child components used in this view
      */
@@ -151,6 +181,21 @@ public class SplashPanel extends GPanel {
 
 	signInBut = new JButton(SignInAction.instance());
 	signInBut.setEnabled(false);
+        signInBut.addActionListener(e -> {
+        // Fetch the userId and encrypted password
+        String userIdInput = userId.getText();
+
+        if (!userIdInput.isEmpty()) {
+                // Encrypt the password for validation (if needed)
+                String encryptedPass = SHA_256.instance().sha256(new String(password.getPassword()));
+
+                // Pass the userId to SplashFrame and initialize the Dashboard
+                SplashFrame.instance().initializeDashboard(authenticateUser(userId.getText(), encryptedPass));
+            } else {
+                JOptionPane.showMessageDialog(this, "Please enter your User ID", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
         
         createAcctBut = new JButton(NewUserAction.instance());
     }
