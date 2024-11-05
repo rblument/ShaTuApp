@@ -334,8 +334,6 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
         
         BitOpStep example = gson.fromJson(step.getData(), BitOpStep.class);
         
-        System.out.println("AddTwoBitView update display called");
-        
         try {
             binary1 = example.getExample().getOperand1();
             binary2 = example.getExample().getOperand2();
@@ -345,14 +343,8 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
             System.out.println("Example is empty.");
         }
         
-        
         stringLabel1.setText("binary number1: " + binary1);
         stringLabel2.setText("binary number2: " + binary2);
-        //this is just for testing purposes and can be removed after it is verified that the check button works
-        stringLabel4.setText("the result is: " + result);
-
-            stringLabel1.setText("binary number1: " + binary1);
-            stringLabel2.setText("binary number2: " + binary2);
         }
     }    
 }

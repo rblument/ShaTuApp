@@ -15,6 +15,7 @@ package edu.regis.shatu.view;
 import edu.regis.shatu.model.Account;
 import edu.regis.shatu.view.act.CreateAcctAction;
 import edu.regis.shatu.view.act.SignInAction;
+import edu.regis.shatu.view.act.BackToLogin;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -75,6 +76,7 @@ public class NewAccountPanel extends GPanel {
 
     protected JButton signInBut;
     protected JButton createAcctBut;
+    protected JButton backBut;
 
     public NewAccountPanel() {
         super();
@@ -181,6 +183,9 @@ public class NewAccountPanel extends GPanel {
         createAcctBut.setEnabled(false);
         MainFrame.instance().getRootPane().setDefaultButton(createAcctBut);
 
+        backBut = new JButton(BackToLogin.instance());
+        backBut.setEnabled(true);
+        
         strength = new JLabel("(Strength: very poor)");
         strength.setForeground(new Color(173,7,1));
         strength.setFont(new Font("Dialog", Font.PLAIN, 10));
@@ -352,12 +357,25 @@ public class NewAccountPanel extends GPanel {
                 GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL,
                 0, 5, 5, 5);
 
-        panel.addc(createAcctBut, 0, 9, 1, 1, 1.0, 0.0,
+        panel.addc(createAcctBut, 1, 9, 1, 1, 1.0, 0.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL,
                 10, 5, 5, 5);
 
         msg = new JLabel("");
         msg.setLabelFor(createAcctBut);
+        msg.setFont(new Font("Dialog", Font.PLAIN, 10));
+        msg.setForeground(new Color(173,7,1));
+
+        panel.addc(msg, 0, 12, 2, 1, 0.0, 0.0,
+                GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
+                5, 5, 5, 5);
+        
+        panel.addc(backBut, 0, 9, 1, 1, 1.0, 0.0,
+                GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL,
+                10, 5, 5, 5);
+
+        msg = new JLabel("");
+        msg.setLabelFor(backBut);
         msg.setFont(new Font("Dialog", Font.PLAIN, 10));
         msg.setForeground(new Color(173,7,1));
 
