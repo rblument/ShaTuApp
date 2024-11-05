@@ -12,7 +12,11 @@
  */
 package edu.regis.shatu.view;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
+import edu.regis.shatu.model.aol.BitOpStep;
 import edu.regis.shatu.model.aol.ExampleType;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.view.act.NewExampleAction;
@@ -55,6 +59,7 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
                          thirtytwoRadioButton;
     private JLabel viewNameLabel, stringXLabel, stringYLabel, answerLabel, 
                    problemSizeLabel, instructionLabel;
+
     
     private static final Random random = new Random();
     
@@ -271,7 +276,8 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
         buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         buttonPanel.add(checkButton);
         buttonPanel.add(nextButton);
-        buttonPanel.add(hintButton);   
+        buttonPanel.add(hintButton);
+        buttonPanel.add(newExampleButton);
     }
     
      /**
@@ -545,16 +551,63 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
  */
     @Override
     public NewExampleRequest newRequest() {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        
         NewExampleRequest ex = new NewExampleRequest();
         
         //Set example type to the problem associated with the current view
+        
         ex.setExampleType(ExampleType.XOR_BITS);
+        
+        BitOpStep newStep = new BitOpStep();
+        
+        ex.setData(gson.toJson(newStep));
+        
+        responseTextArea.setText("");
+        feedbackTextArea.setText("");
+        
+        generateNewQuestion();
+        
+        nextButton.setEnabled(false);
+        checkButton.setEnabled(true);
         
         return ex;
     }
 
     @Override
     public StepCompletion stepCompletion() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        Step currentStep = model.currentTask().currentStep();
+
+        BitOpStep example = gson.fromJson(currentStep.getData(), BitOpStep.class);
+
+        String userResponse = responseTextArea.getText().replaceAll("\\s", "");
+
+        example.getExample().setResult(userResponse);
+
+        StepCompletion step = new StepCompletion(currentStep, gson.toJson(example));
+        
+        step.setStep(currentStep);
+
+        return step;
+    }
+    
+    /**
+     * Update the view with the new operands.
+     * 
+     */
+    @Override
+    protected void updateView() {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+        Step step = model.currentTask().getCurrentStep();
+
+        BitOpStep example = gson.fromJson(step.getData(), BitOpStep.class);
+        
+        stringX = example.getExample().getOperand1();
+        stringY = example.getExample().getOperand2();
+
+        stringXLabel = new JLabel("x: " + stringX);
+        stringYLabel = new JLabel("y: " + stringY);
+
     }
 }
