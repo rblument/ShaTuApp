@@ -113,6 +113,12 @@ public class InitVarView extends UserRequestView implements ActionListener {
         add(buttonPanel, gbc);
     }
 
+    /**
+     * Creates and adds a label for a text field to the GUI.
+     * @param labelText references an initial variable.
+     * @param textField holds the user's answer.
+     * @param gridY The position on the y-axis to place the label and text field.
+     */
     private void createLabelForField(String labelText, JTextField textField, int gridY) {
         JLabel label = new JLabel(labelText);
         label.setLabelFor(textField);
@@ -130,6 +136,11 @@ public class InitVarView extends UserRequestView implements ActionListener {
         add(rowPanel, gbc);
     }
 
+    /**
+     * Monitors all text fields for initial variable labels.
+     * Sets text color to red until correct.
+     * Correct answers are set to a dark green.
+     */
     private void attachDocumentListeners() {
         DocumentListener docListener = new DocumentListener() {
             @Override
@@ -180,7 +191,10 @@ public class InitVarView extends UserRequestView implements ActionListener {
         h6.getDocument().addDocumentListener(docListener);
         h7.getDocument().addDocumentListener(docListener);
     }
-
+    
+    /**
+     * Displays answers next to their corresponding variable and text field.
+     */
     private void showAnswer() {
         removeHints();
         if (answersVisible) {
@@ -193,7 +207,10 @@ public class InitVarView extends UserRequestView implements ActionListener {
         revalidate();
         repaint();
     }
-
+    
+    /**
+     * Adds a label containing an answer for its associated variable and text field.
+     */
     private void addAnswerLabels() {
         addRowWithAnswer("H0: ", h0, "Correct: " + initVarStep.getAnswer("H0"), 0, 1);
         addRowWithAnswer("H1: ", h1, "Correct: " + initVarStep.getAnswer("H1"), 0, 2);
@@ -204,7 +221,11 @@ public class InitVarView extends UserRequestView implements ActionListener {
         addRowWithAnswer("H6: ", h6, "Correct: " + initVarStep.getAnswer("H6"), 0, 7);
         addRowWithAnswer("H7: ", h7, "Correct: " + initVarStep.getAnswer("H7"), 0, 8);
     }
-
+    
+    /**
+     * Called when hint button is pressed.
+     * Determines if hints should be displayed to the user.
+     */
     private void hint() {
         if (hintsVisible) {
             removeHints();
@@ -229,7 +250,14 @@ public class InitVarView extends UserRequestView implements ActionListener {
         revalidate();
         repaint();
     }
-
+    
+    /**
+     * Displays hints to the GUI for their corresponding variable's row.
+     * @param initVar the targeted variable's text field
+     * @param variableName the targeted variable's label
+     * @param hintLevel the level of hint (1st, 2nd, or 3rd hint)
+     * @param hintY the position on the y-axis to place the hint
+     */
     private void addHints(JTextField initVar, String variableName, int hintLevel, int hintY) {
         // Retrieve the hint for the specific variable and level
         String hint = initVarStep.getHint(variableName, hintLevel);

@@ -728,9 +728,7 @@ public class ShaTuTutor implements TutorSvc {
                 + "These constants are derived from the first 32 bits of the "
                 + "fractional parts of the square roots of the first 8 prime numbers.<br>"
                 + "They serve as the starting points for the hash computation and "
-                + "ensure that the algorithm starts from a random-like state.<br>"
-                + "<br>Please enter the inital hash values in hexadecimal for H0 to H7 Below:<br>"
-                + "(Incorrect answers are in red, and turn green when correct.)<br></html>");
+                + "ensure that the algorithm starts from a random-like state.</html>");
         task.addStep(step);
 
         TutorReply reply = new TutorReply(":Success");

@@ -16,7 +16,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- *
+ * This class holds the core logic for the initialize variables step.
+ * All answers and hints are initialized and stored here.
+ * User's answers may be check for correctness as well.
  * @author Ryley MacLagan
  */
 public class InitVarStep {
@@ -95,6 +97,4 @@ public class InitVarStep {
         System.out.println("Variable: "+variable);
         return answers.get(variable).equals(userAnswers.get(variable));
     }
-    
-    
 }
