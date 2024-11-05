@@ -1966,35 +1966,258 @@ public class ShaTuTutor implements TutorSvc {
     }
 
     private TutorReply hintEncode(StepCompletion completion) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        System.out.println("Tutor hintEncode");
+
+        StepCompletionReply stepReply = new StepCompletionReply();
+
+        stepReply.setIsCorrect(false);
+        stepReply.setIsRepeatStep(true);
+        stepReply.setIsNewStep(false);
+        stepReply.setIsNewTask(false);
+        stepReply.setIsNextStep(false);
+
+        Hint hintOne = new Hint();
+        hintOne.setId(0);
+        hintOne.setText("Convert each character to its ASCII value");
+
+        Hint hintTwo = new Hint();
+        hintTwo.setId(1);
+        hintTwo.setText("Each character should be represented by 8 bits");
+
+        Step step = completion.getStep();
+        step.addHint(hintOne);
+        step.addHint(hintTwo);
+        step.setNotifyTutor(true);
+        step.setIsCompleted(false);
+        step.setSubType(StepSubType.REQUEST_HINT);
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+        step.setData(gson.toJson(stepReply));
+
+        TutorReply reply = new TutorReply(":Success");
+        reply.setData(gson.toJson(step));
+
+        return reply;
     }
 
     private TutorReply hintAddOne(StepCompletion completion) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        System.out.println("Tutor hintAddOne");
+
+        StepCompletionReply stepReply = new StepCompletionReply();
+
+        stepReply.setIsCorrect(false);
+        stepReply.setIsRepeatStep(true);
+        stepReply.setIsNewStep(false);
+        stepReply.setIsNewTask(false);
+        stepReply.setIsNextStep(false);
+
+        Hint hintOne = new Hint();
+        hintOne.setId(0);
+        hintOne.setText("Add a single '1' bit to the end of the message");
+
+        Step step = completion.getStep();
+        step.addHint(hintOne);
+        step.setNotifyTutor(true);
+        step.setIsCompleted(false);
+        step.setSubType(StepSubType.REQUEST_HINT);
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+        step.setData(gson.toJson(stepReply));
+
+        TutorReply reply = new TutorReply(":Success");
+        reply.setData(gson.toJson(step));
+
+        return reply;
     }
 
     private TutorReply hintPadZeros(StepCompletion completion) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        System.out.println("Tutor hintPadZeros");
+
+        StepCompletionReply stepReply = new StepCompletionReply();
+
+        stepReply.setIsCorrect(false);
+        stepReply.setIsRepeatStep(true);
+        stepReply.setIsNewStep(false);
+        stepReply.setIsNewTask(false);
+        stepReply.setIsNextStep(false);
+
+        Hint hintOne = new Hint();
+        hintOne.setId(0);
+        hintOne.setText("Add '0' bits until the message length is 448 mod 512");
+
+        Step step = completion.getStep();
+        step.addHint(hintOne);
+        step.setNotifyTutor(true);
+        step.setIsCompleted(false);
+        step.setSubType(StepSubType.REQUEST_HINT);
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+        step.setData(gson.toJson(stepReply));
+
+        TutorReply reply = new TutorReply(":Success");
+        reply.setData(gson.toJson(step));
+
+        return reply;
     }
 
     private TutorReply hintAddMsgLen(StepCompletion completion) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        System.out.println("Tutor hintAddMsgLen");
+
+        StepCompletionReply stepReply = new StepCompletionReply();
+
+        stepReply.setIsCorrect(false);
+        stepReply.setIsRepeatStep(true);
+        stepReply.setIsNewStep(false);
+        stepReply.setIsNewTask(false);
+        stepReply.setIsNextStep(false);
+
+        Hint hintOne = new Hint();
+        hintOne.setId(0);
+        hintOne.setText("Append the original message length as a 64-bit big-endian integer");
+
+        Step step = completion.getStep();
+        step.addHint(hintOne);
+        step.setNotifyTutor(true);
+        step.setIsCompleted(false);
+        step.setSubType(StepSubType.REQUEST_HINT);
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+        step.setData(gson.toJson(stepReply));
+
+        TutorReply reply = new TutorReply(":Success");
+        reply.setData(gson.toJson(step));
+
+        return reply;
     }
 
     private TutorReply hintPrepareSchedule(StepCompletion completion) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        System.out.println("Tutor hintPrepareSchedule");
+
+        StepCompletionReply stepReply = new StepCompletionReply();
+
+        stepReply.setIsCorrect(false);
+        stepReply.setIsRepeatStep(true);
+        stepReply.setIsNewStep(false);
+        stepReply.setIsNewTask(false);
+        stepReply.setIsNextStep(false);
+
+        Hint hintOne = new Hint();
+        hintOne.setId(0);
+        hintOne.setText("Extend the first 16 words to a total of 64 words");
+
+        Hint hintTwo = new Hint();
+        hintTwo.setId(1);
+        hintTwo.setText("Use bitwise operations to generate each new word");
+
+        Step step = completion.getStep();
+        step.addHint(hintOne);
+        step.addHint(hintTwo);
+        step.setNotifyTutor(true);
+        step.setIsCompleted(false);
+        step.setSubType(StepSubType.REQUEST_HINT);
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+        step.setData(gson.toJson(stepReply));
+
+        TutorReply reply = new TutorReply(":Success");
+        reply.setData(gson.toJson(step));
+
+        return reply;
     }
 
     private TutorReply hintInitVars(StepCompletion completion) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        System.out.println("Tutor hintInitVars");
+
+        StepCompletionReply stepReply = new StepCompletionReply();
+
+        stepReply.setIsCorrect(false);
+        stepReply.setIsRepeatStep(true);
+        stepReply.setIsNewStep(false);
+        stepReply.setIsNewTask(false);
+        stepReply.setIsNextStep(false);
+
+        Hint hintOne = new Hint();
+        hintOne.setId(0);
+        hintOne.setText("Initialize 8 variables with the first 32 bits of the fractional parts of the square roots of the first 8 primes");
+
+        Step step = completion.getStep();
+        step.addHint(hintOne);
+        step.setNotifyTutor(true);
+        step.setIsCompleted(false);
+        step.setSubType(StepSubType.REQUEST_HINT);
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+        step.setData(gson.toJson(stepReply));
+
+        TutorReply reply = new TutorReply(":Success");
+        reply.setData(gson.toJson(step));
+
+        return reply;
     }
 
     private TutorReply hintCompressRound(StepCompletion completion) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        System.out.println("Tutor hintCompressRound");
+
+        StepCompletionReply stepReply = new StepCompletionReply();
+
+        stepReply.setIsCorrect(false);
+        stepReply.setIsRepeatStep(true);
+        stepReply.setIsNewStep(false);
+        stepReply.setIsNewTask(false);
+        stepReply.setIsNextStep(false);
+
+        Hint hintOne = new Hint();
+        hintOne.setId(0);
+        hintOne.setText("Perform the main compression function for this round");
+
+        Hint hintTwo = new Hint();
+        hintTwo.setId(1);
+        hintTwo.setText("Use the schedule word and round constant for this round");
+
+        Step step = completion.getStep();
+        step.addHint(hintOne);
+        step.addHint(hintTwo);
+        step.setNotifyTutor(true);
+        step.setIsCompleted(false);
+        step.setSubType(StepSubType.REQUEST_HINT);
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+        step.setData(gson.toJson(stepReply));
+
+        TutorReply reply = new TutorReply(":Success");
+        reply.setData(gson.toJson(step));
+
+        return reply;
     }
 
     private TutorReply hintRotateBits(StepCompletion completion) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        System.out.println("Tutor hintRotateBits");
+
+        StepCompletionReply stepReply = new StepCompletionReply();
+
+        stepReply.setIsCorrect(false);
+        stepReply.setIsRepeatStep(true);
+        stepReply.setIsNewStep(false);
+        stepReply.setIsNewTask(false);
+        stepReply.setIsNextStep(false);
+
+        Hint hintOne = new Hint();
+        hintOne.setId(0);
+        hintOne.setText("The bits that 'fall off' one end should be added to the other end");
+
+        Step step = completion.getStep();
+        step.addHint(hintOne);
+        step.setNotifyTutor(true);
+        step.setIsCompleted(false);
+        step.setSubType(StepSubType.REQUEST_HINT);
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+        step.setData(gson.toJson(stepReply));
+
+        TutorReply reply = new TutorReply(":Success");
+        reply.setData(gson.toJson(step));
+
+        return reply;
     }
 
     private TutorReply hintShiftBits(StepCompletion completion) {
@@ -2051,18 +2274,122 @@ public class ShaTuTutor implements TutorSvc {
     }
 
     private TutorReply hintXorBits(StepCompletion completion) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        System.out.println("Tutor hintXorBits");
+
+        StepCompletionReply stepReply = new StepCompletionReply();
+
+        stepReply.setIsCorrect(false);
+        stepReply.setIsRepeatStep(true);
+        stepReply.setIsNewStep(false);
+        stepReply.setIsNewTask(false);
+        stepReply.setIsNextStep(false);
+
+        Hint hintOne = new Hint();
+        hintOne.setId(0);
+        hintOne.setText("XOR operation results in 1 only when the bits are different");
+
+        Step step = completion.getStep();
+        step.addHint(hintOne);
+        step.setNotifyTutor(true);
+        step.setIsCompleted(false);
+        step.setSubType(StepSubType.REQUEST_HINT);
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+        step.setData(gson.toJson(stepReply));
+
+        TutorReply reply = new TutorReply(":Success");
+        reply.setData(gson.toJson(step));
+
+        return reply;
     }
 
     private TutorReply hintAddBits(StepCompletion completion) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        System.out.println("Tutor hintAddBits");
+
+        StepCompletionReply stepReply = new StepCompletionReply();
+
+        stepReply.setIsCorrect(false);
+        stepReply.setIsRepeatStep(true);
+        stepReply.setIsNewStep(false);
+        stepReply.setIsNewTask(false);
+        stepReply.setIsNextStep(false);
+
+        Hint hintOne = new Hint();
+        hintOne.setId(0);
+        hintOne.setText("Add the bits as if they were unsigned integers, discarding any overflow beyond 32 bits");
+
+        Step step = completion.getStep();
+        step.addHint(hintOne);
+        step.setNotifyTutor(true);
+        step.setIsCompleted(false);
+        step.setSubType(StepSubType.REQUEST_HINT);
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+        step.setData(gson.toJson(stepReply));
+
+        TutorReply reply = new TutorReply(":Success");
+        reply.setData(gson.toJson(step));
+
+        return reply;
     }
 
     private TutorReply hintMajorityFunction(StepCompletion completion) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        System.out.println("Tutor hintMajorityFunction");
+
+        StepCompletionReply stepReply = new StepCompletionReply();
+
+        stepReply.setIsCorrect(false);
+        stepReply.setIsRepeatStep(true);
+        stepReply.setIsNewStep(false);
+        stepReply.setIsNewTask(false);
+        stepReply.setIsNextStep(false);
+
+        Hint hintOne = new Hint();
+        hintOne.setId(0);
+        hintOne.setText("The majority function returns the bit value that appears most frequently among the three inputs");
+
+        Step step = completion.getStep();
+        step.addHint(hintOne);
+        step.setNotifyTutor(true);
+        step.setIsCompleted(false);
+        step.setSubType(StepSubType.REQUEST_HINT);
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+        step.setData(gson.toJson(stepReply));
+
+        TutorReply reply = new TutorReply(":Success");
+        reply.setData(gson.toJson(step));
+
+        return reply;
     }
 
     private TutorReply hintChoiceFunction(StepCompletion completion) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        System.out.println("Tutor hintChoiceFunction");
+
+        StepCompletionReply stepReply = new StepCompletionReply();
+
+        stepReply.setIsCorrect(false);
+        stepReply.setIsRepeatStep(true);
+        stepReply.setIsNewStep(false);
+        stepReply.setIsNewTask(false);
+        stepReply.setIsNextStep(false);
+
+        Hint hintOne = new Hint();
+        hintOne.setId(0);
+        hintOne.setText("The choice function selects bits from one input or another based on the value of the first input");
+
+        Step step = completion.getStep();
+        step.addHint(hintOne);
+        step.setNotifyTutor(true);
+        step.setIsCompleted(false);
+        step.setSubType(StepSubType.REQUEST_HINT);
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+        step.setData(gson.toJson(stepReply));
+
+        TutorReply reply = new TutorReply(":Success");
+        reply.setData(gson.toJson(step));
+
+        return reply;
     }
 }
