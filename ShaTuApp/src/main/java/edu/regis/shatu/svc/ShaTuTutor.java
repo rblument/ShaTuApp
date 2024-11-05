@@ -1096,6 +1096,7 @@ public class ShaTuTutor implements TutorSvc {
         }
     }
 
+    
     /**
      * Handles client requests for a new ASCII encode example.
      *
@@ -1137,14 +1138,13 @@ public class ShaTuTutor implements TutorSvc {
         EncodeAsciiStep subStep = new EncodeAsciiStep();
         subStep.setExample(example);
 
-        //ToDo: multistep should be determined by the student model.
         subStep.setMultiStep(rnd.nextBoolean());
 
         Step step = new Step(1, 0, StepSubType.ENCODE_ASCII);
         step.setCurrentHintIndex(0);
         step.setNotifyTutor(true);
         step.setIsCompleted(false);
-        // ToDo: fix timeouts
+
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);
 
@@ -1156,7 +1156,6 @@ public class ShaTuTutor implements TutorSvc {
         task.setDescription("Encode a string as ASCII values");
         task.addStep(step);
 
-        // ToDo: Add the task to the session and update it.
         TutorReply reply = new TutorReply(":Success");
         reply.setData(gson.toJson(task));
 
