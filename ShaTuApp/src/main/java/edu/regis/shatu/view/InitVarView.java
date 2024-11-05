@@ -47,7 +47,6 @@ public class InitVarView extends UserRequestView implements ActionListener {
     
     @Override
     public void actionPerformed(ActionEvent event) {
-      // Placeholder for future use.
     }
 
     private void initializeComponents() {
@@ -250,7 +249,6 @@ public class InitVarView extends UserRequestView implements ActionListener {
         revalidate();
         repaint();
     }
-    
     /**
      * Displays hints to the GUI for their corresponding variable's row.
      * @param initVar the targeted variable's text field
@@ -267,7 +265,6 @@ public class InitVarView extends UserRequestView implements ActionListener {
             addRowWithAnswer(variableName + ": ", initVar, "Hint: " + hint, 1, hintY);
         }
     }
-    
     /**
      * Adds a new row at the specified x and y values.
      * @param labelText first field in each row, the label for the text field
