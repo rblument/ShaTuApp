@@ -56,7 +56,7 @@ public class ChoiceFunctionView extends UserRequestView implements ActionListene
     private GPanel truthTablePanel, questionPanel, descriptionPanel, qrPanel;
     private JPanel buttonPanel, radioButtonPanel;
     private JTable chTruthTable;
-    private JButton checkButton, nextButton, hintButton;
+    private JButton checkButton, nextButton, hintButton, truthTableToggleButton;
     private ButtonGroup problemSizeGroup;
     private JRadioButton fourRadioButton, eightRadioButton, sixteenRadioButton,
             thirtytwoRadioButton;
@@ -373,6 +373,8 @@ public class ChoiceFunctionView extends UserRequestView implements ActionListene
         chTruthTablePane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
         truthTablePanel = new GPanel();
+        
+        setupTruthTableToggleButton();
 
         truthTablePanel.addc(truthTableLabel, 0, 0, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
@@ -385,8 +387,39 @@ public class ChoiceFunctionView extends UserRequestView implements ActionListene
         truthTablePanel.addc(chTruthTablePane, 0, 2, 1, 1, 1.0, 1.0,
                 GridBagConstraints.CENTER, GridBagConstraints.BOTH,
                 5, 5, 5, 5);
+        
+        truthTablePanel.addc(truthTableToggleButton, 1, 2, 1, 1, 0.0, 0.0,
+            GridBagConstraints.EAST, GridBagConstraints.NONE,
+            5, 5, 5, 5);
     }
+    
+    /**
+     * On button press will show/hide Truth Table
+     */
+    private void setupTruthTableToggleButton() {
+        truthTableToggleButton = new JButton("Show Truth Table");
+        truthTableToggleButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                boolean isCurrentlyVisible = chTruthTablePane.isVisible();
+                chTruthTablePane.setVisible(!isCurrentlyVisible);
+                truthTableLabel.setVisible(!isCurrentlyVisible);
+                chFunctionLabel.setVisible(!isCurrentlyVisible);
 
+                // Update button text based on show/hide press
+                if (isCurrentlyVisible) {
+                    truthTableToggleButton.setText("Show Truth Table");
+                } else {
+                truthTableToggleButton.setText("Hide Truth Table");
+                }
+        }
+    });
+    //start by hiding truth table for practice mode
+    chTruthTablePane.setVisible(false);
+    truthTableLabel.setVisible(false);
+    chFunctionLabel.setVisible(false);
+}
+    
     /**
      * Configures the appearance of the truth table.
      */
