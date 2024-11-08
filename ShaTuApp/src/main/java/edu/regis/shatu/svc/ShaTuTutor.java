@@ -2469,6 +2469,19 @@ public class ShaTuTutor implements TutorSvc {
 
         TutorReply reply = new TutorReply(":Success");
         reply.setData(gson.toJson(step));
+        
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("Choice Function").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId); 
+        assessment.incrementHints();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.HINTS);
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
 
         return reply;
     }

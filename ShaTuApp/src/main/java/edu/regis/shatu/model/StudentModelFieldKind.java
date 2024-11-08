@@ -19,13 +19,15 @@ package edu.regis.shatu.model;
  */
 public enum StudentModelFieldKind {
     /**
-     * The assement field
+     * The assessment field
      */
     ASSESSMENT_LEVEL("Assessment Level"),
    
     ATTEMPTS("Attempts"),
     
     SUCCESSES("Success"),
+    
+    HINTS("Hints"),
     
     ALL("All");
     
