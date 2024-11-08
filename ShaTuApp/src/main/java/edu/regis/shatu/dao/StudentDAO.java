@@ -54,10 +54,13 @@ public class StudentDAO extends MySqlDAO implements StudentSvc {
         PreparedStatement stmt1, stmt2 = null;
         
         String userId = student.getUserId();
-
+        System.out.println("create() in Student DAO");
         // 1. Create the Student into the DB
         try {
             conn = DriverManager.getConnection(URL);
+            if (exists(userId)) {
+                throw new IllegalArgException("User exists " + userId);
+            }
             stmt1 = conn.prepareStatement(sql1);
             
             stmt1.setString(1, userId);
@@ -77,7 +80,7 @@ public class StudentDAO extends MySqlDAO implements StudentSvc {
             stmt2.setString(1, userId);
             stmt2.setString(2, ScaffoldLevel.EXTREME.toString());
             
-            stmt1.executeUpdate();
+            stmt2.executeUpdate();
             
         } catch (SQLException e) {
             throw new NonRecoverableException("StudentDAO-ERR-2" + e.toString(), e); 
@@ -92,7 +95,35 @@ public class StudentDAO extends MySqlDAO implements StudentSvc {
      */
     @Override
     public boolean exists(String userId) throws NonRecoverableException {
-        throw new UnsupportedOperationException("Not supported yet.");    
+        boolean exists = false;
+        
+        Connection conn = null;
+        PreparedStatement stmt1 = null;
+        
+        // SQL statement to check if userId exists in Student table
+        final String sql1 = "SELECT '" + userId + 
+                "' FROM Student WHERE UserId = '" + userId + "';";
+        
+        // Check if the UserId is in the Student Table
+        try {
+            conn = DriverManager.getConnection(URL);
+            stmt1 = conn.prepareStatement(sql1);
+
+            ResultSet rs = stmt1.executeQuery();
+            
+            exists = rs.isBeforeFirst();  
+            
+            System.out.println("The result of ResultSet is " + exists);
+           
+       
+        } catch (SQLException e) {
+            throw new NonRecoverableException("StudentDAO-ERR-1" + e.toString(), e);
+        
+        } finally {
+            close(conn, stmt1);
+        }
+        
+         return exists;
     }
     
    
