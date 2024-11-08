@@ -690,11 +690,6 @@ public class ShaTuTutor implements TutorSvc {
             stepReply.setIsRepeatStep(false);
             stepReply.setIsNewStep(true);
 
-            // ToDo: Use the student model to figure out whether we want
-            // to give the student another practice problem of the same
-            // type or move on to an entirely different problem.
-            stepReply.setIsNewTask(true);
-
             // ToDo: currently only one step in a task, so there isn't a next one???
             stepReply.setIsNextStep(false);
             
@@ -710,6 +705,16 @@ public class ShaTuTutor implements TutorSvc {
             } catch (NonRecoverableException ex) {
                 return createError("Unknown error", ex);
             }
+            
+            int exposures = assessment.getExposures();
+            int successes = assessment.getSuccessess();
+            
+            if (exposures > 0 && (double) successes / exposures > 0.6) {
+                stepReply.setIsNewTask(true);
+                System.out.println("%%%%%%%%%%% Next Task Recommended");
+            }
+            else stepReply.setIsNewTask(false);
+            
 
         } else {
             stepReply.setIsCorrect(false);
@@ -894,11 +899,6 @@ public class ShaTuTutor implements TutorSvc {
             stepReply.setIsRepeatStep(false);
             stepReply.setIsNewStep(true);
 
-            // ToDo: Use the student model to figure out whether we want
-            // to give the student another practice problem of the same
-            // type or move on to an entirely different problem.
-            stepReply.setIsNewTask(true);
-
             // ToDo: currently only one step in a task, so there isn't a next one???
             stepReply.setIsNextStep(false);
 
@@ -914,6 +914,15 @@ public class ShaTuTutor implements TutorSvc {
             } catch (NonRecoverableException ex) {
                 return createError("Unknown error", ex);
             }
+            
+            int exposures = assessment.getExposures();
+            int successes = assessment.getSuccessess();
+            
+            if (exposures > 0 && (double) successes / exposures > 0.8) {
+                stepReply.setIsNewTask(true);
+                System.out.println("%%%%%%%%%%% Next Task Recommended");
+            }
+            else stepReply.setIsNewTask(false);
 
         } else {
             stepReply.setIsCorrect(false);
