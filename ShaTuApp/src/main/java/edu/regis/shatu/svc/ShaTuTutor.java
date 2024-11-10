@@ -658,83 +658,34 @@ public class ShaTuTutor implements TutorSvc {
     public TutorReply completeInitVarsStep(StepCompletion completion) {
         System.out.println("Completed InitVars Step");
 
-        // Deserialize the completion object to access user inputs
+        // Create StepCompletionReply based on user responses
+        StepCompletionReply stepReply = new StepCompletionReply();
         InitVarStep completedInitVarStep = gson.fromJson(completion.getData(), InitVarStep.class);
 
-        // Access the user's answers using consistent method calls
-        String userH0 = completedInitVarStep.getUserAnswer("H0");
-        String userH1 = completedInitVarStep.getUserAnswer("H1");
-        String userH2 = completedInitVarStep.getUserAnswer("H2");
-        String userH3 = completedInitVarStep.getUserAnswer("H3");
-        String userH4 = completedInitVarStep.getUserAnswer("H4");
-        String userH5 = completedInitVarStep.getUserAnswer("H5");
-        String userH6 = completedInitVarStep.getUserAnswer("H6");
-        String userH7 = completedInitVarStep.getUserAnswer("H7");
+        boolean allCorrect = completedInitVarStep.allAnswersCorrect();
+        StringBuilder correctAnswers = new StringBuilder();
 
-        // Assuming these are the expected answers
-        String correctH0 = completedInitVarStep.getAnswer("H0");
-        String correctH1 = completedInitVarStep.getAnswer("H1");
-        String correctH2 = completedInitVarStep.getAnswer("H2");
-        String correctH3 = completedInitVarStep.getAnswer("H3");
-        String correctH4 = completedInitVarStep.getAnswer("H4");
-        String correctH5 = completedInitVarStep.getAnswer("H5");
-        String correctH6 = completedInitVarStep.getAnswer("H6");
-        String correctH7 = completedInitVarStep.getAnswer("H7");
+        for (String var : new String[]{"H0", "H1", "H2", "H3", "H4", "H5", "H6", "H7"}) {
+            String userAnswer = completedInitVarStep.getUserAnswer(var);
+            String correctAnswer = completedInitVarStep.getAnswer(var);
 
-        // Set up the reply with correct answers for display
-        StepCompletionReply stepReply = new StepCompletionReply();
-        stepReply.setCorrectAnswer("H0: " + correctH0 + ", H1: " + correctH1 + ", H2: " + correctH2 +
-                                   ", H3: " + correctH3 + ", H4: " + correctH4 + 
-                                   ", H5: " + correctH5 + ", H6: " + correctH6 + 
-                                   ", H7: " + correctH7);
-
-        // Evaluate correctness
-        boolean allCorrect = userH0.equals(correctH0) && userH1.equals(correctH1) &&
-                             userH2.equals(correctH2) && userH3.equals(correctH3) &&
-                             userH4.equals(correctH4) && userH5.equals(correctH5) &&
-                             userH6.equals(correctH6) && userH7.equals(correctH7);
-
-        // Set flags based on correctness
-        if (allCorrect) {
-            stepReply.setIsCorrect(true);
-            stepReply.setIsRepeatStep(false);
-            stepReply.setIsNewStep(true);
-            stepReply.setIsNewTask(true);
-            stepReply.setIsNextStep(false);
-        } else {
-            stepReply.setIsCorrect(false);
-            stepReply.setIsRepeatStep(true);
-            stepReply.setIsNewStep(false);
-            stepReply.setIsNewTask(false);
-            stepReply.setIsNextStep(false);
+            if (userAnswer == null || !userAnswer.equals(correctAnswer)) {
+                allCorrect = false;
+            }
+            correctAnswers.append(var).append(": ").append(correctAnswer).append(", ");
         }
 
-        // Create a Step and Task for the response
-        Step step = new Step(1, 0, StepSubType.STEP_COMPLETION_REPLY);
-        step.setCurrentHintIndex(0);
-        step.setNotifyTutor(true);
-        step.setIsCompleted(false);
+        if (correctAnswers.length() > 0) {
+            correctAnswers.setLength(correctAnswers.length() - 2); // Remove trailing comma
+        }
 
-        // Set a timeout for the step
-        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
-        step.setTimeout(timeout);
-        step.setData(gson.toJson(stepReply));
+        // Set properties in StepCompletionReply
+        stepReply.setIsCorrect(allCorrect);
+        stepReply.setCorrectAnswer(correctAnswers.toString());
 
-        Task task = new Task();
-        task.setKind(TaskKind.PROBLEM);
-        task.setType(ExampleType.STEP_COMPLETION_REPLY);
-        task.setDescription("<html>In SHA-256, the algorithm begins with a set of "
-                + "initial hash values, which are specifically chosen constants.<br>"
-                + "These constants are derived from the first 32 bits of the "
-                + "fractional parts of the square roots of the first 8 prime numbers.<br>"
-                + "They serve as the starting points for the hash computation and "
-                + "ensure that the algorithm starts from a random-like state.</html>");
-        task.addStep(step);
-
-        TutorReply reply = new TutorReply(":Success");
-        reply.setData(gson.toJson(task));
-
-        return reply;
+        // Convert StepCompletionReply to JSON for TutorReply
+        String stepReplyJson = gson.toJson(stepReply);
+        return new TutorReply("SUCCESS", stepReplyJson);
     }
 
     public TutorReply completeCompressRoundStep(StepCompletion completion) {

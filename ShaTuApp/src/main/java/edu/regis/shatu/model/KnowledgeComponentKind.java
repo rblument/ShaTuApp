@@ -29,6 +29,11 @@ public enum KnowledgeComponentKind {
      */
      CHOICE_FUNCTION("Choice Function", 100);
      
+     /**
+      * Define the corresponding database id for this knowledge component.
+      */
+     //INITIALIZE_VARS("Initialize Variables", 2);
+     
     /**
      * A GUI displayable string identifying this knowledge component.
      */

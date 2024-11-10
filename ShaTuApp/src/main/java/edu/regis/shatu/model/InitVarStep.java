@@ -18,22 +18,20 @@ import java.util.Map;
 /**
  * This class holds the core logic for the initialize variables step.
  * All answers and hints are initialized and stored here.
- * User's answers may be check for correctness as well.
+ * User's answers may be checked for correctness as well.
  * @author Ryley MacLagan
  */
 public class InitVarStep {
     // Defines a map to associate user answer with correct answer
     final private Map<String, String> answers = new HashMap<>();
-    
+    final private Map<String, String> userAnswers = new HashMap<>();
+
     // Defines maps to associate user answer with correct hint
     final private Map<String, String> hint1 = new HashMap<>();
     final private Map<String, String> hint2 = new HashMap<>();
     final private Map<String, String> hint3 = new HashMap<>();
-    private Map<String, String> userAnswers;
     
-    public InitVarStep(){
-        userAnswers = new HashMap<>();
-        
+    public InitVarStep(){        
         // Map text fields with their correct answers to enable automated checking
         answers.put("H0", "0x6a09e667");
         answers.put("H1", "0xbb67ae85");
@@ -93,8 +91,27 @@ public class InitVarStep {
         }
     }
     
-    public boolean isUserCorrect(String variable){
-        System.out.println("Variable: "+variable);
-        return answers.get(variable).equals(userAnswers.get(variable));
+    /**
+     * Checks if a specific user answer is correct.
+     * @param variable the variable to check user's answer for
+     * @return true if user's answer for variable is correct. False otherwise.
+     */
+     public boolean isUserCorrect(String variable) {
+        String correctAnswer = answers.get(variable);
+        String userAnswer = userAnswers.get(variable);
+        return correctAnswer != null && correctAnswer.equals(userAnswer);
+    }
+    
+    /**
+     * Checks if all user answers are correct
+     * @return true if all user answers are correct. False otherwise.
+     */
+    public boolean allAnswersCorrect() {
+        for (String key : answers.keySet()) {
+            if (!isUserCorrect(key)) {
+                return false;
+            }
+        }
+        return true;
     }
 }
