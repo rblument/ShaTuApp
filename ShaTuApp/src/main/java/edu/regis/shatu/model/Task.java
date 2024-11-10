@@ -133,12 +133,12 @@ public class Task extends TitledModel {
     }
     
     public ArrayList<Step> getSteps() {
-        System.out.println("Task.getStepts: " + steps.size());
+        System.out.println("Task.getSteps: " + steps.size());
         return steps;
     }
     
     public void setSteps(ArrayList<Step> steps) {
-        System.out.println("Task.setSepats: " + steps);
+        System.out.println("Task.setSteps: " + steps);
         this.steps = steps;
     }
     

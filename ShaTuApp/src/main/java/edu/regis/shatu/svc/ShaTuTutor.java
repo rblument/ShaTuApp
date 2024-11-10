@@ -172,7 +172,7 @@ public class ShaTuTutor implements TutorSvc {
         } catch (IllegalArgumentException ex) {
             return createError("ShaTuTutor_ERR_4", ex);
         } catch (InvocationTargetException ex) {
-            return createError("ShaTuTutor_ERR_5", ex);
+            return createError("ShaTuTutor_ERR_5", (Exception) ex.getCause());
         }
     }
 
@@ -187,7 +187,7 @@ public class ShaTuTutor implements TutorSvc {
      */
     public TutorReply createAccount(String jsonAcct) throws NonRecoverableException {
         Account acct = gson.fromJson(jsonAcct, Account.class);
-
+        Student stud = gson.fromJson(jsonAcct, Student.class);
         int courseId = DEFAULT_COURSE_ID; // Currently only one course
 
         StudentSvc stuSvc = ServiceFactory.findStudentSvc();
@@ -195,18 +195,18 @@ public class ShaTuTutor implements TutorSvc {
         if (stuSvc.exists(acct.getUserId())) {
             return new TutorReply("IllegalUserId");
         }
-
+        
         try {
             ServiceFactory.findUserSvc().create(acct);
 
             try {
                 CourseSvc courseSvc = ServiceFactory.findCourseSvc();
-
+                
                 Course course = courseSvc.retrieve(courseId);
-
+                
                 session = createSession(acct, course);
 
-                createStudent(acct, course, session);
+                createStudent(stud, course, session);
 
                 return new TutorReply("Created");
 
@@ -1033,13 +1033,13 @@ public class ShaTuTutor implements TutorSvc {
 
             TutoringSession tSession = new TutoringSession();
             tSession.setAccount(account);
-
+            
             Random rnd = new Random();
             String clearToken = "Session" + account.getUserId() + Integer.toString(rnd.nextInt());
             tSession.setSecurityToken(SHA_256.instance().sha256(clearToken));
-
+            
             tSession.setCourse(course.getDigest());
-
+            
             Unit unit = course.currentUnit();
             if (unit != null) {
                 tSession.setUnit(unit.getDigest());
@@ -1056,7 +1056,7 @@ public class ShaTuTutor implements TutorSvc {
             throw new NonRecoverableException("Session already exists " + account.getUserId());
         }
     }
-
+        
     /**
      * Create and save the student and their initial student model.
      *
@@ -1064,10 +1064,10 @@ public class ShaTuTutor implements TutorSvc {
      * @param course
      * @return
      */
-    private Student createStudent(Account acct, Course course, TutoringSession session)
+    private Student createStudent(Student student, Course course, TutoringSession session)
             throws NonRecoverableException {
 
-        Student student = new Student(acct.getUserId(), acct.getPassword());
+        //Student student = new Student(acct.getUserId(), acct.getPassword());
         StudentModel model = student.getStudentModel();
 
         try {
@@ -1097,12 +1097,11 @@ public class ShaTuTutor implements TutorSvc {
 
             StudentSvc svc = ServiceFactory.findStudentSvc();
             svc.create(student);
-
             return student;
 
         } catch (IllegalArgException e) {
             // We should never get here since 
-            throw new NonRecoverableException("Student already exists " + acct.getUserId());
+            throw new NonRecoverableException("Student already exists " + student.getUserId());
 
         } catch (ObjNotFoundException e) {
             throw new NonRecoverableException("Inconsistent Course in DB knowledge component" + course.getId());
