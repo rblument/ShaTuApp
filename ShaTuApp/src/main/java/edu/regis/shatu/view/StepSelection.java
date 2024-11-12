@@ -52,6 +52,17 @@ public enum StepSelection {
     
     SHA_ONE(new HighlightLabel("SHA Sum 1 value")),
     
+    /**
+     * Lesson Labels for LessonStepSelectionView
+     */   
+    OVERVIEW(new HighlightLabel("Overview")),
+    
+    MESSAGE_PREPROCESSING(new HighlightLabel("Message Preprocessing")),
+    
+    HASH_COMPUTATION(new HighlightLabel("Hash Computation")),
+    
+    CONCLUSION(new HighlightLabel("Conclusion")),
+        
     // Isn't displayed in StepSelectionView
     STEP_REPLY(new HighlightLabel("Step Reply"));
 
