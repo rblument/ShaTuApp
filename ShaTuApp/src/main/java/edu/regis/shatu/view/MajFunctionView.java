@@ -416,7 +416,7 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
         if (e.getKeyCode() == KeyEvent.VK_ENTER && responseTextArea.getText().equals("")) {
             JOptionPane.showMessageDialog(this, "Please provide an answer");
         } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-            verifyAnswer();
+            checkButton.doClick();
         }
     }
 

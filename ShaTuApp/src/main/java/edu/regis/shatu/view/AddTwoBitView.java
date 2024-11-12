@@ -19,6 +19,7 @@ import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.BitOpStep;
 import edu.regis.shatu.model.aol.ExampleType;
 import edu.regis.shatu.model.aol.NewExampleRequest;
+import edu.regis.shatu.view.act.HintAction;
 import edu.regis.shatu.view.act.NewExampleAction;
 import edu.regis.shatu.view.act.StepCompletionAction;
 import java.awt.GridBagConstraints;
@@ -220,7 +221,7 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
         if (e.getKeyCode() == KeyEvent.VK_ENTER && answerField.getText().equals("")) {
             JOptionPane.showMessageDialog(this, "Please provide an answer");
         } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-            verifyAnswer();
+            checkButton.doClick();
         }
     }
 
@@ -260,8 +261,8 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
      */
     private void onNextHint() {
         JOptionPane.showMessageDialog(this, "Hint");
-    }
-
+        }
+       
     /**
      * Handles the action for the Check button.
      */
