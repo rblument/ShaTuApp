@@ -16,6 +16,7 @@ import edu.regis.shatu.model.Account;
 import edu.regis.shatu.model.TutoringSession;
 import edu.regis.shatu.model.User;
 import edu.regis.shatu.svc.SHA_256;
+import edu.regis.shatu.view.act.ForgotPasswordAction;
 import edu.regis.shatu.view.act.NewUserAction;
 import edu.regis.shatu.view.act.SignInAction;
 import java.awt.Color;
@@ -72,6 +73,11 @@ public class SplashPanel extends GPanel {
      * Displays a panel allowing the user to create a new student account.
      */
     protected JButton createAcctBut;
+    
+    /**
+     * Displays a panel allowing the user to reset their password.
+     */
+    protected JButton forgotPasswordBut;
     
     /**
      * Create and layout the child GUI components in this panel.
@@ -198,6 +204,8 @@ public class SplashPanel extends GPanel {
 
         
         createAcctBut = new JButton(NewUserAction.instance());
+        
+        forgotPasswordBut = new JButton(ForgotPasswordAction.instance());
     }
     
     /**
@@ -284,6 +292,9 @@ public class SplashPanel extends GPanel {
 		   GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL,
 		   0,5,5,5);
 	panel.addc(signInBut, 0,5, 1,1, 0.0,0.0,
+		   GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
+		   15,5,5,5);
+        panel.addc(forgotPasswordBut,1,5,1,1, 0.0,0.0,
 		   GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
 		   15,5,5,5);
 	return panel;
