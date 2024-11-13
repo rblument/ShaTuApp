@@ -115,6 +115,8 @@ public class Step extends TitledModel {
     }
 
     public void setSubType(StepSubType subType) {
+        System.out.println("Sub type set: " + subType); // Error checking
+        
         this.subType = subType;
     }
 

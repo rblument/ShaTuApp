@@ -100,7 +100,7 @@ public class ShaTuApp {
             LOGGER.info(" Server is running.");
                 
             LOGGER.info(" Starting Client GUI...");
-            
+
             // Force the creation of the MainFrame singleton, which is not
             // made visible to the user until after they sign-in.
             MainFrame.instance();

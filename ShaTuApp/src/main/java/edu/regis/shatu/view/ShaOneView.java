@@ -180,6 +180,21 @@ public class ShaOneView extends UserRequestView implements ActionListener, KeyLi
             verifyAnswer();
         }
     }
+    
+    @Override
+    /**
+     * Updates the description, question, and hints from the model
+     * 
+     * TODO: THIS IS A PLACEHOLDER UNTIl WE HAVE HAVE THE MODEL CODE COMPLETED
+     */
+    protected void updateView() {
+        if (model != null) {
+            // ****TO-DO*****
+            // Update the view's information from the model
+            // Debugging dynamic updates to the model can be done here.
+            System.out.println("ShaOneView");
+        }
+    }
 
     @Override
     public NewExampleRequest newRequest() {

@@ -25,9 +25,9 @@ import javax.swing.border.EmptyBorder;
 
 /**
  *
- * @author rickb
+ * @author Amanda Roskelley
  */
-public class BitOpLabel extends JLabel implements MouseListener {
+public class VariableLabel extends JLabel implements MouseListener {
     /**
      * The pixel width and height of this component.
      */
@@ -53,19 +53,19 @@ public class BitOpLabel extends JLabel implements MouseListener {
             = new CompoundBorder(BorderFactory.createLineBorder(Color.RED, 2), EMPTY_BORDER);
     
     /**
-     * The background of this label is pinkish when not highlighted.
+     * The background of this label is white when not highlighted.
      */
-    private static final Color NORMAL_BACKGROUND = new Color(230,230,250);
+    private static final Color NORMAL_BACKGROUND = new Color(255,255,255);
     
     /**
      * The background of this label is a light yellow when highlighted.
      */
-    private static final Color HIGHLIGHT_BACKGROUND = new Color(255, 255, 205);
+    private static final Color HIGHLIGHT_BACKGROUND = new Color(210,248,210);
     
     /**
      * The background of this label when selected.
      */
-    private static final Color SELECTED_BACKGROUND = new Color(204, 255, 205);
+    private static final Color SELECTED_BACKGROUND = new Color(212,235,242);
     
     /**
      * The view that is displayed when this label is selected.
@@ -80,16 +80,16 @@ public class BitOpLabel extends JLabel implements MouseListener {
      * 
      * @param text the text of this label
      */
-    public BitOpLabel(String text) {
+    public VariableLabel(String text) {
         super(text, SwingConstants.CENTER);
         
         isSelected = false;
-
+        
         Dimension d = new Dimension(SIZE, SIZE); // Determined empirically
-
-        setOpaque(true);
-        setBackground(NORMAL_BACKGROUND);
-        setBorder(NORMAL_BORDER);
+        
+        setOpaque(false);
+        //setBackground(NORMAL_BACKGROUND);
+        //setBorder(NORMAL_BORDER);
         setMinimumSize(d);
         setSize(d);
 
@@ -99,12 +99,12 @@ public class BitOpLabel extends JLabel implements MouseListener {
     public void select() {
         GuiController.instance().getStepSelectorView().displayStep(stepSelection);
         isSelected = true;
-        setBackground(SELECTED_BACKGROUND);
+        //setBackground(SELECTED_BACKGROUND);
     }
     
     public void deselect() {
         isSelected = false;
-        setBackground(NORMAL_BACKGROUND);
+       // setBackground(NORMAL_BACKGROUND);
     }
 
     @Override
@@ -130,8 +130,8 @@ public class BitOpLabel extends JLabel implements MouseListener {
     @Override
     public void mouseEntered(MouseEvent e) {
         if (!isSelected) {
-            setBorder(HIGHLIGHT_BORDER);
-            setBackground(HIGHLIGHT_BACKGROUND);
+            //setBorder(HIGHLIGHT_BORDER);
+            //setBackground(HIGHLIGHT_BACKGROUND);
         }
     }
 
@@ -143,8 +143,8 @@ public class BitOpLabel extends JLabel implements MouseListener {
     @Override
     public void mouseExited(MouseEvent e) {
         if (!isSelected) {
-            setBorder(NORMAL_BORDER);
-            setBackground(NORMAL_BACKGROUND);
+            //setBorder(NORMAL_BORDER);
+            //setBackground(NORMAL_BACKGROUND);
         }
     }
 }

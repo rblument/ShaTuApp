@@ -12,13 +12,18 @@
  */
 package edu.regis.shatu.view;
 
+import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
+import edu.regis.shatu.model.Task;
 import edu.regis.shatu.model.TutoringSession;
 import edu.regis.shatu.model.aol.EncodeAsciiExample;
 import edu.regis.shatu.model.aol.EncodeAsciiStep;
 import edu.regis.shatu.model.aol.EncodeAsciiStep.OutputListener;
 import edu.regis.shatu.model.StepCompletion;
+import edu.regis.shatu.model.aol.ExampleType;
 import edu.regis.shatu.model.aol.NewExampleRequest;
+import edu.regis.shatu.svc.ShaTuTutor;
+import edu.regis.shatu.svc.TutorReply;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
@@ -44,6 +49,11 @@ import javax.swing.ButtonGroup;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import edu.regis.shatu.view.act.NewExampleAction;
+import edu.regis.shatu.view.act.StepCompletionAction;
+import javax.swing.SwingUtilities;
 
 
 /**
@@ -54,16 +64,14 @@ import javax.swing.JTextField;
  * 
  * @author rickb
  */
-
 public class EncodeView extends UserRequestView implements ActionListener, KeyListener, EncodeAsciiStep.OutputListener {
-
     private TutoringSession model;    
     private JTextPane descriptionTextPane;
     private JLabel questionLabel, instructionsLabel, messageLengthLabel;
     private JTextField messageLengthField;
     private JTextArea responseArea;
     private JTextArea feedbackArea;
-    private JButton submitButton, nextButton, hintButton;
+    private JButton submitButton, nextButton, hintButton, showHideAsciiTableButton;
     private JTable asciiTable;
     private JScrollPane responseScrollPane, asciiTableScrollPane, feedbackScrollPane;
     private String question;
@@ -74,8 +82,11 @@ public class EncodeView extends UserRequestView implements ActionListener, KeyLi
     private JTextField exampleInputField;
     private JButton stepThroughButton;
     private JButton completeOutputButton;
+    private JButton submitAsciiButton;
+    private JButton newExampleButton;
     private EncodeAsciiStep asciiStep;
     private String lastInput = "";
+    private int currentIndex = 0;
 
     
     // For random character generation
@@ -89,20 +100,52 @@ public class EncodeView extends UserRequestView implements ActionListener, KeyLi
      * Constructor initializes the view by setting up components and layout.
      */
     public EncodeView() {
+        gson = new GsonBuilder().setPrettyPrinting().create();
         questionData = new ArrayList<>();
         initializeComponents();
         initializeLayout();
         updateToRadioButtonsEnabledState();
         prepareNextQuestion();
     }
-
+    
+    /**
+    * Creates a new request for an ASCII encoding example.
+    *
+    * @return ex containing the encoded ASCII step data.
+    */
     public NewExampleRequest newRequest() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        
+        NewExampleRequest ex = new NewExampleRequest();
+        ex.setExampleType(ExampleType.ASCII_ENCODE);
+        EncodeAsciiStep asciiStep = new EncodeAsciiStep();
+        ex.setData(gson.toJson(asciiStep));
+
+        return ex;
+    }
+    
+    /**
+    * Handles the completion of a step by retrieving the current step data
+    *
+    * @return step object containing the updated step information.
+     */
+    public StepCompletion stepCompletion() {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        
+        Step currentStep = model.currentTask().currentStep();
+        EncodeAsciiStep example = gson.fromJson(currentStep.getData(), EncodeAsciiStep.class);
+        String userResponse = feedbackArea.getText().replaceAll("\\s", "");
+        EncodeAsciiExample newExample = new EncodeAsciiExample(userResponse);
+        example.setExample(newExample);
+        String encodedResult = example.encode();
+   
+        feedbackArea.setText(encodedResult);
+
+        StepCompletion step = new StepCompletion(currentStep, gson.toJson(example));
+    
+        return step;
     }
 
-    public StepCompletion stepCompletion() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
     
     /**
      * Enumeration to hold the various conversion types
@@ -129,7 +172,11 @@ public class EncodeView extends UserRequestView implements ActionListener, KeyLi
             handleStepThroughAscii();
         } else if (event.getSource() == completeOutputButton){
             handleCompleteAsciiConversion();
-        }
+        } else if (event.getSource() == submitAsciiButton) {
+            asciiStepQuestion();
+        } else if (event.getSource() == newExampleButton) {
+            handleNewAsciiExampleRequest();
+    }
     }
     
      @Override
@@ -189,10 +236,6 @@ public class EncodeView extends UserRequestView implements ActionListener, KeyLi
         setupButtons();
         setupAsciiTable();
         setupExampleInputField();
-        stepThroughButton = new JButton("Step Through ASCII Conversion");
-        completeOutputButton = new JButton("Complete ASCII Conversion");
-        stepThroughButton.addActionListener(this);
-        completeOutputButton.addActionListener(this);
     }
 
     /**
@@ -200,8 +243,8 @@ public class EncodeView extends UserRequestView implements ActionListener, KeyLi
      * constraints.
      */
     private void initializeLayout() {
-
-    JPanel buttonPanel = createButtonPanel();  
+    JPanel buttonPanel = createButtonPanel();
+    JPanel asciiButtonPanel = createAsciiButtonPanel();  
     JPanel messageLengthPanel = createMessageLengthPanel();
     JPanel convertFromPanel = createConvertFromRadioPanel();
     JPanel convertToPanel = createConvertToRadioPanel();
@@ -220,13 +263,6 @@ public class EncodeView extends UserRequestView implements ActionListener, KeyLi
     addc(examplePanel, 0, 1, 3, 1,  
          1.0, 0.0, GridBagConstraints.CENTER, 
          GridBagConstraints.HORIZONTAL, 5, 5, 5, 20);
-    addc(stepThroughButton, 0, 8, 1, 1, 
-         1.0, 0.0, GridBagConstraints.CENTER, 
-         GridBagConstraints.HORIZONTAL, 5, 5, 5, 5);
-    addc(completeOutputButton, 1, 8, 1, 1, 
-         1.0, 0.0, GridBagConstraints.CENTER, 
-         GridBagConstraints.HORIZONTAL, 5, 5, 5, 5);
-    
     addc(messageLengthPanel, 0, 2, 1, 1, 
             1.0, 0.0, GridBagConstraints.CENTER, 
             GridBagConstraints.NONE, 5, 5, 5, 5);
@@ -236,7 +272,6 @@ public class EncodeView extends UserRequestView implements ActionListener, KeyLi
     addc(convertToPanel, 2, 2, 1, 1, 
             1.0, 0.0, GridBagConstraints.CENTER, 
             GridBagConstraints.NONE, 5, 5, 5, 5); 
-
     addc(questionLabel, 0, 3, 3, 1, 
             1.0, 0.0, GridBagConstraints.CENTER, 
             GridBagConstraints.HORIZONTAL, 5, 5, 5, 5);
@@ -252,21 +287,126 @@ public class EncodeView extends UserRequestView implements ActionListener, KeyLi
     addc(buttonPanel, 0, 7, 3, 1, 
             1.0, 1.0, GridBagConstraints.CENTER, 
             GridBagConstraints.NONE, 10, 0, 0, 0);
+    addc(asciiButtonPanel, 0, 8, 3, 1, 
+            1.0, 1.0, GridBagConstraints.CENTER, 
+            GridBagConstraints.NONE, 10, 0, 0, 0);
+    addc(showHideAsciiTableButton, 3, 0, 1, 1, 
+            1.0, 0.0, GridBagConstraints.NORTH, 
+            GridBagConstraints.HORIZONTAL, 5, 5, 5, 5);
     addc(asciiTableScrollPane, 3, 0, GridBagConstraints.REMAINDER,
             8, 3.0, 1.0, GridBagConstraints.CENTER, 
             GridBagConstraints.BOTH, 5, 5, 5, 5);
 }
-
-
-    
+    /**
+    * Sets up the input field for entering the example string
+    */
     private void setupExampleInputField() {
-    exampleInputField = new JTextField(20);  // Creates a text field with a preferred width
+    exampleInputField = new JTextField(9);  // Creates a text field with a preferred width
 }
-    
-    @Override
+    /**
+    * Appends the given text to the response area.
+    * 
+    * @param text The text to append
+    */
     public void appendText(String text) {
         responseArea.append(text + "\n");  // Append new text with a newline for readability
     }
+    
+    /**
+    * Handles the logic for checking to see if the user's input 
+    * matches the ASCII values for each character in the example string
+    */
+    private void asciiStepQuestion() {
+    String userInput = responseArea.getText().trim();
+
+    //Reset index if the string changed
+    if (!exampleInputField.getText().equals(lastInput)) {
+        currentIndex = 0;
+        lastInput = exampleInputField.getText();
+        char firstChar = lastInput.charAt(currentIndex);
+        feedbackArea.setText("Please enter the ASCII value for the first"
+                + " character: '" + firstChar + "'.");
+    }
+
+    //Get the example string from the input field
+    String exampleString = exampleInputField.getText();
+
+    //Ensure the current index is within bounds of the string
+    if (currentIndex >= exampleString.length()) {
+        feedbackArea.setText("All characters have been encoded correctly!");
+        return;
+    }
+    
+    //Get the current character based on the current index
+    char currentChar = exampleString.charAt(currentIndex);
+    String expectedAscii = String.valueOf((int) currentChar);
+
+    //Compare the user's input to the expected ASCII value
+    if (userInput.equals(expectedAscii)) {
+        feedbackArea.setText("Correct! The "
+                + "ASCII value for '" + currentChar + 
+                "' is " + expectedAscii + ".");
+
+        //When correct, move to next character
+        currentIndex++;
+
+        //Check if there are more characters to encode
+        if (currentIndex < exampleString.length()) {
+            char nextChar = exampleString.charAt(currentIndex);
+            feedbackArea.append("\nPlease enter the ASCII value "
+                    + "for the next character: '" + nextChar + "'.");
+            responseArea.setText("");
+        } else {
+            feedbackArea.append("\nAll characters have been encoded correctly!");
+        }
+    } else {
+        feedbackArea.setText("Incorrect. The ASCII value for"
+                + " '" + currentChar + "' is not " + userInput + ". Try again.");
+    }
+}
+
+
+    /**
+    * Handles the creation of a new ASCII example request and updates the
+    * UI with the received example.
+    */
+    private void handleNewAsciiExampleRequest() {
+        //Create a new ShaTuTutor object
+        ShaTuTutor tutor = new ShaTuTutor();
+        int length = random.nextInt(6) + 3;
+    
+        //Prepare the JSON request with EncodeAsciiExample data
+        String userInput = exampleInputField.getText();
+        EncodeAsciiExample example = new EncodeAsciiExample(userInput);
+        example.setStringLength(length);
+        String exampleJson = gson.toJson(example);
+        NewExampleRequest request = new NewExampleRequest();
+        request.setExampleType(ExampleType.ASCII_ENCODE);
+        request.setData(exampleJson);
+        String jsonRequest = gson.toJson(request);
+    
+        //Call the backend method using the tutor object
+        TutorReply reply = tutor.newExample(jsonRequest);
+        Task task = gson.fromJson(reply.getData(), Task.class);
+        Step step = task.getSteps().get(0);
+        EncodeAsciiStep asciiStep = gson.fromJson(step.getData(), EncodeAsciiStep.class);
+        EncodeAsciiExample receivedExample = asciiStep.getExample();
+
+        //Display the example string in the UI
+        SwingUtilities.invokeLater(() -> {
+        exampleInputField.setText(receivedExample.getExampleString());
+        feedbackArea.setText("Please enter the ASCII value for the first "
+            + "character: '" + receivedExample.getExampleString().charAt(0) + "'.");
+            responseArea.setText("");
+        });
+
+        currentIndex = 0;
+    }
+    
+    /**
+    * Handles the step-through ASCII conversion, allowing the user/tutor to
+    * walk-through the ASCII conversion process with the example provided.
+    */
     private void handleStepThroughAscii() {
         String userInput = exampleInputField.getText();
     if (asciiStep == null || !userInput.equals(lastInput)) {
@@ -276,17 +416,21 @@ public class EncodeView extends UserRequestView implements ActionListener, KeyLi
         asciiStep.setExample(example);
         asciiStep.setMultiStep(true);
     }
-    String result = asciiStep.encode();
-    responseArea.setText(result);  // Set the returned output to the response area
+      String result = asciiStep.encode();
+      feedbackArea.setText(result);  // Set the returned output to the response area
 }
+    /**
+    * Handles the complete ASCII conversion, allowing the user/tutor to
+    * show the entire ASCII conversion conveniently. 
+    */
     private void handleCompleteAsciiConversion() {
-    String userInput = exampleInputField.getText();  // Get user input from text field
-    EncodeAsciiExample example = new EncodeAsciiExample(userInput);
-    EncodeAsciiStep asciiStep = new EncodeAsciiStep();
-    asciiStep.setExample(example);
-    asciiStep.setMultiStep(false);  // Set to complete mode
-    String result = asciiStep.encode();  // This will complete the ASCII conversion process at once
-    responseArea.setText(result);
+        String userInput = exampleInputField.getText();  // Get user input from text field
+        EncodeAsciiExample example = new EncodeAsciiExample(userInput);
+        EncodeAsciiStep asciiStep = new EncodeAsciiStep();
+        asciiStep.setExample(example);
+        asciiStep.setMultiStep(false);  // Set to complete mode
+        String result = asciiStep.encode();  // This will complete the ASCII conversion process at once
+        feedbackArea.setText(result);
 }
 
     /**
@@ -656,7 +800,6 @@ public class EncodeView extends UserRequestView implements ActionListener, KeyLi
 
     /**
      * Initializes the submit, next, and hint buttons and sets up action listeners
-     * 
      */
     private void setupButtons() {
         submitButton = new JButton("Submit");
@@ -666,6 +809,16 @@ public class EncodeView extends UserRequestView implements ActionListener, KeyLi
         nextButton.addActionListener(this);
         hintButton.addActionListener(this);
         nextButton.setEnabled(false);
+        
+        submitAsciiButton = new JButton(StepCompletionAction.instance());
+        newExampleButton = new JButton(NewExampleAction.instance());
+        stepThroughButton = new JButton("Step Through ASCII Conversion");
+        completeOutputButton = new JButton("Complete ASCII Conversion");
+        newExampleButton.addActionListener(this);
+        submitAsciiButton.addActionListener(this); 
+        stepThroughButton.addActionListener(this);
+        completeOutputButton.addActionListener(this);
+        setupAsciiTableToggleButton();
     }    
 
     /**
@@ -678,6 +831,19 @@ public class EncodeView extends UserRequestView implements ActionListener, KeyLi
         buttonPanel.add(nextButton);
         buttonPanel.add(hintButton);
         return buttonPanel;
+    }
+    
+    /**
+     * A second JPanel containing action buttons with a FlowLayout
+     * @return asciiButtonPanel containing action buttons
+     */
+    private JPanel createAsciiButtonPanel() {
+        JPanel asciiButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        asciiButtonPanel.add(submitAsciiButton);
+        asciiButtonPanel.add(newExampleButton);
+        asciiButtonPanel.add(stepThroughButton);
+        asciiButtonPanel.add(completeOutputButton);
+        return asciiButtonPanel;
     }
     
     /**
@@ -777,6 +943,31 @@ public class EncodeView extends UserRequestView implements ActionListener, KeyLi
         int randomInt = 32 + random.nextInt(127 - 32);
         return randomInt; 
     }
+    
+    /**
+     * On button press will show/hide ASCII Table
+     */
+    private void setupAsciiTableToggleButton() {
+    //If button is pressed setup ascii table
+    setupAsciiTable();
+    
+    //Create the Show/Hide button
+    showHideAsciiTableButton = new JButton("Hide ASCII Table");
+    showHideAsciiTableButton.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            boolean isCurrentlyVisible = asciiTableScrollPane.isVisible();
+            asciiTableScrollPane.setVisible(!isCurrentlyVisible);
+            
+            //Update button text based on show/hide press
+            if (isCurrentlyVisible) {
+                showHideAsciiTableButton.setText("Show ASCII Table");
+            } else {
+                showHideAsciiTableButton.setText("Hide ASCII Table");
+            }
+        }
+    });
+}
     
     /**
      * Initializes the ASCII table and its scroll pane

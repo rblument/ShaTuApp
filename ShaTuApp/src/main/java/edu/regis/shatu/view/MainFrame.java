@@ -27,6 +27,7 @@ import javax.swing.JFrame;
  * @author rickb
  */
 public class MainFrame extends JFrame implements WindowListener {
+
     /**
      * The singleton instance of this frame.
      */
@@ -67,7 +68,6 @@ public class MainFrame extends JFrame implements WindowListener {
      */
     private MainFrame() {
         super("ShaTut");
-
         Dimension screenSize = Toolkit. getDefaultToolkit(). getScreenSize();
         screenSize.width = screenSize.width - SCREEN_SIZE_INSET ;
         screenSize.height = screenSize.height - SCREEN_SIZE_INSET - 10;
@@ -144,6 +144,7 @@ public class MainFrame extends JFrame implements WindowListener {
      */
     private void initializeComponents() {
         view = new TutoringSessionView(); 
+
     }
     
     /**
@@ -151,6 +152,7 @@ public class MainFrame extends JFrame implements WindowListener {
      */
     private void layoutComponents() {
         setContentPane(view);
+        
     }
     
     /**

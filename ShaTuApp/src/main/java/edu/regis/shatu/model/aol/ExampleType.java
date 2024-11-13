@@ -50,6 +50,10 @@ public enum ExampleType {
     
     CHOICE_FUNCTION("Choice Function"),
     
+    SHA_ZERO("Sha sum 0"),
+    
+    SHA_ONE("Sha sum 1"),
+    
     STEP_COMPLETION_REPLY("Step Completion Reply"),
     
     REQUEST_HINT("Request Hint"),

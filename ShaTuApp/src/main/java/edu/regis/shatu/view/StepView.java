@@ -46,7 +46,7 @@ public class StepView extends JPanel {
     
     private Add1View add1View;
     
-    private PadView padView;
+    private Pad0View padView;
     
     private RotateView rotateView;
     
@@ -69,6 +69,8 @@ public class StepView extends JPanel {
     private StepCompletionReplyView stepReplyView;
     
     private TutoringSession model;
+    
+    private MessageLenView messageLenView;
 
 
     /**
@@ -177,6 +179,8 @@ public class StepView extends JPanel {
                     return stepReplyView;
             case XOR:
                 return exclusiveOrView;
+            case LENGTH:
+                return messageLenView;
    
             default:
 
@@ -204,12 +208,13 @@ public class StepView extends JPanel {
         shaZero = new ShaZeroView();
         shaOne = new ShaOneView();
         add1View = new Add1View();
-        padView = new PadView();
+        padView = new Pad0View();
         rotateView = new RotateView();
         initVarView = new InitVarView();
         exclusiveOrView = new ExclusiveOrView();
         choiceFunctionView = new ChoiceFunctionView();
         stepReplyView = new StepCompletionReplyView();
+        messageLenView = new MessageLenView();
     }
     
     /**
@@ -231,6 +236,7 @@ public class StepView extends JPanel {
         add(initVarView, StepSelection.INIT_VARS.toString());
         add(exclusiveOrView, StepSelection.XOR.toString());
         add(choiceFunctionView, StepSelection.CHOICE_FUNCTION.toString());
+        add(messageLenView, StepSelection.LENGTH.toString());
 
 
         add(stepReplyView, StepSelection.STEP_REPLY.toString());
