@@ -51,6 +51,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import edu.regis.shatu.view.act.HintAction;
 import edu.regis.shatu.view.act.NewExampleAction;
 import edu.regis.shatu.view.act.StepCompletionAction;
 import javax.swing.SwingUtilities;
@@ -65,7 +66,7 @@ import javax.swing.SwingUtilities;
  * @author rickb
  */
 public class EncodeView extends UserRequestView implements ActionListener, KeyListener, EncodeAsciiStep.OutputListener {
-    private TutoringSession model;    
+//    private TutoringSession model;    
     private JTextPane descriptionTextPane;
     private JLabel questionLabel, instructionsLabel, messageLengthLabel;
     private JTextField messageLengthField;
@@ -129,6 +130,7 @@ public class EncodeView extends UserRequestView implements ActionListener, KeyLi
     *
     * @return step object containing the updated step information.
      */
+    @Override
     public StepCompletion stepCompletion() {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         
@@ -142,6 +144,8 @@ public class EncodeView extends UserRequestView implements ActionListener, KeyLi
         feedbackArea.setText(encodedResult);
 
         StepCompletion step = new StepCompletion(currentStep, gson.toJson(example));
+        
+        step.setStep(currentStep);
     
         return step;
     }
@@ -804,7 +808,7 @@ public class EncodeView extends UserRequestView implements ActionListener, KeyLi
     private void setupButtons() {
         submitButton = new JButton("Submit");
         nextButton = new JButton("Next");
-        hintButton = new JButton("Hint");
+        hintButton = new JButton(HintAction.instance());
         submitButton.addActionListener(this);
         nextButton.addActionListener(this);
         hintButton.addActionListener(this);
@@ -948,26 +952,26 @@ public class EncodeView extends UserRequestView implements ActionListener, KeyLi
      * On button press will show/hide ASCII Table
      */
     private void setupAsciiTableToggleButton() {
-    //If button is pressed setup ascii table
-    setupAsciiTable();
-    
-    //Create the Show/Hide button
-    showHideAsciiTableButton = new JButton("Hide ASCII Table");
-    showHideAsciiTableButton.addActionListener(new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            boolean isCurrentlyVisible = asciiTableScrollPane.isVisible();
-            asciiTableScrollPane.setVisible(!isCurrentlyVisible);
-            
-            //Update button text based on show/hide press
-            if (isCurrentlyVisible) {
-                showHideAsciiTableButton.setText("Show ASCII Table");
-            } else {
-                showHideAsciiTableButton.setText("Hide ASCII Table");
+        //If button is pressed setup ascii table
+        setupAsciiTable();
+
+        //Create the Show/Hide button
+        showHideAsciiTableButton = new JButton("Hide ASCII Table");
+        showHideAsciiTableButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                boolean isCurrentlyVisible = asciiTableScrollPane.isVisible();
+                asciiTableScrollPane.setVisible(!isCurrentlyVisible);
+
+                //Update button text based on show/hide press
+                if (isCurrentlyVisible) {
+                    showHideAsciiTableButton.setText("Show ASCII Table");
+                } else {
+                    showHideAsciiTableButton.setText("Hide ASCII Table");
+                }
             }
-        }
-    });
-}
+        });
+    }
     
     /**
      * Initializes the ASCII table and its scroll pane

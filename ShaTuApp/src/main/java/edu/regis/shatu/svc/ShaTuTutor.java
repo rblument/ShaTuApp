@@ -528,17 +528,17 @@ public class ShaTuTutor implements TutorSvc {
 
         Pad0Step completedPadZeroStep = gson.fromJson(completion.getData(), Pad0Step.class);
 
-        int userAnswer = Integer.parseInt(completedPadZeroStep.getUserAnswer());
-        int correctAnswer = completedPadZeroStep.getResult();
+        String userAnswer = completedPadZeroStep.getUserAnswer();
+        String correctAnswer = completedPadZeroStep.getResult();
 
         System.out.println("user answer: " + userAnswer); // Error checking
         System.out.println("Correct answer: " + correctAnswer); // Error checking
 
         StepCompletionReply stepReply = new StepCompletionReply();
-        stepReply.setCorrectAnswer(Integer.toString(correctAnswer));
-        stepReply.setResponse(Integer.toString(userAnswer));
+        stepReply.setCorrectAnswer(correctAnswer);
+        stepReply.setResponse(userAnswer);
 
-        if (userAnswer == correctAnswer) { // User was correct
+        if (userAnswer.equals(correctAnswer)) { // User was correct
             System.out.println("Answer was correct, correct if branch taken."); // Error checking
             stepReply.setIsCorrect(true);
             stepReply.setIsRepeatStep(false);
@@ -1290,7 +1290,7 @@ public class ShaTuTutor implements TutorSvc {
 
         subStep.setQuestion(question);
 
-        subStep.setResult(calculateZerosNeededForPadding(messageLength)); // Calculates the number of zeros needed to pad the message correctly
+        subStep.setResult(Integer.toString(calculateZerosNeededForPadding(messageLength))); // Calculates the number of zeros needed to pad the message correctly
 
         System.out.println(subStep.getResult()); // Error checking
 
