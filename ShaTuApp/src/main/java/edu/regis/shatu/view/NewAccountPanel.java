@@ -15,6 +15,7 @@ package edu.regis.shatu.view;
 import edu.regis.shatu.model.Account;
 import edu.regis.shatu.view.act.CreateAcctAction;
 import edu.regis.shatu.view.act.SignInAction;
+import edu.regis.shatu.view.act.BackToLogin;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -75,6 +76,7 @@ public class NewAccountPanel extends GPanel {
 
     protected JButton signInBut;
     protected JButton createAcctBut;
+    protected JButton backBut;
 
     public NewAccountPanel() {
         super();
@@ -181,13 +183,16 @@ public class NewAccountPanel extends GPanel {
         createAcctBut.setEnabled(false);
         MainFrame.instance().getRootPane().setDefaultButton(createAcctBut);
 
+        backBut = new JButton(BackToLogin.instance());
+        backBut.setEnabled(true);
+        
         strength = new JLabel("(Strength: very poor)");
-        strength.setForeground(Color.RED);
+        strength.setForeground(new Color(173,7,1));
         strength.setFont(new Font("Dialog", Font.PLAIN, 10));
     }
 
     private void layoutPanel() {
-        setBackground(Color.WHITE);
+        setBackground(new Color(0, 43, 73));
 
         setPreferredSize(new Dimension(300, 400));
 
@@ -205,6 +210,7 @@ public class NewAccountPanel extends GPanel {
 
         JLabel copyright = new JLabel("(C) 2019-2024 Johanna and Richard Blumenthal. All Rights Reserved");
         copyright.setFont(new Font("Dialog", Font.PLAIN, 10));
+        copyright.setForeground(new Color(241,196,0));
         addc(copyright, 0, 2, 2, 1, 1.0, 1.0,
                 GridBagConstraints.NORTH, GridBagConstraints.CENTER,
                 5, 5, 5, 5);
@@ -214,11 +220,11 @@ public class NewAccountPanel extends GPanel {
 
     private GPanel createHeader() {
         GPanel panel = new GPanel();
-        panel.setBackground(new Color(223, 242, 245));
+        panel.setBackground(new Color(241,196,0));
 
         JLabel ccis = new JLabel("Regis University Department of Computer and Cyber Sciences");
         ccis.setFont(new Font("Dialog", Font.PLAIN, 20));
-        ccis.setForeground(Color.BLUE);
+        ccis.setForeground(new Color(0, 43, 73));
 
         panel.addc(ccis, 0, 0, 1, 1, 1.0, 1.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL,
@@ -229,14 +235,14 @@ public class NewAccountPanel extends GPanel {
 
     private GPanel createOverview() {
         GPanel panel = new GPanel();
-        panel.setBackground(Color.WHITE);
+        panel.setBackground(new Color(241,196,0));
 
         panel.setSize(300, 400);
         panel.setPreferredSize(new Dimension(300, 400));
 
         JLabel logo = new JLabel("ShaTu");
         logo.setFont(new Font("Dialog", Font.PLAIN, 20));
-        logo.setForeground(Color.MAGENTA);
+        logo.setForeground(new Color(0, 43, 73));
 
         panel.addc(logo, 0, 0, 1, 1, 0.0, 0.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
@@ -252,6 +258,7 @@ public class NewAccountPanel extends GPanel {
         descr.setEditable(false);
         descr.setLineWrap(true);
         descr.setWrapStyleWord(true);
+        descr.setBackground(new Color(241,196,0));
         descr.setFont(new Font("Dialog", Font.PLAIN, 12));
 	descr.append("ShaTu provides individualized tutoring practice focused ");
 	descr.append("on understanding the SHA-256 digest algorithm and the");
@@ -281,7 +288,7 @@ public class NewAccountPanel extends GPanel {
 
     private GPanel createLogin() {
         GPanel panel = new GPanel();
-        panel.setBackground(new Color(223, 242, 245));
+        panel.setBackground(new Color(241,196,0));
 
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 5, 5));
 
@@ -318,7 +325,7 @@ public class NewAccountPanel extends GPanel {
 
         label = new JLabel("(do not use your existing university password!)");
         label.setFont(new Font("Dialog", Font.PLAIN, 10));
-        label.setForeground(new Color(200, 200, 200));
+        label.setForeground(new Color(75,66,66));
 
         panel.addc(label, 1, 4, 2, 1, 0.0, 0.0,
                 GridBagConstraints.SOUTHEAST, GridBagConstraints.NONE,
@@ -334,7 +341,7 @@ public class NewAccountPanel extends GPanel {
 
         label = new JLabel("(try 6 characters, mixed case, and special chars)");
         label.setFont(new Font("Dialog", Font.PLAIN, 10));
-        label.setForeground(new Color(200, 200, 200));
+        label.setForeground(new Color(75,66,66));
         panel.addc(label, 1, 6, 1, 1, 1.0, 0.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL,
                 0, 5, 5, 5);
@@ -350,14 +357,27 @@ public class NewAccountPanel extends GPanel {
                 GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL,
                 0, 5, 5, 5);
 
-        panel.addc(createAcctBut, 0, 9, 1, 1, 1.0, 0.0,
+        panel.addc(createAcctBut, 1, 9, 1, 1, 1.0, 0.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL,
                 10, 5, 5, 5);
 
         msg = new JLabel("");
         msg.setLabelFor(createAcctBut);
         msg.setFont(new Font("Dialog", Font.PLAIN, 10));
-        msg.setForeground(Color.RED);
+        msg.setForeground(new Color(173,7,1));
+
+        panel.addc(msg, 0, 12, 2, 1, 0.0, 0.0,
+                GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
+                5, 5, 5, 5);
+        
+        panel.addc(backBut, 0, 9, 1, 1, 1.0, 0.0,
+                GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL,
+                10, 5, 5, 5);
+
+        msg = new JLabel("");
+        msg.setLabelFor(backBut);
+        msg.setFont(new Font("Dialog", Font.PLAIN, 10));
+        msg.setForeground(new Color(173,7,1));
 
         panel.addc(msg, 0, 12, 2, 1, 0.0, 0.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
@@ -399,19 +419,19 @@ public class NewAccountPanel extends GPanel {
         switch (points) {
             case 0:
                 strength.setText("(Strength: Very poor)");
-                strength.setForeground(Color.RED);
+                strength.setForeground(new Color(173,7,1));
                 break;
             case 1:
                 strength.setText("(Strength: Poor)");
-                strength.setForeground(Color.RED);
+                strength.setForeground(new Color(173,7,1));
                 break;
             case 2:
                 strength.setText("(Strength: Moderate)");
-                strength.setForeground(Color.YELLOW);
+                strength.setForeground(new Color(255,255,0));
                 break;
             default:
                 strength.setText("(Strength: Good)");
-                strength.setForeground(Color.GREEN);
+                strength.setForeground(new Color(0,128,0));
                 break;
         }
     }
@@ -445,14 +465,14 @@ public class NewAccountPanel extends GPanel {
         if (isValidFName) {
             fName.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         } else {
-            fName.setBorder(BorderFactory.createLineBorder(Color.RED));
+            fName.setBorder(BorderFactory.createLineBorder(new Color(173,7,1)));
         }
 
         boolean isValidLName = !lName.isDefaultValue();
         if (isValidLName) {
             lName.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         } else {
-            lName.setBorder(BorderFactory.createLineBorder(Color.RED));
+            lName.setBorder(BorderFactory.createLineBorder(new Color(173,7,1)));
         }
 
         boolean isValidUserId = !userId.isDefaultValue();
@@ -467,18 +487,18 @@ public class NewAccountPanel extends GPanel {
                 if (isValidUserId) {
                     userId.setBorder(BorderFactory.createLineBorder(Color.BLACK));
                 } else {
-                    userId.setBorder(BorderFactory.createLineBorder(Color.RED));
+                    userId.setBorder(BorderFactory.createLineBorder(new Color(173,7,1)));
                 }
             } catch (BadLocationException er) {
                 // Cannot happen since 0 to length
             }
         } else {
-            userId.setBorder(BorderFactory.createLineBorder(Color.RED));
+            userId.setBorder(BorderFactory.createLineBorder(new Color(173,7,1)));
         }
 
         boolean isPass1Valid = pass1.getDocument().getLength() == 0;
         if (isPass1Valid) {
-            pass1.setBorder(BorderFactory.createLineBorder(Color.RED));
+            pass1.setBorder(BorderFactory.createLineBorder(new Color(173,7,1)));
         } else {
             pass1.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         }
@@ -486,7 +506,7 @@ public class NewAccountPanel extends GPanel {
         if (isSamePass) {
             pass2.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         } else {
-            pass2.setBorder(BorderFactory.createLineBorder(Color.RED));
+            pass2.setBorder(BorderFactory.createLineBorder(new Color(173,7,1)));
         }
         if (isValidFName && isValidLName && isValidUserId && isSamePass) {
             createAcctBut.setEnabled(true);

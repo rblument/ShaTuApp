@@ -26,7 +26,6 @@ import edu.regis.shatu.model.CourseDigest;
 import edu.regis.shatu.model.InformationStep;
 import edu.regis.shatu.model.aol.EncodeAsciiExample;
 //import edu.regis.shatu.model.aol.EncodeAsciiStep;
-import edu.regis.shatu.model.aol.ExampleType;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.aol.StepSubType;

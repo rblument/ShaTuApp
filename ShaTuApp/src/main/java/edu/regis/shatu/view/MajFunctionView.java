@@ -10,8 +10,17 @@
  */
 package edu.regis.shatu.view;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import edu.regis.shatu.model.MajorityStep;
+import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
+import edu.regis.shatu.view.act.StepCompletionAction;
+import edu.regis.shatu.model.ChoiceFunctionStep;
+import edu.regis.shatu.model.aol.ExampleType;
 import edu.regis.shatu.model.aol.NewExampleRequest;
+import edu.regis.shatu.model.aol.StepSubType;
+import edu.regis.shatu.view.act.NewExampleAction;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -37,17 +46,18 @@ import javax.swing.table.DefaultTableCellRenderer;
  * <p>
  * Inline comments have been added throughout the code to explain specific sections and methods.
  *
- * @author rickb
+ * @author rickb, mpowanga
  */
+
 public class MajFunctionView extends UserRequestView implements ActionListener, KeyListener {
     private String stringX, stringY, stringZ;
     private int problemSize; 
-    private JTextArea descTextArea, feedbackTextArea, responseTextArea;
-    private JScrollPane feedbackPane, responsePane, majTruthTablePane;
+    private JTextArea descTextArea, responseTextArea;
+    private JScrollPane responsePane, majTruthTablePane;
     private GPanel truthTablePanel, questionPanel, descriptionPanel, qrPanel;
     private JPanel buttonPanel, radioButtonPanel; 
     private JTable majTruthTable;
-    private JButton checkButton, nextButton, hintButton;
+    private JButton checkButton, newExampleButton, hintButton;
     private ButtonGroup problemSizeGroup;
     private JRadioButton fourRadioButton, eightRadioButton, sixteenRadioButton, 
                          thirtytwoRadioButton;
@@ -55,7 +65,7 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
                    stringXLabel, stringYLabel, stringZLabel, answerLabel, 
                    problemSizeLabel, instructionLabel;
     
-    private static final Random random = new Random();
+   // private static final Random random = new Random();
 
     /**
      * Initialize this view including creating and laying out its child components.
@@ -64,16 +74,46 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
         initializeComponents();
         initializeLayout();
     }
+    
+    /**
+     * Create and return the server request this view makes when a user selects
+     * that they want to practice a new choice function example.
+     *
+     * @return
+     */
+    @Override
+    public NewExampleRequest newRequest() {
+        NewExampleRequest ex = new NewExampleRequest();
+
+        //Set example type to the problem associated with the current view
+        ex.setExampleType(ExampleType.MAJORITY_FUNCTION);
+
+        MajorityStep newStep = new MajorityStep();
+
+        newStep.setBitLength(problemSize);
+
+        //Set the data of the NewExampleRequest to the new RotateStep containing
+        //the desired conditions
+        ex.setData(gson.toJson(newStep));
+
+        return ex;
+    }
 
     @Override
-    public void actionPerformed(ActionEvent event) {
-        if (event.getSource() == checkButton) {
-            onCheckButton();
-        } else if (event.getSource() == hintButton) {
-            onNextHint();
-        } else if (event.getSource() == nextButton) {
-            onNextQuestion();
-        }
+    public StepCompletion stepCompletion() {
+        Step currentStep = model.currentTask().currentStep();
+
+        MajorityStep example = gson.fromJson(currentStep.getData(), MajorityStep.class);
+
+        String userResponse = responseTextArea.getText().replaceAll("\\s", "");
+
+        example.setResult(userResponse);
+
+        StepCompletion step = new StepCompletion(currentStep, gson.toJson(example));
+        
+        step.setStep(currentStep);
+
+        return step;
     }
     
     /**
@@ -84,7 +124,6 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
         setUpRadioButtons();
         setUpQuestionArea();
         setUpResponseArea();
-        setUpFeedbackArea();
         setUpButtons();
         setUpTruthTable();
         setUpDescriptionPanel();
@@ -160,7 +199,7 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
         ActionListener selection = e -> {
             JRadioButton source = (JRadioButton) e.getSource();
             updateProblemSize(source);
-            generateNewQuestion();
+        //    generateNewQuestion();
         };
         
         fourRadioButton.addActionListener(selection);
@@ -205,9 +244,9 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
      */
     private void setUpQuestionArea() {
         problemSize = 4;
-        stringX = generateInputString();
-        stringY = generateInputString();
-        stringZ = generateInputString();
+        stringX = "foo"; // generateInputString();
+        stringY = "var"; // generateInputString();
+        stringZ = "baz"; // generateInputString();
         
         stringXLabel = new JLabel("x: " + stringX);
         stringYLabel = new JLabel("y: " + stringY);
@@ -254,52 +293,35 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
         responsePane.setPreferredSize(new Dimension(800, 200));
     }
     
-     /**
-     * Initialized the feedback area
-     */
-    private void setUpFeedbackArea() {
-        feedbackTextArea = new JTextArea(3, 20);
-        feedbackTextArea.setEditable(false);
-        feedbackTextArea.setLineWrap(true);
-        feedbackTextArea.setWrapStyleWord(true);
-        feedbackTextArea.setBackground(null);
-        
-        feedbackPane = new JScrollPane(feedbackTextArea);
-        feedbackPane.setPreferredSize(new Dimension(800, 200));
-    }
-    
     /**
-     * Sets up the Check, Next, and Hint buttons and their action listeners
+     * Sets up the Check, New Example, and Hint buttons and their action listeners
      */
     private void setUpButtons() {
-        checkButton = new JButton("Check");
+        
+        
+        checkButton = new JButton(StepCompletionAction.instance());
         checkButton.addActionListener(this);
         
         hintButton = new JButton("Hint");
         hintButton.addActionListener(this);
         
-        nextButton = new JButton("Next");
-        nextButton.addActionListener(this);
-        nextButton.setEnabled(false);
+        newExampleButton = new JButton(NewExampleAction.instance());
+        newExampleButton.addActionListener(this);
         
         buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         buttonPanel.add(checkButton);
-        buttonPanel.add(nextButton);
+        buttonPanel.add(newExampleButton);
         buttonPanel.add(hintButton);   
     }
     
     /**
-     * Creates a GPanel containing the response and feedback JScrollPanes and 
+     * Creates a GPanel containing the response JScrollPanes and 
      * the button panel. 
      */
     private void setUpQRPanel(){ //Rename function (frPanel?)
         qrPanel = new GPanel();
         
         qrPanel.addc(responsePane, 0, 0, 1, 1, 1.0, 1.0,
-                GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
-                5, 5, 5, 5);
-        
-        qrPanel.addc(feedbackPane, 0, 1, 1, 1, 1.0, 1.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
                 5, 5, 5, 5);
 
@@ -348,6 +370,9 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
         truthTablePanel.addc(majTruthTablePane, 0, 2, 1, 1, 1.0, 1.0,
                 GridBagConstraints.CENTER, GridBagConstraints.BOTH,
                 5, 5, 5, 5);
+        
+        truthTablePanel.setVisible(false);
+
     }
     
     /**
@@ -363,6 +388,40 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
         majTruthTable.getColumnModel().getColumn(1).setPreferredWidth(25);
         majTruthTable.getColumnModel().getColumn(2).setPreferredWidth(25);
         majTruthTable.getColumnModel().getColumn(6).setPreferredWidth(130);
+        
+    }
+    
+    /**
+     * Handles the actionPerformed event for buttons in the view.
+     *
+     * @param event The ActionEvent that occurred.
+     */
+    @Override
+    public void actionPerformed(ActionEvent event) {
+        if (event.getSource() == checkButton) {
+            onCheckButton();
+        } else if (event.getSource() == hintButton) {
+            onNextHint();
+        } else if (event.getSource() == newExampleButton) {
+            onNextQuestion();
+        }
+    }
+    
+    @Override
+    public void keyTyped(KeyEvent e) {
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_ENTER && responseTextArea.getText().equals("")) {
+            JOptionPane.showMessageDialog(this, "Please provide an answer");
+        } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+            verifyAnswer();
+        }
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
     }
     
      /**
@@ -371,6 +430,7 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
      * 
      * @return A string to be used as an input into the function.
      */
+    /*
     private String generateInputString() { //Try to find a better way to do this?
         String inputString;
         String tempString;
@@ -422,7 +482,7 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
         inputString = inputStringBuilder.toString();
         
         return inputString;
-    }
+    } */
     
     /**
      * Formats the result output by the choice function based on the size of the 
@@ -431,6 +491,7 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
      * 
      * @return the binary string representation of the answer
      */
+    /*
     private String formatResult(long answer) {
         String finalResult = "";
         
@@ -451,14 +512,13 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
                 break;
         }
         return finalResult;
-    }
+    } */
     
     /**
      * Generates and displays three new input strings.
-     */
+     *//*
     private void generateNewQuestion() {   
         responseTextArea.setText("");
-        feedbackTextArea.setText("");
         
         stringX = generateInputString();
         stringY = generateInputString();
@@ -467,7 +527,7 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
         stringXLabel.setText("x: " + stringX);
         stringYLabel.setText("y: " + stringY);
         stringZLabel.setText("z: " + stringZ);
-    }
+    }*/
     
     /**
      * Evaluates the maj function maj(x, y, z).
@@ -477,6 +537,7 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
      * @param z Binary string representation of z.
      * @return Binary string result of maj(x, y, z).
      */
+    /*
     private String majorityFunction(String x, String y, String z) {
         // Convert the binary strings to integer values
         String tempX = x.replaceAll("\\s", "");
@@ -499,62 +560,48 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
         String binaryResult = formatResult(result);
 
         return binaryResult;
-    }
+    }*/
 
     /**
      * Verifies the user's answer against the correct result and shows a message dialog.
      */
-    private void verifyAnswer() {
+    private void verifyAnswer() {/*
         String correctAnswer = majorityFunction(stringX, stringY, stringZ);
         String userResponse = responseTextArea.getText();
         
         userResponse = userResponse.replaceAll("\\s", "");
         
         if (correctAnswer.equals(userResponse)) {
-            feedbackTextArea.setText("Correct!");
-            nextButton.setEnabled(true);
+            JOptionPane.showMessageDialog(this, "Correct!");
             checkButton.setEnabled(false);
         } else {
-            feedbackTextArea.setText("Incorrect! Please check your entry and "
+            JOptionPane.showMessageDialog(this, "Incorrect! Please check your entry and "
                     + "try again or use the hint feature for help. Correct answer: " + correctAnswer);
-        }
+        }*/
     }
 
-    @Override
-    public void keyTyped(KeyEvent e) {
-    }
-
-    @Override
-    public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_ENTER && responseTextArea.getText().equals("")) {
-            feedbackTextArea.setText("Please provide an answer");
-        } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-            verifyAnswer();
-        }
-    }
-
-    @Override
-    public void keyReleased(KeyEvent e) {
-    }
+    
 
     /**
      * Displays a message dialog indicating the start of the next question.
      */
-    private void onNextQuestion() {
-        responseTextArea.setText("");
-        feedbackTextArea.setText("");
+    private void onNextQuestion() {/*
         
         generateNewQuestion();
         
-        nextButton.setEnabled(false);
-        checkButton.setEnabled(true);
+        responseTextArea.setText("");
+        JOptionPane.showMessageDialog(this, "New Example Generated");
+        
+        checkButton.setEnabled(true);*/
     }
 
     /**
      * Displays a message dialog indicating the provision of a hint.
     */
     private void onNextHint() {
-        feedbackTextArea.setText("Hint: Check the truth table above for the "
+        truthTablePanel.setVisible(true);
+
+        JOptionPane.showMessageDialog(this, "Hint: Check the truth table above for the "
                 + "appropriate values.");
     }
 
@@ -563,34 +610,24 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
     */
     private void onCheckButton() {
         if (responseTextArea.getText().equals("")) {
-            feedbackTextArea.setText("Please provide an answer");
+            JOptionPane.showMessageDialog(this, "Please provide an answer");
         } else {
             verifyAnswer();
         }
     }
     
     @Override
-    /**
-     * Updates the description, question, and hints from the model
-     * 
-     * TODO: THIS IS A PLACEHOLDER UNTIl WE HAVE HAVE THE MODEL CODE COMPLETED
-     */
     protected void updateView() {
-        if (model != null) {
-            // ****TO-DO*****
-            // Update the view's information from the model
-            // Debugging dynamic updates to the model can be done here.
-            System.out.println("MajFunctionView");
-        }
-    }
-    
-    @Override
-    public NewExampleRequest newRequest() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-    @Override
-    public StepCompletion stepCompletion() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        Step step = model.currentTask().getCurrentStep();
+        if (step.getSubType() == StepSubType.MAJORITY_FUNCTION) {
+            //Get the data from the model as a RotateStep object
+            MajorityStep example = gson.fromJson(step.getData(), MajorityStep.class);
+
+            stringXLabel.setText("x: " + example.getOperand1());
+            stringYLabel.setText("y: " + example.getOperand2());
+            stringZLabel.setText("z: " + example.getOperand3());
+        }
     }
 }

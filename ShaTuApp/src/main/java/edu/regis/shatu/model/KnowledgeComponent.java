@@ -25,6 +25,8 @@ import java.util.ArrayList;
  * @author rickb
  */
 public class KnowledgeComponent extends TitledModel {
+    
+    
     /**
      * The Bloom Level associated with this outcome.
      */

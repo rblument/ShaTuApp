@@ -14,6 +14,8 @@ package edu.regis.shatu.view;
 
 import edu.regis.shatu.model.TutoringSession;
 import java.awt.GridBagConstraints;
+import javax.swing.JButton;
+
 
 /**
  * Displays a tutoring session (the top-level GUI view for the application).
@@ -24,6 +26,11 @@ import java.awt.GridBagConstraints;
  * @author rickb
  */
 public class TutoringSessionView extends GPanel {
+    /**
+     * Universal button for returning to the dashboard.
+     */
+    private JButton dashboardButton;
+    
     /**
      * The tutoring session model displayed in this view.
      */
@@ -74,10 +81,12 @@ public class TutoringSessionView extends GPanel {
         // StepView must be created before StepSelectorView since the later
         // references the EncodeView in StepView by selecting it.
         stepView = new StepView(); 
-        
         stepSelectorView = new StepSelectorView();
-    }
+        //button for returning to dashboard
+        dashboardButton = new JButton("Go to Dashboard");
+        dashboardButton.addActionListener(e -> navigateToDashboard());
 
+    }
     /**
      * Layout the child components in this view
      */
@@ -88,5 +97,14 @@ public class TutoringSessionView extends GPanel {
         addc(stepView, 1, 0, 1, 1, 1.0, 1.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
                 5, 5, 5, 5);
+        addc(dashboardButton, 0, 2, 1, 1, 0.1, 0.1,
+                GridBagConstraints.SOUTHWEST, GridBagConstraints.NONE,
+                5, 5, 5, 5);
+    }
+    /**
+     * A class called by dashboardButton to return to dashboard.
+     */
+    public void navigateToDashboard() {
+        SplashFrame.instance().selectDashboard(this.getModel());
     }
 }
