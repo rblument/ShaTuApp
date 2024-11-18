@@ -32,8 +32,13 @@ public class TutoringSessionView extends GPanel {
     private JButton dashboardButton;
     
     /**
+     * Universal button for logging off. 
+     */    
+    private JButton logoutButton;
+    /**
      * The tutoring session model displayed in this view.
      */
+    
     private TutoringSession model;
 
     /**
@@ -85,7 +90,9 @@ public class TutoringSessionView extends GPanel {
         //button for returning to dashboard
         dashboardButton = new JButton("Go to Dashboard");
         dashboardButton.addActionListener(e -> navigateToDashboard());
-
+        //button for logging out
+        logoutButton = new JButton("Logout");
+        logoutButton.addActionListener(e -> logout());
     }
     /**
      * Layout the child components in this view
@@ -100,11 +107,21 @@ public class TutoringSessionView extends GPanel {
         addc(dashboardButton, 0, 2, 1, 1, 0.1, 0.1,
                 GridBagConstraints.SOUTHWEST, GridBagConstraints.NONE,
                 5, 5, 5, 5);
+        
+        addc(logoutButton, 0, 4, 1, 1, 0.1, 0.1,
+                GridBagConstraints.SOUTHWEST, GridBagConstraints.NONE,
+                5, 5, 5, 5);
     }
     /**
      * A class called by dashboardButton to return to dashboard.
      */
     public void navigateToDashboard() {
         SplashFrame.instance().selectDashboard(this.getModel());
+    }
+    /**
+     * A class called by logout Button to logout
+     */
+    public void logout() {
+        SplashFrame.instance().logout();
     }
 }

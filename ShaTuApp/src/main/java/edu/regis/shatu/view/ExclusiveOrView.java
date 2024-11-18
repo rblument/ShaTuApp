@@ -558,11 +558,22 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
      */
     protected void updateView() {
         if (model != null) {
-            // ****TO-DO*****
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+        Step step = model.currentTask().getCurrentStep();
+
+        BitOpStep example = gson.fromJson(step.getData(), BitOpStep.class);
+        
+        stringX = example.getExample().getOperand1();
+        stringY = example.getExample().getOperand2();
+
+        stringXLabel = new JLabel("x: " + stringX);
+        stringYLabel = new JLabel("y: " + stringY);
+
+    }
             // Update the view's information from the model
             // Debugging dynamic updates to the model can be done here.
             System.out.println("ExclusiveOrView");
-        }
     }
 
     @Override
@@ -605,25 +616,5 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
         step.setStep(currentStep);
 
         return step;
-    }
-    
-    /**
-     * Update the view with the new operands.
-     * 
-     */
-    @Override
-    protected void updateView() {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-
-        Step step = model.currentTask().getCurrentStep();
-
-        BitOpStep example = gson.fromJson(step.getData(), BitOpStep.class);
-        
-        stringX = example.getExample().getOperand1();
-        stringY = example.getExample().getOperand2();
-
-        stringXLabel = new JLabel("x: " + stringX);
-        stringYLabel = new JLabel("y: " + stringY);
-
     }
 }
