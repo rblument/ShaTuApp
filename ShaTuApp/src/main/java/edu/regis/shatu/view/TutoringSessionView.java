@@ -13,8 +13,11 @@
 package edu.regis.shatu.view;
 
 import edu.regis.shatu.model.TutoringSession;
-import java.awt.GridBagConstraints;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
 import javax.swing.JButton;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 
 
 /**
@@ -91,15 +94,26 @@ public class TutoringSessionView extends GPanel {
      * Layout the child components in this view
      */
     private void layoutComponents() {
-        addc(stepSelectorView, 0, 0, 1, 1, 0.0, 0.0,
-                GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
-                5, 5, 5, 5);
-        addc(stepView, 1, 0, 1, 1, 1.0, 1.0,
-                GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
-                5, 5, 5, 5);
-        addc(dashboardButton, 0, 2, 1, 1, 0.1, 0.1,
-                GridBagConstraints.SOUTHWEST, GridBagConstraints.NONE,
-                5, 5, 5, 5);
+        // Wrap StepSelectorView in a JScrollPane
+        JScrollPane scrollPane = new JScrollPane(stepSelectorView);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+
+        // Set minimum sizes for scrollPane and stepView
+        scrollPane.setMinimumSize(new Dimension(100, 200));   // Minimum size to prevent collapse
+
+        stepView.setMinimumSize(new Dimension(400, 200));     // Minimum size to prevent collapse
+
+        // Create a JSplitPane to allow resizing of the left panel
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, scrollPane, stepView);
+        splitPane.setResizeWeight(0.2); // Start with 20% width for the left panel
+        splitPane.setDividerLocation(275); // Initial width of the left panel in pixels
+        splitPane.setOneTouchExpandable(true); // Allow collapsing and expanding from user
+
+        // Set the layout and add the components
+        setLayout(new BorderLayout());
+        add(splitPane, BorderLayout.CENTER);
+        add(dashboardButton, BorderLayout.SOUTH);
     }
     /**
      * A class called by dashboardButton to return to dashboard.
