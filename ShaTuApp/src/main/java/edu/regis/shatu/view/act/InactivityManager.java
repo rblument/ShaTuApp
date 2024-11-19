@@ -24,7 +24,7 @@ import javax.swing.Timer;
 
 /**
  *
- * @author teamg
+ * @author austenj
  */
 public class InactivityManager {
     private Timer inactivityTimer;
