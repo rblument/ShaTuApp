@@ -14,6 +14,7 @@ package edu.regis.shatu.view;
 
 import edu.regis.shatu.model.TutoringSession;
 import edu.regis.shatu.util.CustomProgressBar;
+import javax.swing.JOptionPane;
 /**
  * The dashboard screen to be displayed upon user sign in.
  * Enables user to select a mode from the tutor (teach me, practice, quiz me)
@@ -32,6 +33,15 @@ public class DashboardPanel extends javax.swing.JPanel {
             System.err.println("Account is null in DashboardPanel");
         } else {
             System.out.println("DashboardPanel initialized for user: " + tutoringSession.getAccount().getFirstName());
+                String welcomeMessage = "Welcome, " + 
+                        tutoringSession.getAccount().getFirstName() + "! "
+                + "Your session has successfully started.";
+                JOptionPane.showMessageDialog(
+                null,
+                welcomeMessage,
+                "Welcome",
+                JOptionPane.INFORMATION_MESSAGE
+            );
         }
 
         initComponents();  // Initialize UI components

@@ -28,8 +28,9 @@ import javax.swing.Timer;
  */
 public class InactivityManager {
     private Timer inactivityTimer;
-    // 10 minutes in milliseconds
-    private static final int inactive = 600000;
+    int restartCounter = 0;
+    // 10 minutes in milliseconds (currently at 30 seconds for testing)
+    private static final int inactive = 30000;
 
     public void startTracking() {
         // Initializing timer
@@ -54,6 +55,8 @@ public class InactivityManager {
 
     public void resetInactivityTimer() {
         if (inactivityTimer != null) {
+            System.out.println("restarting inactivity: " + restartCounter);
+            restartCounter++;
             inactivityTimer.restart();
         }
     }
