@@ -13,8 +13,6 @@
  */
 package edu.regis.shatu.svc;
 
-import edu.regis.shatu.model.aol.NewExampleRequest;
-import edu.regis.shatu.model.aol.EncodeAsciiExample;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import edu.regis.shatu.err.IllegalArgException;
@@ -22,35 +20,37 @@ import edu.regis.shatu.err.NonRecoverableException;
 import edu.regis.shatu.err.ObjNotFoundException;
 import edu.regis.shatu.model.Account;
 import edu.regis.shatu.model.AddOneStep;
-import edu.regis.shatu.model.aol.RotateStep;
 import edu.regis.shatu.model.BitShiftStep;
 import edu.regis.shatu.model.ChoiceFunctionStep;
 import edu.regis.shatu.model.Course;
 import edu.regis.shatu.model.Hint;
-import edu.regis.shatu.model.TutoringSession;
-import edu.regis.shatu.model.User;
-import edu.regis.shatu.model.aol.BitOpExample;
-import edu.regis.shatu.model.aol.BitOpStep;
-import edu.regis.shatu.model.aol.EncodeAsciiStep;
 import edu.regis.shatu.model.KnowledgeComponent;
 import edu.regis.shatu.model.KnowledgeComponentKind;
-import edu.regis.shatu.model.Pad0Step;
 import edu.regis.shatu.model.MajorityStep;
 import edu.regis.shatu.model.MessageLenStep;
+import edu.regis.shatu.model.Pad0Step;
 import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.StepCompletionReply;
 import edu.regis.shatu.model.Student;
 import edu.regis.shatu.model.StudentModelFieldKind;
-import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.model.Task;
-import edu.regis.shatu.model.aol.TaskKind;
-import edu.regis.shatu.model.aol.Timeout;
+import edu.regis.shatu.model.TutoringSession;
 import edu.regis.shatu.model.Unit;
+import edu.regis.shatu.model.User;
 import edu.regis.shatu.model.aol.Assessment;
 import edu.regis.shatu.model.aol.AssessmentLevel;
+import edu.regis.shatu.model.aol.BitOpExample;
+import edu.regis.shatu.model.aol.BitOpStep;
+import edu.regis.shatu.model.aol.EncodeAsciiExample;
+import edu.regis.shatu.model.aol.EncodeAsciiStep;
 import edu.regis.shatu.model.aol.ExampleType;
+import edu.regis.shatu.model.aol.NewExampleRequest;
+import edu.regis.shatu.model.aol.RotateStep;
+import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.model.aol.StudentModel;
+import edu.regis.shatu.model.aol.TaskKind;
+import edu.regis.shatu.model.aol.Timeout;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
@@ -406,6 +406,29 @@ public class ShaTuTutor implements TutorSvc {
             stepReply.setIsNewStep(true);
             stepReply.setIsNewTask(true);
             stepReply.setIsNextStep(false);
+            
+            // Update the assessment data and save it to the database.
+            int dbId = KnowledgeComponentKind.fromString("Rotate n BITS").dbId();
+            Assessment assessment = studentModel.findAssessment(dbId); 
+            assessment.incrementSuccessess();
+
+            try {
+                StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+                modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.SUCCESSES);
+
+            } catch (NonRecoverableException ex) {
+                return createError("Unknown error", ex);
+            }
+            
+            int exposures = assessment.getExposures();
+            int successes = assessment.getSuccessess();
+            
+            if (exposures > 0 && (double) successes / exposures > 0.6) {
+                stepReply.setIsNewTask(true);
+                System.out.println("%%%%%%%%%%% Next Task Recommended");
+            }
+            else stepReply.setIsNewTask(false);
+            
         } else {
             stepReply.setIsCorrect(false);
             stepReply.setIsRepeatStep(true);
@@ -483,6 +506,28 @@ public class ShaTuTutor implements TutorSvc {
 
             // ToDo: currently only one step in a task, so there isn't a next one???
             stepReply.setIsNextStep(false);
+            
+            // Update the assessment data and save it to the database.
+            int dbId = KnowledgeComponentKind.fromString("Add One Bit").dbId();
+            Assessment assessment = studentModel.findAssessment(dbId); 
+            assessment.incrementSuccessess();
+
+            try {
+                StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+                modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.SUCCESSES);
+
+            } catch (NonRecoverableException ex) {
+                return createError("Unknown error", ex);
+            }
+            
+            int exposures = assessment.getExposures();
+            int successes = assessment.getSuccessess();
+            
+            if (exposures > 0 && (double) successes / exposures > 0.6) {
+                stepReply.setIsNewTask(true);
+                System.out.println("%%%%%%%%%%% Next Task Recommended");
+            }
+            else stepReply.setIsNewTask(false);
 
         } else { // User was wrong
             System.out.println("Answer was not correct, correct if branch taken."); // Error checking
@@ -551,6 +596,28 @@ public class ShaTuTutor implements TutorSvc {
 
             // ToDo: currently only one step in a task, so there isn't a next one???
             stepReply.setIsNextStep(false);
+            
+            // Update the assessment data and save it to the database.
+            int dbId = KnowledgeComponentKind.fromString("Pad with Zeros").dbId();
+            Assessment assessment = studentModel.findAssessment(dbId); 
+            assessment.incrementSuccessess();
+
+            try {
+                StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+                modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.SUCCESSES);
+
+            } catch (NonRecoverableException ex) {
+                return createError("Unknown error", ex);
+            }
+            
+            int exposures = assessment.getExposures();
+            int successes = assessment.getSuccessess();
+            
+            if (exposures > 0 && (double) successes / exposures > 0.6) {
+                stepReply.setIsNewTask(true);
+                System.out.println("%%%%%%%%%%% Next Task Recommended");
+            }
+            else stepReply.setIsNewTask(false);
 
         } else { // User was wrong
             System.out.println("Answer was not correct, correct if branch taken."); // Error checking
@@ -616,6 +683,28 @@ public class ShaTuTutor implements TutorSvc {
             
             // ToDo: currently only one step in a task, so there isn't a next one???
             stepReply.setIsNextStep(false);
+            
+            // Update the assessment data and save it to the database.
+            int dbId = KnowledgeComponentKind.fromString("Add Message Length").dbId();
+            Assessment assessment = studentModel.findAssessment(dbId); 
+            assessment.incrementSuccessess();
+
+            try {
+                StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+                modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.SUCCESSES);
+
+            } catch (NonRecoverableException ex) {
+                return createError("Unknown error", ex);
+            }
+            
+            int exposures = assessment.getExposures();
+            int successes = assessment.getSuccessess();
+            
+            if (exposures > 0 && (double) successes / exposures > 0.6) {
+                stepReply.setIsNewTask(true);
+                System.out.println("%%%%%%%%%%% Next Task Recommended");
+            }
+            else stepReply.setIsNewTask(false);
 
         } else { // User was wrong
             System.out.println("Answer was not correct, correct if branch taken."); // Error checking
@@ -782,6 +871,28 @@ public class ShaTuTutor implements TutorSvc {
 
             // ToDo: currently only one step in a task, so there isn't a next one???
             stepReply.setIsNextStep(false);
+            
+            // Update the assessment data and save it to the database.
+            int dbId = KnowledgeComponentKind.fromString("Add Bits").dbId();
+            Assessment assessment = studentModel.findAssessment(dbId); 
+            assessment.incrementSuccessess();
+
+            try {
+                StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+                modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.SUCCESSES);
+
+            } catch (NonRecoverableException ex) {
+                return createError("Unknown error", ex);
+            }
+            
+            int exposures = assessment.getExposures();
+            int successes = assessment.getSuccessess();
+            
+            if (exposures > 0 && (double) successes / exposures > 0.6) {
+                stepReply.setIsNewTask(true);
+                System.out.println("%%%%%%%%%%% Next Task Recommended");
+            }
+            else stepReply.setIsNewTask(false);
 
         } else {
             stepReply.setIsCorrect(false);
@@ -818,9 +929,9 @@ public class ShaTuTutor implements TutorSvc {
         System.out.println("Tutor completeMajorityStep");
 
         MajorityStep example = gson.fromJson(completion.getData(), MajorityStep.class);
-        String operand1 = example.getOperand1();
-        String operand2 = example.getOperand2();
-        String operand3 = example.getOperand3();
+        String operand1 = example.getOperandA();
+        String operand2 = example.getOperandB();
+        String operand3 = example.getOperandC();
         int bitLength = example.getBitLength();
         String result = example.getResult();
         // System.out.println("Result: " + example.getResult());
@@ -844,6 +955,28 @@ public class ShaTuTutor implements TutorSvc {
 
             // ToDo: currently only one step in a task, so there isn't a next one???
             stepReply.setIsNextStep(false);
+            
+            // Update the assessment data and save it to the database.
+            int dbId = KnowledgeComponentKind.fromString("Majority Function").dbId();
+            Assessment assessment = studentModel.findAssessment(dbId); 
+            assessment.incrementSuccessess();
+
+            try {
+                StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+                modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.SUCCESSES);
+
+            } catch (NonRecoverableException ex) {
+                return createError("Unknown error", ex);
+            }
+            
+            int exposures = assessment.getExposures();
+            int successes = assessment.getSuccessess();
+            
+            if (exposures > 0 && (double) successes / exposures > 0.6) {
+                stepReply.setIsNewTask(true);
+                System.out.println("%%%%%%%%%%% Next Task Recommended");
+            }
+            else stepReply.setIsNewTask(false);
 
         } else {
             stepReply.setIsCorrect(false);
@@ -1223,10 +1356,23 @@ public class ShaTuTutor implements TutorSvc {
         task.setDescription("Encode a string as ASCII values");
         task.addStep(step);
 
-        TutorReply reply = new TutorReply(":Success");
-        reply.setData(gson.toJson(task));
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("ASCII Encode").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId);
+        assessment.incrementExposures();
 
-        return reply;
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
+
+            TutorReply reply = new TutorReply(":Success");
+            reply.setData(gson.toJson(task));
+
+            return reply;
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
     }
 
     /**
@@ -1267,11 +1413,23 @@ public class ShaTuTutor implements TutorSvc {
         task.setDescription("Add one bit to the given bit string");
         task.addStep(step);
 
-        // ToDo: Add the task to the session and update it.
-        TutorReply reply = new TutorReply(":Success");
-        reply.setData(gson.toJson(task));
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("Add One Bit").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId);
+        assessment.incrementExposures();
 
-        return reply;
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
+
+            TutorReply reply = new TutorReply(":Success");
+            reply.setData(gson.toJson(task));
+
+            return reply;
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
     }
 
     /**
@@ -1310,11 +1468,23 @@ public class ShaTuTutor implements TutorSvc {
         task.setDescription("Calculate zeros needed to pad the message");
         task.addStep(step);
 
-        // ToDo: Add the task to the session and update it.
-        TutorReply reply = new TutorReply(":Success");
-        reply.setData(gson.toJson(task));
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("Pad with Zeros").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId);
+        assessment.incrementExposures();
 
-        return reply;
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
+
+            TutorReply reply = new TutorReply(":Success");
+            reply.setData(gson.toJson(task));
+
+            return reply;
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
     }
 
     /**
@@ -1353,11 +1523,23 @@ public class ShaTuTutor implements TutorSvc {
         task.setDescription("Calculate the message length for the last 64 bits of the message length step");
         task.addStep(step);
 
-        // ToDo: Add the task to the session and update it.
-        TutorReply reply = new TutorReply(":Success");
-        reply.setData(gson.toJson(task));
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("Add Message Length").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId);
+        assessment.incrementExposures();
 
-        return reply;
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
+
+            TutorReply reply = new TutorReply(":Success");
+            reply.setData(gson.toJson(task));
+
+            return reply;
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
     }
 
     /**
@@ -1399,7 +1581,6 @@ public class ShaTuTutor implements TutorSvc {
      * @return a TutorReply
      */
      private TutorReply newRotateBitsExample(TutoringSession session, String jsonData) {
-        TutorReply reply = new TutorReply(":Success");
         RotateStep example = gson.fromJson(jsonData, RotateStep.class);
 
         // Check if the data (bit string) is provided, if not, generate it
@@ -1418,8 +1599,23 @@ public class ShaTuTutor implements TutorSvc {
         task.setType(ExampleType.ROTATE_BITS);
         task.addStep(step);
         
-        reply.setData(gson.toJson(task));
-        return reply;
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("Rotate n BITS").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId);
+        assessment.incrementExposures();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
+
+            TutorReply reply = new TutorReply(":Success");
+            reply.setData(gson.toJson(task));
+
+            return reply;
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
     }
      /**
       * Performs bit rotation on the example string to get correct answer for
@@ -1546,11 +1742,23 @@ public class ShaTuTutor implements TutorSvc {
         task.setDescription("Xor the bits in the two operands");
         task.addStep(step);
 
-        // ToDo: Add the task to the session and update it.
-        TutorReply reply = new TutorReply(":Success");
-        reply.setData(gson.toJson(task));
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("XOR Bits").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId);
+        assessment.incrementExposures();
 
-        return reply;
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
+
+            TutorReply reply = new TutorReply(":Success");
+            reply.setData(gson.toJson(task));
+
+            return reply;
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
     }
 
     /**
@@ -1627,11 +1835,23 @@ public class ShaTuTutor implements TutorSvc {
         task.setDescription("addition modulo 2^256 the bits in the two operands");
         task.addStep(step);
 
-        // ToDo: Add the task to the session and update it.
-        TutorReply reply = new TutorReply(":Success");
-        reply.setData(gson.toJson(task));
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("Add Bits").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId);
+        assessment.incrementExposures();
 
-        return reply;
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
+
+            TutorReply reply = new TutorReply(":Success");
+            reply.setData(gson.toJson(task));
+
+            return reply;
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
     }
 
     /**
@@ -1649,9 +1869,9 @@ public class ShaTuTutor implements TutorSvc {
         String operand2 = generateInputString(bitLength);
         String operand3 = generateInputString(bitLength);
 
-        substep.setOperand1(operand1);
-        substep.setOperand2(operand2);
-        substep.setOperand3(operand3);
+        substep.setOperandA(operand1);
+        substep.setOperandB(operand2);
+        substep.setOperandC(operand3);
 
         substep.setResult(majorityFunction(operand1, operand2, operand3, bitLength));
 
@@ -1671,13 +1891,23 @@ public class ShaTuTutor implements TutorSvc {
         task.setDescription("Compute the result of the majority function on the three operands");
         task.addStep(step);
 
-        // ToDo: Add the task to the session and update it.
-        TutorReply reply = new TutorReply(":Success");
-        reply.setData(gson.toJson(task));
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("Majority Function").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId);
+        assessment.incrementExposures();
 
-        System.out.println("before reply return");
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
 
-        return reply;
+            TutorReply reply = new TutorReply(":Success");
+            reply.setData(gson.toJson(task));
+
+            return reply;
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
     }
 
     /**
@@ -2109,6 +2339,19 @@ public class ShaTuTutor implements TutorSvc {
         TutorReply reply = new TutorReply(":Success");
         reply.setData(gson.toJson(step));
 
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("ASCII Encode").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId); 
+        assessment.incrementHints();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.HINTS);
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
+
         return reply;
     }
 
@@ -2138,6 +2381,19 @@ public class ShaTuTutor implements TutorSvc {
 
         TutorReply reply = new TutorReply(":Success");
         reply.setData(gson.toJson(step));
+
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("Add One Bit").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId); 
+        assessment.incrementHints();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.HINTS);
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
 
         return reply;
     }
@@ -2169,6 +2425,19 @@ public class ShaTuTutor implements TutorSvc {
         TutorReply reply = new TutorReply(":Success");
         reply.setData(gson.toJson(step));
 
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("Pad with Zeros").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId); 
+        assessment.incrementHints();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.HINTS);
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
+
         return reply;
     }
 
@@ -2198,6 +2467,19 @@ public class ShaTuTutor implements TutorSvc {
 
         TutorReply reply = new TutorReply(":Success");
         reply.setData(gson.toJson(step));
+
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("Add Message Length").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId); 
+        assessment.incrementHints();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.HINTS);
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
 
         return reply;
     }
@@ -2234,6 +2516,19 @@ public class ShaTuTutor implements TutorSvc {
         TutorReply reply = new TutorReply(":Success");
         reply.setData(gson.toJson(step));
 
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("Prepare Schedule").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId); 
+        assessment.incrementHints();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.HINTS);
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
+
         return reply;
     }
 
@@ -2263,6 +2558,19 @@ public class ShaTuTutor implements TutorSvc {
 
         TutorReply reply = new TutorReply(":Success");
         reply.setData(gson.toJson(step));
+
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("Initialize Variables").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId); 
+        assessment.incrementHints();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.HINTS);
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
 
         return reply;
     }
@@ -2299,6 +2607,19 @@ public class ShaTuTutor implements TutorSvc {
         TutorReply reply = new TutorReply(":Success");
         reply.setData(gson.toJson(step));
 
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("Compress Round").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId); 
+        assessment.incrementHints();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.HINTS);
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
+
         return reply;
     }
 
@@ -2328,6 +2649,19 @@ public class ShaTuTutor implements TutorSvc {
 
         TutorReply reply = new TutorReply(":Success");
         reply.setData(gson.toJson(step));
+
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("Rotate n BITS").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId); 
+        assessment.incrementHints();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.HINTS);
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
 
         return reply;
     }
@@ -2425,6 +2759,19 @@ public class ShaTuTutor implements TutorSvc {
         TutorReply reply = new TutorReply(":Success");
         reply.setData(gson.toJson(step));
 
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("XOR Bits").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId); 
+        assessment.incrementHints();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.HINTS);
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
+
         return reply;
     }
 
@@ -2455,6 +2802,19 @@ public class ShaTuTutor implements TutorSvc {
         TutorReply reply = new TutorReply(":Success");
         reply.setData(gson.toJson(step));
 
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("Add Bits").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId); 
+        assessment.incrementHints();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.HINTS);
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
+
         return reply;
     }
 
@@ -2484,6 +2844,19 @@ public class ShaTuTutor implements TutorSvc {
 
         TutorReply reply = new TutorReply(":Success");
         reply.setData(gson.toJson(step));
+
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("Majority Function").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId); 
+        assessment.incrementHints();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.HINTS);
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
 
         return reply;
     }

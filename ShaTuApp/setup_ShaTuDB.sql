@@ -60,11 +60,19 @@ INSERT INTO Student (UserId, FirstName, LastName)
 INSERT INTO StudentModel (UserId, ScaffoldLevel)
    VALUES ('test@regis.edu', 'Extreme');
 
-INSERT INTO Assessment (Id, UserId, KnowledgeComponentId, AssessmentLevel, Exposures, Successes, Hints)
-   VALUES (1, 'test@regis.edu', 1, 'Not Started', 0, 0, 0);
-
-INSERT INTO Assessment (Id, UserId, KnowledgeComponentId, AssessmentLevel, Exposures, Successes, Hints)
-   VALUES (100, 'test@regis.edu', 100, 'Not Started', 0, 0, 0);
-
-INSERT INTO Assessment (Id, UserId, KnowledgeComponentId, AssessmentLevel, Exposures, Successes, Hints)
-   VALUES (101, 'test@regis.edu', 101, 'Not Started', 0, 0, 0);
+INSERT INTO Assessment (UserId, KnowledgeComponentId, AssessmentLevel, Exposures, Successes, Hints)
+   VALUES 
+   ('test@regis.edu', 1, 'Not Started', 0, 0, 0),
+   ('test@regis.edu', 100, 'Not Started', 0, 0, 0),
+   ('test@regis.edu', 101, 'Not Started', 0, 0, 0),
+   ('test@regis.edu', 102, 'Not Started', 0, 0, 0),
+   ('test@regis.edu', 103, 'Not Started', 0, 0, 0),
+   ('test@regis.edu', 104, 'Not Started', 0, 0, 0),
+   ('test@regis.edu', 105, 'Not Started', 0, 0, 0),
+   ('test@regis.edu', 106, 'Not Started', 0, 0, 0),
+   ('test@regis.edu', 107, 'Not Started', 0, 0, 0),
+   ('test@regis.edu', 108, 'Not Started', 0, 0, 0),
+   ('test@regis.edu', 109, 'Not Started', 0, 0, 0),
+   ('test@regis.edu', 110, 'Not Started', 0, 0, 0),
+   ('test@regis.edu', 111, 'Not Started', 0, 0, 0),
+   ('test@regis.edu', 112, 'Not Started', 0, 0, 0);

@@ -617,7 +617,7 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
         //Get the data from the model as a RotateStep object
         MajorityStep example = gson.fromJson(step.getData(), MajorityStep.class);
 
-        if (example.getOperand1() == null || example.getOperand1().isEmpty()) {
+        if (example.getOperandA() == null || example.getOperandA().isEmpty()) {
             stringXLabel.setText("x: Please");
             stringYLabel.setText("y: click");
             stringZLabel.setText("z: New Example"); 
@@ -625,9 +625,9 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
             checkButton.setEnabled(false);
         }
         else {
-            stringXLabel.setText("x: " + example.getOperand1());
-            stringYLabel.setText("y: " + example.getOperand2());
-            stringZLabel.setText("z: " + example.getOperand3());
+            stringXLabel.setText("x: " + example.getOperandA());
+            stringYLabel.setText("y: " + example.getOperandB());
+            stringZLabel.setText("z: " + example.getOperandC());
             hintButton.setEnabled(true);
             checkButton.setEnabled(true);
         }
