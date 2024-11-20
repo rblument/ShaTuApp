@@ -141,7 +141,7 @@ public class StepCompletionAction extends ShaTuGuiAction {
                             StepCompletionReply stepReply = gson.fromJson(step.getData(), StepCompletionReply.class);
 
                             if (stepReply.isCorrect()) {
-                                if (stepReply.isNewStep()) {
+                                if (stepReply.isNewTask()) {
                                     String prompt = "Congratulations, the anser you submitted is correct. " +
                                             "As I believe you've mastered this outcome, I suggest moving on to a different task. " +
                                             "However, if you'd like you can try a similar problem again.";
@@ -222,11 +222,21 @@ public class StepCompletionAction extends ShaTuGuiAction {
                                         }
                                     }
                                 }
-                            } else if (stepReply.getResponse().isEmpty()) {
+                                else {
+                                    String prompt = "Congratulations, the anser you submitted is correct. " + "Keep up the good work to complete this task!";
+                                    String[] options = {selection3};
+                                    JOptionPane.showOptionDialog(MainFrame.instance(),
+                                            prompt, "Tutor Reply", 0, 3, null, options, options[0]);
+                                    NewExampleAction.instance().actionPerformed(null);
+                                }
+                            }
+                            
+                            else if (stepReply.getResponse().isEmpty()) {
                                 String prompt = "Please enter an answer";
                                 JOptionPane.showMessageDialog(MainFrame.instance(),
                                         prompt, "Tutor Reply", JOptionPane.INFORMATION_MESSAGE);
-                            } else {
+                            } 
+                            else {
                                 String prompt = "Unfortunately, your answer was incorrect. Please try agian.";
                                 String[] options = {selection2, selection3, selection4};
                                 int choice = JOptionPane.showOptionDialog(MainFrame.instance(),
