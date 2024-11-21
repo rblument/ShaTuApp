@@ -30,6 +30,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextArea;
@@ -70,6 +71,8 @@ public class NewAccountPanel extends GPanel {
     protected HintTextField userId;
     protected JPasswordField pass1;
     protected JPasswordField pass2;
+    protected JComboBox secQuestions;
+    protected JPasswordField secAnswer;
 
     protected JLabel strength;
     protected JLabel msg;
@@ -129,6 +132,8 @@ public class NewAccountPanel extends GPanel {
         userId.setText("");
         pass1.setText("");
         pass2.setText("");
+        secQuestions.setSelectedIndex(0);
+        secAnswer.setText("");
     }
 
     /**
@@ -139,6 +144,8 @@ public class NewAccountPanel extends GPanel {
         model.setFirstName(fName.getText());
         model.setLastName(lName.getText());
         model.setPassword(encryptSHA256(new String(pass1.getPassword())));
+        model.setSecurityQuestion(secQuestions.getSelectedIndex());
+        model.setSecurityAnswer(encryptSHA256(new String(secAnswer.getPassword())));
     }
 
     /**
@@ -151,6 +158,8 @@ public class NewAccountPanel extends GPanel {
         lName.setText(model.getLastName());
         pass1.setText("");
         pass2.setText("");
+        secQuestions.setSelectedIndex(0);
+        secAnswer.setText("");
     }
 
     // Used to get focus
@@ -174,6 +183,12 @@ public class NewAccountPanel extends GPanel {
 
         pass2 = new JPasswordField(20);
         pass2.getDocument().addDocumentListener(docListener);
+        
+        String s1[] = {"What city were you born in?", "What is your mother's maiden name?"};
+        secQuestions = new JComboBox(s1);
+        
+        secAnswer = new JPasswordField(20);
+        secAnswer.getDocument().addDocumentListener(docListener);
 
         signInBut = new JButton(SignInAction.instance());
         signInBut.setEnabled(true);
@@ -356,8 +371,30 @@ public class NewAccountPanel extends GPanel {
         panel.addc(pass2, 0, 8, 2, 1, 1.0, 0.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL,
                 0, 5, 5, 5);
+        
+        label = new JLabel("Choose Security Question:");
+        label.setLabelFor(secQuestions);
 
-        panel.addc(createAcctBut, 1, 9, 1, 1, 1.0, 0.0,
+        panel.addc(label, 0, 9, 1, 1, 0.0, 0.0,
+                GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
+                15, 5, 5, 5);
+        
+        panel.addc(secQuestions, 0, 10, 2, 1, 1.0, 0.0,
+                GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL,
+                0, 5, 5, 5);
+        
+        label = new JLabel("Answer:");
+        label.setLabelFor(secAnswer);
+
+        panel.addc(label, 0, 11, 2, 1, 0.0, 0.0,
+                GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
+                15, 5, 5, 5);
+        
+        panel.addc(secAnswer, 0, 12, 2, 1, 1.0, 0.0,
+                GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL,
+                0, 5, 5, 5);
+
+        panel.addc(createAcctBut, 1, 14, 1, 1, 1.0, 0.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL,
                 10, 5, 5, 5);
 
@@ -366,11 +403,11 @@ public class NewAccountPanel extends GPanel {
         msg.setFont(new Font("Dialog", Font.PLAIN, 10));
         msg.setForeground(new Color(173,7,1));
 
-        panel.addc(msg, 0, 12, 2, 1, 0.0, 0.0,
+        panel.addc(msg, 0, 14, 2, 1, 0.0, 0.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
                 5, 5, 5, 5);
         
-        panel.addc(backBut, 0, 9, 1, 1, 1.0, 0.0,
+        panel.addc(backBut, 0, 14, 1, 1, 1.0, 0.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL,
                 10, 5, 5, 5);
 
@@ -379,7 +416,7 @@ public class NewAccountPanel extends GPanel {
         msg.setFont(new Font("Dialog", Font.PLAIN, 10));
         msg.setForeground(new Color(173,7,1));
 
-        panel.addc(msg, 0, 12, 2, 1, 0.0, 0.0,
+        panel.addc(msg, 0, 14, 2, 1, 0.0, 0.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
                 5, 5, 5, 5);
 
@@ -508,7 +545,16 @@ public class NewAccountPanel extends GPanel {
         } else {
             pass2.setBorder(BorderFactory.createLineBorder(new Color(173,7,1)));
         }
-        if (isValidFName && isValidLName && isValidUserId && isSamePass) {
+        
+        int isValid = secAnswer.getDocument().getLength();
+        boolean isValidAnswer = false;
+        if (isValid > 0) {
+            isValidAnswer = true;
+        } else {
+            isValidAnswer = false;
+        }
+        
+        if (isValidFName && isValidLName && isValidUserId && isSamePass && isValidAnswer) {
             createAcctBut.setEnabled(true);
             msg.setText("");
 

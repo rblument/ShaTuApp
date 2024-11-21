@@ -29,6 +29,8 @@ public class Account {
     protected String password;
     protected String firstName;
     protected String lastName;
+    protected int securityQuestion;
+    protected String securityAnswer;
 
     public String getUserId() {
         return userId;
@@ -62,11 +64,29 @@ public class Account {
         this.lastName = lastName;
     }
     
+    public int getSecurityQuestion() {
+        return securityQuestion;
+    }
+
+    public void setSecurityQuestion(int securityQuestion) {
+        this.securityQuestion = securityQuestion;
+    }
+    
+    public String getSecurityAnswer() {
+        return securityAnswer;
+    }
+
+    public void setSecurityAnswer(String securityAnswer) {
+        this.securityAnswer = securityAnswer;
+    }
+    
      public void clear(){
         this.userId = null;
         this.password = null;
         this.firstName = null;
         this.lastName = null;
+        this.securityQuestion = 0;
+        this.securityAnswer = null;
     }
     
     public Account() {

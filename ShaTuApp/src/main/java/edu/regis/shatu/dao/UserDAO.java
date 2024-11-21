@@ -42,7 +42,7 @@ public class UserDAO extends MySqlDAO implements UserSvc {
      */
     @Override
     public void create(Account acct) throws IllegalArgException, NonRecoverableException {
-        final String sql = "INSERT INTO User (Email, Password) VALUES (?,?)";
+        final String sql = "INSERT INTO User (Email, Password, Question, Answer) VALUES (?,?,?,?)";
 
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -61,6 +61,8 @@ public class UserDAO extends MySqlDAO implements UserSvc {
 
             stmt.setString(1, userId);
             stmt.setString(2, acct.getPassword());
+            stmt.setInt(3, acct.getSecurityQuestion());
+            stmt.setString(4, acct.getSecurityAnswer());
 
             stmt.executeUpdate();
 

@@ -156,7 +156,7 @@ public class ForgotPasswordPanel extends GPanel{
         userId.getDocument().addDocumentListener(docListener);
 
         
-        String s1[] = {"What city were you born in?", "What is your mother's maiden name"};
+        String s1[] = {"What city were you born in?", "What is your mother's maiden name?"};
         securityQuestions = new JComboBox(s1);
         //securityQuestions.addActionListener(s);
         

@@ -218,18 +218,42 @@ public class ShaTuTutor implements TutorSvc {
             return new TutorReply("IllegalUserId");
         }
     }
-    
+    /**
+     * Verifies the user is in the database and the security question and answer match.
+     *
+     * This method handles ":VerifyUser" requests from the GUI client.
+     *
+     * @param jsonAcct a JSon encoded Account object
+     * @return a TutorReply if successful the status is "Created", otherwise the
+     * status is "ERR".
+     * @throws edu.regis.shatu.err.NonRecoverableException
+     */
+    public TutorReply verifyUser(String jsonAcct) throws NonRecoverableException {
+        Account acct = gson.fromJson(jsonAcct, Account.class);
+        User user = gson.fromJson(jsonAcct, Student.class);
+         System.out.println("Test " + acct.getUserId());
+
+        StudentSvc stuSvc = ServiceFactory.findStudentSvc();
+
+        if (!stuSvc.exists(acct.getUserId())) {
+            return new TutorReply("IllegalUserId");
+        }
+        
+        System.out.println("Test " + acct.getUserId()); // Should never get here since we tested whether the account exists
+        //ServiceFactory.findUserSvc().update(user, answer);
+        return new TutorReply("Verified");
+    }
     /**
      * Resets password for user currently in database
      *
-     * This method handles ":CreateAccount" requests from the GUI client.
+     * This method handles ":ResetPassword" requests from the GUI client.
      *
      * @param jsonAcct a JSon encoded Account object
-     * @param password
      * @return a TutorReply if successful the status is "Created", otherwise the
      * status is "ERR".
+     * @throws edu.regis.shatu.err.NonRecoverableException
      */
-    public TutorReply resetPassword(String jsonAcct, String password) throws NonRecoverableException {
+    public TutorReply resetPassword(String jsonAcct) throws NonRecoverableException {
         Account acct = gson.fromJson(jsonAcct, Account.class);
         User user = gson.fromJson(jsonAcct, Student.class);
 
@@ -241,7 +265,7 @@ public class ShaTuTutor implements TutorSvc {
         
         
         try {
-            ServiceFactory.findUserSvc().update(user, password);
+            ServiceFactory.findUserSvc().update(user, acct.getPassword());  //does this get new password?
             return new TutorReply("PasswordReset");
 
         } catch (ObjNotFoundException ex) {

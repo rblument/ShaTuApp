@@ -30,9 +30,19 @@ public class User extends Model {
      */
     protected String password;
     
+    /**
+     * The security question the user chose to answer.
+     */
+    protected int securityQuestion;
+    
+    /**
+     * SHA-256 encrypted securityAnswer.
+     */
+    protected String securityAnswer;
+    
     // ToDo: Check if this is Needed for gson.fromJson???
     public User() {
-        this("", "");
+        this("", "", 0, "");
     }
     
     /**
@@ -41,7 +51,7 @@ public class User extends Model {
      * @param userId 
      */
     public User(String userId) {
-        this(userId, "");
+        this(userId, "", 0, "");
     }
     
     /**
@@ -49,10 +59,15 @@ public class User extends Model {
      * 
      * @param userId a String (e.g. "name@university.edu").
      * @param password an SHA-256 encrypted password.
+     * @param securityQuestion
+     * @param securityAnswer
      */
-    public User(String userId, String password) { 
+    public User(String userId, String password, int securityQuestion, 
+            String securityAnswer) { 
 	this.userId = userId;
 	this.password = password;
+        this.securityQuestion = securityQuestion;
+        this.securityAnswer = securityAnswer;
     }
     
     /**
@@ -87,6 +102,41 @@ public class User extends Model {
      */
     public void setPassword(String password) {
 	this.password = password;
+    }
+    
+    /**
+     * Return this user's security question.
+     * 
+     * @return int representing the question the user answered
+     */
+    public int getSecurityQuestion() {
+	return securityQuestion;
+    }
+
+    /**
+     * Assign this user's security answer.
+     * 
+     * @param securityAnswer
+     */
+    public void setSecurityQuestion(int securityQuestion) {
+	this.securityQuestion = securityQuestion;
+    }
+    
+    /**
+     * Return this user's security answer.
+     * 
+     * @return a SHA-256 encrypted String
+     */
+    public String getSecurityAnswer() {
+	return password;
+    }
+
+    /**
+     * Assign this user's security answer.
+     * @param securityAnswer
+     */
+    public void setSecurityAnswer(String securityAnswer) {
+	this.securityAnswer = securityAnswer;
     }
     
     /**

@@ -12,11 +12,18 @@
  */
 package edu.regis.shatu.view.act;
 
+import com.google.gson.Gson;
+import edu.regis.shatu.model.Account;
+import edu.regis.shatu.svc.ClientRequest;
+import edu.regis.shatu.svc.ServerRequestType;
+import edu.regis.shatu.svc.SvcFacade;
+import edu.regis.shatu.svc.TutorReply;
 import edu.regis.shatu.view.SplashFrame;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import static javax.swing.Action.MNEMONIC_KEY;
 import static javax.swing.Action.SHORT_DESCRIPTION;
+import javax.swing.JOptionPane;
 
 /**
  * An MVC controller handling a user GUI gesture requesting to reset password, 
@@ -67,7 +74,36 @@ public class CheckSecurityQuestAction extends ShaTuGuiAction {
      * @param evt ignored
      */
     @Override
-    public void actionPerformed(ActionEvent evt) {      
-        SplashFrame.instance().selectResetPassword();
+    public void actionPerformed(ActionEvent evt) { 
+        Gson gson = new Gson();
+        
+        SplashFrame frame = SplashFrame.instance();
+        
+        Account account = frame.getAccount();
+
+        ClientRequest request = new ClientRequest(ServerRequestType.VERIFY_USER);
+        request.setData(gson.toJson(account));
+       
+        TutorReply reply = SvcFacade.instance().tutorRequest(request);
+
+        String msg;
+        switch (reply.getStatus()) {
+            case "Verified":
+                frame.clearNewAccountPanel();
+                msg = "UserId and Security Question match credentials.\n\n" +
+                        "Press okay and create a new password\n\n";
+                SplashFrame.instance().selectResetPassword();
+                break;
+            case "IllegalUserId":
+                msg = "User id already exists: " + account.getUserId();
+                JOptionPane.showMessageDialog(null, msg, "Information",
+                                              JOptionPane.INFORMATION_MESSAGE);
+                break;
+            default: // "ERR" Error should have been logged in tutor.
+                msg = "An unexpected error occurred. Please contact ShaTu support";
+                JOptionPane.showMessageDialog(null, msg, "Error",
+                                              JOptionPane.ERROR_MESSAGE);
+        
+    }
     }
 }
