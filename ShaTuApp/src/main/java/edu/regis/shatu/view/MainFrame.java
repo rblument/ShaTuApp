@@ -72,9 +72,9 @@ public class MainFrame extends JFrame implements WindowListener {
         // Get screen dimensions
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 
-        // Calculate the initial size (80% of the screen size)
+        // Calculate the initial size (80% of the splashFrame width)
         int width = (int) (screenSize.width * 0.8);
-        int height = (int) (screenSize.height * 0.8);
+        int height = (int) (screenSize.height);
         setSize(width, height);
 
         setJMenuBar(new ShaTuMenuBar());
