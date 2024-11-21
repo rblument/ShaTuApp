@@ -57,6 +57,16 @@ public class SplashFrame extends JFrame {
     public static final int MAX_SIGNIN_ATTEMPTS = 3;
     
     /**
+     * Name of the forgot password panel in this frame's primary card layout panel.
+     */
+    public static final String FORGOT_PASSWORD = "ForgotPasswordPanel";
+    
+    /**
+     * Name of the forgot password panel in this frame's primary card layout panel.
+     */
+    public static final String RESET_PASSWORD = "ResetPasswordPanel";
+    
+    /**
      * The single instance of this frame.
      */
     private static final SplashFrame SINGLETON;
@@ -116,6 +126,16 @@ public class SplashFrame extends JFrame {
      * associated sign-in information.
      */
     private NewAccountPanel newAccountPanel;
+    
+    /**
+     * A panel which allows the user to reset their password.
+     */
+    private ForgotPasswordPanel forgotPasswordPanel;
+    
+    /**
+     * A panel which allows the user to reset their password.
+     */
+    private ResetPasswordPanel resetPasswordPanel;
     
     /**
      * The number of consecutive illegal passwords attempted by the current
@@ -321,6 +341,22 @@ public class SplashFrame extends JFrame {
     }
     
     /**
+     * Display the Forgot Password panel, which allows the user to reset their
+     * password.
+     */
+    public void selectForgotPassword() {
+        this.selectPanel(FORGOT_PASSWORD);
+    }
+    
+    /**
+     * Display the Forgot Password panel, which allows the user to reset their
+     * password.
+     */
+    public void selectResetPassword() {
+        this.selectPanel(RESET_PASSWORD);
+    }
+    
+    /**
      * Display the card panel with the associated name.
      * 
      * @param name SPLASH, NEW_USER, or DASHBOARD
@@ -364,8 +400,12 @@ public class SplashFrame extends JFrame {
         
         this.splashPanel = new SplashPanel();
         this.newAccountPanel = new NewAccountPanel();
+        this.forgotPasswordPanel = new ForgotPasswordPanel();
+        this.resetPasswordPanel = new ResetPasswordPanel();
                         
         this.cards.add(splashPanel, SPLASH);
         this.cards.add(newAccountPanel, NEW_USER);
+        this.cards.add(forgotPasswordPanel, FORGOT_PASSWORD);
+        this.cards.add(resetPasswordPanel, RESET_PASSWORD);
     }
 }

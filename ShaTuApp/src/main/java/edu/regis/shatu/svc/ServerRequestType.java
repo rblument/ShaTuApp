@@ -71,7 +71,12 @@ public enum ServerRequestType {
      * "NoneLeft"
      * "ERR" data is error message
      */
-    REQUEST_HINT(":RequestHint");
+    REQUEST_HINT(":RequestHint"),
+    
+    /**
+     * The student has reset their password.
+     */
+    RESET_PASSWORD(":PasswordReset");
 
     /**
      * The name used by the server to identify this request.

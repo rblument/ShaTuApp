@@ -218,6 +218,37 @@ public class ShaTuTutor implements TutorSvc {
             return new TutorReply("IllegalUserId");
         }
     }
+    
+    /**
+     * Resets password for user currently in database
+     *
+     * This method handles ":CreateAccount" requests from the GUI client.
+     *
+     * @param jsonAcct a JSon encoded Account object
+     * @param password
+     * @return a TutorReply if successful the status is "Created", otherwise the
+     * status is "ERR".
+     */
+    public TutorReply resetPassword(String jsonAcct, String password) throws NonRecoverableException {
+        Account acct = gson.fromJson(jsonAcct, Account.class);
+        User user = gson.fromJson(jsonAcct, Student.class);
+
+        StudentSvc stuSvc = ServiceFactory.findStudentSvc();
+
+        if (!stuSvc.exists(acct.getUserId())) {
+            return new TutorReply("IllegalUserId");
+        }
+        
+        
+        try {
+            ServiceFactory.findUserSvc().update(user, password);
+            return new TutorReply("PasswordReset");
+
+        } catch (ObjNotFoundException ex) {
+            // Should never get here since we tested whether the account exists
+            return new TutorReply("IllegalUserId");
+        }
+    }
 
     /**
      * Attempts to sign a student in.

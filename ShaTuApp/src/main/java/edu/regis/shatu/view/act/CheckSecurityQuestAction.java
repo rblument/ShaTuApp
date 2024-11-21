@@ -25,11 +25,11 @@ import static javax.swing.Action.SHORT_DESCRIPTION;
  * 
  * @author mandyroskelley
  */
-public class ForgotPasswordAction extends ShaTuGuiAction {
+public class CheckSecurityQuestAction extends ShaTuGuiAction {
     /**
      * The single instance of this new user action.
      */
-    private static final ForgotPasswordAction SINGLETON;
+    private static final CheckSecurityQuestAction SINGLETON;
     
     /**
      * Create the singleton for this action, which occurs when this class
@@ -38,7 +38,7 @@ public class ForgotPasswordAction extends ShaTuGuiAction {
      * initializeComponents() method of the SplashPanel class.
      */
     static {
-        SINGLETON = new ForgotPasswordAction();
+        SINGLETON = new CheckSecurityQuestAction();
     }
 
     /**
@@ -46,16 +46,16 @@ public class ForgotPasswordAction extends ShaTuGuiAction {
      * 
      * @return 
      */
-    public static ForgotPasswordAction instance() {
+    public static CheckSecurityQuestAction instance() {
 	return SINGLETON;
     }
 
     /**
      * Initialize this forgot password action.
      */
-    private ForgotPasswordAction() {
-        super("Forgot Password");
-        putValue(SHORT_DESCRIPTION, "Request to reset password");
+    private CheckSecurityQuestAction() {
+        super("Verify User");
+        putValue(SHORT_DESCRIPTION, "Verify user with security question and answer");
         putValue(MNEMONIC_KEY, KeyEvent.VK_U);
        // putValue(ACCELERATOR_KEY, getAcceleratorKeyStroke());
     }
@@ -68,6 +68,6 @@ public class ForgotPasswordAction extends ShaTuGuiAction {
      */
     @Override
     public void actionPerformed(ActionEvent evt) {      
-        SplashFrame.instance().selectForgotPassword();
+        SplashFrame.instance().selectResetPassword();
     }
 }
