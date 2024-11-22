@@ -116,7 +116,7 @@ public class User extends Model {
     /**
      * Assign this user's security answer.
      * 
-     * @param securityAnswer
+     * @param securityQuestion
      */
     public void setSecurityQuestion(int securityQuestion) {
 	this.securityQuestion = securityQuestion;
@@ -128,7 +128,7 @@ public class User extends Model {
      * @return a SHA-256 encrypted String
      */
     public String getSecurityAnswer() {
-	return password;
+	return securityAnswer;
     }
 
     /**

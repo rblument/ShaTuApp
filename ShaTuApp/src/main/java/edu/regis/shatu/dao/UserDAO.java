@@ -214,4 +214,72 @@ public class UserDAO extends MySqlDAO implements UserSvc {
             close(stmt);
         }
     }
+    
+    @Override
+    public User retrieveQuestion(String userId) throws ObjNotFoundException, NonRecoverableException {
+        final String sql = "SELECT Question FROM User WHERE Email = ?";
+
+        Connection conn = null;
+        PreparedStatement stmt = null;
+
+        try {
+            conn = DriverManager.getConnection(URL);
+            stmt = conn.prepareStatement(sql);
+
+            stmt.setString(1, userId);
+
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                User user = new User(userId);
+
+                user.setSecurityQuestion(rs.getInt(1));
+                System.out.println("UserDAO - Q  " + user.getUserId() + " " + user.getSecurityQuestion());
+
+                return user;
+
+            } else {
+                throw new ObjNotFoundException("Student Id:" + userId);
+            }
+        } catch (SQLException e) {
+            throw new NonRecoverableException("UserDAO-ERR-5" + e.toString(), e);
+        } finally {
+            close(conn, stmt);
+        }
+    }
+    
+    @Override
+    public User retrieveAnswer(String userId) throws ObjNotFoundException, NonRecoverableException {
+        final String sql = "SELECT Answer FROM User WHERE Email = ?";
+
+        Connection conn = null;
+        PreparedStatement stmt = null;
+
+        try {
+            conn = DriverManager.getConnection(URL);
+            stmt = conn.prepareStatement(sql);
+
+            stmt.setString(1, userId);
+
+            ResultSet rs = stmt.executeQuery();
+            
+
+            if (rs.next()) {
+                System.out.println("RS is " + rs.getString(1));
+                User user = new User(userId);
+                user.setSecurityAnswer(rs.getString(1));
+                
+                System.out.println("UserDAO - A " + user.getUserId() + " " + user.getSecurityAnswer());
+
+                return user;
+
+            } else {
+                throw new ObjNotFoundException("Student Id:" + userId);
+            }
+        } catch (SQLException e) {
+            throw new NonRecoverableException("UserDAO-ERR-5" + e.toString(), e);
+        } finally {
+            close(conn, stmt);
+        }
+    }
 }

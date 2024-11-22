@@ -14,6 +14,7 @@ package edu.regis.shatu.view.act;
 
 import com.google.gson.Gson;
 import edu.regis.shatu.model.Account;
+import edu.regis.shatu.model.User;
 import edu.regis.shatu.svc.ClientRequest;
 import edu.regis.shatu.svc.ServerRequestType;
 import edu.regis.shatu.svc.SvcFacade;
@@ -78,11 +79,13 @@ public class CheckSecurityQuestAction extends ShaTuGuiAction {
         Gson gson = new Gson();
         
         SplashFrame frame = SplashFrame.instance();
-        
+        User user = frame.getUser();
         Account account = frame.getAccount();
+        
 
         ClientRequest request = new ClientRequest(ServerRequestType.VERIFY_USER);
         request.setData(gson.toJson(account));
+        System.out.println("Test CheckSecurityQuest- " + account.getUserId());
        
         TutorReply reply = SvcFacade.instance().tutorRequest(request);
 
@@ -92,13 +95,24 @@ public class CheckSecurityQuestAction extends ShaTuGuiAction {
                 frame.clearNewAccountPanel();
                 msg = "UserId and Security Question match credentials.\n\n" +
                         "Press okay and create a new password\n\n";
+                JOptionPane.showMessageDialog(SplashFrame.instance(), msg);
                 SplashFrame.instance().selectResetPassword();
                 break;
             case "IllegalUserId":
-                msg = "User id already exists: " + account.getUserId();
+                msg = "User id does not exist: " + account.getUserId();
                 JOptionPane.showMessageDialog(null, msg, "Information",
                                               JOptionPane.INFORMATION_MESSAGE);
                 break;
+            case "InvalidAnswer":
+                msg = "Answer does not match, please try again. ";
+                JOptionPane.showMessageDialog(null, msg, "Information",
+                                              JOptionPane.INFORMATION_MESSAGE);
+                break;
+            case "UnknownUser":
+                msg = "UnknownUser ";
+                JOptionPane.showMessageDialog(null, msg, "Information",
+                                              JOptionPane.INFORMATION_MESSAGE);
+                break; 
             default: // "ERR" Error should have been logged in tutor.
                 msg = "An unexpected error occurred. Please contact ShaTu support";
                 JOptionPane.showMessageDialog(null, msg, "Error",

@@ -183,7 +183,19 @@ public class SplashFrame extends JFrame {
      * @return an Account (userId, passwd, first and last name)
      */
     public Account getAccount() {
-       return newAccountPanel.getModel();
+        String panel = this.selectedPanel;
+        
+        System.out.println("Get Account : " + panel);
+        
+        switch (panel) {
+            case "ForgotPasswordPanel":
+                return forgotPasswordPanel.getModel();
+            case "ResetPasswordPanel":
+                return resetPasswordPanel.getModel();
+            default:
+                return newAccountPanel.getModel();
+                
+        }
     }
     
     /**
@@ -349,11 +361,25 @@ public class SplashFrame extends JFrame {
     }
     
     /**
+     * Reset the text fields in the forgot password panel to the empty string.
+     */
+    public void clearForgotPassword() {
+        this.forgotPasswordPanel.clearFields();
+    }
+    
+    /**
      * Display the Forgot Password panel, which allows the user to reset their
      * password.
      */
     public void selectResetPassword() {
         this.selectPanel(RESET_PASSWORD);
+    }
+    
+    /**
+     * Reset the text fields in the reset password panel to the empty string.
+     */
+    public void clearResetPassword() {
+        this.resetPasswordPanel.clearFields();
     }
     
     /**
@@ -378,7 +404,7 @@ public class SplashFrame extends JFrame {
     
     /**
      * Initializes a personalized dashboard screen for each user after sign in.
-     * @param sessin: a reference to the current SplashFrame session instance.
+     * @param session: a reference to the current SplashFrame session instance.
      */
     public void initializeDashboard(TutoringSession session) {
         if (session == null) {

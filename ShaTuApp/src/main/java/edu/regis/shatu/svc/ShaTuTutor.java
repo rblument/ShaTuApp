@@ -230,18 +230,54 @@ public class ShaTuTutor implements TutorSvc {
      */
     public TutorReply verifyUser(String jsonAcct) throws NonRecoverableException {
         Account acct = gson.fromJson(jsonAcct, Account.class);
-        User user = gson.fromJson(jsonAcct, Student.class);
-         System.out.println("Test " + acct.getUserId());
+        User user = gson.fromJson(jsonAcct, User.class);
+         System.out.println("ShaTuTutor verifyUser() " + acct.getUserId());
 
         StudentSvc stuSvc = ServiceFactory.findStudentSvc();
-
         if (!stuSvc.exists(acct.getUserId())) {
             return new TutorReply("IllegalUserId");
         }
         
-        System.out.println("Test " + acct.getUserId()); // Should never get here since we tested whether the account exists
-        //ServiceFactory.findUserSvc().update(user, answer);
-        return new TutorReply("Verified");
+        //////////////////
+        try {
+            User dbUserAnswer = ServiceFactory.findUserSvc().retrieveAnswer(user.getUserId());
+            User dbUserQuestion = ServiceFactory.findUserSvc().retrieveQuestion(user.getUserId());
+           
+            
+            System.out.println("ShaTuTutor comparing " + dbUserAnswer.getSecurityAnswer());
+            System.out.println("And  " + user.getSecurityAnswer());
+
+            if ((dbUserAnswer.getSecurityAnswer().equals(user.getSecurityAnswer())) && 
+                    (dbUserQuestion.getSecurityQuestion() == user.getSecurityQuestion())) {
+             
+                SessionSvc svc = ServiceFactory.findSessionSvc();
+
+                TutorReply reply = new TutorReply("Verified");
+
+                reply.setData(gson.toJson(session));
+
+                return reply;
+
+            } else {
+                return new TutorReply("InvalidAnswer");
+            }
+
+        } catch (ObjNotFoundException e) {
+            return new TutorReply("UnknownUser");
+        } catch (NonRecoverableException ex) {
+            Logger.getLogger(ShaTuTutor.class
+                    .getName()).log(Level.SEVERE, null, ex);
+            return new TutorReply();
+        }
+        
+        
+        
+        
+        
+/////////////////////////////////
+        
+        //if (acct.getSecurityQuestion() == )
+        
     }
     /**
      * Resets password for user currently in database

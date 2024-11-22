@@ -13,6 +13,7 @@
 package edu.regis.shatu.view;
 
 import edu.regis.shatu.model.Account;
+import edu.regis.shatu.model.TutoringSession;
 import edu.regis.shatu.view.act.BackToLogin;
 import edu.regis.shatu.view.act.CheckSecurityQuestAction;
 import java.awt.Color;
@@ -73,7 +74,7 @@ public class ForgotPasswordPanel extends GPanel{
     protected JLabel strength;
     protected JLabel msg;
 
-    protected JButton resetBut;
+    protected JButton verifyBut;
     protected JButton signInBut;
     protected JButton backBut;
 
@@ -94,9 +95,11 @@ public class ForgotPasswordPanel extends GPanel{
      * @return
      */
     public Account getModel() {
+        
         updateModel();
+        System.out.println("ForgotPasswordPanel: " + model.getUserId());
 
-        return model;
+	return model;
     }
 
     /**
@@ -125,6 +128,7 @@ public class ForgotPasswordPanel extends GPanel{
     public void clearFields() {
         userId.setText("");
         secAnswer.setText("");
+        securityQuestions.setSelectedIndex(0);
     }
 
     /**
@@ -132,7 +136,8 @@ public class ForgotPasswordPanel extends GPanel{
      */
     private void updateModel() {
         model.setUserId(userId.getText());
-        model.setPassword(encryptSHA256(new String(secAnswer.getPassword())));
+        model.setSecurityAnswer(encryptSHA256(new String(secAnswer.getPassword())));
+        model.setSecurityQuestion(securityQuestions.getSelectedIndex());
     }
 
     /**
@@ -142,8 +147,9 @@ public class ForgotPasswordPanel extends GPanel{
     private void updateDisplay() {
         userId.setText(model.getUserId());
         secAnswer.setText("");
+        securityQuestions.setSelectedIndex(0);
     }
-
+    
     // Used to get focus
     //public JTextField getFNameComp() {
     //return fName;
@@ -163,10 +169,10 @@ public class ForgotPasswordPanel extends GPanel{
         secAnswer = new JPasswordField(20);
         secAnswer.getDocument().addDocumentListener(docListener);
 
-        resetBut = new JButton(CheckSecurityQuestAction.instance());
+        verifyBut = new JButton(CheckSecurityQuestAction.instance());
 
-        resetBut.setEnabled(false);
-        MainFrame.instance().getRootPane().setDefaultButton(resetBut);
+        verifyBut.setEnabled(false);
+        MainFrame.instance().getRootPane().setDefaultButton(verifyBut);
 
         backBut = new JButton(BackToLogin.instance());
         backBut.setEnabled(true);
@@ -311,12 +317,12 @@ public class ForgotPasswordPanel extends GPanel{
                 GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL,
                 0, 5, 5, 5);
 
-        panel.addc(resetBut, 1, 9, 1, 1, 1.0, 0.0,
+        panel.addc(verifyBut, 1, 9, 1, 1, 1.0, 0.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL,
                 10, 5, 5, 5);
 
         msg = new JLabel("");
-        msg.setLabelFor(resetBut);
+        msg.setLabelFor(verifyBut);
         msg.setFont(new Font("Dialog", Font.PLAIN, 10));
         msg.setForeground(new Color(173,7,1));
 
@@ -340,6 +346,7 @@ public class ForgotPasswordPanel extends GPanel{
         return panel;
     }
 
+    
 
     /**
      * If the userId or password fields are empty, disable the OK 'Login'
@@ -384,11 +391,11 @@ public class ForgotPasswordPanel extends GPanel{
             Logger.getLogger(ForgotPasswordPanel.class.getName()).log(Level.SEVERE, null, ex);
         }  
         if (isValidUserId && isValidAnswer) {
-            resetBut.setEnabled(true);
+            verifyBut.setEnabled(true);
             msg.setText("");
 
         } else {
-            resetBut.setEnabled(false);
+            verifyBut.setEnabled(false);
             msg.setText("(* Please fix problems highlighted in red.)");
         }
     }
