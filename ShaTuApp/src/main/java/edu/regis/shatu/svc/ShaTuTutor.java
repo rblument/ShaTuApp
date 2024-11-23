@@ -655,61 +655,92 @@ public class ShaTuTutor implements TutorSvc {
     }
 
     public TutorReply completeInitVarsStep(StepCompletion completion) {
-        System.out.println("Completed InitVars Step");
+        System.out.println("Tutor completeInitVarsStep");
 
+        InitVarStep example = gson.fromJson(completion.getData(), InitVarStep.class);
+
+        // Extract user-provided answers and expected results
+        Map<String, String> userAnswers = example.getUserAnswers();
+        Map<String, String> correctAnswers = example.getCorrectAnswers();
+
+        // Track correctness and prepare feedback
+        boolean allCorrect = true;
+        StringBuilder feedback = new StringBuilder();
+
+        for (String variable : correctAnswers.keySet()) {
+            String userAnswer = userAnswers.getOrDefault(variable, "");
+            String correctAnswer = correctAnswers.get(variable);
+
+            feedback.append(variable)
+                    .append(": User Answer: ")
+                    .append(userAnswer)
+                    .append(", Correct Answer: ")
+                    .append(correctAnswer)
+                    .append("\n");
+
+            if (!userAnswer.equals(correctAnswer)) {
+                allCorrect = false;
+            }
+        }
+
+        System.out.println("Feedback:\n" + feedback);
+
+        // Create StepCompletionReply
         StepCompletionReply stepReply = new StepCompletionReply();
+        stepReply.setIsCorrect(allCorrect);
+        stepReply.setCorrectAnswer(feedback.toString());
+
+        // Update the student model
+        int dbId = KnowledgeComponentKind.fromString("Initialize Variables").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId);
+
+        // Increment success or exposure based on correctness
+        if (allCorrect) {
+            assessment.incrementSuccessess();
+        }
+        assessment.incrementExposures();
 
         try {
-            // Deserialize the data field to Map<String, String>
-            Map<String, Object> outerData = gson.fromJson(completion.getData(), Map.class);
-
-            // Check if 'data' exists
-            if (outerData == null || !outerData.containsKey("data")) {
-                throw new IllegalStateException("'data' field is missing from StepCompletion data.");
-            }
-
-            String innerJsonData = (String) outerData.get("data");  // extract inner JSON string
-
-            // Deserialize the inner JSON string into InitVarStep
-            InitVarStep completedInitVarStep = gson.fromJson(innerJsonData, InitVarStep.class);
-
-            boolean allCorrect = completedInitVarStep.allAnswersCorrect();
-            StringBuilder correctAnswers = new StringBuilder();
-
-            // Compare user answers with the correct answers
-            for (String var : new String[]{"H0", "H1", "H2", "H3", "H4", "H5", "H6", "H7"}) {
-                String userAnswer = completedInitVarStep.getUserAnswer(var);
-                String correctAnswer = completedInitVarStep.getAnswer(var);
-
-                if (userAnswer == null || !userAnswer.equals(correctAnswer)) {
-                    allCorrect = false;
-                }
-                correctAnswers.append(var).append(": ").append(correctAnswer).append(", ");
-            }
-
-            // Remove trailing comma from the correct answers string
-            if (correctAnswers.length() > 0) {
-                correctAnswers.setLength(correctAnswers.length() - 2); // Remove trailing comma
-            }
-
-            // Set properties in StepCompletionReply
-            stepReply.setIsCorrect(allCorrect);
-            stepReply.setCorrectAnswer(correctAnswers.toString());
-
-            // Convert StepCompletionReply to JSON for TutorReply
-            String stepReplyJson = gson.toJson(stepReply);
-
-            // Return a TutorReply containing the result
-            return new TutorReply("SUCCESS", stepReplyJson);
-
-        } catch (Exception e) {
-            // Handle error during deserialization or processing
-            System.err.println("Error processing InitVarStep: " + e.getMessage());
-            e.printStackTrace();
-
-            // Return an error response in case of failure
-            return new TutorReply("ERROR", "Failed to process InitVarStep: " + e.getMessage());
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.SUCCESSES);
+        } catch (NonRecoverableException ex) {
+            return createError("Failed to update assessment data in database", ex);
         }
+
+        // Determine whether to recommend a new task
+        int exposures = assessment.getExposures();
+        int successes = assessment.getSuccessess();
+        if (exposures > 0 && (double) successes / exposures > 0.8) {
+            stepReply.setIsNewTask(true);
+            System.out.println("Next task is recommended.");
+        } else {
+            stepReply.setIsNewTask(false);
+        }
+
+        stepReply.setIsRepeatStep(!allCorrect);
+        stepReply.setIsNewStep(allCorrect);
+        stepReply.setIsNextStep(false);
+
+        // Wrap the StepCompletionReply into a Task and TutorReply
+        Step step = new Step(1, 0, StepSubType.STEP_COMPLETION_REPLY);
+        step.setCurrentHintIndex(0);
+        step.setNotifyTutor(true);
+        step.setIsCompleted(false);
+
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+        step.setData(gson.toJson(stepReply));
+
+        Task task = new Task();
+        task.setKind(TaskKind.PROBLEM);
+        task.setType(ExampleType.STEP_COMPLETION_REPLY);
+        task.setDescription("Review your results and choose the next action.");
+        task.addStep(step);
+
+        TutorReply reply = new TutorReply(":Success");
+        reply.setData(gson.toJson(task));
+
+        return reply;
     }
 
     public TutorReply completeCompressRoundStep(StepCompletion completion) {
@@ -2292,29 +2323,61 @@ public class ShaTuTutor implements TutorSvc {
     private TutorReply hintInitVars(StepCompletion completion) {
         System.out.println("Tutor hintInitVars");
 
-        StepCompletionReply stepReply = new StepCompletionReply();
+        // Deserialize the StepCompletion object to access the InitVarStep
+        InitVarStep initVarStep = gson.fromJson(completion.getData(), InitVarStep.class);
 
+        StepCompletionReply stepReply = new StepCompletionReply();
         stepReply.setIsCorrect(false);
         stepReply.setIsRepeatStep(true);
         stepReply.setIsNewStep(false);
         stepReply.setIsNewTask(false);
         stepReply.setIsNextStep(false);
 
-        Hint hintOne = new Hint();
-        hintOne.setId(0);
-        hintOne.setText("Initialize 8 variables with the first 32 bits of the fractional parts of the square roots of the first 8 primes");
-
+        // Dynamically fetch hints for each variable
         Step step = completion.getStep();
-        step.addHint(hintOne);
+        for (String variable : initVarStep.getCorrectAnswers().keySet()) {
+            // Fetch hints for the variable at different levels
+            Hint hintLevel1 = new Hint();
+            hintLevel1.setId(1);
+            hintLevel1.setText(initVarStep.getHint(variable, 1));
+            step.addHint(hintLevel1);
+
+            Hint hintLevel2 = new Hint();
+            hintLevel2.setId(2);
+            hintLevel2.setText(initVarStep.getHint(variable, 2));
+            step.addHint(hintLevel2);
+
+            Hint hintLevel3 = new Hint();
+            hintLevel3.setId(3);
+            hintLevel3.setText(initVarStep.getHint(variable, 3));
+            step.addHint(hintLevel3);
+        }
+
         step.setNotifyTutor(true);
         step.setIsCompleted(false);
         step.setSubType(StepSubType.REQUEST_HINT);
+
+        // Add timeout
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);
+
+        // Serialize the reply with hints
         step.setData(gson.toJson(stepReply));
 
         TutorReply reply = new TutorReply(":Success");
         reply.setData(gson.toJson(step));
+
+        // Update hint usage in the student model
+        int dbId = KnowledgeComponentKind.fromString("Initialize Variables").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId);
+        assessment.incrementHints();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.HINTS);
+        } catch (NonRecoverableException ex) {
+            return createError("Failed to update assessment data for hint usage", ex);
+        }
 
         return reply;
     }
