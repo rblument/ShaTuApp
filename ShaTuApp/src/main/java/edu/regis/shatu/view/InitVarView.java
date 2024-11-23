@@ -15,6 +15,7 @@ package edu.regis.shatu.view;
 import edu.regis.shatu.model.InitVarStep;
 import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
+import edu.regis.shatu.model.aol.ExampleType;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.view.act.StepCompletionAction;
 import java.awt.Color;
@@ -22,6 +23,7 @@ import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Map;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -366,23 +368,26 @@ public class InitVarView extends UserRequestView implements ActionListener {
     }
     
     @Override
-    /**
-     * Updates the description, question, and hints from the model
-     * 
-     * TODO: THIS IS A PLACEHOLDER UNTIl WE HAVE HAVE THE MODEL CODE COMPLETED
-     */
     protected void updateView() {
-        if (model != null) {
-            // ****TO-DO*****
-            // Update the view's information from the model
-            // Debugging dynamic updates to the model can be done here.
-            System.out.println("InitVarView");
+        if (model == null) {
+            System.out.println("Error: The model is null when switching to Initialize Variables...");
+        }
+        else {
+            // TODO: Debug statements. Task is not being set properly, or is being reset somewhere.
+            System.out.println("Initialize update view called.");
+            System.out.println("----Init Var Task Title-----"+model.currentTask().getTitle());
+            System.out.println("----Init Var Step Title-----"+model.currentTask().getCurrentStep().getTitle());
         }
     }
 
     @Override
     public NewExampleRequest newRequest() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        NewExampleRequest ex = new NewExampleRequest();
+        
+        //Set example type to the problem associated with the current view
+        ex.setExampleType(ExampleType.INITIALIZE_VARS);
+        
+        return ex;
     }
 
     @Override
@@ -400,8 +405,12 @@ public class InitVarView extends UserRequestView implements ActionListener {
         completedInitVarStep.setUserAnswer("H6", h6.getText().trim());
         completedInitVarStep.setUserAnswer("H7", h7.getText().trim());
 
-        // Create StepCompletion with serialized data
-        StepCompletion stepCompletion = new StepCompletion(currentStep, gson.toJson(completedInitVarStep));
+        // Serialize completedInitVarStep without adding extra layers
+        String initVarStepJson = gson.toJson(completedInitVarStep);
+        Map<String, String> dataWrapper = Map.of("data", initVarStepJson);
+
+        // Create StepCompletion with serialized JSON of dataWrapper
+        StepCompletion stepCompletion = new StepCompletion(currentStep, gson.toJson(dataWrapper));
         stepCompletion.setStep(currentStep);
         return stepCompletion;
     }

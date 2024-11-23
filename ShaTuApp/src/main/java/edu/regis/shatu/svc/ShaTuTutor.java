@@ -1,4 +1,3 @@
-
 /*
  * SHATU: SHA-256 Tutor
  * 
@@ -56,6 +55,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -277,7 +277,6 @@ public class ShaTuTutor implements TutorSvc {
         switch (step.getSubType()) {
             case INFO_MESSAGE:
                 return completeInfoMsgStep(completion);
-
             case ENCODE_BINARY: // TO_DO: Really the same
             case ENCODE_HEX:
             case ENCODE_ASCII:
@@ -658,34 +657,59 @@ public class ShaTuTutor implements TutorSvc {
     public TutorReply completeInitVarsStep(StepCompletion completion) {
         System.out.println("Completed InitVars Step");
 
-        // Create StepCompletionReply based on user responses
         StepCompletionReply stepReply = new StepCompletionReply();
-        InitVarStep completedInitVarStep = gson.fromJson(completion.getData(), InitVarStep.class);
 
-        boolean allCorrect = completedInitVarStep.allAnswersCorrect();
-        StringBuilder correctAnswers = new StringBuilder();
+        try {
+            // Deserialize the data field to Map<String, String>
+            Map<String, Object> outerData = gson.fromJson(completion.getData(), Map.class);
 
-        for (String var : new String[]{"H0", "H1", "H2", "H3", "H4", "H5", "H6", "H7"}) {
-            String userAnswer = completedInitVarStep.getUserAnswer(var);
-            String correctAnswer = completedInitVarStep.getAnswer(var);
-
-            if (userAnswer == null || !userAnswer.equals(correctAnswer)) {
-                allCorrect = false;
+            // Check if 'data' exists
+            if (outerData == null || !outerData.containsKey("data")) {
+                throw new IllegalStateException("'data' field is missing from StepCompletion data.");
             }
-            correctAnswers.append(var).append(": ").append(correctAnswer).append(", ");
+
+            String innerJsonData = (String) outerData.get("data");  // extract inner JSON string
+
+            // Deserialize the inner JSON string into InitVarStep
+            InitVarStep completedInitVarStep = gson.fromJson(innerJsonData, InitVarStep.class);
+
+            boolean allCorrect = completedInitVarStep.allAnswersCorrect();
+            StringBuilder correctAnswers = new StringBuilder();
+
+            // Compare user answers with the correct answers
+            for (String var : new String[]{"H0", "H1", "H2", "H3", "H4", "H5", "H6", "H7"}) {
+                String userAnswer = completedInitVarStep.getUserAnswer(var);
+                String correctAnswer = completedInitVarStep.getAnswer(var);
+
+                if (userAnswer == null || !userAnswer.equals(correctAnswer)) {
+                    allCorrect = false;
+                }
+                correctAnswers.append(var).append(": ").append(correctAnswer).append(", ");
+            }
+
+            // Remove trailing comma from the correct answers string
+            if (correctAnswers.length() > 0) {
+                correctAnswers.setLength(correctAnswers.length() - 2); // Remove trailing comma
+            }
+
+            // Set properties in StepCompletionReply
+            stepReply.setIsCorrect(allCorrect);
+            stepReply.setCorrectAnswer(correctAnswers.toString());
+
+            // Convert StepCompletionReply to JSON for TutorReply
+            String stepReplyJson = gson.toJson(stepReply);
+
+            // Return a TutorReply containing the result
+            return new TutorReply("SUCCESS", stepReplyJson);
+
+        } catch (Exception e) {
+            // Handle error during deserialization or processing
+            System.err.println("Error processing InitVarStep: " + e.getMessage());
+            e.printStackTrace();
+
+            // Return an error response in case of failure
+            return new TutorReply("ERROR", "Failed to process InitVarStep: " + e.getMessage());
         }
-
-        if (correctAnswers.length() > 0) {
-            correctAnswers.setLength(correctAnswers.length() - 2); // Remove trailing comma
-        }
-
-        // Set properties in StepCompletionReply
-        stepReply.setIsCorrect(allCorrect);
-        stepReply.setCorrectAnswer(correctAnswers.toString());
-
-        // Convert StepCompletionReply to JSON for TutorReply
-        String stepReplyJson = gson.toJson(stepReply);
-        return new TutorReply("SUCCESS", stepReplyJson);
     }
 
     public TutorReply completeCompressRoundStep(StepCompletion completion) {
@@ -1400,15 +1424,15 @@ public class ShaTuTutor implements TutorSvc {
     }
 
     /**
-     * Handles client requests for a new initialize vars example.
-     *
-     * @return a TutorReply
-     */
-    private TutorReply newInitializeVarsExample(TutoringSession session, String jsonData) {
-        TutorReply reply = new TutorReply(":Success");
+    * Handles client requests for a new initialize vars example.
+    *
+    * @return a TutorReply
+    */
+   private TutorReply newInitializeVarsExample(TutoringSession session, String jsonData) {
+       TutorReply reply = new TutorReply(":Success");
 
-        return reply;
-    }
+       return reply;
+   }
 
     /**
      * Handles client requests for a new compress round example.
