@@ -102,6 +102,11 @@ public class DashboardPanel extends javax.swing.JPanel {
         contentPanel.setLayout(new java.awt.GridBagLayout());
 
         teachMeButton1.setText("Teach Me");
+        teachMeButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                teachMeButton1ActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
@@ -215,6 +220,10 @@ public class DashboardPanel extends javax.swing.JPanel {
     private void logOutButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logOutButtonActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_logOutButtonActionPerformed
+
+    private void teachMeButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_teachMeButton1ActionPerformed
+        SplashFrame.instance().selectLessonScreen();
+    }//GEN-LAST:event_teachMeButton1ActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel contentPanel;
