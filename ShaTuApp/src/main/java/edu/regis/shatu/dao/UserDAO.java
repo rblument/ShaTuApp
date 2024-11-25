@@ -234,7 +234,6 @@ public class UserDAO extends MySqlDAO implements UserSvc {
                 User user = new User(userId);
 
                 user.setSecurityQuestion(rs.getInt(1));
-                System.out.println("UserDAO - Q  " + user.getUserId() + " " + user.getSecurityQuestion());
 
                 return user;
 
@@ -265,11 +264,8 @@ public class UserDAO extends MySqlDAO implements UserSvc {
             
 
             if (rs.next()) {
-                System.out.println("RS is " + rs.getString(1));
                 User user = new User(userId);
                 user.setSecurityAnswer(rs.getString(1));
-                
-                System.out.println("UserDAO - A " + user.getUserId() + " " + user.getSecurityAnswer());
 
                 return user;
 

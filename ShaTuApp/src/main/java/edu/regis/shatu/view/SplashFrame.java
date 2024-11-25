@@ -370,8 +370,9 @@ public class SplashFrame extends JFrame {
     /**
      * Display the Forgot Password panel, which allows the user to reset their
      * password.
+     * @param userId
      */
-    public void selectResetPassword() {
+    public void selectResetPassword(String userId) {
         this.selectPanel(RESET_PASSWORD);
     }
     
@@ -417,21 +418,35 @@ public class SplashFrame extends JFrame {
         this.cards.add(dashboardPanel, DASHBOARD);
         this.selectPanel(DASHBOARD);  // Display the dashboard
     }
+    
+    /**
+     * 
+     * @param email
+     */
+    public void initializeResetPassword(String email) {
+        if (email == null) {
+            System.err.println("Email is null in initializeResetPassword");
+            return;
+        }
+
+        this.resetPasswordPanel = new ResetPasswordPanel(email);
+        
+        this.cards.add(resetPasswordPanel, RESET_PASSWORD);
+    }
 
     /**
      * Create the child GUI components appearing in this frame.
      */
     private void initializeComponents() {
+       
         this.cards = new JPanel(new CardLayout());
         
         this.splashPanel = new SplashPanel();
         this.newAccountPanel = new NewAccountPanel();
         this.forgotPasswordPanel = new ForgotPasswordPanel();
-        this.resetPasswordPanel = new ResetPasswordPanel();
                         
         this.cards.add(splashPanel, SPLASH);
         this.cards.add(newAccountPanel, NEW_USER);
         this.cards.add(forgotPasswordPanel, FORGOT_PASSWORD);
-        this.cards.add(resetPasswordPanel, RESET_PASSWORD);
     }
 }

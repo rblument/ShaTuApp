@@ -76,7 +76,7 @@ public enum ServerRequestType {
     /**
      * The student has reset their password.
      */
-    RESET_PASSWORD(":PasswordReset"),
+    RESET_PASSWORD(":ResetPassword"),
     
     /**
      * The student has answered their security question.

@@ -14,11 +14,11 @@ package edu.regis.shatu.view.act;
 
 import com.google.gson.Gson;
 import edu.regis.shatu.model.Account;
-import edu.regis.shatu.model.User;
 import edu.regis.shatu.svc.ClientRequest;
 import edu.regis.shatu.svc.ServerRequestType;
 import edu.regis.shatu.svc.SvcFacade;
 import edu.regis.shatu.svc.TutorReply;
+import edu.regis.shatu.view.ResetPasswordPanel;
 import edu.regis.shatu.view.SplashFrame;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -38,6 +38,9 @@ public class CheckSecurityQuestAction extends ShaTuGuiAction {
      * The single instance of this new user action.
      */
     private static final CheckSecurityQuestAction SINGLETON;
+    
+    public Account model;
+    
     
     /**
      * Create the singleton for this action, which occurs when this class
@@ -61,7 +64,7 @@ public class CheckSecurityQuestAction extends ShaTuGuiAction {
     /**
      * Initialize this forgot password action.
      */
-    private CheckSecurityQuestAction() {
+    public CheckSecurityQuestAction() {
         super("Verify User");
         putValue(SHORT_DESCRIPTION, "Verify user with security question and answer");
         putValue(MNEMONIC_KEY, KeyEvent.VK_U);
@@ -79,24 +82,26 @@ public class CheckSecurityQuestAction extends ShaTuGuiAction {
         Gson gson = new Gson();
         
         SplashFrame frame = SplashFrame.instance();
-        User user = frame.getUser();
         Account account = frame.getAccount();
         
 
         ClientRequest request = new ClientRequest(ServerRequestType.VERIFY_USER);
         request.setData(gson.toJson(account));
-        System.out.println("Test CheckSecurityQuest- " + account.getUserId());
        
         TutorReply reply = SvcFacade.instance().tutorRequest(request);
 
         String msg;
         switch (reply.getStatus()) {
             case "Verified":
-                frame.clearNewAccountPanel();
-                msg = "UserId and Security Question match credentials.\n\n" +
-                        "Press okay and create a new password\n\n";
+                
+                //frame.clearNewAccountPanel();
+                msg = "Success!\n\n" +
+                        "Press okay to create a new password\n\n";
                 JOptionPane.showMessageDialog(SplashFrame.instance(), msg);
-                SplashFrame.instance().selectResetPassword();
+                SplashFrame.instance().initializeResetPassword(account.getUserId());
+                
+                SplashFrame.instance().selectResetPassword(account.getUserId());
+                
                 break;
             case "IllegalUserId":
                 msg = "User id does not exist: " + account.getUserId();

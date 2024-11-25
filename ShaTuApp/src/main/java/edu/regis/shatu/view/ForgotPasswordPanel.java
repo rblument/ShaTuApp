@@ -98,7 +98,6 @@ public class ForgotPasswordPanel extends GPanel{
         
         updateModel();
         System.out.println("ForgotPasswordPanel: " + model.getUserId());
-
 	return model;
     }
 

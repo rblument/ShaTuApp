@@ -15,7 +15,6 @@ package edu.regis.shatu.view;
 import edu.regis.shatu.model.Account;
 import edu.regis.shatu.view.act.BackToLogin;
 import edu.regis.shatu.view.act.ResetPasswordAction;
-import edu.regis.shatu.view.act.SignInAction;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -26,7 +25,6 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -36,7 +34,6 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
 /**
@@ -61,13 +58,15 @@ public class ResetPasswordPanel extends GPanel{
      * The account being created and displayed in this panel.
      */
     private Account model;
-
+    
     /**
      * The editable fields appearing in this dialog.
      */
-    protected HintTextField userId;
+    protected JTextField userId;
     protected JPasswordField pass1;
     protected JPasswordField pass2;
+    
+    public String userEmail = "";
 
     protected JLabel strength;
     protected JLabel msg;
@@ -76,11 +75,11 @@ public class ResetPasswordPanel extends GPanel{
     protected JButton signInBut;
     protected JButton backBut;
 
-    public ResetPasswordPanel() {
+    public ResetPasswordPanel(String email) {
         super();
 
         model = new Account();
-
+        userEmail = email;
         initComponents();
         layoutPanel();
 
@@ -122,16 +121,25 @@ public class ResetPasswordPanel extends GPanel{
      * Set all of the text fields in this view to the empty string.
      */
     public void clearFields() {
-        userId.setText("");
         pass1.setText("");
         pass2.setText("");
+    }
+    
+    public void setUserEmail(String userId){
+        System.out.println("SetUserEmail " + userId);
+        userEmail = userId;
+    }
+    
+    public String getUserEmail(){
+        System.out.println("GetUserEmail " + userEmail);
+        return userEmail;
     }
 
     /**
      * Update our model with the current values displayed in this view
      */
     private void updateModel() {
-        model.setUserId(userId.getText());
+        model.setUserId(userEmail);
         model.setPassword(encryptSHA256(new String(pass1.getPassword())));
     }
 
@@ -140,20 +148,22 @@ public class ResetPasswordPanel extends GPanel{
      * passwords).
      */
     private void updateDisplay() {
+        model.setUserId(userEmail);
         userId.setText(model.getUserId());
         pass1.setText("");
         pass2.setText("");
     }
-
+    
     // Used to get focus
     //public JTextField getFNameComp() {
     //return fName;
     //}
     private void initComponents() {
+        
         LoginDocumentListener docListener = new LoginDocumentListener();
-
-        userId = new HintTextField("userId@university.edu", 10);
-        userId.setIsEmailAddr(true);
+        
+        userId = new JTextField(userEmail, 10);
+        userId.setEditable(false);
         userId.getDocument().addDocumentListener(docListener);
 
         pass1 = new JPasswordField(20);
@@ -288,7 +298,7 @@ public class ResetPasswordPanel extends GPanel{
                 GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL,
                 0, 5, 5, 5);
 
-        label = new JLabel("Create a Password:");
+        label = new JLabel("Create a New Password:");
         label.setLabelFor(pass1);
 
         panel.addc(label, 0, 4, 1, 1, 0.0, 0.0,
@@ -433,28 +443,6 @@ public class ResetPasswordPanel extends GPanel{
      * button.
      */
     private void enableButtons(Document e) {
-
-        boolean isValidUserId = !userId.isDefaultValue();
-        if (isValidUserId) {
-            Document userIdDoc = userId.getDocument();
-            try {
-                String email = userIdDoc.getText(0, userIdDoc.getLength());
-
-                Matcher matcher = VALID_EMAIL_ADDRESS_REGEX.matcher(email);
-                isValidUserId = matcher.find();
-
-                if (isValidUserId) {
-                    userId.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-                } else {
-                    userId.setBorder(BorderFactory.createLineBorder(new Color(173,7,1)));
-                }
-            } catch (BadLocationException er) {
-                // Cannot happen since 0 to length
-            }
-        } else {
-            userId.setBorder(BorderFactory.createLineBorder(new Color(173,7,1)));
-        }
-
         boolean isPass1Valid = pass1.getDocument().getLength() == 0;
         if (isPass1Valid) {
             pass1.setBorder(BorderFactory.createLineBorder(new Color(173,7,1)));
@@ -467,7 +455,7 @@ public class ResetPasswordPanel extends GPanel{
         } else {
             pass2.setBorder(BorderFactory.createLineBorder(new Color(173,7,1)));
         }
-        if (isValidUserId && isSamePass) {
+        if (isSamePass) {
             resetBut.setEnabled(true);
             msg.setText("");
 
