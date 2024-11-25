@@ -360,6 +360,7 @@ public class ShiftRightView extends UserRequestView implements ActionListener, K
         if (e.getKeyCode() == KeyEvent.VK_ENTER && responseTextArea.getText().equals("")) {
             JOptionPane.showMessageDialog(this, "Please provide an answer");
         } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+            checkButton.doClick();
         }
     }
 
