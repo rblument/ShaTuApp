@@ -32,7 +32,8 @@ public class DashboardPanel extends javax.swing.JPanel {
         } else if (tutoringSession.getAccount() == null) {
             System.err.println("Account is null in DashboardPanel");
         } else {
-            System.out.println("DashboardPanel initialized for user: " + tutoringSession.getAccount().getFirstName());
+            System.out.println("DashboardPanel initialized for user: " + 
+                    tutoringSession.getAccount().getFirstName());
                 String welcomeMessage = "Welcome, " + 
                         tutoringSession.getAccount().getFirstName() + "! "
                 + "Your session has successfully started.";

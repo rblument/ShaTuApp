@@ -23,15 +23,22 @@ import javax.swing.JOptionPane;
 import javax.swing.Timer;
 
 /**
- *
+ * An inactivity tracker that tracks the mouse movement and keyboard
+ * strokes of users. If the user is inactive for 30 minutes they will
+ * be returned to the login screen.
+ * 
  * @author austenj
  */
 public class InactivityManager {
     private Timer inactivityTimer;
-    int restartCounter = 0;
-    // 10 minutes in milliseconds (currently at 30 seconds for testing)
-    private static final int inactive = 30000;
+    // 30 minutes in milliseconds
+    private static final int inactive = 30 * 60 * 1000;
 
+    /**
+     * Starts the Inactivity Tracker.
+     * 
+     * Also starts tracking mouse movement/mouse clicks and keyboard strokes.
+     */
     public void startTracking() {
         // Initializing timer
         if (inactivityTimer == null) {
@@ -52,21 +59,30 @@ public class InactivityManager {
 
         inactivityTimer.start();
     }
-
+    
+    /**
+     * Resets the inactivity tracker.
+     */
     public void resetInactivityTimer() {
         if (inactivityTimer != null) {
-            System.out.println("restarting inactivity: " + restartCounter);
-            restartCounter++;
             inactivityTimer.restart();
         }
     }
 
+    /**
+     * Stops the inactivity tracker.
+     */
     public void stopTracking() {
         if (inactivityTimer != null) {
             inactivityTimer.stop();
         }
     }
 
+    /**
+     * calls BackToLogin() and logs the user out when they go inactive.
+     * 
+     * Also provides a dialog box explaining why they were logged out.
+     */
     private void inactiveLogout() {
         if (inactivityTimer != null) {
         inactivityTimer.stop(); //stopping timer
@@ -80,8 +96,8 @@ public class InactivityManager {
             JOptionPane.WARNING_MESSAGE
         );
 
-     // Hide the main application window and log out
+     // Hide mainframe and logout
      MainFrame.instance().setVisible(false);
-     BackToLogin.instance().actionPerformed(null); // Log out the user
+     BackToLogin.instance().actionPerformed(null);
     }
 }
