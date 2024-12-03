@@ -46,7 +46,7 @@ public interface UserSvc {
     User retrieve(String userId) throws ObjNotFoundException, NonRecoverableException;
     
     /**
-     * Return the user, if any, with the given user id.
+     * Return the question, if any, with the given user id.
      * 
      * @param userId the id of the user to return
      * @return a User with the given id
@@ -56,7 +56,7 @@ public interface UserSvc {
     User retrieveQuestion(String userId) throws ObjNotFoundException, NonRecoverableException;
     
     /**
-     * Return the user, if any, with the given user id.
+     * Return the answer, if any, with the given user id.
      * 
      * @param userId the id of the user to return
      * @return a User with the given id

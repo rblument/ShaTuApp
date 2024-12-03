@@ -320,7 +320,7 @@ public class NewAccountPanel extends GPanel {
                 GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL,
                 5, 5, 5, 5);
 
-        label = new JLabel("User Id");
+        label = new JLabel("User Id:");
         label.setLabelFor(userId);
 
         panel.addc(label, 0, 2, 1, 1, 1.0, 0.0,
@@ -547,12 +547,7 @@ public class NewAccountPanel extends GPanel {
         }
         
         int isValid = secAnswer.getDocument().getLength();
-        boolean isValidAnswer = false;
-        if (isValid > 0) {
-            isValidAnswer = true;
-        } else {
-            isValidAnswer = false;
-        }
+        boolean isValidAnswer = isValid > 0;
         
         if (isValidFName && isValidLName && isValidUserId && isSamePass && isValidAnswer) {
             createAcctBut.setEnabled(true);

@@ -114,7 +114,7 @@ public class User extends Model {
     }
 
     /**
-     * Assign this user's security answer.
+     * Assign this user's security question.
      * 
      * @param securityQuestion
      */

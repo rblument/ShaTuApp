@@ -18,7 +18,6 @@ import edu.regis.shatu.svc.ClientRequest;
 import edu.regis.shatu.svc.ServerRequestType;
 import edu.regis.shatu.svc.SvcFacade;
 import edu.regis.shatu.svc.TutorReply;
-import edu.regis.shatu.view.ResetPasswordPanel;
 import edu.regis.shatu.view.SplashFrame;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -27,15 +26,15 @@ import static javax.swing.Action.SHORT_DESCRIPTION;
 import javax.swing.JOptionPane;
 
 /**
- * An MVC controller handling a user GUI gesture requesting to reset password, 
- * which switches to the forgot password in the GUI
- * (see CreateAcctAction). (Modeled after NewUserAction)
+ * An MVC controller handling a user GUI gesture requesting to verify the user, 
+ * which switches to the reset password panel in the GUI
+ * (Modeled after NewUserAction)
  * 
  * @author mandyroskelley
  */
 public class CheckSecurityQuestAction extends ShaTuGuiAction {
     /**
-     * The single instance of this new user action.
+     * The single instance of this check security question action.
      */
     private static final CheckSecurityQuestAction SINGLETON;
     
@@ -45,7 +44,7 @@ public class CheckSecurityQuestAction extends ShaTuGuiAction {
     /**
      * Create the singleton for this action, which occurs when this class
      * is loaded by the Java class loaded, as a result of the class being 
-     * referenced by executing ForgotPasswordAction.instance() in the 
+     * referenced by executing CheckSecurityQuestAction.instance() in the 
      * initializeComponents() method of the SplashPanel class.
      */
     static {
@@ -53,7 +52,7 @@ public class CheckSecurityQuestAction extends ShaTuGuiAction {
     }
 
     /**
-     * Return the singleton instance of this forgot password action.
+     * Return the singleton instance of this check security question action.
      * 
      * @return 
      */
@@ -62,18 +61,17 @@ public class CheckSecurityQuestAction extends ShaTuGuiAction {
     }
 
     /**
-     * Initialize this forgot password action.
+     * Initialize this check security question action.
      */
     public CheckSecurityQuestAction() {
         super("Verify User");
         putValue(SHORT_DESCRIPTION, "Verify user with security question and answer");
         putValue(MNEMONIC_KEY, KeyEvent.VK_U);
-       // putValue(ACCELERATOR_KEY, getAcceleratorKeyStroke());
     }
     
     /**
-     * Handle the user's request to reset the password by displaying the new
-     * user panel.
+     * Handle the user's request to verify their userID, security question and answer
+     * match by displaying the reset password panel.
      * 
      * @param evt ignored
      */
@@ -93,15 +91,11 @@ public class CheckSecurityQuestAction extends ShaTuGuiAction {
         String msg;
         switch (reply.getStatus()) {
             case "Verified":
-                
-                //frame.clearNewAccountPanel();
                 msg = "Success!\n\n" +
                         "Press okay to create a new password\n\n";
                 JOptionPane.showMessageDialog(SplashFrame.instance(), msg);
                 SplashFrame.instance().initializeResetPassword(account.getUserId());
-                
                 SplashFrame.instance().selectResetPassword(account.getUserId());
-                
                 break;
             case "IllegalUserId":
                 msg = "User id does not exist: " + account.getUserId();

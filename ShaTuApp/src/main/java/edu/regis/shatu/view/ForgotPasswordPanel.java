@@ -13,7 +13,6 @@
 package edu.regis.shatu.view;
 
 import edu.regis.shatu.model.Account;
-import edu.regis.shatu.model.TutoringSession;
 import edu.regis.shatu.view.act.BackToLogin;
 import edu.regis.shatu.view.act.CheckSecurityQuestAction;
 import java.awt.Color;
@@ -22,7 +21,6 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.logging.Level;
@@ -49,11 +47,6 @@ import javax.swing.text.Document;
 public class ForgotPasswordPanel extends GPanel{
     
     /**
-     * Events of interest occurring in this class are logged to this logger.
-     */
-    private static final Logger LOGGER = Logger.getLogger(ForgotPasswordPanel.class.getName());
-
-    /**
      * A regex pattern used to validate user email ids (e.g. "rick@regis.edu").
      */
     public static final Pattern VALID_EMAIL_ADDRESS_REGEX
@@ -75,7 +68,6 @@ public class ForgotPasswordPanel extends GPanel{
     protected JLabel msg;
 
     protected JButton verifyBut;
-    protected JButton signInBut;
     protected JButton backBut;
 
     public ForgotPasswordPanel() {
@@ -149,10 +141,6 @@ public class ForgotPasswordPanel extends GPanel{
         securityQuestions.setSelectedIndex(0);
     }
     
-    // Used to get focus
-    //public JTextField getFNameComp() {
-    //return fName;
-    //}
     private void initComponents() {
         LoginDocumentListener docListener = new LoginDocumentListener();
 
@@ -163,7 +151,6 @@ public class ForgotPasswordPanel extends GPanel{
         
         String s1[] = {"What city were you born in?", "What is your mother's maiden name?"};
         securityQuestions = new JComboBox(s1);
-        //securityQuestions.addActionListener(s);
         
         secAnswer = new JPasswordField(20);
         secAnswer.getDocument().addDocumentListener(docListener);
@@ -194,7 +181,7 @@ public class ForgotPasswordPanel extends GPanel{
                 GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
                 5, 5, 5, 5);
 
-        addc(createLogin(), 1, 1, 1, 1, 0.0, 0.0,
+        addc(createVerify(), 1, 1, 1, 1, 0.0, 0.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
                 10, 5, 5, 5);
 
@@ -276,14 +263,14 @@ public class ForgotPasswordPanel extends GPanel{
         return panel;
     }
 
-    private GPanel createLogin() {
+    private GPanel createVerify() {
         GPanel panel = new GPanel();
         panel.setBackground(new Color(241,196,0));
 
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 5, 5));
 
        
-        JLabel label = new JLabel("User Id");
+        JLabel label = new JLabel("User Id:");
         label.setLabelFor(userId);
 
         panel.addc(label, 0, 2, 1, 1, 1.0, 0.0,
@@ -348,7 +335,7 @@ public class ForgotPasswordPanel extends GPanel{
     
 
     /**
-     * If the userId or password fields are empty, disable the OK 'Login'
+     * If the userId or security answer fields are empty, disable the OK 'Login'
      * button.
      */
     private void enableButtons(Document e)  {
@@ -410,36 +397,33 @@ public class ForgotPasswordPanel extends GPanel{
          */
         @Override
         public void insertUpdate(DocumentEvent e) {
-            Component comp = SplashFrame.instance().getFocusOwner();
             
             enableButtons(e.getDocument());
         }
 
         /**
-         * As text was removed from the userId or password field, check whether
+         * As text was removed from the userId or answer field, check whether
          * we need to enable or disable the LoginDialog's buttons.
          */
         @Override
         public void removeUpdate(DocumentEvent e) {
-            Component comp = MainFrame.instance().getFocusOwner();
             
             enableButtons(e.getDocument());
         }
 
         /**
-         * As text was changed in the userId or password field, check whether we
+         * As text was changed in the userId or answer field, check whether we
          * need to enable or disable the LoginDialog's buttons.
          */
         @Override
         public void changedUpdate(DocumentEvent e) {
-            Component comp = MainFrame.instance().getFocusOwner();
             
             enableButtons(e.getDocument());
         }
     }
 
     /**
-     * Encrypt the given password using SHA-256
+     * Encrypt the given security answer using SHA-256
      *
      * @param base
      * @return

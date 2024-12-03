@@ -72,7 +72,6 @@ public class ResetPasswordPanel extends GPanel{
     protected JLabel msg;
 
     protected JButton resetBut;
-    protected JButton signInBut;
     protected JButton backBut;
 
     public ResetPasswordPanel(String email) {
@@ -125,15 +124,16 @@ public class ResetPasswordPanel extends GPanel{
         pass2.setText("");
     }
     
-    public void setUserEmail(String userId){
-        System.out.println("SetUserEmail " + userId);
-        userEmail = userId;
-    }
+    //////////DELETE?
+    //public void setUserEmail(String userId){
+      //  System.out.println("SetUserEmail " + userId);
+        //userEmail = userId;
+    //}
     
-    public String getUserEmail(){
-        System.out.println("GetUserEmail " + userEmail);
-        return userEmail;
-    }
+    //public String getUserEmail(){
+      //  System.out.println("GetUserEmail " + userEmail);
+        //return userEmail;
+   // }
 
     /**
      * Update our model with the current values displayed in this view
@@ -154,10 +154,6 @@ public class ResetPasswordPanel extends GPanel{
         pass2.setText("");
     }
     
-    // Used to get focus
-    //public JTextField getFNameComp() {
-    //return fName;
-    //}
     private void initComponents() {
         
         LoginDocumentListener docListener = new LoginDocumentListener();
@@ -198,7 +194,7 @@ public class ResetPasswordPanel extends GPanel{
                 GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
                 5, 5, 5, 5);
 
-        addc(createLogin(), 1, 1, 1, 1, 0.0, 0.0,
+        addc(createReset(), 1, 1, 1, 1, 0.0, 0.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
                 10, 5, 5, 5);
 
@@ -280,14 +276,13 @@ public class ResetPasswordPanel extends GPanel{
         return panel;
     }
 
-    private GPanel createLogin() {
+    private GPanel createReset() {
         GPanel panel = new GPanel();
         panel.setBackground(new Color(241,196,0));
 
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 5, 5));
 
-       
-        JLabel label = new JLabel("User Id");
+        JLabel label = new JLabel("User Id:");
         label.setLabelFor(userId);
 
         panel.addc(label, 0, 2, 1, 1, 1.0, 0.0,

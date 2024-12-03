@@ -27,27 +27,21 @@ import static javax.swing.Action.SHORT_DESCRIPTION;
 import javax.swing.JOptionPane;
 
 /**
- * An MVC controller handling a user GUI gesture requesting the creation of a
- * new student account within the NewAccountPanel.
+ * An MVC controller handling a user GUI gesture requesting to reset their
+ * password within the ResetPasswordPanel. (Modeled after NewUserAction)
  *
- * @author rickb
+ * @author mandyroskelley
  */
 public class ResetPasswordAction extends ShaTuGuiAction {
     /**
-     * Exceptions occurring in this class are also logged to this logger.
-     */
-    private static final Logger LOGGER
-            = Logger.getLogger(CreateAcctAction.class.getName());
-
-    /**
-     * The single instance of this create account action.
+     * The single instance of this reset password action.
      */
     private static final ResetPasswordAction SINGLETON;
 
     /**
      * Create the singleton for this action, which occurs when this class
      * is loaded by the Java class loaded, as a result of the class being 
-     * referenced by executing CreateAcctAction.instance() in the 
+     * referenced by executing ResetPassword.instance() in the 
      * initializeComponents() method of the NewAccountPanel class.
      */
     static {
@@ -55,7 +49,7 @@ public class ResetPasswordAction extends ShaTuGuiAction {
     }
 
     /**
-     * Return the singleton instance of this sign-in action.
+     * Return the singleton instance of this reset password action.
      *
      * @return
      */
@@ -64,7 +58,7 @@ public class ResetPasswordAction extends ShaTuGuiAction {
     }
 
     /**
-     * Initialize this create account action with the "Create Account" text.
+     * Initialize this reset password action with the "Reset Password" text.
      */
     private ResetPasswordAction() {
         super("Reset Password");
@@ -74,8 +68,8 @@ public class ResetPasswordAction extends ShaTuGuiAction {
     }
 
     /**
-     * Handle the user's request to create a new student user account by
-     * forwarding the account information in the NewAccountPanel to the tutor.
+     * Handle the user's request to reset their password. After password is reset,
+     * user will be forwarded to the SplashFrame, where they can log in.
      *
      * @param evt ignored
      */

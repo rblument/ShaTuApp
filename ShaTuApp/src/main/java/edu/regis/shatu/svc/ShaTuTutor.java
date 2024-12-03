@@ -245,12 +245,7 @@ public class ShaTuTutor implements TutorSvc {
             if ((dbUserAnswer.getSecurityAnswer().equals(user.getSecurityAnswer())) && 
                     (dbUserQuestion.getSecurityQuestion() == user.getSecurityQuestion())) {
              
-                SessionSvc svc = ServiceFactory.findSessionSvc();
-                TutoringSession session = svc.retrieve(user.getUserId());
-
                 TutorReply reply = new TutorReply("Verified");
-
-                reply.setData(gson.toJson(session));
 
                 return reply;
 

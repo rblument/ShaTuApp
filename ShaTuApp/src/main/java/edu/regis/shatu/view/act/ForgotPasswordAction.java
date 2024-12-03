@@ -19,15 +19,15 @@ import static javax.swing.Action.MNEMONIC_KEY;
 import static javax.swing.Action.SHORT_DESCRIPTION;
 
 /**
- * An MVC controller handling a user GUI gesture requesting to reset password, 
- * which switches to the forgot password in the GUI
- * (see CreateAcctAction). (Modeled after NewUserAction)
+ * An MVC controller handling a user GUI gesture that they forgot their password, 
+ * which switches to the forgot password panel in the GUI
+ * (Modeled after NewUserAction)
  * 
  * @author mandyroskelley
  */
 public class ForgotPasswordAction extends ShaTuGuiAction {
     /**
-     * The single instance of this new user action.
+     * The single instance of this forgot password action action.
      */
     private static final ForgotPasswordAction SINGLETON;
     
@@ -61,8 +61,8 @@ public class ForgotPasswordAction extends ShaTuGuiAction {
     }
     
     /**
-     * Handle the user's request to reset the password by displaying the new
-     * user panel.
+     * Handle the user's request to answer their security question by displaying the forgot
+     * password panel.
      * 
      * @param evt ignored
      */

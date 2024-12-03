@@ -128,7 +128,8 @@ public class SplashFrame extends JFrame {
     private NewAccountPanel newAccountPanel;
     
     /**
-     * A panel which allows the user to reset their password.
+     * A panel which allows the user to verify themselves so they can reset their
+     * password.
      */
     private ForgotPasswordPanel forgotPasswordPanel;
     
@@ -353,8 +354,8 @@ public class SplashFrame extends JFrame {
     }
     
     /**
-     * Display the Forgot Password panel, which allows the user to reset their
-     * password.
+     * Display the Forgot Password panel, which allows the user to verify themselves
+     * so that they can reset their password.
      */
     public void selectForgotPassword() {
         this.selectPanel(FORGOT_PASSWORD);
@@ -368,7 +369,7 @@ public class SplashFrame extends JFrame {
     }
     
     /**
-     * Display the Forgot Password panel, which allows the user to reset their
+     * Display the Reset Password panel, which allows the user to reset their
      * password.
      * @param userId
      */
