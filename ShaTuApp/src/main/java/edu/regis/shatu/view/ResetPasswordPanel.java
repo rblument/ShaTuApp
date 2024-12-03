@@ -123,17 +123,6 @@ public class ResetPasswordPanel extends GPanel{
         pass1.setText("");
         pass2.setText("");
     }
-    
-    //////////DELETE?
-    //public void setUserEmail(String userId){
-      //  System.out.println("SetUserEmail " + userId);
-        //userEmail = userId;
-    //}
-    
-    //public String getUserEmail(){
-      //  System.out.println("GetUserEmail " + userEmail);
-        //return userEmail;
-   // }
 
     /**
      * Update our model with the current values displayed in this view
