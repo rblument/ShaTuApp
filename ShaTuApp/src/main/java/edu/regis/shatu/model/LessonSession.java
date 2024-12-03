@@ -122,6 +122,7 @@ public class LessonSession {
     }
     
     public Task currentTask() {
+        System.out.println("these are the " +tasks);
         return tasks.get(0);
     }
     

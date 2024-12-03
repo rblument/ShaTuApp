@@ -27,6 +27,7 @@ import java.awt.event.KeyEvent;
 import java.util.logging.Logger;
 import static javax.swing.Action.MNEMONIC_KEY;
 import static javax.swing.Action.SHORT_DESCRIPTION;
+import javax.swing.JOptionPane;
 
 /**
  * An (MVC) controller handling a GUI gesture representing a user's request to
@@ -101,12 +102,22 @@ public class SignInAction extends ShaTuGuiAction {
                 // Initialize main frame instance.
                 // This is used after selecting a mode from the dashboard.
                 MainFrame frame = MainFrame.instance();
-                //frame.setVisible(true);
+                frame.setVisible(false);
                 frame.setModel(session);
                 
                 // Transition to dashboard
                 SplashFrame.instance().selectDashboard(session);
                 SplashFrame.instance().setVisible(true); // Hide the SplashFrame
+                //This is a  placeholder until we get this laoding from the database using the course
+               String tutorMessage = """
+                                      Welcome, I'm ShaTu. I'll begin by showing you how this
+                                                       application works as we I begin  demonstrating each step used to create
+                                                       an SHA-256 message digest including the bitwise operations
+                                                       associated with these steps.\\n\\n
+                                                       When I send you an information message, like this one, all you
+                                                       have to do is acknowledge it by pressing the 'ok'
+                                                       button.""";
+                JOptionPane.showMessageDialog(SplashFrame.instance(), tutorMessage, "Welcome", JOptionPane.INFORMATION_MESSAGE);
                 
                 break;
             case "InvalidPassword":

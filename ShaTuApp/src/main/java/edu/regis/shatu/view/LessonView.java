@@ -104,7 +104,7 @@ public class LessonView extends UserRequestView implements ActionListener{
     protected void updateView() {
         if (model != null) {
             
-            System.out.println("SHA-256 Lesson");
+            System.out.println("SHA-256 Lesson......this is from :Essm View Update");
         }
     }
 
@@ -189,7 +189,7 @@ public class LessonView extends UserRequestView implements ActionListener{
                    // descriptionTextArea.setText(element.getTagName() + ": " + element.getTextContent());
                     descriptionTextArea.append(element.getTextContent());        
 
-                    System.out.println(element.getTextContent());
+                    //System.out.println(element.getTextContent());
                    // Thread.sleep(1000);
                 }
             }
