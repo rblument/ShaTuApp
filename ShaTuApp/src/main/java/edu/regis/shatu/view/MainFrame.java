@@ -80,21 +80,24 @@ public class MainFrame extends JFrame implements WindowListener {
      */
     private MainFrame() {
         super("ShaTut");
-        Dimension screenSize = Toolkit. getDefaultToolkit(). getScreenSize();
-        screenSize.width = screenSize.width - SCREEN_SIZE_INSET ;
-        screenSize.height = screenSize.height - SCREEN_SIZE_INSET - 10;
-        setSize(screenSize);
-        setLocation(10, 10);
-        
+
+        // Get screen dimensions
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+
+        // Calculate the initial size (80% of the splashFrame width)
+        int width = (int) (screenSize.width * 0.8);
+        int height = (int) (screenSize.height);
+        setSize(width, height);
+
         setJMenuBar(new ShaTuMenuBar());
-        
+
         initializeComponents();
         layoutComponents();
- 
+
         addWindowListener(this);
 
         setVisible(false);
-        
+
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE); // see windowClosing()
     }
   
