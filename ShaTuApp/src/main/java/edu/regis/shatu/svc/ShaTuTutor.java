@@ -1,4 +1,3 @@
-
 /*
  * SHATU: SHA-256 Tutor
  * 
@@ -27,6 +26,7 @@ import edu.regis.shatu.model.BitShiftStep;
 import edu.regis.shatu.model.ChoiceFunctionStep;
 import edu.regis.shatu.model.Course;
 import edu.regis.shatu.model.Hint;
+import edu.regis.shatu.model.InitVarStep;
 import edu.regis.shatu.model.TutoringSession;
 import edu.regis.shatu.model.User;
 import edu.regis.shatu.model.aol.BitOpExample;
@@ -55,6 +55,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -276,7 +277,6 @@ public class ShaTuTutor implements TutorSvc {
         switch (step.getSubType()) {
             case INFO_MESSAGE:
                 return completeInfoMsgStep(completion);
-
             case ENCODE_BINARY: // TO_DO: Really the same
             case ENCODE_HEX:
             case ENCODE_ASCII:
@@ -655,7 +655,90 @@ public class ShaTuTutor implements TutorSvc {
     }
 
     public TutorReply completeInitVarsStep(StepCompletion completion) {
-        TutorReply reply = new TutorReply(":StepCompletionReply");
+        System.out.println("Tutor completeInitVarsStep");
+
+        InitVarStep example = gson.fromJson(completion.getData(), InitVarStep.class);
+
+        // Extract user-provided answers and expected results
+        Map<String, String> userAnswers = example.getUserAnswers();
+        Map<String, String> correctAnswers = example.getCorrectAnswers();
+
+        // Track correctness and prepare feedback
+        boolean allCorrect = true;
+        StringBuilder feedback = new StringBuilder();
+
+        for (String variable : correctAnswers.keySet()) {
+            String userAnswer = userAnswers.getOrDefault(variable, "");
+            String correctAnswer = correctAnswers.get(variable);
+
+            feedback.append(variable)
+                    .append(": User Answer: ")
+                    .append(userAnswer)
+                    .append(", Correct Answer: ")
+                    .append(correctAnswer)
+                    .append("\n");
+
+            if (!userAnswer.equals(correctAnswer)) {
+                allCorrect = false;
+            }
+        }
+
+        System.out.println("Feedback:\n" + feedback);
+
+        // Create StepCompletionReply
+        StepCompletionReply stepReply = new StepCompletionReply();
+        stepReply.setIsCorrect(allCorrect);
+        stepReply.setCorrectAnswer(feedback.toString());
+
+        // Update the student model
+        int dbId = KnowledgeComponentKind.fromString("Initialize Variables").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId);
+
+        // Increment success or exposure based on correctness
+        if (allCorrect) {
+            assessment.incrementSuccessess();
+        }
+        assessment.incrementExposures();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.SUCCESSES);
+        } catch (NonRecoverableException ex) {
+            return createError("Failed to update assessment data in database", ex);
+        }
+
+        // Determine whether to recommend a new task
+        int exposures = assessment.getExposures();
+        int successes = assessment.getSuccessess();
+        if (exposures > 0 && (double) successes / exposures > 0.8) {
+            stepReply.setIsNewTask(true);
+            System.out.println("Next task is recommended.");
+        } else {
+            stepReply.setIsNewTask(false);
+        }
+
+        stepReply.setIsRepeatStep(!allCorrect);
+        stepReply.setIsNewStep(allCorrect);
+        stepReply.setIsNextStep(false);
+
+        // Wrap the StepCompletionReply into a Task and TutorReply
+        Step step = new Step(1, 0, StepSubType.STEP_COMPLETION_REPLY);
+        step.setCurrentHintIndex(0);
+        step.setNotifyTutor(true);
+        step.setIsCompleted(false);
+
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+        step.setData(gson.toJson(stepReply));
+
+        Task task = new Task();
+        task.setKind(TaskKind.PROBLEM);
+        task.setType(ExampleType.STEP_COMPLETION_REPLY);
+        task.setDescription("Review your results and choose the next action.");
+        task.addStep(step);
+
+        TutorReply reply = new TutorReply(":Success");
+        reply.setData(gson.toJson(task));
 
         return reply;
     }
@@ -1372,15 +1455,15 @@ public class ShaTuTutor implements TutorSvc {
     }
 
     /**
-     * Handles client requests for a new initialize vars example.
-     *
-     * @return a TutorReply
-     */
-    private TutorReply newInitializeVarsExample(TutoringSession session, String jsonData) {
-        TutorReply reply = new TutorReply(":Success");
+    * Handles client requests for a new initialize vars example.
+    *
+    * @return a TutorReply
+    */
+   private TutorReply newInitializeVarsExample(TutoringSession session, String jsonData) {
+       TutorReply reply = new TutorReply(":Success");
 
-        return reply;
-    }
+       return reply;
+   }
 
     /**
      * Handles client requests for a new compress round example.
@@ -2240,29 +2323,61 @@ public class ShaTuTutor implements TutorSvc {
     private TutorReply hintInitVars(StepCompletion completion) {
         System.out.println("Tutor hintInitVars");
 
-        StepCompletionReply stepReply = new StepCompletionReply();
+        // Deserialize the StepCompletion object to access the InitVarStep
+        InitVarStep initVarStep = gson.fromJson(completion.getData(), InitVarStep.class);
 
+        StepCompletionReply stepReply = new StepCompletionReply();
         stepReply.setIsCorrect(false);
         stepReply.setIsRepeatStep(true);
         stepReply.setIsNewStep(false);
         stepReply.setIsNewTask(false);
         stepReply.setIsNextStep(false);
 
-        Hint hintOne = new Hint();
-        hintOne.setId(0);
-        hintOne.setText("Initialize 8 variables with the first 32 bits of the fractional parts of the square roots of the first 8 primes");
-
+        // Dynamically fetch hints for each variable
         Step step = completion.getStep();
-        step.addHint(hintOne);
+        for (String variable : initVarStep.getCorrectAnswers().keySet()) {
+            // Fetch hints for the variable at different levels
+            Hint hintLevel1 = new Hint();
+            hintLevel1.setId(1);
+            hintLevel1.setText(initVarStep.getHint(variable, 1));
+            step.addHint(hintLevel1);
+
+            Hint hintLevel2 = new Hint();
+            hintLevel2.setId(2);
+            hintLevel2.setText(initVarStep.getHint(variable, 2));
+            step.addHint(hintLevel2);
+
+            Hint hintLevel3 = new Hint();
+            hintLevel3.setId(3);
+            hintLevel3.setText(initVarStep.getHint(variable, 3));
+            step.addHint(hintLevel3);
+        }
+
         step.setNotifyTutor(true);
         step.setIsCompleted(false);
         step.setSubType(StepSubType.REQUEST_HINT);
+
+        // Add timeout
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);
+
+        // Serialize the reply with hints
         step.setData(gson.toJson(stepReply));
 
         TutorReply reply = new TutorReply(":Success");
         reply.setData(gson.toJson(step));
+
+        // Update hint usage in the student model
+        int dbId = KnowledgeComponentKind.fromString("Initialize Variables").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId);
+        assessment.incrementHints();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.HINTS);
+        } catch (NonRecoverableException ex) {
+            return createError("Failed to update assessment data for hint usage", ex);
+        }
 
         return reply;
     }

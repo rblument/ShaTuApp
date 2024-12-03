@@ -170,5 +170,13 @@ SHATU: SHA-256 Tutor
         <ExercisingLocation course="1" unit="0" task="0" step="0" />
     </KnowledgeComponent>
     
+    <KnowledgeComponent id="102" title="Initialize Variables Assessment" 
+             bloomLevel="Application" focus="Tutor" pedagogy="Other">
+        <Description>
+            Student has appropriately demonstrated understanding of initializing variables
+        </Description>
+        <ExercisingLocation course="1" unit="0" task="0" step="0" />
+    </KnowledgeComponent>
+    
 </Course>
 

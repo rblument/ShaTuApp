@@ -68,3 +68,6 @@ INSERT INTO Assessment (Id, UserId, KnowledgeComponentId, AssessmentLevel, Expos
 
 INSERT INTO Assessment (Id, UserId, KnowledgeComponentId, AssessmentLevel, Exposures, Successes, Hints)
    VALUES (101, 'test@regis.edu', 101, 'Not Started', 0, 0, 0);
+
+INSERT INTO Assessment (Id, UserId, KnowledgeComponentId, AssessmentLevel, Exposures, Successes, Hints)
+   VALUES (102, 'test@regis.edu', 102, 'Not Started', 0, 0, 0);
