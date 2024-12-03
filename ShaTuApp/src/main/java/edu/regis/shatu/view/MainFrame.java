@@ -18,6 +18,16 @@ import java.awt.Toolkit;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import javax.swing.JFrame;
+import edu.regis.shatu.view.act.BackToLogin;
+import javax.swing.Timer;
+import java.awt.event.AWTEventListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.awt.AWTEvent;
+import javax.swing.JOptionPane;
+
+
+
 
 /**
  * The primary GUI window in the ShaTu application.
@@ -63,6 +73,8 @@ public class MainFrame extends JFrame implements WindowListener {
      */
     private TutoringSessionView view;
     
+    private Timer inactivityTimer; // Timer for inactivity tracking
+    
     /**
      * Initialize and layout the child components displayed in this frame.
      */
@@ -80,12 +92,12 @@ public class MainFrame extends JFrame implements WindowListener {
         layoutComponents();
  
         addWindowListener(this);
-        
+
         setVisible(false);
         
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE); // see windowClosing()
     }
-
+  
     /**
      * Update the current model with changes made in this frame and return it.
      * 

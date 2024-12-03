@@ -100,50 +100,16 @@ public class EncodeView extends UserRequestView implements ActionListener, KeyLi
      * Constructor initializes the view by setting up components and layout.
      */
     public EncodeView() {
+        System.out.println("EncodeView constructor called");
         gson = new GsonBuilder().setPrettyPrinting().create();
         questionData = new ArrayList<>();
         initializeComponents();
         initializeLayout();
         updateToRadioButtonsEnabledState();
         prepareNextQuestion();
-    }
-    
-    /**
-    * Creates a new request for an ASCII encoding example.
-    *
-    * @return ex containing the encoded ASCII step data.
-    */
-    public NewExampleRequest newRequest() {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
         
-        NewExampleRequest ex = new NewExampleRequest();
-        ex.setExampleType(ExampleType.ASCII_ENCODE);
-        EncodeAsciiStep asciiStep = new EncodeAsciiStep();
-        ex.setData(gson.toJson(asciiStep));
-
-        return ex;
-    }
-    
-    /**
-    * Handles the completion of a step by retrieving the current step data
-    *
-    * @return step object containing the updated step information.
-     */
-    public StepCompletion stepCompletion() {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        
-        Step currentStep = model.currentTask().currentStep();
-        EncodeAsciiStep example = gson.fromJson(currentStep.getData(), EncodeAsciiStep.class);
-        String userResponse = feedbackArea.getText().replaceAll("\\s", "");
-        EncodeAsciiExample newExample = new EncodeAsciiExample(userResponse);
-        example.setExample(newExample);
-        String encodedResult = example.encode();
-   
-        feedbackArea.setText(encodedResult);
-
-        StepCompletion step = new StepCompletion(currentStep, gson.toJson(example));
-    
-        return step;
+        // TEMPORARY: Set a model for testing purposes
+        setModel(new TutoringSession()); // Replace with an actual session instance if available
     }
 
     
@@ -209,18 +175,6 @@ public class EncodeView extends UserRequestView implements ActionListener, KeyLi
     private void verifyAnswer() {
       
     }
-
-    private void processExampleSelection(String selectedExample) {
-    // Create a new EncodeAsciiExample instance with the selected string
-    EncodeAsciiExample example = new EncodeAsciiExample(selectedExample);
-
-    // Create an instance of EncodeAsciiStep and set the example
-    EncodeAsciiStep asciiStep = new EncodeAsciiStep();
-    asciiStep.setExample(example);  // Set the example in the step
-
-    // Call the encode method to perform ASCII conversion
-    asciiStep.encode();  // This will print out the ASCII conversion or perform further actions
-}
       
     /**
      * Initializes all GUI components, setting up their properties and configurations.
@@ -372,6 +326,7 @@ public class EncodeView extends UserRequestView implements ActionListener, KeyLi
     */
     private void handleNewAsciiExampleRequest() {
         //Create a new ShaTuTutor object
+        System.out.println("In handle new example request."); //debugging
         ShaTuTutor tutor = new ShaTuTutor();
         int length = random.nextInt(6) + 3;
     
@@ -388,6 +343,12 @@ public class EncodeView extends UserRequestView implements ActionListener, KeyLi
         //Call the backend method using the tutor object
         TutorReply reply = tutor.newExample(jsonRequest);
         Task task = gson.fromJson(reply.getData(), Task.class);
+        if (model != null) {
+            model.addCurrentTask(task);
+            System.out.println("Model updated with new task.");
+            } else {
+            System.out.println("Warning: model is null when trying to add current task.");
+            }
         Step step = task.getSteps().get(0);
         EncodeAsciiStep asciiStep = gson.fromJson(step.getData(), EncodeAsciiStep.class);
         EncodeAsciiExample receivedExample = asciiStep.getExample();
@@ -1016,9 +977,51 @@ public class EncodeView extends UserRequestView implements ActionListener, KeyLi
      * @param model the TutoringSession model to set
      */
     public void setModel(TutoringSession model) {
+        System.out.println("setModel() called with model: " + model);
+
         this.model = model;
         
         updateView();
+    }
+    
+        /**
+    * Creates a new request for an ASCII encoding example.
+    *
+    * @return ex containing the encoded ASCII step data.
+    */
+    public NewExampleRequest newRequest() {
+        System.out.println("EncodeView.newRequest() called.");
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        
+        NewExampleRequest ex = new NewExampleRequest();
+        ex.setExampleType(ExampleType.ASCII_ENCODE);
+        EncodeAsciiStep asciiStep = new EncodeAsciiStep();
+        ex.setData(gson.toJson(asciiStep));
+        
+        System.out.println("EncodeView.newRequest() returning: " + ex);
+        return ex;
+    }
+    
+    /**
+    * Handles the completion of a step by retrieving the current step data
+    *
+    * @return step object containing the updated step information.
+     */
+    public StepCompletion stepCompletion() {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        
+        Step currentStep = model.currentTask().currentStep();
+        EncodeAsciiStep example = gson.fromJson(currentStep.getData(), EncodeAsciiStep.class);
+        String userResponse = feedbackArea.getText().replaceAll("\\s", "");
+        EncodeAsciiExample newExample = new EncodeAsciiExample(userResponse);
+        example.setExample(newExample);
+        String encodedResult = example.encode();
+   
+        feedbackArea.setText(encodedResult);
+
+        StepCompletion step = new StepCompletion(currentStep, gson.toJson(example));
+    
+        return step;
     }
     
     /**
@@ -1026,14 +1029,20 @@ public class EncodeView extends UserRequestView implements ActionListener, KeyLi
      * 
      * TODO: THIS IS A PLACEHOLDER UNTIl WE HAVE HAVE THE MODEL CODE COMPLETED
      */
+    @Override
     protected void updateView() {
-        if (model != null) {
-            // ****TO-DO*****
-            // Update the view's information from the model below are just some debugging
-            System.out.println("EncodeView.updateView() --> model.getUnit().getDescription(): " 
-                    + model.getUnit().getDescription());
-            System.out.println("EncodeView.updateView() --> model.currentTask().currentStep().getTitle(): "
-                    + model.currentTask().currentStep().getTitle());            
-        }   
+        System.out.println("EncodeView.updateView() called.");
+        if (model == null) {
+            System.out.println("EncodeView.updateView() - model is null.");
+        } else {
+            System.out.println("EncodeView.updateView() - model is set.");
+            // Debug the current task and step if available
+            try {
+                System.out.println("EncodeView.updateView() --> model.getUnit().getDescription(): " + model.getUnit().getDescription());
+                System.out.println("EncodeView.updateView() --> model.currentTask().currentStep().getTitle(): " + model.currentTask().currentStep().getTitle());
+            } catch (Exception e) {
+                System.out.println("EncodeView.updateView() - Exception while accessing model: " + e);
+            }
+        }
     }
 } 
