@@ -127,6 +127,12 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
                     stmt = conn.prepareStatement(sql);
                     stmt.setInt(1, assessment.getSuccessess());
                     break;
+                    
+                case HINTS:
+                    sql = "UPDATE Assessment SET Hints = ? WHERE Id = ?";
+                    stmt = conn.prepareStatement(sql);
+                    stmt.setInt(1, assessment.getHints());
+                    break;
             }
 
             stmt.setInt(2, assessmentId);
@@ -203,7 +209,7 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
     private ArrayList<Assessment> retrieveAssessments(String userId, Connection conn)
             throws ObjNotFoundException, SQLException, NonRecoverableException {
 
-        final String sql = "SELECT Id,KnowledgeComponentId,AssessmentLevel,Exposures,Successes FROM Assessment WHERE UserId = ?";
+        final String sql = "SELECT Id,KnowledgeComponentId,AssessmentLevel,Exposures,Successes,Hints FROM Assessment WHERE UserId = ?";
 
         CourseSvc courseSvc = ServiceFactory.findCourseSvc();
         Course course = courseSvc.retrieve(1); // Note only one course possible.
@@ -228,6 +234,7 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
             assessment.setId(assessmentId);
             assessment.setExposures(rs.getInt(4));
             assessment.setSuccessess(rs.getInt(5));
+            assessment.setHints(rs.getInt(6));
 
             assessments.add(assessment);
         }

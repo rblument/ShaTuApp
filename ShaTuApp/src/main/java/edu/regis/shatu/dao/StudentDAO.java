@@ -173,7 +173,7 @@ public class StudentDAO extends MySqlDAO implements StudentSvc {
     @Override
     public StudentModel findModelById(String userId) throws ObjNotFoundException, NonRecoverableException {
         final String sql1 = "SELECT ScaffoldLevel FROM StudentModel WHERE UserId = ?";
-        final String sql2 = "SELECT Id,KnowledgeComponentId,AssessmentLevel,Exposures,Successes FROM Assessment WHERE UserId = ?";
+        final String sql2 = "SELECT Id,KnowledgeComponentId,AssessmentLevel,Exposures,Successes,Hints FROM Assessment WHERE UserId = ?";
 
         
         Connection conn = null;
@@ -224,6 +224,7 @@ public class StudentDAO extends MySqlDAO implements StudentSvc {
                 assessment.setId(rs.getInt(1));
                 assessment.setExposures(rs.getInt(4));
                 assessment.setSuccessess(rs.getInt(5));
+                assessment.setHints(rs.getInt(6));
                 
                 studentModel.addAssessment(assessment);
             } 

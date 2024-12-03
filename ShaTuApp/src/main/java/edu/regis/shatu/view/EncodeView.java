@@ -355,7 +355,7 @@ public class EncodeView extends UserRequestView implements ActionListener {
      */
     @Override
     protected void updateView() {
-        
+
         if (this.model == null) { // Currently in development, Encode Ascii starts first when loaded, which model can be null initially.
             questionLabel.setText("Please click new example button to get started");
             checkButton.setEnabled(false);
@@ -453,8 +453,7 @@ public class EncodeView extends UserRequestView implements ActionListener {
         
         return ex;
     }
-    
-    /**
+     /**
      * This method is suppose to be called when the check button is clicked,
      * it should take the users answer, assign it to the related class, then
      * send it to the tutor to handle checking the answer and then will handle
