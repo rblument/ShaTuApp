@@ -231,6 +231,14 @@ public class SplashFrame extends JFrame {
         return this.tutoringSession;
     }
     
+     /**
+     * Enables access to the current view
+     * @return an instance of the current view
+     */
+    public TutoringSessionView getView(){
+        return this.tutoringSessionView;
+    }
+    
     /**
      * Clears the tutoringSession instance.
      * Changes current user to an empty user instance.

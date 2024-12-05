@@ -38,6 +38,7 @@ import javax.swing.event.DocumentListener;
  */
 public class InitVarView extends UserRequestView implements ActionListener {
     
+    private TutoringSessionView view;
     private InitVarStep initVarStep;
     private JButton showButton, hintButton, checkButton;
     private JTextField h0, h1, h2, h3, h4, h5, h6, h7;
@@ -45,7 +46,7 @@ public class InitVarView extends UserRequestView implements ActionListener {
     private short hintCount;
     private boolean answersVisible, hintsVisible;
 
-    public InitVarView() {   
+    public InitVarView() { 
         initializeComponents();
         initializeLayout();
         attachDocumentListeners();
@@ -55,6 +56,7 @@ public class InitVarView extends UserRequestView implements ActionListener {
     public void actionPerformed(ActionEvent event) {
         if (event.getSource() == checkButton) {
             boolean allCorrect = initVarStep.allAnswersCorrect();
+            
             if(allCorrect){
                 showAnswer();
                 feedbackTextArea.setText("Correct!");
@@ -64,8 +66,6 @@ public class InitVarView extends UserRequestView implements ActionListener {
             }
         } else if (event.getSource() == hintButton) {
             showHint();
-        } else if (event.getSource() == showButton) {
-            showAnswer();
         }
     }
 
@@ -97,10 +97,9 @@ public class InitVarView extends UserRequestView implements ActionListener {
         feedbackTextArea.setLineWrap(true);
         feedbackTextArea.setWrapStyleWord(true);
         feedbackTextArea.setBackground(null);
-
+        
         showButton = new JButton("Show Answer");
-        hintButton = new JButton("Hint");
-        checkButton = new JButton(StepCompletionAction.instance());
+        showButton.addActionListener(e -> showAnswer());
     }
 
     private void initializeLayout() {
@@ -125,13 +124,12 @@ public class InitVarView extends UserRequestView implements ActionListener {
         createLabelForField("H7: ", h7, 8);
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
-        buttonPanel.add(checkButton);
-        buttonPanel.add(hintButton);
+        //buttonPanel.add(checkButton);
+        //buttonPanel.add(hintButton);
         buttonPanel.add(showButton);
 
-        showButton.addActionListener(this);
-        hintButton.addActionListener(this);
-        checkButton.addActionListener(this);
+        //hintButton.addActionListener(this);
+        //checkButton.addActionListener(this);
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
@@ -181,11 +179,18 @@ public class InitVarView extends UserRequestView implements ActionListener {
             @Override
             public void insertUpdate(DocumentEvent e) {
                 checkInput(e);
+                if (!checkButton.isEnabled()){
+                    view.toggleButton(checkButton);
+                    view.toggleButton(hintButton);
+                }
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
                 checkInput(e);
+                if(allFieldsEmpty()){
+                    view.toggleButton(checkButton);
+                }
             }
 
             @Override
@@ -367,16 +372,51 @@ public class InitVarView extends UserRequestView implements ActionListener {
         }
     }
     
+    /**
+    * Checks if all text fields are empty.
+    * 
+    * @return true if all fields are empty, false otherwise.
+    */
+    public boolean allFieldsEmpty() {
+        return h0.getText().trim().isEmpty() &&
+               h1.getText().trim().isEmpty() &&
+               h2.getText().trim().isEmpty() &&
+               h3.getText().trim().isEmpty() &&
+               h4.getText().trim().isEmpty() &&
+               h5.getText().trim().isEmpty() &&
+               h6.getText().trim().isEmpty() &&
+               h7.getText().trim().isEmpty();
+    }
+    
     @Override
     protected void updateView() {
+        view = SplashFrame.instance().getView();
+        view.resetButtonListeners();
+        showButton = view.initializeButton("Show Answer");
+        hintButton = view.getHintButton();
+        hintButton.addActionListener(this);
+        hintButton.setEnabled(false);
+        checkButton = view.getCheckButton();
+        checkButton.addActionListener(this);
+        checkButton.setEnabled(false);
+        
         if (model == null) {
             System.out.println("Error: The model is null when switching to Initialize Variables...");
         }
         else {
-            // TODO: Debug statements. Task is not being set properly, or is being reset somewhere.
+            // TODO: Debug statements. Task is not being set properly.
+            // The model's tasks list holds only the first task. It must be populated with each task.
+            // This should originate from a lack of data within the database. Populating it should resolve this error.
             System.out.println("Initialize update view called.");
             System.out.println("----Init Var Task Title-----"+model.currentTask().getTitle());
             System.out.println("----Init Var Step Title-----"+model.currentTask().getCurrentStep().getTitle());
+            
+            // Defaults with the check and hint buttons disabled until user input.
+            // New example is uniquely hidden for this view,as
+            // There are only 8 initial values, all of which the user shall define.
+            if(view.getNewExampleButton().isEnabled()) {              
+                view.toggleButton(view.getNewExampleButton());
+            }
         }
     }
 
