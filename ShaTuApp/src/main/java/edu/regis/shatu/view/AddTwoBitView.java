@@ -214,7 +214,7 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
         if (e.getKeyCode() == KeyEvent.VK_ENTER && answerField.getText().equals("")) {
             JOptionPane.showMessageDialog(this, "Please provide an answer");
         } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-            verifyAnswer();
+            checkButton.doClick();
         }
     }
 
@@ -254,8 +254,8 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
      */
     private void onNextHint() {
         JOptionPane.showMessageDialog(this, "Hint");
-    }
-
+        }
+       
     /**
      * Handles the action for the Check button.
      */
