@@ -20,6 +20,7 @@ import edu.regis.shatu.model.ChoiceFunctionStep;
 import edu.regis.shatu.model.aol.ExampleType;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.StepSubType;
+import edu.regis.shatu.view.act.HintAction;
 import edu.regis.shatu.view.act.NewExampleAction;
 import javax.swing.*;
 import java.awt.*;
@@ -302,7 +303,7 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
         checkButton = new JButton(StepCompletionAction.instance());
         checkButton.addActionListener(this);
         
-        hintButton = new JButton("Hint");
+        hintButton = new JButton(HintAction.instance());
         hintButton.addActionListener(this);
         
         newExampleButton = new JButton(NewExampleAction.instance());
@@ -398,13 +399,8 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
      */
     @Override
     public void actionPerformed(ActionEvent event) {
-        if (event.getSource() == checkButton) {
-            onCheckButton();
-        } else if (event.getSource() == hintButton) {
+        if (event.getSource() == hintButton) 
             onNextHint();
-        } else if (event.getSource() == newExampleButton) {
-            onNextQuestion();
-        }
     }
     
     @Override
@@ -600,9 +596,6 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
     */
     private void onNextHint() {
         truthTablePanel.setVisible(true);
-
-        JOptionPane.showMessageDialog(this, "Hint: Check the truth table above for the "
-                + "appropriate values.");
     }
 
     /**
@@ -621,13 +614,22 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
         Step step = model.currentTask().getCurrentStep();
-        if (step.getSubType() == StepSubType.MAJORITY_FUNCTION) {
-            //Get the data from the model as a RotateStep object
-            MajorityStep example = gson.fromJson(step.getData(), MajorityStep.class);
+        //Get the data from the model as a RotateStep object
+        MajorityStep example = gson.fromJson(step.getData(), MajorityStep.class);
 
-            stringXLabel.setText("x: " + example.getOperand1());
-            stringYLabel.setText("y: " + example.getOperand2());
-            stringZLabel.setText("z: " + example.getOperand3());
+        if (example.getOperandA() == null || example.getOperandA().isEmpty()) {
+            stringXLabel.setText("x: Please");
+            stringYLabel.setText("y: click");
+            stringZLabel.setText("z: New Example"); 
+            hintButton.setEnabled(false);
+            checkButton.setEnabled(false);
         }
-    }
+        else {
+            stringXLabel.setText("x: " + example.getOperandA());
+            stringYLabel.setText("y: " + example.getOperandB());
+            stringZLabel.setText("z: " + example.getOperandC());
+            hintButton.setEnabled(true);
+            checkButton.setEnabled(true);
+        }
+}
 }

@@ -77,13 +77,6 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
      */
     @Override
     public void actionPerformed(ActionEvent event) {
-        if (event.getSource() == checkButton) {
-            onCheckButton();
-        } else if (event.getSource() == hintButton) {
-            onNextHint();
-        } else if (event.getSource() == nextQuestionButton) {
-            onNextQuestion();
-        }
     }
 
     /**
@@ -104,7 +97,7 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
         checkButton = new JButton(StepCompletionAction.instance());
         checkButton.addActionListener(this);
         
-        hintButton = new JButton("Hint");
+        hintButton = new JButton(HintAction.instance());
         hintButton.addActionListener(this);
         
         nextQuestionButton = new JButton(NewExampleAction.instance());
@@ -339,9 +332,13 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
             binary1 = example.getExample().getOperand1();
             binary2 = example.getExample().getOperand2();
             result = calculateModulo(binary1, binary2); 
+            checkButton.setEnabled(true);
+            hintButton.setEnabled(true);
         }
         catch (NullPointerException e) {
             System.out.println("Example is empty.");
+            checkButton.setEnabled(false);
+            hintButton.setEnabled(false);
         }
         
         stringLabel1.setText("binary number1: " + binary1);
