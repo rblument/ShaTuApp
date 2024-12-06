@@ -134,8 +134,8 @@ public class SplashFrame extends JFrame {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 
         // Calculate initial size (e.g., 80% of the screen)
-        int width = (int) (screenSize.width * 0.8);
-        int height = (int) (screenSize.height * 0.8);
+        int width = (int) (screenSize.width * 0.5);
+        int height = (int) (screenSize.height * 0.56);
         setSize(width, height);
         setMinimumSize(new Dimension(875, 650)); // Minimum size
 
@@ -303,8 +303,8 @@ public class SplashFrame extends JFrame {
 
         // Dynamically resize the frame to fit the screen
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        int width = (int) (screenSize.width * 0.8); // 80% of the screen width
-        int height = (int) (screenSize.height * 0.8); // 80% of the screen height
+        int width = (int) (screenSize.width * 0.5); // 50% of the screen width
+        int height = (int) (screenSize.height * 0.56); // 56% of the screen height
 
         setPreferredSize(new Dimension(width, height));
         pack();
