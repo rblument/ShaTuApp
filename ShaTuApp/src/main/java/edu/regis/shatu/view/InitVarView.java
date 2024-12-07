@@ -179,9 +179,12 @@ public class InitVarView extends UserRequestView implements ActionListener {
             @Override
             public void insertUpdate(DocumentEvent e) {
                 checkInput(e);
-                if (!checkButton.isEnabled()){
+                if (!checkButton.isEnabled() && !hintButton.isEnabled()){
                     view.toggleButton(checkButton);
                     view.toggleButton(hintButton);
+                }
+                else if (!checkButton.isEnabled()) {
+                    view.toggleButton(checkButton);
                 }
             }
 
@@ -189,7 +192,7 @@ public class InitVarView extends UserRequestView implements ActionListener {
             public void removeUpdate(DocumentEvent e) {
                 checkInput(e);
                 if(allFieldsEmpty()){
-                    view.toggleButton(checkButton);
+                    checkButton.setEnabled(false);
                 }
             }
 
@@ -388,19 +391,23 @@ public class InitVarView extends UserRequestView implements ActionListener {
                h7.getText().trim().isEmpty();
     }
     
-    @Override
-    protected void updateView() {
-        view = SplashFrame.instance().getView(); // Accessing view to use universal buttons
-        view.resetButtonListeners(); // Clear any listeners applied from other views
-        
+    private void setupButtons() {
         // Initializes Buttons
         showButton = view.initializeButton("Show Answer");
         hintButton = view.getHintButton();
         hintButton.addActionListener(this);
         checkButton = view.getCheckButton();
         checkButton.addActionListener(this);
+    }
+    
+    @Override
+    protected void updateView() {
+        view = SplashFrame.instance().getView(); // Accessing view to use universal buttons
+        view.resetButtonListeners(); // Clear any listeners applied from other views
+        feedbackTextArea.setText(""); // Resets text feedback area      
+        setupButtons();
         
-        // New example is uniquely hidden for this view,as
+        // New example is uniquely hidden for this view, as
         // There are only 8 initial values, 
         // all of which the user shall define.          
         view.getNewExampleButton().setEnabled(false);   
