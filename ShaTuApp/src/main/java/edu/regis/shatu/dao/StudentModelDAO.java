@@ -111,7 +111,7 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
 
             switch (field) {
                 case ASSESSMENT_LEVEL:
-                    sql = "UPDATE Assessment SET AssementLevel = ? WHERE Id = ? ";
+                    sql = "UPDATE Assessment SET AssessmentLevel = ? WHERE Id = ? ";
                     stmt = conn.prepareStatement(sql);
                     stmt.setString(1, assessment.getAssessment().title());
 
@@ -126,6 +126,7 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
                     sql = "UPDATE Assessment SET Successes = ? WHERE Id = ?";
                     stmt = conn.prepareStatement(sql);
                     stmt.setInt(1, assessment.getSuccessess());
+                    
                     break;
                     
                 case HINTS:

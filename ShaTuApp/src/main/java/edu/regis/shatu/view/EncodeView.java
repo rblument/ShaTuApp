@@ -20,6 +20,7 @@ import edu.regis.shatu.model.EncodeAsciiStep;
 import edu.regis.shatu.model.aol.ExampleType;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.StepSubType;
+import edu.regis.shatu.view.act.HintAction;
 import edu.regis.shatu.view.act.NewExampleAction;
 import edu.regis.shatu.view.act.StepCompletionAction;
 import java.awt.GridBagConstraints;
@@ -248,7 +249,7 @@ public class EncodeView extends UserRequestView implements ActionListener {
         checkButton = new JButton(StepCompletionAction.instance());
         checkButton.addActionListener(this);
 
-        hintButton = new JButton("Hint"); // Needs to be adjusted once tutor can handle hints
+        hintButton = new JButton(HintAction.instance()); // Needs to be adjusted once tutor can handle hints
         hintButton.addActionListener(this);
 
         nextButton = new JButton(NewExampleAction.instance());
