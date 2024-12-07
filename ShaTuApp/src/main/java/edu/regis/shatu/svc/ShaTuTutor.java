@@ -984,7 +984,85 @@ public class ShaTuTutor implements TutorSvc {
     }
 
     public TutorReply completeXorBitsStep(StepCompletion completion) {
-        TutorReply reply = new TutorReply(":StepCompletionReply");
+        Random rnd = new Random();
+        System.out.println("Tutor completeXorBitsStep");
+
+        BitOpStep example = gson.fromJson(completion.getData(), BitOpStep.class);
+
+        String operand1 = example.getExample().getOperand1();
+        String operand2 = example.getExample().getOperand2();
+        String result = example.getExample().getResult();
+
+        int m = 8; //this will be changed
+
+        String expectedResult = xorBitsFunction(operand1, operand2);
+
+        StepCompletionReply stepReply = new StepCompletionReply();
+        stepReply.setCorrectAnswer(expectedResult);
+        stepReply.setResponse(result);
+
+        if (expectedResult.equals(result)) {
+            stepReply.setIsCorrect(true);
+            stepReply.setIsRepeatStep(false);
+            stepReply.setIsNewStep(true);
+
+            // ToDo: Use the student model to figure out whether we want
+            // to give the student another practice problem of the same
+            // type or move on to an entirely different problem.
+            stepReply.setIsNewTask(true);
+
+            // ToDo: currently only one step in a task, so there isn't a next one???
+            stepReply.setIsNextStep(false);
+            
+            // Update the assessment data and save it to the database.
+            int dbId = KnowledgeComponentKind.fromString("XOR Bits").dbId();
+            Assessment assessment = studentModel.findAssessment(dbId); 
+            assessment.incrementSuccessess();
+
+            try {
+                StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+                modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.SUCCESSES);
+
+            } catch (NonRecoverableException ex) {
+                return createError("Unknown error", ex);
+            }
+            
+            int exposures = assessment.getExposures();
+            int successes = assessment.getSuccessess();
+            
+            if (exposures > 0 && (double) successes / exposures > 0.6) {
+                stepReply.setIsNewTask(true);
+                System.out.println("%%%%%%%%%%% Next Task Recommended");
+            }
+            else stepReply.setIsNewTask(false);
+
+        } else {
+            stepReply.setIsCorrect(false);
+            stepReply.setIsRepeatStep(true);
+            stepReply.setIsNewStep(false);
+            stepReply.setIsNewTask(false);
+            stepReply.setIsNextStep(false);
+        }
+
+        Step step = new Step(1, 0, StepSubType.STEP_COMPLETION_REPLY);
+        step.setCurrentHintIndex(0);
+        step.setNotifyTutor(true);
+        step.setIsCompleted(false);
+        // ToDo: fix timeouts
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+
+        step.setData(gson.toJson(stepReply));
+
+        Task task = new Task();
+        task.setKind(TaskKind.PROBLEM);
+        task.setType(ExampleType.STEP_COMPLETION_REPLY);
+        task.setDescription("Choose your next action");
+        task.addStep(step);
+
+        TutorReply reply = new TutorReply(":Success");
+
+        reply.setData(gson.toJson(task));
 
         return reply;
     }
@@ -3070,5 +3148,19 @@ public class ShaTuTutor implements TutorSvc {
         }
 
         return reply;
+    }
+
+    private String xorBitsFunction(String operand1, String operand2) {
+        StringBuilder result = new StringBuilder();
+        int length = Math.min(operand1.length(), operand2.length());
+
+        for (int i = 0; i < length; i++) {
+            char bit1 = operand1.charAt(i);
+            char bit2 = operand2.charAt(i);
+            char xorBit = (char) (((bit1 - '0') ^ (bit2 - '0')) + '0');
+            result.append(xorBit);
+        }
+
+        return result.toString();
     }
 }
