@@ -21,6 +21,7 @@ import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.RotateStep;
 import edu.regis.shatu.view.act.NewExampleAction;
 import edu.regis.shatu.svc.TutorReply;
+import edu.regis.shatu.view.act.HintAction;
 import edu.regis.shatu.view.act.StepCompletionAction;
 import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
@@ -139,7 +140,7 @@ public class RotateView extends UserRequestView implements ActionListener, KeyLi
         checkButton = new JButton(StepCompletionAction.instance());
         checkButton.addActionListener(this);
 
-        hintButton = new JButton("Hint");
+        hintButton = new JButton(HintAction.instance());
         hintButton.addActionListener(this);
         
         nextButton = new JButton(NewExampleAction.instance());
@@ -324,11 +325,16 @@ public class RotateView extends UserRequestView implements ActionListener, KeyLi
         if (problemData == null || problemData.isEmpty()) {
             prompt.setText("");
             problem.setText("Click 'New Example' when ready.");
+            checkButton.setEnabled(false);
+            hintButton.setEnabled(false);
         } else {
             problem.setText(problemData);
             this.problemString = problemData;
             this.numRotations = currentStep.getAmount();
+            checkButton.setEnabled(true);
+            hintButton.setEnabled(true);
         }
+        
     }
     
     @Override

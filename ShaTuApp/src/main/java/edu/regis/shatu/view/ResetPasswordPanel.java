@@ -13,9 +13,8 @@
 package edu.regis.shatu.view;
 
 import edu.regis.shatu.model.Account;
-import edu.regis.shatu.view.act.CreateAcctAction;
-import edu.regis.shatu.view.act.SignInAction;
 import edu.regis.shatu.view.act.BackToLogin;
+import edu.regis.shatu.view.act.ResetPasswordAction;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -26,31 +25,28 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
 /**
- * New user screen that also allows the student to create an IRBt account
+ * Forgot Password screen that allows the user to reset their password.
  *
- * @author rickb
+ * @author mandyroskelley
  */
-public class NewAccountPanel extends GPanel {
-
+public class ResetPasswordPanel extends GPanel{
+    
     /**
      * Events of interest occurring in this class are logged to this logger.
      */
-    private static final Logger LOGGER = Logger.getLogger(NewAccountPanel.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(ForgotPasswordPanel.class.getName());
 
     /**
      * A regex pattern used to validate user email ids (e.g. "rick@regis.edu").
@@ -62,34 +58,31 @@ public class NewAccountPanel extends GPanel {
      * The account being created and displayed in this panel.
      */
     private Account model;
-
+    
     /**
      * The editable fields appearing in this dialog.
      */
-    protected HintTextField fName;
-    protected HintTextField lName;
-    protected HintTextField userId;
+    protected JTextField userId;
     protected JPasswordField pass1;
     protected JPasswordField pass2;
-    protected JComboBox secQuestions;
-    protected JPasswordField secAnswer;
+    
+    public String userEmail = "";
 
     protected JLabel strength;
     protected JLabel msg;
 
-    protected JButton signInBut;
-    protected JButton createAcctBut;
+    protected JButton resetBut;
     protected JButton backBut;
 
-    public NewAccountPanel() {
+    public ResetPasswordPanel(String email) {
         super();
 
         model = new Account();
-
+        userEmail = email;
         initComponents();
         layoutPanel();
 
-        enableButtons(fName.getDocument());
+        enableButtons(userId.getDocument());
     }
 
     /**
@@ -120,32 +113,23 @@ public class NewAccountPanel extends GPanel {
     }
 
     public void updateFocus() {
-        fName.requestFocusInWindow();
+        userId.requestFocusInWindow();
     }
     
     /**
      * Set all of the text fields in this view to the empty string.
      */
     public void clearFields() {
-        fName.setText("");
-        lName.setText("");
-        userId.setText("");
         pass1.setText("");
         pass2.setText("");
-        secQuestions.setSelectedIndex(0);
-        secAnswer.setText("");
     }
 
     /**
      * Update our model with the current values displayed in this view
      */
     private void updateModel() {
-        model.setUserId(userId.getText());
-        model.setFirstName(fName.getText());
-        model.setLastName(lName.getText());
+        model.setUserId(userEmail);
         model.setPassword(encryptSHA256(new String(pass1.getPassword())));
-        model.setSecurityQuestion(secQuestions.getSelectedIndex());
-        model.setSecurityAnswer(encryptSHA256(new String(secAnswer.getPassword())));
     }
 
     /**
@@ -153,29 +137,18 @@ public class NewAccountPanel extends GPanel {
      * passwords).
      */
     private void updateDisplay() {
+        model.setUserId(userEmail);
         userId.setText(model.getUserId());
-        fName.setText(model.getFirstName());
-        lName.setText(model.getLastName());
         pass1.setText("");
         pass2.setText("");
-        secQuestions.setSelectedIndex(0);
-        secAnswer.setText("");
     }
-
-    // Used to get focus
-    //public JTextField getFNameComp() {
-    //return fName;
-    //}
+    
     private void initComponents() {
+        
         LoginDocumentListener docListener = new LoginDocumentListener();
-        fName = new HintTextField("First", 15);
-        fName.getDocument().addDocumentListener(docListener);
-
-        lName = new HintTextField("Last", 30);
-        lName.getDocument().addDocumentListener(docListener);
-
-        userId = new HintTextField("userId@university.edu", 10);
-        userId.setIsEmailAddr(true);
+        
+        userId = new JTextField(userEmail, 10);
+        userId.setEditable(false);
         userId.getDocument().addDocumentListener(docListener);
 
         pass1 = new JPasswordField(20);
@@ -183,20 +156,11 @@ public class NewAccountPanel extends GPanel {
 
         pass2 = new JPasswordField(20);
         pass2.getDocument().addDocumentListener(docListener);
-        
-        String s1[] = {"What city were you born in?", "What is your mother's maiden name?"};
-        secQuestions = new JComboBox(s1);
-        
-        secAnswer = new JPasswordField(20);
-        secAnswer.getDocument().addDocumentListener(docListener);
 
-        signInBut = new JButton(SignInAction.instance());
-        signInBut.setEnabled(true);
+        resetBut = new JButton(ResetPasswordAction.instance());
 
-        createAcctBut = new JButton(CreateAcctAction.instance());
-
-        createAcctBut.setEnabled(false);
-        MainFrame.instance().getRootPane().setDefaultButton(createAcctBut);
+        resetBut.setEnabled(false);
+        MainFrame.instance().getRootPane().setDefaultButton(resetBut);
 
         backBut = new JButton(BackToLogin.instance());
         backBut.setEnabled(true);
@@ -219,7 +183,7 @@ public class NewAccountPanel extends GPanel {
                 GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
                 5, 5, 5, 5);
 
-        addc(createLogin(), 1, 1, 1, 1, 0.0, 0.0,
+        addc(createReset(), 1, 1, 1, 1, 0.0, 0.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
                 10, 5, 5, 5);
 
@@ -301,26 +265,13 @@ public class NewAccountPanel extends GPanel {
         return panel;
     }
 
-    private GPanel createLogin() {
+    private GPanel createReset() {
         GPanel panel = new GPanel();
         panel.setBackground(new Color(241,196,0));
 
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 5, 5));
 
-        JLabel label = new JLabel("Name");
-        label.setLabelFor(fName);
-        panel.addc(label, 0, 0, 1, 1, 0.0, 0.0,
-                GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
-                5, 5, 5, 5);
-
-        panel.addc(fName, 0, 1, 1, 1, 1.0, 0.0,
-                GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL,
-                5, 5, 5, 5);
-        panel.addc(lName, 1, 1, 1, 1, 0.0, 0.0,
-                GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL,
-                5, 5, 5, 5);
-
-        label = new JLabel("User Id:");
+        JLabel label = new JLabel("User Id:");
         label.setLabelFor(userId);
 
         panel.addc(label, 0, 2, 1, 1, 1.0, 0.0,
@@ -331,7 +282,7 @@ public class NewAccountPanel extends GPanel {
                 GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL,
                 0, 5, 5, 5);
 
-        label = new JLabel("Create a Password:");
+        label = new JLabel("Create a New Password:");
         label.setLabelFor(pass1);
 
         panel.addc(label, 0, 4, 1, 1, 0.0, 0.0,
@@ -371,43 +322,21 @@ public class NewAccountPanel extends GPanel {
         panel.addc(pass2, 0, 8, 2, 1, 1.0, 0.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL,
                 0, 5, 5, 5);
-        
-        label = new JLabel("Choose Security Question:");
-        label.setLabelFor(secQuestions);
 
-        panel.addc(label, 0, 9, 1, 1, 0.0, 0.0,
-                GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
-                15, 5, 5, 5);
-        
-        panel.addc(secQuestions, 0, 10, 2, 1, 1.0, 0.0,
-                GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL,
-                0, 5, 5, 5);
-        
-        label = new JLabel("Answer:");
-        label.setLabelFor(secAnswer);
-
-        panel.addc(label, 0, 11, 2, 1, 0.0, 0.0,
-                GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
-                15, 5, 5, 5);
-        
-        panel.addc(secAnswer, 0, 12, 2, 1, 1.0, 0.0,
-                GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL,
-                0, 5, 5, 5);
-
-        panel.addc(createAcctBut, 1, 14, 1, 1, 1.0, 0.0,
+        panel.addc(resetBut, 1, 9, 1, 1, 1.0, 0.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL,
                 10, 5, 5, 5);
 
         msg = new JLabel("");
-        msg.setLabelFor(createAcctBut);
+        msg.setLabelFor(resetBut);
         msg.setFont(new Font("Dialog", Font.PLAIN, 10));
         msg.setForeground(new Color(173,7,1));
 
-        panel.addc(msg, 0, 14, 2, 1, 0.0, 0.0,
+        panel.addc(msg, 0, 12, 2, 1, 0.0, 0.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
                 5, 5, 5, 5);
         
-        panel.addc(backBut, 0, 14, 1, 1, 1.0, 0.0,
+        panel.addc(backBut, 0, 9, 1, 1, 1.0, 0.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL,
                 10, 5, 5, 5);
 
@@ -416,7 +345,7 @@ public class NewAccountPanel extends GPanel {
         msg.setFont(new Font("Dialog", Font.PLAIN, 10));
         msg.setForeground(new Color(173,7,1));
 
-        panel.addc(msg, 0, 14, 2, 1, 0.0, 0.0,
+        panel.addc(msg, 0, 12, 2, 1, 0.0, 0.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
                 5, 5, 5, 5);
 
@@ -498,41 +427,6 @@ public class NewAccountPanel extends GPanel {
      * button.
      */
     private void enableButtons(Document e) {
-        boolean isValidFName = !fName.isDefaultValue();
-        if (isValidFName) {
-            fName.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        } else {
-            fName.setBorder(BorderFactory.createLineBorder(new Color(173,7,1)));
-        }
-
-        boolean isValidLName = !lName.isDefaultValue();
-        if (isValidLName) {
-            lName.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        } else {
-            lName.setBorder(BorderFactory.createLineBorder(new Color(173,7,1)));
-        }
-
-        boolean isValidUserId = !userId.isDefaultValue();
-        if (isValidUserId) {
-            Document userIdDoc = userId.getDocument();
-            try {
-                String email = userIdDoc.getText(0, userIdDoc.getLength());
-
-                Matcher matcher = VALID_EMAIL_ADDRESS_REGEX.matcher(email);
-                isValidUserId = matcher.find();
-
-                if (isValidUserId) {
-                    userId.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-                } else {
-                    userId.setBorder(BorderFactory.createLineBorder(new Color(173,7,1)));
-                }
-            } catch (BadLocationException er) {
-                // Cannot happen since 0 to length
-            }
-        } else {
-            userId.setBorder(BorderFactory.createLineBorder(new Color(173,7,1)));
-        }
-
         boolean isPass1Valid = pass1.getDocument().getLength() == 0;
         if (isPass1Valid) {
             pass1.setBorder(BorderFactory.createLineBorder(new Color(173,7,1)));
@@ -545,16 +439,12 @@ public class NewAccountPanel extends GPanel {
         } else {
             pass2.setBorder(BorderFactory.createLineBorder(new Color(173,7,1)));
         }
-        
-        int isValid = secAnswer.getDocument().getLength();
-        boolean isValidAnswer = isValid > 0;
-        
-        if (isValidFName && isValidLName && isValidUserId && isSamePass && isValidAnswer) {
-            createAcctBut.setEnabled(true);
+        if (isSamePass) {
+            resetBut.setEnabled(true);
             msg.setText("");
 
         } else {
-            createAcctBut.setEnabled(false);
+            resetBut.setEnabled(false);
             msg.setText("(* Please fix problems highlighted in red.)");
         }
     }
@@ -647,5 +537,5 @@ public class NewAccountPanel extends GPanel {
             throw new RuntimeException(ex);
         }
     }
+    
 }
-

@@ -19,6 +19,7 @@ import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.BitOpStep;
 import edu.regis.shatu.model.aol.ExampleType;
 import edu.regis.shatu.model.aol.NewExampleRequest;
+import edu.regis.shatu.view.act.HintAction;
 import edu.regis.shatu.view.act.NewExampleAction;
 import edu.regis.shatu.view.act.StepCompletionAction;
 import java.awt.GridBagConstraints;
@@ -106,7 +107,7 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
         checkButton = new JButton(StepCompletionAction.instance());
         checkButton.addActionListener(this);
         
-        hintButton = new JButton("Hint");
+        hintButton = new JButton(HintAction.instance());
         hintButton.addActionListener(this);
         
         nextButton = new JButton(NewExampleAction.instance());
@@ -354,9 +355,13 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
             binary1 = example.getExample().getOperand1();
             binary2 = example.getExample().getOperand2();
             result = calculateModulo(binary1, binary2); 
+            checkButton.setEnabled(true);
+            hintButton.setEnabled(true);
         }
         catch (NullPointerException e) {
             System.out.println("Example is empty.");
+            checkButton.setEnabled(false);
+            hintButton.setEnabled(false);
         }
         
         stringLabel1.setText("binary number1: " + binary1);

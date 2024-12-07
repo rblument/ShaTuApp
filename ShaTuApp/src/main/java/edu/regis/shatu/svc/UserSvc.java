@@ -46,6 +46,26 @@ public interface UserSvc {
     User retrieve(String userId) throws ObjNotFoundException, NonRecoverableException;
     
     /**
+     * Return the question, if any, with the given user id.
+     * 
+     * @param userId the id of the user to return
+     * @return a User with the given id
+     * @throws ObjNotFoundException no user with the given id exists
+     * @throws NonRecoverableException also see getCause().getErrorCode().
+     */
+    User retrieveQuestion(String userId) throws ObjNotFoundException, NonRecoverableException;
+    
+    /**
+     * Return the answer, if any, with the given user id.
+     * 
+     * @param userId the id of the user to return
+     * @return a User with the given id
+     * @throws ObjNotFoundException no user with the given id exists
+     * @throws NonRecoverableException also see getCause().getErrorCode().
+     */
+    User retrieveAnswer(String userId) throws ObjNotFoundException, NonRecoverableException;
+    
+    /**
      * Update the given user's password (requires existing password).
      * 
      * @param user the userId and existing password

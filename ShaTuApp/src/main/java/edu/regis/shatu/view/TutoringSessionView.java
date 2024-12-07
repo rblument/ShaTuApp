@@ -45,9 +45,15 @@ public class TutoringSessionView extends GPanel {
      * Universal 'Check', 'New Example', 'Hint' buttons.
      */
     private JButton checkButton, newExampleButton, hintButton;
+    
+    /*
+     * Universal button for logging off. 
+     */    
+    private JButton logoutButton;
     /**
      * The tutoring session model displayed in this view.
      */
+    
     private TutoringSession model;
 
     /**
@@ -108,7 +114,9 @@ public class TutoringSessionView extends GPanel {
         //button for returning to dashboard
         dashboardButton = new JButton("Go to Dashboard");
         dashboardButton.addActionListener(e -> navigateToDashboard());
-
+        //button for logging out
+        logoutButton = new JButton("Logout");
+        logoutButton.addActionListener(e -> logout());
     }
     /**
     * Layout the child components in this view
@@ -251,5 +259,11 @@ public class TutoringSessionView extends GPanel {
      */
     public void navigateToDashboard() {
         SplashFrame.instance().selectDashboard(this.getModel());
+    }
+    /**
+     * A class called by logout Button to logout
+     */
+    public void logout() {
+        SplashFrame.instance().logout();
     }
 }

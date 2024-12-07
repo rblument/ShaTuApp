@@ -13,6 +13,7 @@
 package edu.regis.shatu.view;
 
 import edu.regis.shatu.model.Account;
+import edu.regis.shatu.model.LessonSession;
 import edu.regis.shatu.model.TutoringSession;
 import edu.regis.shatu.model.User;
 import java.awt.CardLayout;
@@ -48,6 +49,12 @@ public class SplashFrame extends JFrame {
     public static final String DASHBOARD = "DashboardPanel";
     
     /**
+     * Dashboard Reference Name for CardLayout;
+     * linked to splashPanel sign in.
+     */
+    public static final String LESSON = "LessonMenu";
+    
+    /**
      * Tutor View Reference Name for CardLayout;
      * linked to by dashboard's practice button.
      */
@@ -56,6 +63,16 @@ public class SplashFrame extends JFrame {
      * Allowed consecutive illegal passwords before the user is locked out.
      */
     public static final int MAX_SIGNIN_ATTEMPTS = 3;
+    
+    /**
+     * Name of the forgot password panel in this frame's primary card layout panel.
+     */
+    public static final String FORGOT_PASSWORD = "ForgotPasswordPanel";
+    
+    /**
+     * Name of the forgot password panel in this frame's primary card layout panel.
+     */
+    public static final String RESET_PASSWORD = "ResetPasswordPanel";
     
     /**
      * The single instance of this frame.
@@ -104,6 +121,14 @@ public class SplashFrame extends JFrame {
     private DashboardPanel dashboardPanel;
     
     /**
+     * The panel that allows users to select a type of service
+     * (teach, practice, quiz) upon sign in.
+     */
+    private LessonSessionView lessonSessionView;
+
+    private LessonSession lessonSession;
+    
+    /**
      * The panel which displays the ShaTuApp tutoring view;
      * Used for practicing skills.
      */
@@ -117,6 +142,17 @@ public class SplashFrame extends JFrame {
      * associated sign-in information.
      */
     private NewAccountPanel newAccountPanel;
+    
+    /**
+     * A panel which allows the user to verify themselves so they can reset their
+     * password.
+     */
+    private ForgotPasswordPanel forgotPasswordPanel;
+    
+    /**
+     * A panel which allows the user to reset their password.
+     */
+    private ResetPasswordPanel resetPasswordPanel;
     
     /**
      * The number of consecutive illegal passwords attempted by the current
@@ -171,7 +207,19 @@ public class SplashFrame extends JFrame {
      * @return an Account (userId, passwd, first and last name)
      */
     public Account getAccount() {
-       return newAccountPanel.getModel();
+        String panel = this.selectedPanel;
+        
+        System.out.println("Get Account : " + panel);
+        
+        switch (panel) {
+            case "ForgotPasswordPanel":
+                return forgotPasswordPanel.getModel();
+            case "ResetPasswordPanel":
+                return resetPasswordPanel.getModel();
+            default:
+                return newAccountPanel.getModel();
+                
+        }
     }
     
     /**
@@ -240,6 +288,14 @@ public class SplashFrame extends JFrame {
     }
     
     /**
+     * Returns the current lesson session for the SplashFrame.
+     * @return The current LessonSession instance.
+     */
+    
+    public LessonSession getLessonSession() {
+        return this.lessonSession;
+    }
+    /**
      * Clears the tutoringSession instance.
      * Changes current user to an empty user instance.
      * Clears splashPanel fields.
@@ -279,6 +335,7 @@ public class SplashFrame extends JFrame {
         this.selectPanel(DASHBOARD);  // Display the dashboard
         System.out.println("SplashFrame.java: selectDashboard: session = " + session.getAccount().getFirstName());
     }
+   
 
      /**
      * Selects a personalized practice screen for each user upon selecting
@@ -312,6 +369,33 @@ public class SplashFrame extends JFrame {
         // Switch to the tutoring session view
         selectPanel(TUTOR);
     }
+        
+    /**
+     * Selects a personalized lesson screen for each user upon selecting
+     * the dashboard's practice teach me.
+     */
+        public void selectLessonScreen() {
+        LessonSession session = getLessonSession(); // Retrieve the lesson session
+        TutoringSession tsession = getSession(); // Retrieve the session
+
+        //Initialize the LessonSessionView if it's not already initialized
+        if (this.lessonSessionView == null) {
+            this.lessonSessionView = new LessonSessionView(tsession); // Create the lesson session view
+            cards.add(lessonSessionView, LESSON);  // Add it to the CardLayout
+        }
+        
+        // Set the model (session) for the LessonSessionView
+        this.lessonSessionView.setLessonModel(session);
+
+        // Sets size of lesson screen window.
+        // Without this, the window opens too small.
+        this.setPreferredSize(new Dimension(1000, 800));
+        this.pack();
+        
+        // Switch to the lesson session view
+        selectPanel(LESSON);
+        
+    }
 
     /**
      * Display the New User panel, which allows the user to create a new
@@ -340,6 +424,37 @@ public class SplashFrame extends JFrame {
     }
     
     /**
+     * Display the Forgot Password panel, which allows the user to verify themselves
+     * so that they can reset their password.
+     */
+    public void selectForgotPassword() {
+        this.selectPanel(FORGOT_PASSWORD);
+    }
+    
+    /**
+     * Reset the text fields in the forgot password panel to the empty string.
+     */
+    public void clearForgotPassword() {
+        this.forgotPasswordPanel.clearFields();
+    }
+    
+    /**
+     * Display the Reset Password panel, which allows the user to reset their
+     * password.
+     * @param userId
+     */
+    public void selectResetPassword(String userId) {
+        this.selectPanel(RESET_PASSWORD);
+    }
+    
+    /**
+     * Reset the text fields in the reset password panel to the empty string.
+     */
+    public void clearResetPassword() {
+        this.resetPasswordPanel.clearFields();
+    }
+    
+    /**
      * Display the card panel with the associated name.
      * 
      * @param name SPLASH, NEW_USER, or DASHBOARD
@@ -361,7 +476,7 @@ public class SplashFrame extends JFrame {
     
     /**
      * Initializes a personalized dashboard screen for each user after sign in.
-     * @param sessin: a reference to the current SplashFrame session instance.
+     * @param session: a reference to the current SplashFrame session instance.
      */
     public void initializeDashboard(TutoringSession session) {
         if (session == null) {
@@ -374,17 +489,35 @@ public class SplashFrame extends JFrame {
         this.cards.add(dashboardPanel, DASHBOARD);
         this.selectPanel(DASHBOARD);  // Display the dashboard
     }
+    
+    /**
+     * 
+     * @param email
+     */
+    public void initializeResetPassword(String email) {
+        if (email == null) {
+            System.err.println("Email is null in initializeResetPassword");
+            return;
+        }
+
+        this.resetPasswordPanel = new ResetPasswordPanel(email);
+        
+        this.cards.add(resetPasswordPanel, RESET_PASSWORD);
+    }
 
     /**
      * Create the child GUI components appearing in this frame.
      */
     private void initializeComponents() {
+       
         this.cards = new JPanel(new CardLayout());
         
         this.splashPanel = new SplashPanel();
         this.newAccountPanel = new NewAccountPanel();
+        this.forgotPasswordPanel = new ForgotPasswordPanel();
                         
         this.cards.add(splashPanel, SPLASH);
         this.cards.add(newAccountPanel, NEW_USER);
+        this.cards.add(forgotPasswordPanel, FORGOT_PASSWORD);
     }
 }
