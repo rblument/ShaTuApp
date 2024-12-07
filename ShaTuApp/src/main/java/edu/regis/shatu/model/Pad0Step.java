@@ -22,7 +22,7 @@ public class Pad0Step {
     
     private String question;
     
-    private int correctAnswer;
+    private String correctAnswer;
     
     private String userAnswer;
     
@@ -69,7 +69,7 @@ public class Pad0Step {
      * Setter method for the correct answer
      * @param newResult 
      */
-    public void setResult(int newResult) {
+    public void setResult(String newResult) {
         this.correctAnswer = newResult;
     }
     
@@ -77,7 +77,7 @@ public class Pad0Step {
      * Getter method for the correct answer
      * @return 
      */
-    public int getResult() {
+    public String getResult() {
         return this.correctAnswer;
     }
     

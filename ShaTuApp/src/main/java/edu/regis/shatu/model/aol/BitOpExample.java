@@ -189,7 +189,7 @@ public class BitOpExample {
     public void generatedRandomOperands(int bitSize) {
         Random rnd = new Random();
         
-        preSize = preSize;
+        preSize = bitSize;
         
         int maxOperandVal = (int) Math.pow(2.0d, preSize) - 1; // e.g., 2^8 - 1 = 255
 

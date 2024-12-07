@@ -470,7 +470,7 @@ public class ChoiceFunctionView extends UserRequestView implements ActionListene
         if (e.getKeyCode() == KeyEvent.VK_ENTER && responseTextArea.getText().equals("")) {
             feedbackTextArea.setText("Please provide an answer");
         } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-            verifyAnswer();
+            checkButton.doClick();
         }
     }
 
@@ -550,10 +550,20 @@ public class ChoiceFunctionView extends UserRequestView implements ActionListene
 
         ChoiceFunctionStep example = gson.fromJson(step.getData(), ChoiceFunctionStep.class);
 
-        stringXLabel.setText("x: " + example.getOperand1());
-        stringYLabel.setText("y: " + example.getOperand2());
-        stringZLabel.setText("z: " + example.getOperand3());
-
+        if (example.getOperand1() == null || example.getOperand1().isEmpty()) {
+            stringXLabel.setText("x: Please");
+            stringYLabel.setText("y: click");
+            stringZLabel.setText("z: New Example"); 
+            hintButton.setEnabled(false);
+            checkButton.setEnabled(false);
+        }
+        else {
+            stringXLabel.setText("x: " + example.getOperand1());
+            stringYLabel.setText("y: " + example.getOperand2());
+            stringZLabel.setText("z: " + example.getOperand3());
+            hintButton.setEnabled(true);
+            checkButton.setEnabled(true);
+        }
     }
 
 }

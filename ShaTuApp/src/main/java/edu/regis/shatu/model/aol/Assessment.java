@@ -46,6 +46,12 @@ public class Assessment extends Model {
      */
     private int successess;
     
+    /**
+     * The number of hints the student has requested in this knowledge 
+     * component in this assessment.
+     */
+    private int hints;
+    
     public Assessment(KnowledgeComponent outcome, AssessmentLevel assessment) {
         this.outcome = outcome;
         this.assessment = assessment;
@@ -100,5 +106,21 @@ public class Assessment extends Model {
      */
     public void incrementSuccessess() {
         successess++;
+    }
+    
+    public int getHints() {
+        return hints;
+    }
+
+    public void setHints(int hints) {
+        this.hints = hints;
+    }
+
+    /**
+     * Increment the number of hints.
+     */
+    public void incrementHints() {
+        hints++;
+        System.out.println("Hints incremented to " + hints);
     }
 }

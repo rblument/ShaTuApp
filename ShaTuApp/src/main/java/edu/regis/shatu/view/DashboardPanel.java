@@ -14,6 +14,7 @@ package edu.regis.shatu.view;
 
 import edu.regis.shatu.model.TutoringSession;
 import edu.regis.shatu.util.CustomProgressBar;
+import javax.swing.JOptionPane;
 /**
  * The dashboard screen to be displayed upon user sign in.
  * Enables user to select a mode from the tutor (teach me, practice, quiz me)
@@ -31,12 +32,22 @@ public class DashboardPanel extends javax.swing.JPanel {
         } else if (tutoringSession.getAccount() == null) {
             System.err.println("Account is null in DashboardPanel");
         } else {
-            System.out.println("DashboardPanel initialized for user: " + tutoringSession.getAccount().getFirstName());
+            System.out.println("DashboardPanel initialized for user: " + 
+                    tutoringSession.getAccount().getFirstName());
+                String welcomeMessage = "Welcome, " + 
+                        tutoringSession.getAccount().getFirstName() + "! "
+                + "Your session has successfully started.";
+                JOptionPane.showMessageDialog(
+                null,
+                welcomeMessage,
+                "Welcome",
+                JOptionPane.INFORMATION_MESSAGE
+            );
         }
 
         initComponents();  // Initialize UI components
     }
-
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -60,6 +71,9 @@ public class DashboardPanel extends javax.swing.JPanel {
         quizMeProgressBar1 = new CustomProgressBar();
 
         setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        setMaximumSize(new java.awt.Dimension(32767, 32767));
+        setMinimumSize(new java.awt.Dimension(0, 0));
+        setPreferredSize(new java.awt.Dimension(986, 480));
         setLayout(new java.awt.BorderLayout());
 
         headerPanel.setLayout(new java.awt.BorderLayout());
@@ -102,6 +116,11 @@ public class DashboardPanel extends javax.swing.JPanel {
         contentPanel.setLayout(new java.awt.GridBagLayout());
 
         teachMeButton1.setText("Teach Me");
+        teachMeButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                teachMeButton1ActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
@@ -212,6 +231,9 @@ public class DashboardPanel extends javax.swing.JPanel {
         SplashFrame.instance().logout();
     }//GEN-LAST:event_logOutButtonMouseClicked
 
+    private void teachMeButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_teachMeButton1ActionPerformed
+     SplashFrame.instance().selectLessonScreen();
+    }//GEN-LAST:event_teachMeButton1ActionPerformed
     private void logOutButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logOutButtonActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_logOutButtonActionPerformed
