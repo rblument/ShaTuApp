@@ -65,6 +65,7 @@ import javax.swing.SwingUtilities;
  * @author rickb
  */
 public class EncodeView extends UserRequestView implements ActionListener, KeyListener, EncodeAsciiStep.OutputListener {
+    private TutoringSessionView view;
     private TutoringSession model;    
     private JTextPane descriptionTextPane;
     private JLabel questionLabel, instructionsLabel, messageLengthLabel;
@@ -1031,18 +1032,23 @@ public class EncodeView extends UserRequestView implements ActionListener, KeyLi
      */
     @Override
     protected void updateView() {
-        System.out.println("EncodeView.updateView() called.");
-        if (model == null) {
-            System.out.println("EncodeView.updateView() - model is null.");
-        } else {
-            System.out.println("EncodeView.updateView() - model is set.");
-            // Debug the current task and step if available
-            try {
-                System.out.println("EncodeView.updateView() --> model.getUnit().getDescription(): " + model.getUnit().getDescription());
-                System.out.println("EncodeView.updateView() --> model.currentTask().currentStep().getTitle(): " + model.currentTask().currentStep().getTitle());
-            } catch (Exception e) {
-                System.out.println("EncodeView.updateView() - Exception while accessing model: " + e);
+        // Ensure 'view' is only initialized when SplashFrame.instance() is non-null
+        if (view == null) {
+            MainFrame splashFrame = MainFrame.instance();
+            if (splashFrame != null) {
+                view = SplashFrame.instance().getView(); // Initialize view once SplashFrame is ready
+            } else {
+                System.err.println("SplashFrame.instance() is null. Cannot initialize 'view'.");
+                return; // Exit updateView if the view cannot be initialized
             }
         }
+
+        // Reset button listeners using the initialized view
+        if (view != null) {
+            view.resetButtonListeners(); // Clear any listeners applied from other views
+        }
+
+        // Other update logic here
+        System.out.println("UpdateView logic continues...");
     }
 } 

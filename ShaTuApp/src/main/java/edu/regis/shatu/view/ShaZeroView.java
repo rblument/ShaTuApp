@@ -29,6 +29,8 @@ import java.awt.event.KeyListener;
  * @author rickb
  */
 public class ShaZeroView extends UserRequestView implements ActionListener, KeyListener {
+    private TutoringSessionView view;
+    
     /**
      * The number of places for the right shift operation.
      */
@@ -40,8 +42,9 @@ public class ShaZeroView extends UserRequestView implements ActionListener, KeyL
     private JTextField answerField;
     private JButton checkButton;
     private JButton hintButton;
-    private JButton nextQuestionButton;
-
+    private JButton nextButton;
+    private boolean checkHintEnabled = false;
+    
     /**
      * Initialize this view including creating and laying out its child components.
      */
@@ -56,7 +59,8 @@ public class ShaZeroView extends UserRequestView implements ActionListener, KeyL
             onCheckButton();
         } else if (event.getSource() == hintButton) {
             onNextHint();
-        } else if (event.getSource() == nextQuestionButton) {
+        } else if (event.getSource() == nextButton) {
+            checkHintEnabled = true;
             onNextQuestion();
         }
     }
@@ -78,8 +82,8 @@ public class ShaZeroView extends UserRequestView implements ActionListener, KeyL
         hintButton = new JButton("Hint");
         hintButton.addActionListener(this); // Add an action listener for the check button
         
-        nextQuestionButton = new JButton("Next Question");
-        nextQuestionButton.addActionListener(this);
+        nextButton = new JButton("Next Question");
+        nextButton.addActionListener(this);
     }
 
     /**
@@ -104,7 +108,7 @@ public class ShaZeroView extends UserRequestView implements ActionListener, KeyL
         addc(hintButton, 0, 3, 2, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
-        addc(nextQuestionButton, 0, 7, 1,1,0.0,0.0,
+        addc(nextButton, 0, 7, 1,1,0.0,0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
     }
@@ -191,6 +195,19 @@ public class ShaZeroView extends UserRequestView implements ActionListener, KeyL
      * TODO: THIS IS A PLACEHOLDER UNTIl WE HAVE HAVE THE MODEL CODE COMPLETED
      */
     protected void updateView() {
+        view = SplashFrame.instance().getView(); // Accessing view to use universal buttons
+        hintButton = view.getHintButton();
+        checkButton = view.getCheckButton();
+        nextButton = view.getNewExampleButton();
+        
+        // If check and hint buttons are disabled, reset listenerers and apply those used by this view
+        if(!checkHintEnabled) {
+            view.resetButtonListeners(); // Clear any listeners applied from other views          
+            hintButton.addActionListener(this);           
+            checkButton.addActionListener(this);            
+            nextButton.addActionListener(this);
+        }
+        
         if (model != null) {
             // ****TO-DO*****
             // Update the view's information from the model

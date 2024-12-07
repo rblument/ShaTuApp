@@ -46,13 +46,14 @@ import javax.swing.JTextField;
  * @author rickb
  */
 public class MessageLenView extends UserRequestView implements ActionListener {
-    
+    private TutoringSessionView view;
     private JTextPane descriptionTextPane;
     private JLabel questionLabel, instructionsLabel, messageLengthLabel;
     private JTextField messageLengthField;
     private JTextArea responseArea;
     private JTextArea feedbackArea;
     private JButton checkButton, nextButton, hintButton;
+    private boolean checkHintEnabled = false;
     private JScrollPane responseScrollPane, feedbackScrollPane;
     private String question;
     
@@ -76,6 +77,7 @@ public class MessageLenView extends UserRequestView implements ActionListener {
         if (event.getSource() == checkButton) {
             submitAnswer();           
         } else if (event.getSource() == nextButton) {
+            checkHintEnabled = true;
             prepareNextQuestion();
         } else if (event.getSource() == hintButton) {
             requestHint();
@@ -305,6 +307,18 @@ public class MessageLenView extends UserRequestView implements ActionListener {
      */
     @Override
     protected void updateView() {
+        view = SplashFrame.instance().getView(); // Accessing view to use universal buttons
+        hintButton = view.getHintButton();
+        checkButton = view.getCheckButton();
+        nextButton = view.getNewExampleButton();
+        
+        // If check and hint buttons are disabled, reset listenerers and apply those used by this view
+        if(!checkHintEnabled) {
+            view.resetButtonListeners(); // Clear any listeners applied from other views          
+            hintButton.addActionListener(this);           
+            checkButton.addActionListener(this);            
+            nextButton.addActionListener(this);
+        }
         
         /*
         When switching between steps, the current step will be the previous enum

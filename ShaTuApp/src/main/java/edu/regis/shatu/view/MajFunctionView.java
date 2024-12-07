@@ -50,6 +50,7 @@ import javax.swing.table.DefaultTableCellRenderer;
  */
 
 public class MajFunctionView extends UserRequestView implements ActionListener, KeyListener {
+    private TutoringSessionView view;
     private String stringX, stringY, stringZ;
     private int problemSize; 
     private JTextArea descTextArea, responseTextArea;
@@ -57,7 +58,8 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
     private GPanel truthTablePanel, questionPanel, descriptionPanel, qrPanel;
     private JPanel buttonPanel, radioButtonPanel; 
     private JTable majTruthTable;
-    private JButton checkButton, newExampleButton, hintButton;
+    private JButton checkButton, nextButton, hintButton;
+    private boolean checkHintEnabled = false;
     private ButtonGroup problemSizeGroup;
     private JRadioButton fourRadioButton, eightRadioButton, sixteenRadioButton, 
                          thirtytwoRadioButton;
@@ -305,12 +307,12 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
         hintButton = new JButton("Hint");
         hintButton.addActionListener(this);
         
-        newExampleButton = new JButton(NewExampleAction.instance());
-        newExampleButton.addActionListener(this);
+        nextButton = new JButton(NewExampleAction.instance());
+        nextButton.addActionListener(this);
         
         buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         buttonPanel.add(checkButton);
-        buttonPanel.add(newExampleButton);
+        buttonPanel.add(nextButton);
         buttonPanel.add(hintButton);   
     }
     
@@ -402,7 +404,8 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
             onCheckButton();
         } else if (event.getSource() == hintButton) {
             onNextHint();
-        } else if (event.getSource() == newExampleButton) {
+        } else if (event.getSource() == nextButton) {
+            checkHintEnabled = true;
             onNextQuestion();
         }
     }
@@ -618,6 +621,19 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
     
     @Override
     protected void updateView() {
+        view = SplashFrame.instance().getView(); // Accessing view to use universal buttons
+        hintButton = view.getHintButton();
+        checkButton = view.getCheckButton();
+        nextButton = view.getNewExampleButton();
+        
+        // If check and hint buttons are disabled, reset listenerers and apply those used by this view
+        if(!checkHintEnabled) {
+            view.resetButtonListeners(); // Clear any listeners applied from other views          
+            hintButton.addActionListener(this);           
+            checkButton.addActionListener(this);            
+            nextButton.addActionListener(this);
+        }
+        
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
         Step step = model.currentTask().getCurrentStep();

@@ -28,6 +28,12 @@ import java.awt.Point;
  * @author rickb
  */
 public class CompressionCanvasView extends UserRequestView {
+    
+    /**
+     * Required for access to the current view.
+     * Used to access universal (check, hint, new example) buttons.
+     */
+    private TutoringSessionView view;
     /**
      * There eight working variables 'a' through 'h'.
      */
@@ -480,6 +486,12 @@ public class CompressionCanvasView extends UserRequestView {
      * TODO: THIS IS A PLACEHOLDER UNTIl WE HAVE HAVE THE MODEL CODE COMPLETED
      */
     protected void updateView() {
+        view = SplashFrame.instance().getView(); // Accessing view to use universal buttons
+        view.resetButtonListeners(); // Clear any listeners applied from other views
+        view.getCheckButton().setEnabled(false);
+        view.getHintButton().setEnabled(false);
+        view.getNewExampleButton().setEnabled(false);
+        
         if (model != null) {
             // ****TO-DO*****
             // Update the view's information from the model

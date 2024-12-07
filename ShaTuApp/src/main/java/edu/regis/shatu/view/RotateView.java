@@ -45,6 +45,7 @@ import javax.swing.JRadioButton;
  * @author rickb
  */
 public class RotateView extends UserRequestView implements ActionListener, KeyListener {
+    TutoringSessionView view;
     private String problemString;
     private int numRotations;
     private String answer;
@@ -53,7 +54,8 @@ public class RotateView extends UserRequestView implements ActionListener, KeyLi
     private JTextField answerField;
     private JButton checkButton; // Add the check button
     private JButton hintButton;
-    private JButton newExampleButton;
+    private JButton nextButton;
+    private boolean checkHintEnabled = false;
     private JRadioButton shortProblem;
     private JRadioButton longProblem;
     private JRadioButton rightRotate;
@@ -140,8 +142,8 @@ public class RotateView extends UserRequestView implements ActionListener, KeyLi
         hintButton = new JButton("Hint");
         hintButton.addActionListener(this);
         
-        newExampleButton = new JButton(NewExampleAction.instance());
-        newExampleButton.setToolTipText("Generate New Example Problem");
+        nextButton = new JButton(NewExampleAction.instance());
+        nextButton.setToolTipText("Generate New Example Problem");
         
         shortProblem = new JRadioButton("16-bit");
         shortProblem.setSelected(true);
@@ -193,7 +195,7 @@ public class RotateView extends UserRequestView implements ActionListener, KeyLi
         addc(hintButton, 2, 4, 2, 1, 0.2, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
-        addc(newExampleButton, 1, 5, 2, 1, 0.0, 0.2, 
+        addc(nextButton, 1, 5, 2, 1, 0.0, 0.2, 
               GridBagConstraints.WEST, GridBagConstraints.NONE,
               5, 5, 5, 5);
         addc(shortProblem, 0, 6, 1, 1, 0.0, 0.0, 
@@ -224,7 +226,9 @@ public class RotateView extends UserRequestView implements ActionListener, KeyLi
             }
         } else if (event.getSource() == hintButton) {
             JOptionPane.showMessageDialog(this, "Hint");
-        } 
+        } else if (event.getSource() == nextButton) {
+            checkHintEnabled = true;
+        }
     }
 
     @Override
@@ -283,6 +287,19 @@ public class RotateView extends UserRequestView implements ActionListener, KeyLi
      */
     @Override
     protected void updateView() {
+        view = SplashFrame.instance().getView(); // Accessing view to use universal buttons
+        hintButton = view.getHintButton();
+        checkButton = view.getCheckButton();
+        nextButton = view.getNewExampleButton();
+        
+        // If check and hint buttons are disabled, reset listenerers and apply those used by this view
+        if(!checkHintEnabled) {
+            view.resetButtonListeners(); // Clear any listeners applied from other views          
+            hintButton.addActionListener(this);           
+            checkButton.addActionListener(this);            
+            nextButton.addActionListener(this);
+        }
+        
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         Step step = model.currentTask().getCurrentStep();
         

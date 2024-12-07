@@ -99,9 +99,12 @@ public class TutoringSessionView extends GPanel {
         
         // Buttons for 'check', 'new example', and 'hint'
         checkButton = this.initializeButton(StepCompletionAction.instance());
-        newExampleButton = this.initializeButton(NewExampleAction.instance());
         hintButton = this.initializeButton(HintAction.instance());
-        
+        newExampleButton = this.initializeButton(NewExampleAction.instance());
+        newExampleButton.addActionListener(e -> {
+            checkButton.setEnabled(true);
+            hintButton.setEnabled(true);
+        });
         //button for returning to dashboard
         dashboardButton = new JButton("Go to Dashboard");
         dashboardButton.addActionListener(e -> navigateToDashboard());
@@ -173,35 +176,58 @@ public class TutoringSessionView extends GPanel {
             return new JButton(buttonInstance);
     }
     
+    /**
+     * Toggles the given button on/off
+     * Ensures the GUI updates to display the button's new state
+     **/
     public void toggleButton(JButton button) {
         button.setEnabled(!button.isEnabled());
         button.repaint();
         button.revalidate();
     }
     
+    /**
+     * These buttons are used universally by each view
+     * Each view attaches its own listeners, and must be cleaned up
+     * before interacting with a new view.
+     * 
+     * Failure to clean up the additional listeners will result in unnecessary,
+     * or redundant, operations executed.
+     */
     public void resetButtonListeners() {
-        // Store current button text to preserve it
-        String checkText = checkButton.getText();
-        String hintText = hintButton.getText();
-        String newExampleText = newExampleButton.getText();
+        // Keep track of the known initial listeners
+        ActionListener hintAction = HintAction.instance();
+        ActionListener checkAction = StepCompletionAction.instance();
+        ActionListener newExampleAction = NewExampleAction.instance();
 
-        // Remove all ActionListeners for each button
-        for (ActionListener al : checkButton.getActionListeners()) {
-            checkButton.removeActionListener(al);
+        // Clear all listeners for the check button and re-add the known listener
+        for (ActionListener listener : checkButton.getActionListeners()) {
+            checkButton.removeActionListener(listener);
         }
-        for (ActionListener al : hintButton.getActionListeners()) {
-            hintButton.removeActionListener(al);
-        }
-        for (ActionListener al : newExampleButton.getActionListeners()) {
-            newExampleButton.removeActionListener(al);
-        }
+        checkButton.addActionListener(checkAction);
 
-        // Restore button text
-        checkButton.setText(checkText);
-        hintButton.setText(hintText);
-        newExampleButton.setText(newExampleText);
+        // Clear all listeners for the hint button and re-add the known listener
+        for (ActionListener listener : hintButton.getActionListeners()) {
+            hintButton.removeActionListener(listener);
+        }
+        hintButton.addActionListener(hintAction);
 
-        // Disable all buttons initially
+        // Clear all listeners for the new example button and re-add the known listeners
+        for (ActionListener listener : newExampleButton.getActionListeners()) {
+            newExampleButton.removeActionListener(listener);
+        }
+        newExampleButton.addActionListener(newExampleAction);
+        newExampleButton.addActionListener(e -> {
+            checkButton.setEnabled(true);
+            hintButton.setEnabled(true);
+        }); // Re-add the lambda listener
+
+        // Reset button text
+        checkButton.setText("Check");
+        hintButton.setText("Hint");
+        newExampleButton.setText("New Example");
+
+        // Set the default button states
         checkButton.setEnabled(false);
         hintButton.setEnabled(false);
         newExampleButton.setEnabled(true); // Enable New Example by default
@@ -212,6 +238,7 @@ public class TutoringSessionView extends GPanel {
     }
     
     public JButton getNewExampleButton(){
+        newExampleButton.setEnabled(true);
         return newExampleButton;
     }
 

@@ -390,15 +390,20 @@ public class InitVarView extends UserRequestView implements ActionListener {
     
     @Override
     protected void updateView() {
-        view = SplashFrame.instance().getView();
-        view.resetButtonListeners();
+        view = SplashFrame.instance().getView(); // Accessing view to use universal buttons
+        view.resetButtonListeners(); // Clear any listeners applied from other views
+        
+        // Initializes Buttons
         showButton = view.initializeButton("Show Answer");
         hintButton = view.getHintButton();
         hintButton.addActionListener(this);
-        hintButton.setEnabled(false);
         checkButton = view.getCheckButton();
         checkButton.addActionListener(this);
-        checkButton.setEnabled(false);
+        
+        // New example is uniquely hidden for this view,as
+        // There are only 8 initial values, 
+        // all of which the user shall define.          
+        view.getNewExampleButton().setEnabled(false);   
         
         if (model == null) {
             System.out.println("Error: The model is null when switching to Initialize Variables...");
@@ -406,17 +411,11 @@ public class InitVarView extends UserRequestView implements ActionListener {
         else {
             // TODO: Debug statements. Task is not being set properly.
             // The model's tasks list holds only the first task. It must be populated with each task.
-            // This should originate from a lack of data within the database. Populating it should resolve this error.
+            // This should originate from a lack of data within the database. 
+            // Populating it should aid in resolving this error.
             System.out.println("Initialize update view called.");
             System.out.println("----Init Var Task Title-----"+model.currentTask().getTitle());
-            System.out.println("----Init Var Step Title-----"+model.currentTask().getCurrentStep().getTitle());
-            
-            // Defaults with the check and hint buttons disabled until user input.
-            // New example is uniquely hidden for this view,as
-            // There are only 8 initial values, all of which the user shall define.
-            if(view.getNewExampleButton().isEnabled()) {              
-                view.toggleButton(view.getNewExampleButton());
-            }
+            System.out.println("----Init Var Step Title-----"+model.currentTask().getCurrentStep().getTitle());        
         }
     }
 
