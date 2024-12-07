@@ -13,7 +13,9 @@
 package edu.regis.shatu.view;
 
 import edu.regis.shatu.model.StepCompletion;
+import edu.regis.shatu.model.aol.ExampleType;
 import edu.regis.shatu.model.aol.NewExampleRequest;
+import edu.regis.shatu.view.act.NewExampleAction;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -47,7 +49,7 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
     private JScrollPane feedbackPane, responsePane;
     private GPanel questionPanel, descriptionPanel, qrPanel;
     private JPanel buttonPanel, radioButtonPanel;
-    private JButton checkButton, nextButton, hintButton;
+    private JButton checkButton, nextButton, hintButton, newExampleButton;
     private ButtonGroup problemSizeGroup;
     private JRadioButton fourRadioButton, eightRadioButton, sixteenRadioButton, 
                          thirtytwoRadioButton;
@@ -258,6 +260,9 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
         
         hintButton = new JButton("Hint");
         hintButton.addActionListener(this);
+        
+        newExampleButton = new JButton(NewExampleAction.instance());
+        newExampleButton.addActionListener(this);
         
         nextButton = new JButton("Next");
         nextButton.addActionListener(this);
@@ -470,7 +475,7 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
         if (e.getKeyCode() == KeyEvent.VK_ENTER && responseTextArea.getText().equals("")) {
             JOptionPane.showMessageDialog(this, "Please provide an answer");
         } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-            verifyAnswer();
+            checkButton.doClick();
         }
     }
 
@@ -534,6 +539,10 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
             verifyAnswer();
         }
     }
+/**
+ * XOR Example Request Added
+ * @return 
+ */
     
     @Override
     /**
@@ -552,7 +561,12 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
 
     @Override
     public NewExampleRequest newRequest() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        NewExampleRequest ex = new NewExampleRequest();
+        
+        //Set example type to the problem associated with the current view
+        ex.setExampleType(ExampleType.XOR_BITS);
+        
+        return ex;
     }
 
     @Override

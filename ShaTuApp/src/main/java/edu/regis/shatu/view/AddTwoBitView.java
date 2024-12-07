@@ -19,6 +19,7 @@ import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.BitOpStep;
 import edu.regis.shatu.model.aol.ExampleType;
 import edu.regis.shatu.model.aol.NewExampleRequest;
+import edu.regis.shatu.view.act.HintAction;
 import edu.regis.shatu.view.act.NewExampleAction;
 import edu.regis.shatu.view.act.StepCompletionAction;
 import java.awt.GridBagConstraints;
@@ -76,13 +77,6 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
      */
     @Override
     public void actionPerformed(ActionEvent event) {
-        if (event.getSource() == checkButton) {
-            onCheckButton();
-        } else if (event.getSource() == hintButton) {
-            onNextHint();
-        } else if (event.getSource() == nextQuestionButton) {
-            onNextQuestion();
-        }
     }
 
     /**
@@ -103,7 +97,7 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
         checkButton = new JButton(StepCompletionAction.instance());
         checkButton.addActionListener(this);
         
-        hintButton = new JButton("Hint");
+        hintButton = new JButton(HintAction.instance());
         hintButton.addActionListener(this);
         
         nextQuestionButton = new JButton(NewExampleAction.instance());
@@ -220,7 +214,7 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
         if (e.getKeyCode() == KeyEvent.VK_ENTER && answerField.getText().equals("")) {
             JOptionPane.showMessageDialog(this, "Please provide an answer");
         } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-            verifyAnswer();
+            checkButton.doClick();
         }
     }
 
@@ -260,8 +254,8 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
      */
     private void onNextHint() {
         JOptionPane.showMessageDialog(this, "Hint");
-    }
-
+        }
+       
     /**
      * Handles the action for the Check button.
      */
@@ -334,25 +328,21 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
         
         BitOpStep example = gson.fromJson(step.getData(), BitOpStep.class);
         
-        System.out.println("AddTwoBitView update display called");
-        
         try {
             binary1 = example.getExample().getOperand1();
             binary2 = example.getExample().getOperand2();
             result = calculateModulo(binary1, binary2); 
+            checkButton.setEnabled(true);
+            hintButton.setEnabled(true);
         }
         catch (NullPointerException e) {
             System.out.println("Example is empty.");
+            checkButton.setEnabled(false);
+            hintButton.setEnabled(false);
         }
-        
         
         stringLabel1.setText("binary number1: " + binary1);
         stringLabel2.setText("binary number2: " + binary2);
-        //this is just for testing purposes and can be removed after it is verified that the check button works
-        stringLabel4.setText("the result is: " + result);
-
-            stringLabel1.setText("binary number1: " + binary1);
-            stringLabel2.setText("binary number2: " + binary2);
         }
     }    
 }

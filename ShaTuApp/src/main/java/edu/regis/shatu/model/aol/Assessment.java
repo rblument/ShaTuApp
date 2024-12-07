@@ -13,13 +13,17 @@
 package edu.regis.shatu.model.aol;
 
 import edu.regis.shatu.model.KnowledgeComponent;
+import edu.regis.shatu.model.Model;
 
 /**
  * An assessment by the tutor of a knowledge component outcome.
  * 
+ * Note: Updates to assessment objects need to eventually be saved to the
+ * database. See StudentModel.updateAssessment(...)
+ * 
  * @author rickb
  */
-public class Assessment {
+public class Assessment extends Model {
     /**
      * The  knowledge component assessed in this assessment
      */
@@ -41,6 +45,12 @@ public class Assessment {
      * use of the knowledge component in this assessment.
      */
     private int successess;
+    
+    /**
+     * The number of hints the student has requested in this knowledge 
+     * component in this assessment.
+     */
+    private int hints;
     
     public Assessment(KnowledgeComponent outcome, AssessmentLevel assessment) {
         this.outcome = outcome;
@@ -75,6 +85,13 @@ public class Assessment {
     public void setExposures(int exposures) {
         this.exposures = exposures;
     }
+    
+    /**
+     * Increment the number of exposures.
+     */
+    public void incrementExposures() {
+        exposures++;
+    }
 
     public int getSuccessess() {
         return successess;
@@ -82,5 +99,28 @@ public class Assessment {
 
     public void setSuccessess(int successess) {
         this.successess = successess;
+    }
+    
+    /**
+     * 
+     */
+    public void incrementSuccessess() {
+        successess++;
+    }
+    
+    public int getHints() {
+        return hints;
+    }
+
+    public void setHints(int hints) {
+        this.hints = hints;
+    }
+
+    /**
+     * Increment the number of hints.
+     */
+    public void incrementHints() {
+        hints++;
+        System.out.println("Hints incremented to " + hints);
     }
 }

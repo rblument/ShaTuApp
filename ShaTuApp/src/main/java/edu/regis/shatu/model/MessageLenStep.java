@@ -16,20 +16,20 @@ package edu.regis.shatu.model;
  *
  * @author rickb
  */
-public class Pad0Step {
+public class MessageLenStep {
     
     private int messageLength;
     
     private String question;
     
-    private String correctAnswer;
+    private String result;
     
     private String userAnswer;
     
     /**
      * Constructor
      */
-    public Pad0Step() {
+    public MessageLenStep() {
         
     }
     
@@ -70,7 +70,7 @@ public class Pad0Step {
      * @param newResult 
      */
     public void setResult(String newResult) {
-        this.correctAnswer = newResult;
+        this.result = newResult;
     }
     
     /**
@@ -78,7 +78,7 @@ public class Pad0Step {
      * @return 
      */
     public String getResult() {
-        return this.correctAnswer;
+        return this.result;
     }
     
     /**

@@ -18,6 +18,7 @@ import edu.regis.shatu.model.TutoringSession;
 import edu.regis.shatu.model.User;
 import java.awt.CardLayout;
 import java.awt.Dimension;
+import java.awt.Toolkit;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -143,19 +144,26 @@ public class SplashFrame extends JFrame {
      */
     private SplashFrame() {
         super("ShaTu");
-        
-        setMinimumSize(new Dimension(875,650));
-        
+
+        // Get screen dimensions
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+
+        // Calculate initial size (e.g., 80% of the screen)
+        int width = (int) (screenSize.width * 0.8);
+        int height = (int) (screenSize.height * 0.8);
+        setSize(width, height);
+        setMinimumSize(new Dimension(875, 650)); // Minimum size
+
         initializeComponents();
-        
+
         this.setContentPane(cards);
-        
+
         selectPanel(SPLASH);
-        
+
         pack();
-        
+
         splashPanel.setInitialFocus();
-        
+
         setVisible(true);
     }
     
@@ -246,7 +254,30 @@ public class SplashFrame extends JFrame {
     public LessonSession getLessonSession() {
         return this.lessonSession;
     }
-    
+    /**
+     * Clears the tutoringSession instance.
+     * Changes current user to an empty user instance.
+     * Clears splashPanel fields.
+     * Switches to splash screen for sign in.
+     */
+    public void logout() {        
+        // Ensure that tutoring session is not null before attempting to clear
+        if (this.tutoringSession != null && this.tutoringSession.getAccount() != null) {
+            // Clear account information
+            this.tutoringSession.getAccount().clear();
+        }
+
+        // Invalidate or set the tutoring session to null
+        this.tutoringSession = null;
+
+        // Clear the splash panel model by setting it to a new user and reset the fields
+        this.splashPanel.setModel(new User());  // Reset the splash panel model
+        this.splashPanel.clearFields();  // Clear the userId and password fields
+
+        // Swap to splash screen for login
+        this.selectSplash();
+    }
+
     /**
      * Sets the current card panel to Dashboard.
      * @param session
@@ -270,7 +301,7 @@ public class SplashFrame extends JFrame {
      * the dashboard's practice button.
      * @param session
      */
-        public void selectPracticeScreen() {
+     public void selectPracticeScreen() {
         TutoringSession session = getSession(); // Retrieve the session
         if (session == null) {
             System.err.println("Session is null when switching to practice screen.");
@@ -285,12 +316,15 @@ public class SplashFrame extends JFrame {
 
         // Set the model (session) for the TutoringSessionView
         this.tutoringSessionView.setModel(session);
-        
-        // Sets size of practice screen window.
-        // Without this, the window opens too small.
-        this.setPreferredSize(new Dimension(1000, 800));
-        this.pack();
-        
+
+        // Dynamically resize the frame to fit the screen
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        int width = (int) (screenSize.width * 0.8); // 80% of the screen width
+        int height = (int) (screenSize.height * 0.8); // 80% of the screen height
+
+        setPreferredSize(new Dimension(width, height));
+        pack();
+
         // Switch to the tutoring session view
         selectPanel(TUTOR);
     }

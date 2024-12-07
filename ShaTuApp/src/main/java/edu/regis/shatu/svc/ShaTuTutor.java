@@ -12,8 +12,6 @@
  */
 package edu.regis.shatu.svc;
 
-import edu.regis.shatu.model.aol.NewExampleRequest;
-import edu.regis.shatu.model.aol.EncodeAsciiExample;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import edu.regis.shatu.err.IllegalArgException;
@@ -25,31 +23,43 @@ import edu.regis.shatu.model.BitShiftStep;
 import edu.regis.shatu.model.ChoiceFunctionStep;
 import edu.regis.shatu.model.Course;
 import edu.regis.shatu.model.Hint;
+import edu.regis.shatu.model.InitVarStep;
 import edu.regis.shatu.model.TutoringSession;
 import edu.regis.shatu.model.User;
 import edu.regis.shatu.model.aol.BitOpExample;
 import edu.regis.shatu.model.aol.BitOpStep;
-import edu.regis.shatu.model.aol.EncodeAsciiStep;
+import edu.regis.shatu.model.EncodeAsciiStep;
 import edu.regis.shatu.model.KnowledgeComponent;
-import edu.regis.shatu.model.Pad0Step;
+import edu.regis.shatu.model.KnowledgeComponentKind;
 import edu.regis.shatu.model.MajorityStep;
+import edu.regis.shatu.model.MessageLenStep;
+import edu.regis.shatu.model.Pad0Step;
 import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.StepCompletionReply;
 import edu.regis.shatu.model.Student;
-import edu.regis.shatu.model.aol.StepSubType;
+import edu.regis.shatu.model.StudentModelFieldKind;
 import edu.regis.shatu.model.Task;
-import edu.regis.shatu.model.aol.TaskKind;
-import edu.regis.shatu.model.aol.Timeout;
+import edu.regis.shatu.model.TutoringSession;
 import edu.regis.shatu.model.Unit;
+import edu.regis.shatu.model.User;
 import edu.regis.shatu.model.aol.Assessment;
 import edu.regis.shatu.model.aol.AssessmentLevel;
+import edu.regis.shatu.model.aol.BitOpExample;
+import edu.regis.shatu.model.aol.BitOpStep;
+import edu.regis.shatu.model.aol.EncodeAsciiExample;
 import edu.regis.shatu.model.aol.ExampleType;
+import edu.regis.shatu.model.aol.NewExampleRequest;
+import edu.regis.shatu.model.aol.RotateStep;
+import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.model.aol.StudentModel;
+import edu.regis.shatu.model.aol.TaskKind;
+import edu.regis.shatu.model.aol.Timeout;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -85,6 +95,9 @@ public class ShaTuTutor implements TutorSvc {
      * Student, StudentModel, Course, Task, Step, etc.
      */
     private TutoringSession session;
+
+    private Student student;
+    private StudentModel studentModel;
 
     /**
      * Convenience reference to the current gson object.
@@ -124,8 +137,13 @@ public class ShaTuTutor implements TutorSvc {
             case "completedTask":
             case "newExample":
             case "requestHint":
+
                 try {
-                session = verifySession(request.getUserId(), request.getSessionId());
+                    session = verifySession(request.getUserId(), request.getSessionId());
+
+                    // Retrieve the student model since we're going to eventually update. 
+                    student = ServiceFactory.findStudentSvc().retrieve(session.getAccount().getUserId());
+                    studentModel = student.getStudentModel();
 
                 } catch (ObjNotFoundException ex) {
                     return createError("No session exists for user: " + request.getUserId(), ex);
@@ -158,7 +176,7 @@ public class ShaTuTutor implements TutorSvc {
         } catch (IllegalArgumentException ex) {
             return createError("ShaTuTutor_ERR_4", ex);
         } catch (InvocationTargetException ex) {
-            return createError("ShaTuTutor_ERR_5", ex);
+            return createError("ShaTuTutor_ERR_5", (Exception) ex.getCause());
         }
     }
 
@@ -173,25 +191,26 @@ public class ShaTuTutor implements TutorSvc {
      */
     public TutorReply createAccount(String jsonAcct) throws NonRecoverableException {
         Account acct = gson.fromJson(jsonAcct, Account.class);
-
+        Student stud = gson.fromJson(jsonAcct, Student.class);
         int courseId = DEFAULT_COURSE_ID; // Currently only one course
 
         StudentSvc stuSvc = ServiceFactory.findStudentSvc();
 
-        if (stuSvc.exists(acct.getUserId()))
+        if (stuSvc.exists(acct.getUserId())) {
             return new TutorReply("IllegalUserId");
-
+        }
+        
         try {
             ServiceFactory.findUserSvc().create(acct);
 
             try {
                 CourseSvc courseSvc = ServiceFactory.findCourseSvc();
-
+                
                 Course course = courseSvc.retrieve(courseId);
-
+                
                 session = createSession(acct, course);
 
-                createStudent(acct, course, session);
+                createStudent(stud, course, session);
 
                 return new TutorReply("Created");
 
@@ -256,54 +275,53 @@ public class ShaTuTutor implements TutorSvc {
     public TutorReply requestHint(String jsonObj) {
         System.out.println("requestHint");
         StepCompletion completion = gson.fromJson(jsonObj, StepCompletion.class);
-        
+
         Step step = completion.getStep();
-        
+
         switch (step.getSubType()) {
             case INFO_MESSAGE:
                 return completeInfoMsgStep(completion);
-
             case ENCODE_BINARY: // TO_DO: Really the same
             case ENCODE_HEX:
             case ENCODE_ASCII:
-               return hintEncode(completion);
-                
+                return hintEncode(completion);
+
             case ADD_ONE_BIT:
-               return hintAddOne(completion);
-    
-            case PAD_ZEROS:  
+                return hintAddOne(completion);
+
+            case PAD_ZEROS:
                 return hintPadZeros(completion);
-                
+
             case ADD_MSG_LENGTH:
                 return hintAddMsgLen(completion);
-                
+
             case PREPARE_SCHEDULE:
                 return hintPrepareSchedule(completion);
-            
+
             case INITIALIZE_VARS:
                 return hintInitVars(completion);
-                
+
             case COMPRESS_ROUND:
                 return hintCompressRound(completion);
-            
+
             case ROTATE_BITS:
                 return hintRotateBits(completion);
-    
+
             case SHIFT_BITS:
                 return hintShiftBits(completion);
-            
+
             case XOR_BITS:
                 return hintXorBits(completion);
-            
+
             case ADD_BITS:
                 return hintAddBits(completion);
-            
+
             case MAJORITY_FUNCTION:
                 return hintMajorityFunction(completion);
-            
+
             case CHOICE_FUNCTION:
                 return hintChoiceFunction(completion);
-                
+
             default:
                 return createError("Unknown step completion: " + step.getSubType(), null);
         }
@@ -311,14 +329,15 @@ public class ShaTuTutor implements TutorSvc {
 
     /**
      * @param jsonObj a JSon encoded StepCompletion object
-     * @return 
+     * @return
      */
     public TutorReply completedStep(String jsonObj) {
         System.out.println("completedStep");
+
         StepCompletion completion = gson.fromJson(jsonObj, StepCompletion.class);
-        
+
         Step step = completion.getStep();
-        
+
         switch (step.getSubType()) {
             case INFO_MESSAGE:
                 return completeInfoMsgStep(completion);
@@ -326,118 +345,106 @@ public class ShaTuTutor implements TutorSvc {
             case ENCODE_BINARY: // TO_DO: Really the same
             case ENCODE_HEX:
             case ENCODE_ASCII:
-               return completeEncodeStep(completion);
-                
+                return completeEncodeStep(completion);
+
             case ADD_ONE_BIT:
-               return completeAddOneStep(completion);
-    
-            case PAD_ZEROS:  
+                return completeAddOneStep(completion);
+
+            case PAD_ZEROS:
                 return completePadZerosStep(completion);
-                
+
             case ADD_MSG_LENGTH:
                 return completeAddMsgLenStep(completion);
-                
+
             case PREPARE_SCHEDULE:
                 return completePrepareScheduleStep(completion);
-            
+
             case INITIALIZE_VARS:
                 return completeInitVarsStep(completion);
-                
+
             case COMPRESS_ROUND:
                 return completeCompressRoundStep(completion);
-            
+
             case ROTATE_BITS:
                 return completeRotateStep(completion);
-    
+
             case SHIFT_BITS:
                 return completeShiftBitsStep(completion);
-            
+
             case XOR_BITS:
                 return completeXorBitsStep(completion);
-            
+
             case ADD_BITS:
                 return completeAddBitsStep(completion);
-            
+
             case MAJORITY_FUNCTION:
                 return completeMajorityStep(completion);
-            
+
             case CHOICE_FUNCTION:
                 return completeChoiceStep(completion);
-                
+
             default:
                 return createError("Unknown step completion: " + step.getSubType(), null);
         }
     }
-    
+
     public TutorReply completeRotateStep(StepCompletion completion) {
-        TutorReply reply = new TutorReply(":StepCompletionReply");
+        System.out.println("Tutor completeRotateStep");
+        RotateStep example = gson.fromJson(completion.getData(), RotateStep.class);
+        int amount = example.getAmount();
+        String data = example.getData();
         
-        return reply;
-    }
-    
-    public TutorReply completeInfoMsgStep(StepCompletion completion) {
-        TutorReply reply = new TutorReply(":StepCompletionReply");
-        
-        return reply;
-    }
-    
-      public TutorReply completeEncodeStep(StepCompletion completion) {
-        TutorReply reply = new TutorReply(":StepCompletionReply");
-        
-        return reply;
-    }
- 
-      /**
-       * This method is called from the AddOneView when the check button is clicked,
-       * will check the users answer to the correct answer generated by the
-       * newAddOneStep method in this file.
-       * 
-       * @param completion
-       * 
-       * @return 
-       */
-    public TutorReply completeAddOneStep(StepCompletion completion) {
-        
-        AddOneStep completedAddOneStep = gson.fromJson(completion.getData(), AddOneStep.class); // AddOneStep that was created in the stepCompletion function in the AddOneView
-        
-        String userAnswer = completedAddOneStep.getUserAnswer(); // What the user submitted as the answer. 
-        String correctAnswer = completedAddOneStep.getResult();
-        
-        System.out.println("Correct Answer: " + correctAnswer); // Error checking
-        System.out.println("User Answer: " + userAnswer); // Error checking
+        String expectedResult = performBitRotation(data, amount);
         
         StepCompletionReply stepReply = new StepCompletionReply();
-        stepReply.setCorrectAnswer(correctAnswer);
-        stepReply.setResponse(userAnswer);
+        String result = example.getUserResponse();
         
-        if (userAnswer.equals(correctAnswer)) { // User was correct
-            System.out.println("Answer was correct, correct if branch taken."); // Error checking.
+        stepReply.setCorrectAnswer(expectedResult);
+        stepReply.setResponse(result);
+        
+        System.out.println("Answer: " + expectedResult);
+        
+        if (expectedResult.equals(result)) {
             stepReply.setIsCorrect(true);
             stepReply.setIsRepeatStep(false);
             stepReply.setIsNewStep(true);
-             
-            // ToDo: Use the student model to figure out whether we want
-            // to give the student another practice problem of the same
-            // type or move on to an entirely different problem.
             stepReply.setIsNewTask(true);
-            
-            // ToDo: currently only one step in a task, so there isn't a next one???
             stepReply.setIsNextStep(false);
+            
+            // Update the assessment data and save it to the database.
+            int dbId = KnowledgeComponentKind.fromString("Rotate n BITS").dbId();
+            Assessment assessment = studentModel.findAssessment(dbId); 
+            assessment.incrementSuccessess();
 
-        } else { // User was wrong
-            System.out.println("Answer was not correct, correct if branch taken."); // Error checking
+            try {
+                StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+                modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.SUCCESSES);
+
+            } catch (NonRecoverableException ex) {
+                return createError("Unknown error", ex);
+            }
+            
+            int exposures = assessment.getExposures();
+            int successes = assessment.getSuccessess();
+            
+            if (exposures > 0 && (double) successes / exposures > 0.6) {
+                stepReply.setIsNewTask(true);
+                System.out.println("%%%%%%%%%%% Next Task Recommended");
+            }
+            else stepReply.setIsNewTask(false);
+            
+        } else {
             stepReply.setIsCorrect(false);
             stepReply.setIsRepeatStep(true);
             stepReply.setIsNewStep(false);
             stepReply.setIsNewTask(false);
             stepReply.setIsNextStep(false);
         }
-        
+
         Step step = new Step(1, 0, StepSubType.STEP_COMPLETION_REPLY);
         step.setCurrentHintIndex(0);
         step.setNotifyTutor(true);
         step.setIsCompleted(false);
-        // ToDo: fix timeouts
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);
         step.setData(gson.toJson(stepReply));
@@ -454,31 +461,281 @@ public class ShaTuTutor implements TutorSvc {
         
         return reply;
     }
-    
+
+    public TutorReply completeInfoMsgStep(StepCompletion completion) {
+        TutorReply reply = new TutorReply(":StepCompletionReply");
+
+        return reply;
+    }
+
+    /**
+     * This method is called from the EncodeAsciiView when the check button is
+     * clicked, will check the users answer to the correct answer generated by
+     * the newEncodeAsciiStep method in this file.
+     *
+     * @param completion
+     *
+     * @return
+     */
+    public TutorReply completeEncodeStep(StepCompletion completion) {
+        EncodeAsciiStep completedEncodeAsciiStep = gson.fromJson(completion.getData(), EncodeAsciiStep.class); // EncodeAsciiStep that was created in the stepCompletion function in the EncodeAsciiView
+
+        String userAnswer = completedEncodeAsciiStep.getUserAnswer(); // What the user submitted as the answer. 
+        String correctAnswer = completedEncodeAsciiStep.getResult();
+
+        System.out.println("Correct Answer: " + correctAnswer); // Error checking
+        System.out.println("User Answer: " + userAnswer); // Error checking
+
+        StepCompletionReply stepReply = new StepCompletionReply();
+        stepReply.setCorrectAnswer(correctAnswer);
+        stepReply.setResponse(userAnswer);
+
+        if (userAnswer.equals(correctAnswer)) { // User was correct
+            System.out.println("Answer was correct, correct if branch taken."); // Error checking.
+            stepReply.setIsCorrect(true);
+            stepReply.setIsRepeatStep(false);
+            stepReply.setIsNewStep(true);
+
+            // ToDo: Use the student model to figure out whether we want
+            // to give the student another practice problem of the same
+            // type or move on to an entirely different problem.
+            stepReply.setIsNewTask(true);
+
+            // ToDo: currently only one step in a task, so there isn't a next one???
+            stepReply.setIsNextStep(false);
+
+        } else { // User was wrong
+            System.out.println("Answer was not correct, correct if branch taken."); // Error checking
+            stepReply.setIsCorrect(false);
+            stepReply.setIsRepeatStep(true);
+            stepReply.setIsNewStep(false);
+            stepReply.setIsNewTask(false);
+            stepReply.setIsNextStep(false);
+        }
+
+        Step step = new Step(1, 0, StepSubType.STEP_COMPLETION_REPLY);
+        step.setCurrentHintIndex(0);
+        step.setNotifyTutor(true);
+        step.setIsCompleted(false);
+        // ToDo: fix timeouts
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+        step.setData(gson.toJson(stepReply));
+
+        Task task = new Task();
+        task.setKind(TaskKind.PROBLEM);
+        task.setType(ExampleType.STEP_COMPLETION_REPLY);
+        task.setDescription("Choose your next action");
+        task.addStep(step);
+
+        TutorReply reply = new TutorReply(":Success");
+
+        reply.setData(gson.toJson(task));
+
+        return reply;
+    }
+
+    /**
+     * This method is called from the AddOneView when the check button is
+     * clicked, will check the users answer to the correct answer generated by
+     * the newAddOneStep method in this file.
+     *
+     * @param completion
+     *
+     * @return
+     */
+    public TutorReply completeAddOneStep(StepCompletion completion) {
+
+        AddOneStep completedAddOneStep = gson.fromJson(completion.getData(), AddOneStep.class); // AddOneStep that was created in the stepCompletion function in the AddOneView
+
+        String userAnswer = completedAddOneStep.getUserAnswer(); // What the user submitted as the answer. 
+        String correctAnswer = completedAddOneStep.getResult();
+
+        System.out.println("Correct Answer: " + correctAnswer); // Error checking
+        System.out.println("User Answer: " + userAnswer); // Error checking
+
+        StepCompletionReply stepReply = new StepCompletionReply();
+        stepReply.setCorrectAnswer(correctAnswer);
+        stepReply.setResponse(userAnswer);
+
+        if (userAnswer.equals(correctAnswer)) { // User was correct
+            System.out.println("Answer was correct, correct if branch taken."); // Error checking.
+            stepReply.setIsCorrect(true);
+            stepReply.setIsRepeatStep(false);
+            stepReply.setIsNewStep(true);
+
+            // ToDo: Use the student model to figure out whether we want
+            // to give the student another practice problem of the same
+            // type or move on to an entirely different problem.
+            stepReply.setIsNewTask(true);
+
+            // ToDo: currently only one step in a task, so there isn't a next one???
+            stepReply.setIsNextStep(false);
+            
+            // Update the assessment data and save it to the database.
+            int dbId = KnowledgeComponentKind.fromString("Add One Bit").dbId();
+            Assessment assessment = studentModel.findAssessment(dbId); 
+            assessment.incrementSuccessess();
+
+            try {
+                StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+                modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.SUCCESSES);
+
+            } catch (NonRecoverableException ex) {
+                return createError("Unknown error", ex);
+            }
+            
+            int exposures = assessment.getExposures();
+            int successes = assessment.getSuccessess();
+            
+            if (exposures > 0 && (double) successes / exposures > 0.6) {
+                stepReply.setIsNewTask(true);
+                System.out.println("%%%%%%%%%%% Next Task Recommended");
+            }
+            else stepReply.setIsNewTask(false);
+
+        } else { // User was wrong
+            System.out.println("Answer was not correct, correct if branch taken."); // Error checking
+            stepReply.setIsCorrect(false);
+            stepReply.setIsRepeatStep(true);
+            stepReply.setIsNewStep(false);
+            stepReply.setIsNewTask(false);
+            stepReply.setIsNextStep(false);
+        }
+
+        Step step = new Step(1, 0, StepSubType.STEP_COMPLETION_REPLY);
+        step.setCurrentHintIndex(0);
+        step.setNotifyTutor(true);
+        step.setIsCompleted(false);
+        // ToDo: fix timeouts
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+        step.setData(gson.toJson(stepReply));
+
+        Task task = new Task();
+        task.setKind(TaskKind.PROBLEM);
+        task.setType(ExampleType.STEP_COMPLETION_REPLY);
+        task.setDescription("Choose your next action");
+        task.addStep(step);
+
+        TutorReply reply = new TutorReply(":Success");
+
+        reply.setData(gson.toJson(task));
+
+        return reply;
+    }
+
     /**
      * This method is called from the Pad0View when the check button is clicked,
      * will check the users answer to the correct answer generated by the
      * newPad0Step method in this file.
-     * 
+     *
      * @param completion
-     * 
-     * @return 
+     *
+     * @return
      */
     public TutorReply completePadZerosStep(StepCompletion completion) {
-        
+
         Pad0Step completedPadZeroStep = gson.fromJson(completion.getData(), Pad0Step.class);
+
+        String userAnswer = completedPadZeroStep.getUserAnswer();
+        String correctAnswer = completedPadZeroStep.getResult();
+
+        System.out.println("user answer: " + userAnswer); // Error checking
+        System.out.println("Correct answer: " + correctAnswer); // Error checking
+
+        StepCompletionReply stepReply = new StepCompletionReply();
+        stepReply.setCorrectAnswer(correctAnswer);
+        stepReply.setResponse(userAnswer);
+
+        if (userAnswer.equals(correctAnswer)) { // User was correct
+            System.out.println("Answer was correct, correct if branch taken."); // Error checking
+            stepReply.setIsCorrect(true);
+            stepReply.setIsRepeatStep(false);
+            stepReply.setIsNewStep(true);
+
+            // ToDo: Use the student model to figure out whether we want
+            // to give the student another practice problem of the same
+            // type or move on to an entirely different problem.
+            stepReply.setIsNewTask(true);
+
+            // ToDo: currently only one step in a task, so there isn't a next one???
+            stepReply.setIsNextStep(false);
+            
+            // Update the assessment data and save it to the database.
+            int dbId = KnowledgeComponentKind.fromString("Pad with Zeros").dbId();
+            Assessment assessment = studentModel.findAssessment(dbId); 
+            assessment.incrementSuccessess();
+
+            try {
+                StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+                modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.SUCCESSES);
+
+            } catch (NonRecoverableException ex) {
+                return createError("Unknown error", ex);
+            }
+            
+            int exposures = assessment.getExposures();
+            int successes = assessment.getSuccessess();
+            
+            if (exposures > 0 && (double) successes / exposures > 0.6) {
+                stepReply.setIsNewTask(true);
+                System.out.println("%%%%%%%%%%% Next Task Recommended");
+            }
+            else stepReply.setIsNewTask(false);
+
+        } else { // User was wrong
+            System.out.println("Answer was not correct, correct if branch taken."); // Error checking
+            stepReply.setIsCorrect(false);
+            stepReply.setIsRepeatStep(true);
+            stepReply.setIsNewStep(false);
+            stepReply.setIsNewTask(false);
+            stepReply.setIsNextStep(false);
+        }
+
+        Step step = new Step(1, 0, StepSubType.STEP_COMPLETION_REPLY);
+        step.setCurrentHintIndex(0);
+        step.setNotifyTutor(true);
+        step.setIsCompleted(false);
+        // ToDo: fix timeouts
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+        step.setData(gson.toJson(stepReply));
+
+        Task task = new Task();
+        task.setKind(TaskKind.PROBLEM);
+        task.setType(ExampleType.STEP_COMPLETION_REPLY);
+        task.setDescription("Choose your next action");
+        task.addStep(step);
+
+        TutorReply reply = new TutorReply(":Success");
+
+        reply.setData(gson.toJson(task));
+
+        return reply;
+    }
+    
+    /**
+     * Function that is called from the overrided stepCompletion method from the MessageLenView.  
+     * Checks the users answer with the correct answer and will provide the user
+     * with further guidance.
+     * @param completion
+     * @return 
+     */    
+    public TutorReply completeAddMsgLenStep(StepCompletion completion) {
+        MessageLenStep completedMessageLenStep = gson.fromJson(completion.getData(), MessageLenStep.class);
         
-        int userAnswer = Integer.parseInt(completedPadZeroStep.getUserAnswer());
-        int correctAnswer = completedPadZeroStep.getResult();
+        String userAnswer = completedMessageLenStep.getUserAnswer();
+        String correctAnswer = completedMessageLenStep.getResult();
         
         System.out.println("user answer: " + userAnswer); // Error checking
         System.out.println("Correct answer: " + correctAnswer); // Error checking
         
         StepCompletionReply stepReply = new StepCompletionReply();
-        stepReply.setCorrectAnswer(Integer.toString(correctAnswer));
-        stepReply.setResponse(Integer.toString(userAnswer));
+        stepReply.setCorrectAnswer(correctAnswer);
+        stepReply.setResponse(userAnswer);
         
-        if (userAnswer == correctAnswer) { // User was correct
+        if (userAnswer.equals(correctAnswer)) { // User was correct
             System.out.println("Answer was correct, correct if branch taken."); // Error checking
             stepReply.setIsCorrect(true);
             stepReply.setIsRepeatStep(false);
@@ -491,6 +748,28 @@ public class ShaTuTutor implements TutorSvc {
             
             // ToDo: currently only one step in a task, so there isn't a next one???
             stepReply.setIsNextStep(false);
+            
+            // Update the assessment data and save it to the database.
+            int dbId = KnowledgeComponentKind.fromString("Add Message Length").dbId();
+            Assessment assessment = studentModel.findAssessment(dbId); 
+            assessment.incrementSuccessess();
+
+            try {
+                StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+                modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.SUCCESSES);
+
+            } catch (NonRecoverableException ex) {
+                return createError("Unknown error", ex);
+            }
+            
+            int exposures = assessment.getExposures();
+            int successes = assessment.getSuccessess();
+            
+            if (exposures > 0 && (double) successes / exposures > 0.6) {
+                stepReply.setIsNewTask(true);
+                System.out.println("%%%%%%%%%%% Next Task Recommended");
+            }
+            else stepReply.setIsNewTask(false);
 
         } else { // User was wrong
             System.out.println("Answer was not correct, correct if branch taken."); // Error checking
@@ -522,46 +801,123 @@ public class ShaTuTutor implements TutorSvc {
         
         return reply;
     }
-        
-    public TutorReply completeAddMsgLenStep(StepCompletion completion) {
-        TutorReply reply = new TutorReply(":StepCompletionReply");
-        
-        return reply;
-    }  
-          
+
     public TutorReply completePrepareScheduleStep(StepCompletion completion) {
         TutorReply reply = new TutorReply(":StepCompletionReply");
-        
+
         return reply;
     }
-           
+
     public TutorReply completeInitVarsStep(StepCompletion completion) {
-        TutorReply reply = new TutorReply(":StepCompletionReply");
-        
+        System.out.println("Tutor completeInitVarsStep");
+
+        InitVarStep example = gson.fromJson(completion.getData(), InitVarStep.class);
+
+        // Extract user-provided answers and expected results
+        Map<String, String> userAnswers = example.getUserAnswers();
+        Map<String, String> correctAnswers = example.getCorrectAnswers();
+
+        // Track correctness and prepare feedback
+        boolean allCorrect = true;
+        StringBuilder feedback = new StringBuilder();
+
+        for (String variable : correctAnswers.keySet()) {
+            String userAnswer = userAnswers.getOrDefault(variable, "");
+            String correctAnswer = correctAnswers.get(variable);
+
+            feedback.append(variable)
+                    .append(": User Answer: ")
+                    .append(userAnswer)
+                    .append(", Correct Answer: ")
+                    .append(correctAnswer)
+                    .append("\n");
+
+            if (!userAnswer.equals(correctAnswer)) {
+                allCorrect = false;
+            }
+        }
+
+        System.out.println("Feedback:\n" + feedback);
+
+        // Create StepCompletionReply
+        StepCompletionReply stepReply = new StepCompletionReply();
+        stepReply.setIsCorrect(allCorrect);
+        stepReply.setCorrectAnswer(feedback.toString());
+
+        // Update the student model
+        int dbId = KnowledgeComponentKind.fromString("Initialize Variables").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId);
+
+        // Increment success or exposure based on correctness
+        if (allCorrect) {
+            assessment.incrementSuccessess();
+        }
+        assessment.incrementExposures();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.SUCCESSES);
+        } catch (NonRecoverableException ex) {
+            return createError("Failed to update assessment data in database", ex);
+        }
+
+        // Determine whether to recommend a new task
+        int exposures = assessment.getExposures();
+        int successes = assessment.getSuccessess();
+        if (exposures > 0 && (double) successes / exposures > 0.8) {
+            stepReply.setIsNewTask(true);
+            System.out.println("Next task is recommended.");
+        } else {
+            stepReply.setIsNewTask(false);
+        }
+
+        stepReply.setIsRepeatStep(!allCorrect);
+        stepReply.setIsNewStep(allCorrect);
+        stepReply.setIsNextStep(false);
+
+        // Wrap the StepCompletionReply into a Task and TutorReply
+        Step step = new Step(1, 0, StepSubType.STEP_COMPLETION_REPLY);
+        step.setCurrentHintIndex(0);
+        step.setNotifyTutor(true);
+        step.setIsCompleted(false);
+
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+        step.setData(gson.toJson(stepReply));
+
+        Task task = new Task();
+        task.setKind(TaskKind.PROBLEM);
+        task.setType(ExampleType.STEP_COMPLETION_REPLY);
+        task.setDescription("Review your results and choose the next action.");
+        task.addStep(step);
+
+        TutorReply reply = new TutorReply(":Success");
+        reply.setData(gson.toJson(task));
+
         return reply;
     }
-  
+
     public TutorReply completeCompressRoundStep(StepCompletion completion) {
         TutorReply reply = new TutorReply(":StepCompletionReply");
-        
+
         return reply;
     }
 
     public TutorReply completeShiftBitsStep(StepCompletion completion) {
         System.out.println("Tutor completeShiftBitsStep");
-        
+
         BitShiftStep example = gson.fromJson(completion.getData(), BitShiftStep.class);
         String operand = example.getOperand();
         int shiftLength = example.getShiftLength();
         boolean shiftRight = example.isShiftRight();
         int bitLength = example.getBitLength();
         String result = example.getResult();
-        
-        String expectedResult = bitShiftFunction(operand, 
-                                                 shiftLength, 
-                                                 shiftRight, 
-                                                 bitLength);
-        
+
+        String expectedResult = bitShiftFunction(operand,
+                shiftLength,
+                shiftRight,
+                bitLength);
+
         StepCompletionReply stepReply = new StepCompletionReply();
         stepReply.setCorrectAnswer(expectedResult);
         stepReply.setResponse(result);
@@ -571,13 +927,31 @@ public class ShaTuTutor implements TutorSvc {
             stepReply.setIsRepeatStep(false);
             stepReply.setIsNewStep(true);
 
-            // ToDo: Use the student model to figure out whether we want
-            // to give the student another practice problem of the same
-            // type or move on to an entirely different problem.
-            stepReply.setIsNewTask(true);
-
             // ToDo: currently only one step in a task, so there isn't a next one???
             stepReply.setIsNextStep(false);
+            
+            // Update the assessment data and save it to the database.
+            int dbId = KnowledgeComponentKind.fromString("Shift Bits").dbId();
+            Assessment assessment = studentModel.findAssessment(dbId); 
+            assessment.incrementSuccessess();
+
+            try {
+                StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+                modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.SUCCESSES);
+
+            } catch (NonRecoverableException ex) {
+                return createError("Unknown error", ex);
+            }
+            
+            int exposures = assessment.getExposures();
+            int successes = assessment.getSuccessess();
+            
+            if (exposures > 0 && (double) successes / exposures > 0.6) {
+                stepReply.setIsNewTask(true);
+                System.out.println("%%%%%%%%%%% Next Task Recommended");
+            }
+            else stepReply.setIsNewTask(false);
+            
 
         } else {
             stepReply.setIsCorrect(false);
@@ -600,34 +974,35 @@ public class ShaTuTutor implements TutorSvc {
         task.setKind(TaskKind.PROBLEM);
         task.setType(ExampleType.STEP_COMPLETION_REPLY);
         task.setDescription("Choose your next action");
-        task.addStep(step); 
+        task.addStep(step);
 
         TutorReply reply = new TutorReply(":Success");
 
         reply.setData(gson.toJson(task));
-        
+
         return reply;
     }
-    
+
     public TutorReply completeXorBitsStep(StepCompletion completion) {
         TutorReply reply = new TutorReply(":StepCompletionReply");
-        
+
         return reply;
     }
+
     public TutorReply completeAddBitsStep(StepCompletion completion) {
         Random rnd = new Random();
         System.out.println("Tutor completeAddBitsStep");
-        
+
         BitOpStep example = gson.fromJson(completion.getData(), BitOpStep.class);
-        
+
         String operand1 = example.getExample().getOperand1();
         String operand2 = example.getExample().getOperand2();
         String result = example.getExample().getResult();
-        
+
         int m = 8; //this will be changed
-        
+
         String expectedResult = addBitsFunction(operand1, operand2, m);
-        
+
         StepCompletionReply stepReply = new StepCompletionReply();
         stepReply.setCorrectAnswer(expectedResult);
         stepReply.setResponse(result);
@@ -644,6 +1019,28 @@ public class ShaTuTutor implements TutorSvc {
 
             // ToDo: currently only one step in a task, so there isn't a next one???
             stepReply.setIsNextStep(false);
+            
+            // Update the assessment data and save it to the database.
+            int dbId = KnowledgeComponentKind.fromString("Add Bits").dbId();
+            Assessment assessment = studentModel.findAssessment(dbId); 
+            assessment.incrementSuccessess();
+
+            try {
+                StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+                modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.SUCCESSES);
+
+            } catch (NonRecoverableException ex) {
+                return createError("Unknown error", ex);
+            }
+            
+            int exposures = assessment.getExposures();
+            int successes = assessment.getSuccessess();
+            
+            if (exposures > 0 && (double) successes / exposures > 0.6) {
+                stepReply.setIsNewTask(true);
+                System.out.println("%%%%%%%%%%% Next Task Recommended");
+            }
+            else stepReply.setIsNewTask(false);
 
         } else {
             stepReply.setIsCorrect(false);
@@ -660,115 +1057,154 @@ public class ShaTuTutor implements TutorSvc {
         // ToDo: fix timeouts
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);
-        
+
         step.setData(gson.toJson(stepReply));
 
         Task task = new Task();
         task.setKind(TaskKind.PROBLEM);
         task.setType(ExampleType.STEP_COMPLETION_REPLY);
         task.setDescription("Choose your next action");
-        task.addStep(step); 
+        task.addStep(step);
 
         TutorReply reply = new TutorReply(":Success");
 
         reply.setData(gson.toJson(task));
-        
+
         return reply;
     }
 
-    public TutorReply completeMajorityStep(StepCompletion completion) {        
+    public TutorReply completeMajorityStep(StepCompletion completion) {
         System.out.println("Tutor completeMajorityStep");
-        
+
         MajorityStep example = gson.fromJson(completion.getData(), MajorityStep.class);
+        String operand1 = example.getOperandA();
+        String operand2 = example.getOperandB();
+        String operand3 = example.getOperandC();
+        int bitLength = example.getBitLength();
+        String result = example.getResult();
+        // System.out.println("Result: " + example.getResult());
+
+        String expectedResult = majorityFunction(operand1, operand2, operand3, bitLength);
+        System.out.println("Expected result: " + expectedResult);
+
+        StepCompletionReply stepReply = new StepCompletionReply();
+        stepReply.setCorrectAnswer(expectedResult);
+        stepReply.setResponse(result);
+
+        if (expectedResult.equals(result)) {
+            stepReply.setIsCorrect(true);
+            stepReply.setIsRepeatStep(false);
+            stepReply.setIsNewStep(true);
+
+            // ToDo: Use the student model to figure out whether we want
+            // to give the student another practice problem of the same
+            // type or move on to an entirely different problem.
+            stepReply.setIsNewTask(true);
+
+            // ToDo: currently only one step in a task, so there isn't a next one???
+            stepReply.setIsNextStep(false);
+            
+            // Update the assessment data and save it to the database.
+            int dbId = KnowledgeComponentKind.fromString("Majority Function").dbId();
+            Assessment assessment = studentModel.findAssessment(dbId); 
+            assessment.incrementSuccessess();
+
+            try {
+                StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+                modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.SUCCESSES);
+
+            } catch (NonRecoverableException ex) {
+                return createError("Unknown error", ex);
+            }
+            
+            int exposures = assessment.getExposures();
+            int successes = assessment.getSuccessess();
+            
+            if (exposures > 0 && (double) successes / exposures > 0.6) {
+                stepReply.setIsNewTask(true);
+                System.out.println("%%%%%%%%%%% Next Task Recommended");
+            }
+            else stepReply.setIsNewTask(false);
+
+        } else {
+            stepReply.setIsCorrect(false);
+            stepReply.setIsRepeatStep(true);
+            stepReply.setIsNewStep(false);
+            stepReply.setIsNewTask(false);
+            stepReply.setIsNextStep(false);
+        }
+
+        Step step = new Step(1, 0, StepSubType.STEP_COMPLETION_REPLY);
+        step.setCurrentHintIndex(0);
+        step.setNotifyTutor(true);
+        step.setIsCompleted(false);
+        // ToDo: fix timeouts
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+        step.setData(gson.toJson(stepReply));
+
+        Task task = new Task();
+        task.setKind(TaskKind.PROBLEM);
+        task.setType(ExampleType.STEP_COMPLETION_REPLY);
+        task.setDescription("Choose your next action");
+        task.addStep(step);
+
+        TutorReply reply = new TutorReply(":Success");
+
+        reply.setData(gson.toJson(task));
+
+        return reply;
+    }
+
+    public TutorReply completeChoiceStep(StepCompletion completion) {
+        System.out.println("Tutor completeChoiceStep");
+
+        ChoiceFunctionStep example = gson.fromJson(completion.getData(), ChoiceFunctionStep.class);
         String operand1 = example.getOperand1();
         String operand2 = example.getOperand2();
+
         String operand3 = example.getOperand3();
         int bitLength = example.getBitLength();
         String result = example.getResult();
-       // System.out.println("Result: " + example.getResult());
-        
-        String expectedResult = majorityFunction(operand1, operand2, operand3, bitLength);
-        System.out.println("Expected result: " + expectedResult);
-  
-        StepCompletionReply stepReply = new StepCompletionReply();
-        stepReply.setCorrectAnswer(expectedResult);
-        stepReply.setResponse(result);
-        
-        if (expectedResult.equals(result)) {
-            stepReply.setIsCorrect(true);
-            stepReply.setIsRepeatStep(false);
-            stepReply.setIsNewStep(true);
-             
-            // ToDo: Use the student model to figure out whether we want
-            // to give the student another practice problem of the same
-            // type or move on to an entirely different problem.
-            stepReply.setIsNewTask(true);
-            
-            // ToDo: currently only one step in a task, so there isn't a next one???
-            stepReply.setIsNextStep(false);
-            
-        } else {
-            stepReply.setIsCorrect(false);
-            stepReply.setIsRepeatStep(true);
-            stepReply.setIsNewStep(false);
-            stepReply.setIsNewTask(false);
-            stepReply.setIsNextStep(false);
-        }
-     
-        Step step = new Step(1, 0, StepSubType.STEP_COMPLETION_REPLY);
-        step.setCurrentHintIndex(0);
-        step.setNotifyTutor(true);
-        step.setIsCompleted(false);
-        // ToDo: fix timeouts
-        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
-        step.setTimeout(timeout);
-        step.setData(gson.toJson(stepReply));
-        
-        Task task = new Task();
-        task.setKind(TaskKind.PROBLEM);
-        task.setType(ExampleType.STEP_COMPLETION_REPLY);
-        task.setDescription("Choose your next action");
-        task.addStep(step); 
-        
-        TutorReply reply = new TutorReply(":Success");
-    
-        reply.setData(gson.toJson(task));
-        
-        return reply;
-    }
-                
-    public TutorReply completeChoiceStep(StepCompletion completion) {
-        System.out.println("Tutor completeChoiceStep");
-        
-        ChoiceFunctionStep example = gson.fromJson(completion.getData(), ChoiceFunctionStep.class);
-        String operand1 = example.getOperand1();
-         String operand2 = example.getOperand2();
-        
-          String operand3 = example.getOperand3();
-        int bitLength = example.getBitLength();
-        String result = example.getResult();
-        
+
         String expectedResult = choiceFunction(operand1, operand2, operand3, bitLength);
 
-        System.out.println("Expected result: " + expectedResult);
-  
+        System.out.println("Expected result: " + expectedResult); // ToDo debuggin
+
         StepCompletionReply stepReply = new StepCompletionReply();
         stepReply.setCorrectAnswer(expectedResult);
         stepReply.setResponse(result);
-        
+
         if (expectedResult.equals(result)) {
             stepReply.setIsCorrect(true);
             stepReply.setIsRepeatStep(false);
             stepReply.setIsNewStep(true);
-             
-            // ToDo: Use the student model to figure out whether we want
-            // to give the student another practice problem of the same
-            // type or move on to an entirely different problem.
-            stepReply.setIsNewTask(true);
-            
+
             // ToDo: currently only one step in a task, so there isn't a next one???
             stepReply.setIsNextStep(false);
+
+            // Update the assessment data and save it to the database.
+            int dbId = KnowledgeComponentKind.fromString("Choice Function").dbId();
+            Assessment assessment = studentModel.findAssessment(dbId); 
+            assessment.incrementSuccessess();
+
+            try {
+                StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+                modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.SUCCESSES);
+
+            } catch (NonRecoverableException ex) {
+                return createError("Unknown error", ex);
+            }
             
+            int exposures = assessment.getExposures();
+            int successes = assessment.getSuccessess();
+            
+            if (exposures > 0 && (double) successes / exposures > 0.8) {
+                stepReply.setIsNewTask(true);
+                System.out.println("%%%%%%%%%%% Next Task Recommended");
+            }
+            else stepReply.setIsNewTask(false);
+
         } else {
             stepReply.setIsCorrect(false);
             stepReply.setIsRepeatStep(true);
@@ -776,7 +1212,7 @@ public class ShaTuTutor implements TutorSvc {
             stepReply.setIsNewTask(false);
             stepReply.setIsNextStep(false);
         }
-     
+
         Step step = new Step(1, 0, StepSubType.STEP_COMPLETION_REPLY);
         step.setCurrentHintIndex(0);
         step.setNotifyTutor(true);
@@ -785,18 +1221,18 @@ public class ShaTuTutor implements TutorSvc {
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);
         step.setData(gson.toJson(stepReply));
-        
+
         Task task = new Task();
         task.setKind(TaskKind.PROBLEM);
         task.setType(ExampleType.STEP_COMPLETION_REPLY);
         task.setDescription("Choose your next action");
-        task.addStep(step); 
-        
+        task.addStep(step);
+
         TutorReply reply = new TutorReply(":Success");
-    
+
         reply.setData(gson.toJson(task));
-        
-        return reply;                
+
+        return reply;
     }
 
     public TutorReply completedTask(String taskInfo) {
@@ -872,17 +1308,18 @@ public class ShaTuTutor implements TutorSvc {
 
             TutoringSession tSession = new TutoringSession();
             tSession.setAccount(account);
-
+            
             Random rnd = new Random();
             String clearToken = "Session" + account.getUserId() + Integer.toString(rnd.nextInt());
             tSession.setSecurityToken(SHA_256.instance().sha256(clearToken));
-
+            
             tSession.setCourse(course.getDigest());
-
+            
             Unit unit = course.currentUnit();
-            if (unit != null)
+            if (unit != null) {
                 tSession.setUnit(unit.getDigest());
-         
+            }
+
             tSession.addTask(task);
 
             ServiceFactory.findSessionSvc().create(tSession);
@@ -894,7 +1331,7 @@ public class ShaTuTutor implements TutorSvc {
             throw new NonRecoverableException("Session already exists " + account.getUserId());
         }
     }
-
+        
     /**
      * Create and save the student and their initial student model.
      *
@@ -902,10 +1339,10 @@ public class ShaTuTutor implements TutorSvc {
      * @param course
      * @return
      */
-    private Student createStudent(Account acct, Course course, TutoringSession session)
+    private Student createStudent(Student student, Course course, TutoringSession session)
             throws NonRecoverableException {
-        
-        Student student = new Student(acct.getUserId(), acct.getPassword());
+
+        //Student student = new Student(acct.getUserId(), acct.getPassword());
         StudentModel model = student.getStudentModel();
 
         try {
@@ -929,19 +1366,17 @@ public class ShaTuTutor implements TutorSvc {
                 if (!model.containsAssessment(id)) {
                     KnowledgeComponent comp = course.findKnowledgeComponent(id);
                     model.addAssessment(id, new Assessment(comp, AssessmentLevel.VERY_LOW));
-                    
-                    
+
                 }
             }
 
             StudentSvc svc = ServiceFactory.findStudentSvc();
             svc.create(student);
-
             return student;
 
         } catch (IllegalArgException e) {
             // We should never get here since 
-            throw new NonRecoverableException("Student already exists " + acct.getUserId());
+            throw new NonRecoverableException("Student already exists " + student.getUserId());
 
         } catch (ObjNotFoundException e) {
             throw new NonRecoverableException("Inconsistent Course in DB knowledge component" + course.getId());
@@ -1009,6 +1444,7 @@ public class ShaTuTutor implements TutorSvc {
         }
     }
 
+    
     /**
      * Handles client requests for a new ASCII encode example.
      *
@@ -1016,57 +1452,45 @@ public class ShaTuTutor implements TutorSvc {
      * object.
      */
     private TutorReply newAsciiEncodeExample(TutoringSession session, String jsonData) {
-        Random rnd = new Random();
+        System.out.println("Start tutor newEncodeAsciiexample"); // Error checking
 
-        EncodeAsciiExample example = gson.fromJson(jsonData, EncodeAsciiExample.class);
+        EncodeAsciiStep newEncodeAscii = gson.fromJson(jsonData, EncodeAsciiStep.class); // This is the EncodeAsciiStep created in the newExample function from the EncodeAsciiView.
+        
+        if (newEncodeAscii.getQuestion().isEmpty() || newEncodeAscii.getQuestion() == null) {
+            
+            System.out.println("Question was empty"); // Error checking
+            
+            int messageLength = newEncodeAscii.getMessageLength(); // Set in the newExample function from the EncodeAsciiView, represents the String length that will be generated for the question.
 
-        int strLen = example.getStringLength();
+            String newQuestion = generateRandomString(messageLength); // Generates a random string to convert to binary
 
-        if (strLen == 0) {
-            // ToDo: The tutor should generate the string length and timeout
-            // based on the the current student model.
-            strLen = rnd.nextInt(MAX_ASCII_SIZE - 1) + 1;
-            example.setTimeOut(600);
-
-        } else if (strLen > MAX_ASCII_SIZE) {
-            // The student is requesting practice for a specific string length.
-            strLen = MAX_ASCII_SIZE;
-            example.setTimeOut(0);
+            newEncodeAscii.setQuestion(newQuestion);
+            
+            newEncodeAscii.setResult(toBinaryFunction(newQuestion)); // Generates the binary version of the question, which is now the answer
+            
+        }
+        
+        else {
+            newEncodeAscii.setResult(toBinaryFunction(newEncodeAscii.getQuestion())); // Generates the binary version of the question, which is now the answer
         }
 
-        int[] encoding = new int[strLen];
-
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < strLen; i++) {
-            // Printable ASCII in range 32 ' ' to 126 '-'
-            encoding[i] = rnd.nextInt((126 - 32) + 1) + 32;
-            builder.append((char) encoding[i]);
-        }
-
-        example.setStringLength(strLen);
-        example.setExampleString(builder.toString());
-        example.setAsciiEncoding(encoding);
-
-        EncodeAsciiStep subStep = new EncodeAsciiStep();
-        subStep.setExample(example);
-
-        //ToDo: multistep should be determined by the student model.
-        subStep.setMultiStep(rnd.nextBoolean());
+        System.out.println(newEncodeAscii.getResult()); // Error checking
 
         Step step = new Step(1, 0, StepSubType.ENCODE_ASCII);
         step.setCurrentHintIndex(0);
         step.setNotifyTutor(true);
         step.setIsCompleted(false);
+
         // ToDo: fix timeouts
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);
 
-        step.setData(gson.toJson(subStep));
+        step.setData(gson.toJson(newEncodeAscii));
 
         Task task = new Task();
         task.setKind(TaskKind.PROBLEM);
         task.setType(ExampleType.ASCII_ENCODE);
-        task.setDescription("Encode a string as ASCII values");
+        task.setDescription("Convert the question to binary.");
         task.addStep(step);
 
         // ToDo: Add the task to the session and update it.
@@ -1082,26 +1506,26 @@ public class ShaTuTutor implements TutorSvc {
      * @return a TutorReply
      */
     private TutorReply newAddOneBitExample(TutoringSession session, String jsonData) {
-        
+
         System.out.println("Start tutor newaddonebitexample"); // Error checking
 
         AddOneStep newAddOneBit = gson.fromJson(jsonData, AddOneStep.class); // This is the AddOneStep created in the newExample function from the AddOneView.
-        
+
         int messageLength = newAddOneBit.getMessageLength(); // Set in the newExample function from the AddOneView, represents the String length that will be generated for the question.
-        
+
         String question = generateRandomString(messageLength); // Generates a random string to convert to binary
-        
+
         newAddOneBit.setQuestion(question);
-        
+
         newAddOneBit.setResult(addOneFunction(question)); // Generates the binary version of the question, which is now the answer
-        
+
         System.out.println(newAddOneBit.getResult()); // Error checking
-        
+
         Step step = new Step(1, 0, StepSubType.ADD_ONE_BIT);
         step.setCurrentHintIndex(0);
         step.setNotifyTutor(true);
         step.setIsCompleted(false);
-        
+
         // ToDo: fix timeouts
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);
@@ -1114,11 +1538,23 @@ public class ShaTuTutor implements TutorSvc {
         task.setDescription("Add one bit to the given bit string");
         task.addStep(step);
 
-        // ToDo: Add the task to the session and update it.
-        TutorReply reply = new TutorReply(":Success");
-        reply.setData(gson.toJson(task));
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("Add One Bit").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId);
+        assessment.incrementExposures();
 
-        return reply;
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
+
+            TutorReply reply = new TutorReply(":Success");
+            reply.setData(gson.toJson(task));
+
+            return reply;
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
     }
 
     /**
@@ -1130,17 +1566,17 @@ public class ShaTuTutor implements TutorSvc {
         System.out.println("Start tutor newPadZerosExample"); // Error checking
 
         Pad0Step subStep = gson.fromJson(jsonData, Pad0Step.class);
-        
+
         int messageLength = subStep.getMessageLength();
-        
+
         String question = generateRandomString(messageLength);
-        
+
         subStep.setQuestion(question);
-        
-        subStep.setResult(calculateZerosNeededForPadding(messageLength)); // Calculates the number of zeros needed to pad the message correctly
-        
+
+        subStep.setResult(Integer.toString(calculateZerosNeededForPadding(messageLength))); // Calculates the number of zeros needed to pad the message correctly
+
         System.out.println(subStep.getResult()); // Error checking
-        
+
         Step step = new Step(1, 0, StepSubType.PAD_ZEROS);
         step.setCurrentHintIndex(0);
         step.setNotifyTutor(true);
@@ -1157,11 +1593,23 @@ public class ShaTuTutor implements TutorSvc {
         task.setDescription("Calculate zeros needed to pad the message");
         task.addStep(step);
 
-        // ToDo: Add the task to the session and update it.
-        TutorReply reply = new TutorReply(":Success");
-        reply.setData(gson.toJson(task));
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("Pad with Zeros").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId);
+        assessment.incrementExposures();
 
-        return reply;
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
+
+            TutorReply reply = new TutorReply(":Success");
+            reply.setData(gson.toJson(task));
+
+            return reply;
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
     }
 
     /**
@@ -1170,9 +1618,53 @@ public class ShaTuTutor implements TutorSvc {
      * @return a TutorReply
      */
     private TutorReply newAddMsgLenExample(TutoringSession session, String jsonData) {
-        TutorReply reply = new TutorReply(":Success");
+        System.out.println("Start tutor newAddMsgLenExample"); // Error checking
 
-        return reply;
+        MessageLenStep subStep = gson.fromJson(jsonData, MessageLenStep.class);
+        
+        int messageLength = subStep.getMessageLength();
+        
+        String question = generateRandomString(messageLength);
+        
+        subStep.setQuestion(question);
+        
+        subStep.setResult(Integer.toBinaryString(messageLength * 8)); // Calculates the number of bits that the message length represents then converts that int to a binary string. (8 bits per char)
+        
+        System.out.println(subStep.getResult()); // Error checking
+        
+        Step step = new Step(1, 0, StepSubType.ADD_MSG_LENGTH);
+        step.setCurrentHintIndex(0);
+        step.setNotifyTutor(true);
+        step.setIsCompleted(false);
+        // ToDo: fix timeouts
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+
+        step.setData(gson.toJson(subStep));
+
+        Task task = new Task();
+        task.setKind(TaskKind.PROBLEM);
+        task.setType(ExampleType.ADD_MSG_LENGTH);
+        task.setDescription("Calculate the message length for the last 64 bits of the message length step");
+        task.addStep(step);
+
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("Add Message Length").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId);
+        assessment.incrementExposures();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
+
+            TutorReply reply = new TutorReply(":Success");
+            reply.setData(gson.toJson(task));
+
+            return reply;
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
     }
 
     /**
@@ -1187,15 +1679,15 @@ public class ShaTuTutor implements TutorSvc {
     }
 
     /**
-     * Handles client requests for a new initialize vars example.
-     *
-     * @return a TutorReply
-     */
-    private TutorReply newInitializeVarsExample(TutoringSession session, String jsonData) {
-        TutorReply reply = new TutorReply(":Success");
+    * Handles client requests for a new initialize vars example.
+    *
+    * @return a TutorReply
+    */
+   private TutorReply newInitializeVarsExample(TutoringSession session, String jsonData) {
+       TutorReply reply = new TutorReply(":Success");
 
-        return reply;
-    }
+       return reply;
+   }
 
     /**
      * Handles client requests for a new compress round example.
@@ -1213,12 +1705,61 @@ public class ShaTuTutor implements TutorSvc {
      *
      * @return a TutorReply
      */
-    private TutorReply newRotateBitsExample(TutoringSession session, String jsonData) {
-        TutorReply reply = new TutorReply(":Success");
+     private TutorReply newRotateBitsExample(TutoringSession session, String jsonData) {
+        RotateStep example = gson.fromJson(jsonData, RotateStep.class);
 
-        return reply;
+        // Check if the data (bit string) is provided, if not, generate it
+        if (example.getData() == null || example.getData().isEmpty()) {
+            String generatedData = generateInputString(example.getLength());
+            example.setData(generatedData);
+        }
+
+        Step step = new Step(1, 0, StepSubType.ROTATE_BITS);
+        step.setData(gson.toJson(example));
+        step.setIsCompleted(false);
+        step.setNotifyTutor(true);
+
+        Task task = new Task();
+        task.setKind(TaskKind.PROBLEM);
+        task.setType(ExampleType.ROTATE_BITS);
+        task.addStep(step);
+        
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("Rotate n BITS").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId);
+        assessment.incrementExposures();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
+
+            TutorReply reply = new TutorReply(":Success");
+            reply.setData(gson.toJson(task));
+
+            return reply;
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
     }
+     /**
+      * Performs bit rotation on the example string to get correct answer for
+      *   comparison to user's answer.
+      * @param data
+      * @param amount
+      * @return result
+      */
+    private String performBitRotation(String data, int amount) {
+        String fdata = data.replaceAll("\\s+", "");
+        int length = fdata.length();
+        amount = amount % length;
 
+        if (amount < 0) {
+            amount = length + amount;
+        }
+           String result = fdata.substring(length - amount) + fdata.substring(0, length - amount);
+        return result;
+    }
     /**
      * Handles client requests for a new shift bits zeros example.
      *
@@ -1227,7 +1768,7 @@ public class ShaTuTutor implements TutorSvc {
     private TutorReply newShiftBitsExample(TutoringSession session, String jsonData) {
         System.out.println("newShiftBitsExample");
         BitShiftStep substep = gson.fromJson(jsonData, BitShiftStep.class);
-        
+
         int bitLength = substep.getBitLength();
 
         String operand = generateInputString(bitLength);
@@ -1254,15 +1795,25 @@ public class ShaTuTutor implements TutorSvc {
         task.setKind(TaskKind.PROBLEM);
         task.setType(ExampleType.SHIFT_BITS);
         task.setDescription("Compute the result of the bitshift on the operand");
-        task.addStep(step);  
+        task.addStep(step);
 
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("Shift Bits").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId);
+        assessment.incrementExposures();
 
-        TutorReply reply = new TutorReply(":Success");
-        reply.setData(gson.toJson(task));
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
 
-        System.out.println("before reply return");
+            TutorReply reply = new TutorReply(":Success");
+            reply.setData(gson.toJson(task));
 
-        return reply;
+            return reply;
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
     }
 
     /**
@@ -1316,11 +1867,23 @@ public class ShaTuTutor implements TutorSvc {
         task.setDescription("Xor the bits in the two operands");
         task.addStep(step);
 
-        // ToDo: Add the task to the session and update it.
-        TutorReply reply = new TutorReply(":Success");
-        reply.setData(gson.toJson(task));
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("XOR Bits").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId);
+        assessment.incrementExposures();
 
-        return reply;
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
+
+            TutorReply reply = new TutorReply(":Success");
+            reply.setData(gson.toJson(task));
+
+            return reply;
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
     }
 
     /**
@@ -1397,11 +1960,23 @@ public class ShaTuTutor implements TutorSvc {
         task.setDescription("addition modulo 2^256 the bits in the two operands");
         task.addStep(step);
 
-        // ToDo: Add the task to the session and update it.
-        TutorReply reply = new TutorReply(":Success");
-        reply.setData(gson.toJson(task));
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("Add Bits").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId);
+        assessment.incrementExposures();
 
-        return reply;
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
+
+            TutorReply reply = new TutorReply(":Success");
+            reply.setData(gson.toJson(task));
+
+            return reply;
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
     }
 
     /**
@@ -1412,19 +1987,19 @@ public class ShaTuTutor implements TutorSvc {
     private TutorReply newMajorityFunctionExample(TutoringSession session, String jsonData) {
         System.out.println("newMajorityFunctionExample");
         MajorityStep substep = gson.fromJson(jsonData, MajorityStep.class);
-        
+
         int bitLength = substep.getBitLength();
-        
+
         String operand1 = generateInputString(bitLength);
         String operand2 = generateInputString(bitLength);
         String operand3 = generateInputString(bitLength);
-        
-        substep.setOperand1(operand1);
-        substep.setOperand2(operand2);
-        substep.setOperand3(operand3);
-        
+
+        substep.setOperandA(operand1);
+        substep.setOperandB(operand2);
+        substep.setOperandC(operand3);
+
         substep.setResult(majorityFunction(operand1, operand2, operand3, bitLength));
-        
+
         Step step = new Step(1, 0, StepSubType.MAJORITY_FUNCTION);
         step.setCurrentHintIndex(0);
         step.setNotifyTutor(true);
@@ -1439,15 +2014,25 @@ public class ShaTuTutor implements TutorSvc {
         task.setKind(TaskKind.PROBLEM);
         task.setType(ExampleType.MAJORITY_FUNCTION);
         task.setDescription("Compute the result of the majority function on the three operands");
-        task.addStep(step);  
-      
-        // ToDo: Add the task to the session and update it.
-        TutorReply reply = new TutorReply(":Success");
-        reply.setData(gson.toJson(task));
-    
-    System.out.println("before reply return");
-    
-        return reply;
+        task.addStep(step);
+
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("Majority Function").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId);
+        assessment.incrementExposures();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
+
+            TutorReply reply = new TutorReply(":Success");
+            reply.setData(gson.toJson(task));
+
+            return reply;
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
     }
 
     /**
@@ -1458,19 +2043,19 @@ public class ShaTuTutor implements TutorSvc {
     private TutorReply newChoiceFunctionExample(TutoringSession session, String jsonData) {
         System.out.println("newChoiceFunctionExample");
         ChoiceFunctionStep substep = gson.fromJson(jsonData, ChoiceFunctionStep.class);
-        
+
         int bitLength = substep.getBitLength();
-        
+
         String operand1 = generateInputString(bitLength);
         String operand2 = generateInputString(bitLength);
         String operand3 = generateInputString(bitLength);
-        
+
         substep.setOperand1(operand1);
         substep.setOperand2(operand2);
         substep.setOperand3(operand3);
-        
+
         substep.setResult(choiceFunction(operand1, operand2, operand3, bitLength));
-        
+
         Step step = new Step(1, 0, StepSubType.CHOICE_FUNCTION);
         step.setCurrentHintIndex(0);
         step.setNotifyTutor(true);
@@ -1485,24 +2070,36 @@ public class ShaTuTutor implements TutorSvc {
         task.setKind(TaskKind.PROBLEM);
         task.setType(ExampleType.CHOICE_FUNCTION);
         task.setDescription("Compute the result of the choice function on the three operands");
-        task.addStep(step);  
-      
-        
-        TutorReply reply = new TutorReply(":Success");
-        reply.setData(gson.toJson(task));
-        
-System.out.println("before reply return");
-        return reply;
+        task.addStep(step);
+
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("Choice Function").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId);
+        assessment.incrementExposures();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
+
+            TutorReply reply = new TutorReply(":Success");
+            reply.setData(gson.toJson(task));
+
+            return reply;
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
     }
-    
+
     /**
      * Performs a bit shift (left or right) on a binary string operand.
-     * 
-     * @param operand      The binary string to be shifted.
-     * @param shiftLength  The number of positions to shift the bits.
-     * @param bitLength    The length of the resulting binary string. 
-     * @param shiftRight   If true, performs a right shift; if false, performs a left shift.
-     * @return             The binary string result after shifting.
+     *
+     * @param operand The binary string to be shifted.
+     * @param shiftLength The number of positions to shift the bits.
+     * @param bitLength The length of the resulting binary string.
+     * @param shiftRight If true, performs a right shift; if false, performs a
+     * left shift.
+     * @return The binary string result after shifting.
      */
     private String bitShiftFunction(String operand, int shiftLength, boolean shiftRight, int bitLength) {
         // Convert the binary string to a long integer
@@ -1522,17 +2119,17 @@ System.out.println("before reply return");
 
         return binaryResult;
     }
-    
+
     /**
      * Performs binary addition modulo 2^256
-     * 
-     * @param operand1   The binary string for operand 1.
-     * @param operand2   The binary string for operand 2.
-     * @param m    The int for calculating the modulo
-     * @return          The binary string result after adding two bits
+     *
+     * @param operand1 The binary string for operand 1.
+     * @param operand2 The binary string for operand 2.
+     * @param m The int for calculating the modulo
+     * @return The binary string result after adding two bits
      */
     private String addBitsFunction(String operand1, String operand2, int m) {
-        
+
         if (operand1 == null || operand1.isEmpty()) {
             return "";
         }
@@ -1563,8 +2160,8 @@ System.out.println("before reply return");
 
         return resultBinary;
     }
-    
-     /**
+
+    /**
      * Evaluates the choice function Ch(x, y, z).
      *
      * @param x Binary string representation of x.
@@ -1593,32 +2190,56 @@ System.out.println("before reply return");
 
         return binaryResult;
     }
-    
+
     /**
-     * This method takes the question from the newAddOneStep ad converts it
-     * to binary and returns the binary answer.
-     * 
+     * This method takes the question from the newAddOneStep ad converts it to
+     * binary and returns the binary answer.
+     *
      * @param question
-     * 
-     * @return 
+     *
+     * @return
      */
     private String addOneFunction(String question) {
         String answer;
-        
+
         char stringArray[] = question.toCharArray();
-        
+
         StringBuilder binary = new StringBuilder();
 
         for (int i = 0; i < stringArray.length; i++) {
             String binaryChar = String.format("%8s", Integer.toBinaryString(stringArray[i])).replaceAll(" ", "0");
-            
+
             binary.append(binaryChar).append(" ");
         }
-        
+
         answer = binary + "1";
 
         return answer;
     }
+    
+    /**
+     * Function that can take a string and convert it to binary
+     * @param question
+     * @return 
+     */
+    private String toBinaryFunction(String question) {
+        String answer;
+
+        char stringArray[] = question.toCharArray();
+
+        StringBuilder binary = new StringBuilder();
+
+        for (int i = 0; i < stringArray.length; i++) {
+            String binaryChar = String.format("%8s", Integer.toBinaryString(stringArray[i])).replaceAll(" ", "0");
+
+            binary.append(binaryChar);
+        }
+
+        answer = binary.toString();
+
+        return answer;
+    }
+
     /**
      * Evaluates the maj function maj(x, y, z).
      *
@@ -1632,7 +2253,7 @@ System.out.println("before reply return");
         String tempX = x.replaceAll("\\s", "");
         String tempY = y.replaceAll("\\s", "");
         String tempZ = z.replaceAll("\\s", "");
-               
+
         long intX = Long.parseLong(tempX, 2);
         long intY = Long.parseLong(tempY, 2);
         long intZ = Long.parseLong(tempZ, 2);
@@ -1640,7 +2261,7 @@ System.out.println("before reply return");
         long xy = intX & intY;
 
         long xz = intX & intZ;
-        
+
         long yz = intY & intZ;
 
         long result = xy ^ xz ^ yz;
@@ -1650,14 +2271,14 @@ System.out.println("before reply return");
 
         return binaryResult;
     }
-    
+
     /**
      * Suppose to translate a String into a binary representation and returns
      * the binary translation back as a String.
-     * 
-     * @param question - String value representing the randomly generated question
-     * that needs to be translated into binary form.
-     * 
+     *
+     * @param question - String value representing the randomly generated
+     * question that needs to be translated into binary form.
+     *
      * @return - String binary representation of the question.
      */
 //    private String addOneFunction(String question) {
@@ -1677,16 +2298,15 @@ System.out.println("before reply return");
 //
 //        return answer;
 //    }
-    
     /**
-     * This function is called from the newPadZeroStep method and will
-     * calculate the zeros needed for the SHA256 message.  The variables are 
-     * written purposely to give the developer a easier understanding of whats
-     * being calculated instead of just using the integers.
-     * 
+     * This function is called from the newPadZeroStep method and will calculate
+     * the zeros needed for the SHA256 message. The variables are written
+     * purposely to give the developer a easier understanding of whats being
+     * calculated instead of just using the integers.
+     *
      * @param messageLength
-     * 
-     * @return 
+     *
+     * @return
      */
     private int calculateZerosNeededForPadding(int messageLength) {
         int sha256MessageLength = 512;
@@ -1697,10 +2317,10 @@ System.out.println("before reply return");
         int appendOneBit = 1;
         int totalMessageLengthInBits = totalBitsPerMessage + appendOneBit;
         int zerosNeededToPadMessage = padZerosStepBitsLength - totalMessageLengthInBits;
-        
+
         return zerosNeededToPadMessage;
     }
-    
+
     /**
      * Formats the result output by the choice function based on the size of the
      * problem.
@@ -1730,8 +2350,8 @@ System.out.println("before reply return");
         }
         return finalResult;
     }
-    
-     /**
+
+    /**
      * Generates an n-bit binary string (length 4, 8, 16, or 32) to be used as
      * an input into the Ch function. Every four bits are separated by a space
      * to improve readability.
@@ -1740,7 +2360,7 @@ System.out.println("before reply return");
      */
     private String generateInputString(int problemSize) {
         Random random = new Random();
-        
+
         String inputString;
         String tempString;
         StringBuilder inputStringBuilder = new StringBuilder();
@@ -1813,16 +2433,16 @@ System.out.println("before reply return");
 
         return new TutorReply(":ERR", errMsg);
     }
-    
+
     /**
      * Method that generates and returns a random string.
-     * 
+     *
      * @param length
-     * 
-     * @return 
+     *
+     * @return
      */
     private String generateRandomString(int length) {
-        
+
         Random random = new Random();
         StringBuilder sb = new StringBuilder(length); // StringBuilder allows easier altering of a string.
 
@@ -1835,79 +2455,415 @@ System.out.println("before reply return");
         return sb.toString();
     }
 
-    private TutorReply hintEncode(StepCompletion completion)
-    {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    private TutorReply hintEncode(StepCompletion completion) {
+        System.out.println("Tutor hintEncode");
+
+        StepCompletionReply stepReply = new StepCompletionReply();
+
+        stepReply.setIsCorrect(false);
+        stepReply.setIsRepeatStep(true);
+        stepReply.setIsNewStep(false);
+        stepReply.setIsNewTask(false);
+        stepReply.setIsNextStep(false);
+
+        Hint hintOne = new Hint();
+        hintOne.setId(0);
+        hintOne.setText("Convert each character to its ASCII value");
+
+        Hint hintTwo = new Hint();
+        hintTwo.setId(1);
+        hintTwo.setText("Each character should be represented by 8 bits");
+
+        Step step = completion.getStep();
+        step.addHint(hintOne);
+        step.addHint(hintTwo);
+        step.setNotifyTutor(true);
+        step.setIsCompleted(false);
+        step.setSubType(StepSubType.REQUEST_HINT);
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+        step.setData(gson.toJson(stepReply));
+
+        TutorReply reply = new TutorReply(":Success");
+        reply.setData(gson.toJson(step));
+
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("ASCII Encode").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId); 
+        assessment.incrementHints();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.HINTS);
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
+
+        return reply;
     }
 
-    private TutorReply hintAddOne(StepCompletion completion)
-    {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    private TutorReply hintAddOne(StepCompletion completion) {
+        System.out.println("Tutor hintAddOne");
+
+        StepCompletionReply stepReply = new StepCompletionReply();
+
+        stepReply.setIsCorrect(false);
+        stepReply.setIsRepeatStep(true);
+        stepReply.setIsNewStep(false);
+        stepReply.setIsNewTask(false);
+        stepReply.setIsNextStep(false);
+
+        Hint hintOne = new Hint();
+        hintOne.setId(0);
+        hintOne.setText("Add a single '1' bit to the end of the message");
+
+        Step step = completion.getStep();
+        step.addHint(hintOne);
+        step.setNotifyTutor(true);
+        step.setIsCompleted(false);
+        step.setSubType(StepSubType.REQUEST_HINT);
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+        step.setData(gson.toJson(stepReply));
+
+        TutorReply reply = new TutorReply(":Success");
+        reply.setData(gson.toJson(step));
+
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("Add One Bit").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId); 
+        assessment.incrementHints();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.HINTS);
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
+
+        return reply;
     }
 
-    private TutorReply hintPadZeros(StepCompletion completion)
-    {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    private TutorReply hintPadZeros(StepCompletion completion) {
+        System.out.println("Tutor hintPadZeros");
+
+        StepCompletionReply stepReply = new StepCompletionReply();
+
+        stepReply.setIsCorrect(false);
+        stepReply.setIsRepeatStep(true);
+        stepReply.setIsNewStep(false);
+        stepReply.setIsNewTask(false);
+        stepReply.setIsNextStep(false);
+
+        Hint hintOne = new Hint();
+        hintOne.setId(0);
+        hintOne.setText("Add '0' bits until the message length is 448 mod 512");
+
+        Step step = completion.getStep();
+        step.addHint(hintOne);
+        step.setNotifyTutor(true);
+        step.setIsCompleted(false);
+        step.setSubType(StepSubType.REQUEST_HINT);
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+        step.setData(gson.toJson(stepReply));
+
+        TutorReply reply = new TutorReply(":Success");
+        reply.setData(gson.toJson(step));
+
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("Pad with Zeros").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId); 
+        assessment.incrementHints();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.HINTS);
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
+
+        return reply;
     }
 
-    private TutorReply hintAddMsgLen(StepCompletion completion)
-    {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    private TutorReply hintAddMsgLen(StepCompletion completion) {
+        System.out.println("Tutor hintAddMsgLen");
+
+        StepCompletionReply stepReply = new StepCompletionReply();
+
+        stepReply.setIsCorrect(false);
+        stepReply.setIsRepeatStep(true);
+        stepReply.setIsNewStep(false);
+        stepReply.setIsNewTask(false);
+        stepReply.setIsNextStep(false);
+
+        Hint hintOne = new Hint();
+        hintOne.setId(0);
+        hintOne.setText("Append the original message length as a 64-bit big-endian integer");
+
+        Step step = completion.getStep();
+        step.addHint(hintOne);
+        step.setNotifyTutor(true);
+        step.setIsCompleted(false);
+        step.setSubType(StepSubType.REQUEST_HINT);
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+        step.setData(gson.toJson(stepReply));
+
+        TutorReply reply = new TutorReply(":Success");
+        reply.setData(gson.toJson(step));
+
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("Add Message Length").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId); 
+        assessment.incrementHints();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.HINTS);
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
+
+        return reply;
     }
 
-    private TutorReply hintPrepareSchedule(StepCompletion completion)
-    {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    private TutorReply hintPrepareSchedule(StepCompletion completion) {
+        System.out.println("Tutor hintPrepareSchedule");
+
+        StepCompletionReply stepReply = new StepCompletionReply();
+
+        stepReply.setIsCorrect(false);
+        stepReply.setIsRepeatStep(true);
+        stepReply.setIsNewStep(false);
+        stepReply.setIsNewTask(false);
+        stepReply.setIsNextStep(false);
+
+        Hint hintOne = new Hint();
+        hintOne.setId(0);
+        hintOne.setText("Extend the first 16 words to a total of 64 words");
+
+        Hint hintTwo = new Hint();
+        hintTwo.setId(1);
+        hintTwo.setText("Use bitwise operations to generate each new word");
+
+        Step step = completion.getStep();
+        step.addHint(hintOne);
+        step.addHint(hintTwo);
+        step.setNotifyTutor(true);
+        step.setIsCompleted(false);
+        step.setSubType(StepSubType.REQUEST_HINT);
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+        step.setData(gson.toJson(stepReply));
+
+        TutorReply reply = new TutorReply(":Success");
+        reply.setData(gson.toJson(step));
+
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("Prepare Schedule").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId); 
+        assessment.incrementHints();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.HINTS);
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
+
+        return reply;
     }
 
-    private TutorReply hintInitVars(StepCompletion completion)
-    {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    private TutorReply hintInitVars(StepCompletion completion) {
+        System.out.println("Tutor hintInitVars");
+
+        // Deserialize the StepCompletion object to access the InitVarStep
+        InitVarStep initVarStep = gson.fromJson(completion.getData(), InitVarStep.class);
+
+        StepCompletionReply stepReply = new StepCompletionReply();
+        stepReply.setIsCorrect(false);
+        stepReply.setIsRepeatStep(true);
+        stepReply.setIsNewStep(false);
+        stepReply.setIsNewTask(false);
+        stepReply.setIsNextStep(false);
+
+        // Dynamically fetch hints for each variable
+        Step step = completion.getStep();
+        for (String variable : initVarStep.getCorrectAnswers().keySet()) {
+            // Fetch hints for the variable at different levels
+            Hint hintLevel1 = new Hint();
+            hintLevel1.setId(1);
+            hintLevel1.setText(initVarStep.getHint(variable, 1));
+            step.addHint(hintLevel1);
+
+            Hint hintLevel2 = new Hint();
+            hintLevel2.setId(2);
+            hintLevel2.setText(initVarStep.getHint(variable, 2));
+            step.addHint(hintLevel2);
+
+            Hint hintLevel3 = new Hint();
+            hintLevel3.setId(3);
+            hintLevel3.setText(initVarStep.getHint(variable, 3));
+            step.addHint(hintLevel3);
+        }
+
+        step.setNotifyTutor(true);
+        step.setIsCompleted(false);
+        step.setSubType(StepSubType.REQUEST_HINT);
+
+        // Add timeout
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+
+        // Serialize the reply with hints
+        step.setData(gson.toJson(stepReply));
+
+        TutorReply reply = new TutorReply(":Success");
+        reply.setData(gson.toJson(step));
+
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("Initialize Variables").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId); 
+        assessment.incrementHints();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.HINTS);
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
+
+        return reply;
     }
 
-    private TutorReply hintCompressRound(StepCompletion completion)
-    {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    private TutorReply hintCompressRound(StepCompletion completion) {
+        System.out.println("Tutor hintCompressRound");
+
+        StepCompletionReply stepReply = new StepCompletionReply();
+
+        stepReply.setIsCorrect(false);
+        stepReply.setIsRepeatStep(true);
+        stepReply.setIsNewStep(false);
+        stepReply.setIsNewTask(false);
+        stepReply.setIsNextStep(false);
+
+        Hint hintOne = new Hint();
+        hintOne.setId(0);
+        hintOne.setText("Perform the main compression function for this round");
+
+        Hint hintTwo = new Hint();
+        hintTwo.setId(1);
+        hintTwo.setText("Use the schedule word and round constant for this round");
+
+        Step step = completion.getStep();
+        step.addHint(hintOne);
+        step.addHint(hintTwo);
+        step.setNotifyTutor(true);
+        step.setIsCompleted(false);
+        step.setSubType(StepSubType.REQUEST_HINT);
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+        step.setData(gson.toJson(stepReply));
+
+        TutorReply reply = new TutorReply(":Success");
+        reply.setData(gson.toJson(step));
+
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("Compress Round").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId); 
+        assessment.incrementHints();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.HINTS);
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
+
+        return reply;
     }
 
-    private TutorReply hintRotateBits(StepCompletion completion)
-    {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    private TutorReply hintRotateBits(StepCompletion completion) {
+        System.out.println("Tutor hintRotateBits");
+
+        StepCompletionReply stepReply = new StepCompletionReply();
+
+        stepReply.setIsCorrect(false);
+        stepReply.setIsRepeatStep(true);
+        stepReply.setIsNewStep(false);
+        stepReply.setIsNewTask(false);
+        stepReply.setIsNextStep(false);
+
+        Hint hintOne = new Hint();
+        hintOne.setId(0);
+        hintOne.setText("The bits that 'fall off' one end should be added to the other end");
+
+        Step step = completion.getStep();
+        step.addHint(hintOne);
+        step.setNotifyTutor(true);
+        step.setIsCompleted(false);
+        step.setSubType(StepSubType.REQUEST_HINT);
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+        step.setData(gson.toJson(stepReply));
+
+        TutorReply reply = new TutorReply(":Success");
+        reply.setData(gson.toJson(step));
+
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("Rotate n BITS").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId); 
+        assessment.incrementHints();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.HINTS);
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
+
+        return reply;
     }
 
-    private TutorReply hintShiftBits(StepCompletion completion)
-    {
+    private TutorReply hintShiftBits(StepCompletion completion) {
         System.out.println("Tutor hintShiftBits");
-        
+
         BitShiftStep example = gson.fromJson(completion.getData(), BitShiftStep.class);
         String operand = example.getOperand();
         int shiftLength = example.getShiftLength();
         boolean shiftRight = example.isShiftRight();
         int bitLength = example.getBitLength();
         String result = example.getResult();
-        
-        
-        String expectedResult = bitShiftFunction(operand, 
-                                                 shiftLength, 
-                                                 shiftRight, 
-                                                 bitLength);
-        
+
+        String expectedResult = bitShiftFunction(operand,
+                shiftLength,
+                shiftRight,
+                bitLength);
+
         StepCompletionReply stepReply = new StepCompletionReply();
         stepReply.setCorrectAnswer(expectedResult);
         stepReply.setResponse(result);
 
-        
         stepReply.setIsCorrect(false);
         stepReply.setIsRepeatStep(true);
         stepReply.setIsNewStep(false);
         stepReply.setIsNewTask(false);
         stepReply.setIsNextStep(false);
-        
+
         Hint hintOne = new Hint();
         hintOne.setId(0);
         String hintText = "There will be " + shiftLength + " zeros on the left";
         hintOne.setText(hintText);
-        
+
         Hint hintTwo = new Hint();
         hintTwo.setId(1);
         hintText = "Remove " + shiftLength + " bits from the right";
@@ -1928,26 +2884,191 @@ System.out.println("before reply return");
 
         reply.setData(gson.toJson(step));
         
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("Shift Bits").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId); 
+        assessment.incrementHints();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.HINTS);
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
+
         return reply;
     }
 
-    private TutorReply hintXorBits(StepCompletion completion)
-    {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    private TutorReply hintXorBits(StepCompletion completion) {
+        System.out.println("Tutor hintXorBits");
+
+        StepCompletionReply stepReply = new StepCompletionReply();
+
+        stepReply.setIsCorrect(false);
+        stepReply.setIsRepeatStep(true);
+        stepReply.setIsNewStep(false);
+        stepReply.setIsNewTask(false);
+        stepReply.setIsNextStep(false);
+
+        Hint hintOne = new Hint();
+        hintOne.setId(0);
+        hintOne.setText("XOR operation results in 1 only when the bits are different");
+
+        Step step = completion.getStep();
+        step.addHint(hintOne);
+        step.setNotifyTutor(true);
+        step.setIsCompleted(false);
+        step.setSubType(StepSubType.REQUEST_HINT);
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+        step.setData(gson.toJson(stepReply));
+
+        TutorReply reply = new TutorReply(":Success");
+        reply.setData(gson.toJson(step));
+
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("XOR Bits").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId); 
+        assessment.incrementHints();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.HINTS);
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
+
+        return reply;
     }
 
-    private TutorReply hintAddBits(StepCompletion completion)
-    {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    private TutorReply hintAddBits(StepCompletion completion) {
+        System.out.println("Tutor hintAddBits");
+
+        StepCompletionReply stepReply = new StepCompletionReply();
+
+        stepReply.setIsCorrect(false);
+        stepReply.setIsRepeatStep(true);
+        stepReply.setIsNewStep(false);
+        stepReply.setIsNewTask(false);
+        stepReply.setIsNextStep(false);
+
+        Hint hintOne = new Hint();
+        hintOne.setId(0);
+        hintOne.setText("Add the bits as if they were unsigned integers, discarding any overflow beyond 32 bits");
+
+        Step step = completion.getStep();
+        step.addHint(hintOne);
+        step.setNotifyTutor(true);
+        step.setIsCompleted(false);
+        step.setSubType(StepSubType.REQUEST_HINT);
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+        step.setData(gson.toJson(stepReply));
+
+        TutorReply reply = new TutorReply(":Success");
+        reply.setData(gson.toJson(step));
+
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("Add Bits").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId); 
+        assessment.incrementHints();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.HINTS);
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
+
+        return reply;
     }
 
-    private TutorReply hintMajorityFunction(StepCompletion completion)
-    {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    private TutorReply hintMajorityFunction(StepCompletion completion) {
+        System.out.println("Tutor hintMajorityFunction");
+
+        StepCompletionReply stepReply = new StepCompletionReply();
+
+        stepReply.setIsCorrect(false);
+        stepReply.setIsRepeatStep(true);
+        stepReply.setIsNewStep(false);
+        stepReply.setIsNewTask(false);
+        stepReply.setIsNextStep(false);
+
+        Hint hintOne = new Hint();
+        hintOne.setId(0);
+        hintOne.setText("The majority function returns the bit value that appears most frequently among the three inputs");
+
+        Step step = completion.getStep();
+        step.addHint(hintOne);
+        step.setNotifyTutor(true);
+        step.setIsCompleted(false);
+        step.setSubType(StepSubType.REQUEST_HINT);
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+        step.setData(gson.toJson(stepReply));
+
+        TutorReply reply = new TutorReply(":Success");
+        reply.setData(gson.toJson(step));
+
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("Majority Function").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId); 
+        assessment.incrementHints();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.HINTS);
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
+
+        return reply;
     }
 
-    private TutorReply hintChoiceFunction(StepCompletion completion)
-    {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    private TutorReply hintChoiceFunction(StepCompletion completion) {
+        System.out.println("Tutor hintChoiceFunction");
+
+        StepCompletionReply stepReply = new StepCompletionReply();
+
+        stepReply.setIsCorrect(false);
+        stepReply.setIsRepeatStep(true);
+        stepReply.setIsNewStep(false);
+        stepReply.setIsNewTask(false);
+        stepReply.setIsNextStep(false);
+
+        Hint hintOne = new Hint();
+        hintOne.setId(0);
+        hintOne.setText("The choice function selects bits from one input or another based on the value of the first input");
+
+        Step step = completion.getStep();
+        step.addHint(hintOne);
+        step.setNotifyTutor(true);
+        step.setIsCompleted(false);
+        step.setSubType(StepSubType.REQUEST_HINT);
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+        step.setData(gson.toJson(stepReply));
+
+        TutorReply reply = new TutorReply(":Success");
+        reply.setData(gson.toJson(step));
+        
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("Choice Function").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId); 
+        assessment.incrementHints();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.HINTS);
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
+
+        return reply;
     }
 }

@@ -327,6 +327,15 @@ public class ShiftRightView extends UserRequestView implements ActionListener, K
         
         System.out.println("Shift right update display called");
         operand = example.getOperand();
+        if (operand == null || operand.isEmpty()) {
+            operand = "Please click New Example";
+            checkButton.setEnabled(false);
+            hintButton.setEnabled(false);
+        }
+        else {
+            checkButton.setEnabled(true);
+            hintButton.setEnabled(true);
+        }
         shiftLength = example.getShiftLength();
         operandLabel.setText(operand);
         instructionLabel.setText("Logical right shift the input given below by "
@@ -360,6 +369,7 @@ public class ShiftRightView extends UserRequestView implements ActionListener, K
         if (e.getKeyCode() == KeyEvent.VK_ENTER && responseTextArea.getText().equals("")) {
             JOptionPane.showMessageDialog(this, "Please provide an answer");
         } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+            checkButton.doClick();
         }
     }
 

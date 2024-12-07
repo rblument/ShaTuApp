@@ -141,6 +141,10 @@ public class SplashPanel extends GPanel {
         return signInBut;
     }
     
+    public void clearFields(){
+        userId.setText("");  // Clear user ID field
+        password.setText("");  // Clear password field
+    }
     
     /**
      * Creates an account instance for the user upon successful sign-in.
@@ -150,18 +154,19 @@ public class SplashPanel extends GPanel {
      * Null otherwise.
      */
     private TutoringSession authenticateUser(String userId, String encryptedPass) {
-    // Simulate server-side authentication and session creation
-    if (userId != null && encryptedPass.equals("validEncryptedPassword")) {
-        TutoringSession session = new TutoringSession();
-        Account account = new Account();
-        account.setUserId(userId);
-        account.setPassword(encryptedPass);
-        session.setAccount(account);
-        return session;
+        // Simulate server-side authentication and session creation
+        if (userId != null && encryptedPass.equals("validEncryptedPassword")) {
+            TutoringSession session = new TutoringSession();
+            Account account = new Account();
+            account.setUserId(userId);
+            account.setPassword(encryptedPass);
+            session.setAccount(account);
+            return session;
+        }
+        return null;
     }
-    return null;
-}
-
+    
+    
     /**
      * Create the primary child components used in this view
      */

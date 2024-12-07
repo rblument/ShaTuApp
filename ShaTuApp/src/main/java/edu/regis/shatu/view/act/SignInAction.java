@@ -27,6 +27,8 @@ import java.awt.event.KeyEvent;
 import java.util.logging.Logger;
 import static javax.swing.Action.MNEMONIC_KEY;
 import static javax.swing.Action.SHORT_DESCRIPTION;
+import edu.regis.shatu.view.act.InactivityManager;
+
 
 /**
  * An (MVC) controller handling a GUI gesture representing a user's request to
@@ -38,6 +40,10 @@ import static javax.swing.Action.SHORT_DESCRIPTION;
  * @author rickb
  */
 public class SignInAction extends ShaTuGuiAction {
+    
+    private final InactivityManager inactivityManager
+            = new InactivityManager();
+
 
     /**
      * Exceptions occurring in this class are also logged to this logger.
@@ -107,6 +113,9 @@ public class SignInAction extends ShaTuGuiAction {
                 // Transition to dashboard
                 SplashFrame.instance().selectDashboard(session);
                 SplashFrame.instance().setVisible(true); // Hide the SplashFrame
+                
+                // Start tracking user inactivity
+                inactivityManager.startTracking();
                 
                 break;
             case "InvalidPassword":

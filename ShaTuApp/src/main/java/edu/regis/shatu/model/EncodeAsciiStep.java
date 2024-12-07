@@ -13,82 +13,89 @@
 package edu.regis.shatu.model;
 
 /**
- * Data corresponding to an ENCODE_ASCII step consisting of a source, "R", a
- * target "52", possibly not specified, and associated encoding CHAR and HEX,
- * respectively
- * 
+ *
  * @author rickb
  */
 public class EncodeAsciiStep {
+    
+    private int messageLength;
+    
+    private String question;
+    
+    private String result; // Correct Answer
+    
+    private String userAnswer;
+   
     /**
-     * The valid encoding types for the source and target.
+     * Constructor
      */
-    public enum ENCODING {BINARY, CHAR, DECIMAL, HEX, OCTAL};
+    public EncodeAsciiStep() {
+        if (this.question == null) {
+            this.question = "";  
+        } 
+    }
+
+    /**
+     * Setter method for message length
+     * @param messageLength 
+     */
+    public void setMessageLength(int messageLength) {
+        this.messageLength = messageLength;
+    }
     
     /**
-     * The query data the student is being asked to encode (e.g., "R").
+     * Getter method for message length
+     * @return 
      */
-    private String source;
+    public int getMessageLength() {
+        return this.messageLength;
+    }
     
     /**
-     * The encoding format for the source (e.g., CHAR).
+     * Setter method for the question
+     * @param question 
      */
-    private ENCODING sourceEncoding;
+    public void setQuestion(String question) {
+        this.question = question;
+    }
     
     /**
-     * The encoded answer of the target data (e.g., "52"), which may not
-     * be specified when the Tutor presents the step to the GUI.
+     * Getter method for the question
+     * @return 
      */
-    private String target;
+    public String getQuestion() {
+        return this.question;
+    }
     
     /**
-     * The encoding format for the target (e.g., HEX).
+     * Setter method for the correct answer (result)
+     * @param newResult 
      */
-    private ENCODING targetEncoding;
-
-    /**
-     * Initialize this step with the given source and target data.
-     * 
-     * @param source the data the student is being asked to encoded
-     * @param target the encoding of the source in the given encoding format.
-     */
-    public EncodeAsciiStep(String source, String target) {
-        this.source = source;
-        this.target = target;
-        
-        sourceEncoding = ENCODING.CHAR;
-        targetEncoding = ENCODING.BINARY;
+    public void setResult(String newResult) {
+        this.result = newResult;
     }
     
-    public String getSource() {
-        return source;
+    /**
+     * Getter method for the correct answer (result)
+     * @return 
+     */
+    public String getResult() {
+        return this.result;
     }
-
-    public void setSource(String source) {
-        this.source = source;
+    
+    /**
+     * Setter method for the user's answer
+     * @param userResponse 
+     */
+    public void setUserAnswer(String userResponse) {
+        this.userAnswer = userResponse;
     }
-
-    public ENCODING getSourceEncoding() {
-        return sourceEncoding;
-    }
-
-    public void setSourceEncoding(ENCODING sourceEncoding) {
-        this.sourceEncoding = sourceEncoding;
-    }
-
-    public String getTarget() {
-        return target;
-    }
-
-    public void setTarget(String target) {
-        this.target = target;
-    }
-
-    public ENCODING getTargetEncoding() {
-        return targetEncoding;
-    }
-
-    public void setTargetEncoding(ENCODING targetEncoding) {
-        this.targetEncoding = targetEncoding;
+    
+    /**
+     * Getter method for the user answer
+     * @return 
+     */
+    public String getUserAnswer() {
+        return this.userAnswer;
     }
 }
