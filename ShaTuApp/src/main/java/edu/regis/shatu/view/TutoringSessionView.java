@@ -13,8 +13,13 @@
 package edu.regis.shatu.view;
 
 import edu.regis.shatu.model.TutoringSession;
-import java.awt.GridBagConstraints;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 
 
 /**
@@ -98,19 +103,30 @@ public class TutoringSessionView extends GPanel {
      * Layout the child components in this view
      */
     private void layoutComponents() {
-        addc(stepSelectorView, 0, 0, 1, 1, 0.0, 0.0,
-                GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
-                5, 5, 5, 5);
-        addc(stepView, 1, 0, 1, 1, 1.0, 1.0,
-                GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
-                5, 5, 5, 5);
-        addc(dashboardButton, 0, 2, 1, 1, 0.1, 0.1,
-                GridBagConstraints.SOUTHWEST, GridBagConstraints.NONE,
-                5, 5, 5, 5);
-        
-        addc(logoutButton, 0, 4, 1, 1, 0.1, 0.1,
-                GridBagConstraints.SOUTHWEST, GridBagConstraints.NONE,
-                5, 5, 5, 5);
+        // Wrap StepSelectorView in a JScrollPane
+        JScrollPane scrollPane = new JScrollPane(stepSelectorView);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+
+        // Set minimum sizes for scrollPane and stepView
+        scrollPane.setMinimumSize(new Dimension(100, 200)); // Minimum size for the scroll pane
+        stepView.setMinimumSize(new Dimension(740, 200));   // Minimum size for the step view
+
+        // Create a JSplitPane to allow resizing of the left panel
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, scrollPane, stepView);
+        splitPane.setDividerLocation(259); // Initial width of the left panel in pixels
+        splitPane.setOneTouchExpandable(true); // Allow collapsing and expanding by the user
+
+        // Set the layout for this panel
+        setLayout(new BorderLayout());
+        add(splitPane, BorderLayout.CENTER);
+
+        // Add a JPanel for the dashboard button at the bottom
+        JPanel buttonPanel = new JPanel(new BorderLayout());
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 0)); // Adds padding (top, left, bottom, right)
+        buttonPanel.add(dashboardButton, BorderLayout.WEST);
+        dashboardButton.setPreferredSize(new Dimension(150, 25)); // Adjustable initial size
+        add(buttonPanel, BorderLayout.SOUTH);
     }
     /**
      * A class called by dashboardButton to return to dashboard.

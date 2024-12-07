@@ -14,12 +14,16 @@ package edu.regis.shatu.view;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
+import edu.regis.shatu.model.aol.BitOpExample;
 import edu.regis.shatu.model.aol.BitOpStep;
 import edu.regis.shatu.model.aol.ExampleType;
 import edu.regis.shatu.model.aol.NewExampleRequest;
+import edu.regis.shatu.view.act.HintAction;
 import edu.regis.shatu.view.act.NewExampleAction;
+import edu.regis.shatu.view.act.StepCompletionAction;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -53,7 +57,7 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
     private JScrollPane feedbackPane, responsePane;
     private GPanel questionPanel, descriptionPanel, qrPanel;
     private JPanel buttonPanel, radioButtonPanel;
-    private JButton checkButton, nextButton, hintButton, newExampleButton;
+    private JButton checkButton, hintButton, newExampleButton;
     private ButtonGroup problemSizeGroup;
     private JRadioButton fourRadioButton, eightRadioButton, sixteenRadioButton, 
                          thirtytwoRadioButton;
@@ -260,22 +264,17 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
      * Sets up the Check, Next, and Hint buttons and their action listeners
      */
     private void setUpButtons() {
-        checkButton = new JButton("Check");
+        checkButton = new JButton(StepCompletionAction.instance());
         checkButton.addActionListener(this);
         
-        hintButton = new JButton("Hint");
+        hintButton = new JButton(HintAction.instance());
         hintButton.addActionListener(this);
         
         newExampleButton = new JButton(NewExampleAction.instance());
         newExampleButton.addActionListener(this);
         
-        nextButton = new JButton("Next");
-        nextButton.addActionListener(this);
-        nextButton.setEnabled(false);
-        
         buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         buttonPanel.add(checkButton);
-        buttonPanel.add(nextButton);
         buttonPanel.add(hintButton);
         buttonPanel.add(newExampleButton);
     }
@@ -452,13 +451,6 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
      */
     @Override
     public void actionPerformed(ActionEvent event) {
-        if (event.getSource() == checkButton) {
-            onCheckButton();
-        } else if (event.getSource() == hintButton) {
-            onNextHint();
-        } else if (event.getSource() == nextButton) {
-            onNextQuestion();
-        }
     }
 
     /**
@@ -481,7 +473,7 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
         if (e.getKeyCode() == KeyEvent.VK_ENTER && responseTextArea.getText().equals("")) {
             JOptionPane.showMessageDialog(this, "Please provide an answer");
         } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-            verifyAnswer();
+            checkButton.doClick();
         }
     }
 
@@ -499,51 +491,19 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
      * Verifies the user's answer against the correct answer.
      */
     private void verifyAnswer() {
-        String correctAnswer = performXOR(stringX, stringY);
-        String userResponse = responseTextArea.getText();
         
-        userResponse = userResponse.replaceAll("\\s", "");
-        
-        if (correctAnswer.equals(userResponse)) {
-            feedbackTextArea.setText("Correct!");
-            nextButton.setEnabled(true);
-            checkButton.setEnabled(false);
-        } else {
-            feedbackTextArea.setText("Incorrect! Please check your entry and "
-                    + "try again or use the hint feature for help. Correct answer: " + correctAnswer);
-        }
-    }
-
-    /**
-     * Handles the action for the Next Question button.
-     */
-    private void onNextQuestion() {
-        responseTextArea.setText("");
-        feedbackTextArea.setText("");
-        
-        generateNewQuestion();
-        
-        nextButton.setEnabled(false);
-        checkButton.setEnabled(true);
     }
 
     /**
      * Handles the action for the Hint button.
      */
     private void onNextHint() {
-        feedbackTextArea.setText("Hint: Check the truth table above for the "
-                + "appropriate values."); //Add different hint
     }
 
     /**
      * Handles the action for the Check button.
      */
     private void onCheckButton() {
-        if (responseTextArea.getText().equals("")) {
-            feedbackTextArea.setText("Please provide an answer");
-        } else {
-            verifyAnswer();
-        }
     }
 /**
  * XOR Example Request Added
@@ -551,29 +511,38 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
  */
     
     @Override
-    /**
-     * Updates the description, question, and hints from the model
-     * 
-     * TODO: THIS IS A PLACEHOLDER UNTIl WE HAVE HAVE THE MODEL CODE COMPLETED
-     */
     protected void updateView() {
         if (model != null) {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            Step step = model.currentTask().getCurrentStep();
 
-        Step step = model.currentTask().getCurrentStep();
+            try {
+                BitOpStep bitOpStep = gson.fromJson(step.getData(), BitOpStep.class);
+                if (bitOpStep != null && bitOpStep.getExample() != null) {
+                    stringX = bitOpStep.getExample().getOperand1();
+                    stringY = bitOpStep.getExample().getOperand2();
+                } else {
+                    throw new NullPointerException("BitOpStep or its example is null");
+                }
 
-        BitOpStep example = gson.fromJson(step.getData(), BitOpStep.class);
-        
-        stringX = example.getExample().getOperand1();
-        stringY = example.getExample().getOperand2();
+                stringXLabel.setText("x: " + stringX);
+                stringYLabel.setText("y: " + stringY);
+                
+                checkButton.setEnabled(true);
+                hintButton.setEnabled(true);
+            } catch (JsonSyntaxException | NullPointerException e) {
+                stringX = "Please click";
+                stringY = "New Example";
 
-        stringXLabel = new JLabel("x: " + stringX);
-        stringYLabel = new JLabel("y: " + stringY);
+                stringXLabel.setText("x: " + stringX);
+                stringYLabel.setText("y: " + stringY);
+                
+                checkButton.setEnabled(false);
+                hintButton.setEnabled(false);
 
-    }
-            // Update the view's information from the model
-            // Debugging dynamic updates to the model can be done here.
-            System.out.println("ExclusiveOrView");
+                System.err.println("Error updating view: " + e.getMessage());
+            }
+        }
     }
 
     @Override
@@ -581,22 +550,14 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         
         NewExampleRequest ex = new NewExampleRequest();
-        
-        //Set example type to the problem associated with the current view
-        
+                
         ex.setExampleType(ExampleType.XOR_BITS);
         
-        BitOpStep newStep = new BitOpStep();
+        BitOpExample newStep = new BitOpExample();
+        
+        newStep.setPreSize(problemSize);
         
         ex.setData(gson.toJson(newStep));
-        
-        responseTextArea.setText("");
-        feedbackTextArea.setText("");
-        
-        generateNewQuestion();
-        
-        nextButton.setEnabled(false);
-        checkButton.setEnabled(true);
         
         return ex;
     }

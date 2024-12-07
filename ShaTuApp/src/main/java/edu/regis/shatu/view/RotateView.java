@@ -21,6 +21,7 @@ import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.RotateStep;
 import edu.regis.shatu.view.act.NewExampleAction;
 import edu.regis.shatu.svc.TutorReply;
+import edu.regis.shatu.view.act.HintAction;
 import edu.regis.shatu.view.act.StepCompletionAction;
 import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
@@ -137,7 +138,7 @@ public class RotateView extends UserRequestView implements ActionListener, KeyLi
         checkButton = new JButton(StepCompletionAction.instance());
         checkButton.addActionListener(this);
 
-        hintButton = new JButton("Hint");
+        hintButton = new JButton(HintAction.instance());
         hintButton.addActionListener(this);
         
         newExampleButton = new JButton(NewExampleAction.instance());
@@ -218,13 +219,7 @@ public class RotateView extends UserRequestView implements ActionListener, KeyLi
     
     @Override
     public void actionPerformed(ActionEvent event) {
-        if (event.getSource() == checkButton) {
-            if (this.answerField.getText().equals("")) {
-                JOptionPane.showMessageDialog(this, "Please provide an answer");
-            }
-        } else if (event.getSource() == hintButton) {
-            JOptionPane.showMessageDialog(this, "Hint");
-        } 
+        
     }
 
     @Override
@@ -236,7 +231,7 @@ public class RotateView extends UserRequestView implements ActionListener, KeyLi
         if (e.getKeyCode() == KeyEvent.VK_ENTER && answerField.getText().equals("")) {
             JOptionPane.showMessageDialog(this, "Please provide an answer");
         } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-            //verifyAnswer(this.problemString, this.numRotations);
+            checkButton.doClick();
         }
     }
 
@@ -307,11 +302,16 @@ public class RotateView extends UserRequestView implements ActionListener, KeyLi
         if (problemData == null || problemData.isEmpty()) {
             prompt.setText("");
             problem.setText("Click 'New Example' when ready.");
+            checkButton.setEnabled(false);
+            hintButton.setEnabled(false);
         } else {
             problem.setText(problemData);
             this.problemString = problemData;
             this.numRotations = currentStep.getAmount();
+            checkButton.setEnabled(true);
+            hintButton.setEnabled(true);
         }
+        
     }
     
     @Override

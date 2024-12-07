@@ -14,6 +14,7 @@ package edu.regis.shatu.view;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import edu.regis.shatu.model.LessonSession;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.Task;
 import edu.regis.shatu.model.TutoringSession;
@@ -37,6 +38,12 @@ public abstract class UserRequestView extends GPanel {
      */
     protected TutoringSession model;
     
+    /**
+     * The current task and step in this tutoring session are displayed in this 
+     * view.
+     */
+    protected LessonSession lessonModel;
+   
     /**
      * Convenience utility for converting between Java and JSon objects.
      */
@@ -75,6 +82,17 @@ public abstract class UserRequestView extends GPanel {
         gson = new GsonBuilder().setPrettyPrinting().create();
         random = new Random();
         this.model = model;
+        updateView();
+    }
+    
+    public LessonSession getLessonModel() {
+        return this.lessonModel;
+    }
+    
+    public void setLessonModel(LessonSession model) {
+        gson = new GsonBuilder().setPrettyPrinting().create();
+        random = new Random();
+        this.lessonModel = model;
         updateView();
     }
     

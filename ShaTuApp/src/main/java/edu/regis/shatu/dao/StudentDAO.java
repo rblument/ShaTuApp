@@ -49,9 +49,26 @@ public class StudentDAO extends MySqlDAO implements StudentSvc {
     public void create(Student student) throws IllegalArgException, NonRecoverableException {
         final String sql1 = "INSERT INTO Student (UserId, FirstName, LastName) VALUES (?,?,?)";
         final String sql2 = "INSERT INTO StudentModel (UserId, ScaffoldLevel) VALUES (?,?)";
+        final String sql3 = """
+                            INSERT INTO Assessment (UserId, KnowledgeComponentId, AssessmentLevel, Exposures, Successes, Hints)
+                               VALUES 
+                               (?, 1, 'Not Started', 0, 0, 0),
+                               (?, 100, 'Not Started', 0, 0, 0),
+                               (?, 101, 'Not Started', 0, 0, 0),
+                               (?, 102, 'Not Started', 0, 0, 0),
+                               (?, 103, 'Not Started', 0, 0, 0),
+                               (?, 104, 'Not Started', 0, 0, 0),
+                               (?, 105, 'Not Started', 0, 0, 0),
+                               (?, 106, 'Not Started', 0, 0, 0),
+                               (?, 107, 'Not Started', 0, 0, 0),
+                               (?, 108, 'Not Started', 0, 0, 0),
+                               (?, 109, 'Not Started', 0, 0, 0),
+                               (?, 110, 'Not Started', 0, 0, 0),
+                               (?, 111, 'Not Started', 0, 0, 0),
+                               (?, 112, 'Not Started', 0, 0, 0);""";
 
         Connection conn = null;
-        PreparedStatement stmt1, stmt2 = null;
+        PreparedStatement stmt1, stmt2 = null, stmt3 = null;
         
         String userId = student.getUserId();
         System.out.println("create() in Student DAO");
@@ -84,7 +101,21 @@ public class StudentDAO extends MySqlDAO implements StudentSvc {
             
         } catch (SQLException e) {
             throw new NonRecoverableException("StudentDAO-ERR-2" + e.toString(), e); 
+        } 
+        
+        // 2. Create student model in the DB
+        try {
+            stmt3 = conn.prepareStatement(sql3);
+            
+            for (int i = 1; i < 15; ++i) 
+                stmt3.setString(i, userId);
+            
+            stmt3.executeUpdate();
+            
+        } catch (SQLException e) {
+            throw new NonRecoverableException("StudentDAO-ERR-2" + e.toString(), e); 
         } finally {
+            close(stmt3);
             close(stmt2);
             close(conn, stmt1);
         }        
@@ -173,7 +204,7 @@ public class StudentDAO extends MySqlDAO implements StudentSvc {
     @Override
     public StudentModel findModelById(String userId) throws ObjNotFoundException, NonRecoverableException {
         final String sql1 = "SELECT ScaffoldLevel FROM StudentModel WHERE UserId = ?";
-        final String sql2 = "SELECT Id,KnowledgeComponentId,AssessmentLevel,Exposures,Successes FROM Assessment WHERE UserId = ?";
+        final String sql2 = "SELECT Id,KnowledgeComponentId,AssessmentLevel,Exposures,Successes,Hints FROM Assessment WHERE UserId = ?";
 
         
         Connection conn = null;
@@ -224,6 +255,7 @@ public class StudentDAO extends MySqlDAO implements StudentSvc {
                 assessment.setId(rs.getInt(1));
                 assessment.setExposures(rs.getInt(4));
                 assessment.setSuccessess(rs.getInt(5));
+                assessment.setHints(rs.getInt(6));
                 
                 studentModel.addAssessment(assessment);
             } 
