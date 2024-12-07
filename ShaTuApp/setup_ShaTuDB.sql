@@ -25,6 +25,8 @@ USE ShaTuDB;
 CREATE TABLE User (
    Email VARCHAR(255),
    Password VARCHAR(255) NOT NULL,
+   Question int(10),
+   Answer VARCHAR(255),
    PRIMARY KEY (Email)
 );
 

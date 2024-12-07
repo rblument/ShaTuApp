@@ -119,6 +119,47 @@ public class UserFileDAO implements UserSvc {
      * {@inheritDoc}
      */
     @Override
+    public User retrieveQuestion(String userId) throws ObjNotFoundException {
+        Gson gson = new Gson();
+       
+        String fileName = fullyQualifiedFileName(userId);
+        
+        Path path = Paths.get(fileName);
+     
+        try (Reader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
+            JsonObject jsonObj = JsonParser.parseReader(reader).getAsJsonObject();
+            
+            return gson.fromJson(jsonObj, User.class);
+
+        } catch (IOException ex) { // If username is not found
+            throw new ObjNotFoundException(String.valueOf(userId));
+        }
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public User retrieveAnswer(String userId) throws ObjNotFoundException {
+        Gson gson = new Gson();
+       
+        String fileName = fullyQualifiedFileName(userId);
+        
+        Path path = Paths.get(fileName);
+     
+        try (Reader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
+            JsonObject jsonObj = JsonParser.parseReader(reader).getAsJsonObject();
+            
+            return gson.fromJson(jsonObj, User.class);
+
+        } catch (IOException ex) { // If username is not found
+            throw new ObjNotFoundException(String.valueOf(userId));
+        }
+    }
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void update(User user, String newPassword) throws ObjNotFoundException, NonRecoverableException {
         //ToDo: add functionality
         throw new UnsupportedOperationException("Not supported yet."); 

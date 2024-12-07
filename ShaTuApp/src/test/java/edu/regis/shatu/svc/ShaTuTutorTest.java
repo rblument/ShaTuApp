@@ -357,7 +357,7 @@ public class ShaTuTutorTest {
     private TutoringSession signIn() {
         String userId = "test@regis.edu";
 
-        User user = new User(userId, SHA_256.instance().sha256("TestP@ss"));
+        User user = new User(userId, SHA_256.instance().sha256("TestP@ss"), 1, SHA_256.instance().sha256("Denver"));
 
         // First we need to sign in to obtain the session security token.
         ClientRequest request = new ClientRequest(ServerRequestType.SIGN_IN);

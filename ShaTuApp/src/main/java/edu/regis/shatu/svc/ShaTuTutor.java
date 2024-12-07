@@ -223,6 +223,80 @@ public class ShaTuTutor implements TutorSvc {
             return new TutorReply("IllegalUserId");
         }
     }
+    /**
+     * Verifies the user is in the database and the security question and answer match.
+     *
+     * This method handles ":VerifyUser" requests from the GUI client.
+     *
+     * @param jsonAcct a JSon encoded Account object
+     * @return a TutorReply if successful the status is "Created", otherwise the
+     * status is "ERR".
+     * @throws edu.regis.shatu.err.NonRecoverableException
+     */
+    public TutorReply verifyUser(String jsonAcct) throws NonRecoverableException {
+        Account acct = gson.fromJson(jsonAcct, Account.class);
+        User user = gson.fromJson(jsonAcct, User.class);
+
+        StudentSvc stuSvc = ServiceFactory.findStudentSvc();
+        if (!stuSvc.exists(acct.getUserId())) {
+            return new TutorReply("IllegalUserId");
+        }
+        
+        try {
+            User dbUserAnswer = ServiceFactory.findUserSvc().retrieveAnswer(user.getUserId());
+            User dbUserQuestion = ServiceFactory.findUserSvc().retrieveQuestion(user.getUserId());
+           
+
+            if ((dbUserAnswer.getSecurityAnswer().equals(user.getSecurityAnswer())) && 
+                    (dbUserQuestion.getSecurityQuestion() == user.getSecurityQuestion())) {
+             
+                TutorReply reply = new TutorReply("Verified");
+
+                return reply;
+
+            } else {
+                return new TutorReply("InvalidAnswer");
+            }
+
+        } catch (ObjNotFoundException e) {
+            return new TutorReply("UnknownUser");
+        } catch (NonRecoverableException ex) {
+            Logger.getLogger(ShaTuTutor.class
+                    .getName()).log(Level.SEVERE, null, ex);
+            return new TutorReply();
+        }
+        
+    }
+    /**
+     * Resets password for user currently in database
+     *
+     * This method handles ":ResetPassword" requests from the GUI client.
+     *
+     * @param jsonAcct a JSon encoded Account object
+     * @return a TutorReply if successful the status is "Created", otherwise the
+     * status is "ERR".
+     * @throws edu.regis.shatu.err.NonRecoverableException
+     */
+    public TutorReply resetPassword(String jsonAcct) throws NonRecoverableException {
+        Account acct = gson.fromJson(jsonAcct, Account.class);
+        User user = gson.fromJson(jsonAcct, Student.class);
+
+        StudentSvc stuSvc = ServiceFactory.findStudentSvc();
+
+        if (!stuSvc.exists(acct.getUserId())) {
+            return new TutorReply("IllegalUserId");
+        }
+        
+        
+        try {
+            ServiceFactory.findUserSvc().update(user, acct.getPassword());  //does this get new password?
+            return new TutorReply("PasswordReset");
+
+        } catch (ObjNotFoundException ex) {
+            // Should never get here since we tested whether the account exists
+            return new TutorReply("IllegalUserId");
+        }
+    }
 
     /**
      * Attempts to sign a student in.

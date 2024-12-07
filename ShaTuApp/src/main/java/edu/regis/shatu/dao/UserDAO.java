@@ -42,7 +42,7 @@ public class UserDAO extends MySqlDAO implements UserSvc {
      */
     @Override
     public void create(Account acct) throws IllegalArgException, NonRecoverableException {
-        final String sql = "INSERT INTO User (Email, Password) VALUES (?,?)";
+        final String sql = "INSERT INTO User (Email, Password, Question, Answer) VALUES (?,?,?,?)";
 
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -61,6 +61,8 @@ public class UserDAO extends MySqlDAO implements UserSvc {
 
             stmt.setString(1, userId);
             stmt.setString(2, acct.getPassword());
+            stmt.setInt(3, acct.getSecurityQuestion());
+            stmt.setString(4, acct.getSecurityAnswer());
 
             stmt.executeUpdate();
 
@@ -210,6 +212,70 @@ public class UserDAO extends MySqlDAO implements UserSvc {
             throw new NonRecoverableException("UserDAO-ERR-3" + ex.toString(), ex);
         } finally {
             close(stmt);
+        }
+    }
+    
+    @Override
+    public User retrieveQuestion(String userId) throws ObjNotFoundException, NonRecoverableException {
+        final String sql = "SELECT Question FROM User WHERE Email = ?";
+
+        Connection conn = null;
+        PreparedStatement stmt = null;
+
+        try {
+            conn = DriverManager.getConnection(URL);
+            stmt = conn.prepareStatement(sql);
+
+            stmt.setString(1, userId);
+
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                User user = new User(userId);
+
+                user.setSecurityQuestion(rs.getInt(1));
+
+                return user;
+
+            } else {
+                throw new ObjNotFoundException("Student Id:" + userId);
+            }
+        } catch (SQLException e) {
+            throw new NonRecoverableException("UserDAO-ERR-5" + e.toString(), e);
+        } finally {
+            close(conn, stmt);
+        }
+    }
+    
+    @Override
+    public User retrieveAnswer(String userId) throws ObjNotFoundException, NonRecoverableException {
+        final String sql = "SELECT Answer FROM User WHERE Email = ?";
+
+        Connection conn = null;
+        PreparedStatement stmt = null;
+
+        try {
+            conn = DriverManager.getConnection(URL);
+            stmt = conn.prepareStatement(sql);
+
+            stmt.setString(1, userId);
+
+            ResultSet rs = stmt.executeQuery();
+            
+
+            if (rs.next()) {
+                User user = new User(userId);
+                user.setSecurityAnswer(rs.getString(1));
+
+                return user;
+
+            } else {
+                throw new ObjNotFoundException("Student Id:" + userId);
+            }
+        } catch (SQLException e) {
+            throw new NonRecoverableException("UserDAO-ERR-5" + e.toString(), e);
+        } finally {
+            close(conn, stmt);
         }
     }
 }
