@@ -252,6 +252,7 @@ public class StepCompletionAction extends ShaTuGuiAction {
                                         System.out.println("show answer");
                                         JOptionPane.showMessageDialog(MainFrame.instance(),
                                         stepReply.getCorrectAnswer(), "Tutor Reply", JOptionPane.INFORMATION_MESSAGE);
+                                        NewExampleAction.instance().actionPerformed(null);
                                     }
                                     default -> System.out.println("try again");
                                 }
