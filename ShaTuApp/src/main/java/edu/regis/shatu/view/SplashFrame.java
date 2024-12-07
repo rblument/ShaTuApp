@@ -13,6 +13,7 @@
 package edu.regis.shatu.view;
 
 import edu.regis.shatu.model.Account;
+import edu.regis.shatu.model.LessonSession;
 import edu.regis.shatu.model.TutoringSession;
 import edu.regis.shatu.model.User;
 import java.awt.CardLayout;
@@ -46,6 +47,12 @@ public class SplashFrame extends JFrame {
      * linked to splashPanel sign in.
      */
     public static final String DASHBOARD = "DashboardPanel";
+    
+    /**
+     * Dashboard Reference Name for CardLayout;
+     * linked to splashPanel sign in.
+     */
+    public static final String LESSON = "LessonMenu";
     
     /**
      * Tutor View Reference Name for CardLayout;
@@ -102,6 +109,14 @@ public class SplashFrame extends JFrame {
      * (teach, practice, quiz) upon sign in.
      */
     private DashboardPanel dashboardPanel;
+    
+    /**
+     * The panel that allows users to select a type of service
+     * (teach, practice, quiz) upon sign in.
+     */
+    private LessonSessionView lessonSessionView;
+
+    private LessonSession lessonSession;
     
     /**
      * The panel which displays the ShaTuApp tutoring view;
@@ -232,6 +247,14 @@ public class SplashFrame extends JFrame {
     }
     
     /**
+     * Returns the current lesson session for the SplashFrame.
+     * @return The current LessonSession instance.
+     */
+    
+    public LessonSession getLessonSession() {
+        return this.lessonSession;
+    }
+    /**
      * Clears the tutoringSession instance.
      * Changes current user to an empty user instance.
      * Clears splashPanel fields.
@@ -271,6 +294,7 @@ public class SplashFrame extends JFrame {
         this.selectPanel(DASHBOARD);  // Display the dashboard
         System.out.println("SplashFrame.java: selectDashboard: session = " + session.getAccount().getFirstName());
     }
+   
 
      /**
      * Selects a personalized practice screen for each user upon selecting
@@ -303,6 +327,33 @@ public class SplashFrame extends JFrame {
 
         // Switch to the tutoring session view
         selectPanel(TUTOR);
+    }
+        
+    /**
+     * Selects a personalized lesson screen for each user upon selecting
+     * the dashboard's practice teach me.
+     */
+        public void selectLessonScreen() {
+        LessonSession session = getLessonSession(); // Retrieve the lesson session
+        TutoringSession tsession = getSession(); // Retrieve the session
+
+        //Initialize the LessonSessionView if it's not already initialized
+        if (this.lessonSessionView == null) {
+            this.lessonSessionView = new LessonSessionView(tsession); // Create the lesson session view
+            cards.add(lessonSessionView, LESSON);  // Add it to the CardLayout
+        }
+        
+        // Set the model (session) for the LessonSessionView
+        this.lessonSessionView.setLessonModel(session);
+
+        // Sets size of lesson screen window.
+        // Without this, the window opens too small.
+        this.setPreferredSize(new Dimension(1000, 800));
+        this.pack();
+        
+        // Switch to the lesson session view
+        selectPanel(LESSON);
+        
     }
 
     /**
@@ -353,7 +404,7 @@ public class SplashFrame extends JFrame {
     
     /**
      * Initializes a personalized dashboard screen for each user after sign in.
-     * @param sessin: a reference to the current SplashFrame session instance.
+     * @param session
      */
     public void initializeDashboard(TutoringSession session) {
         if (session == null) {
@@ -366,7 +417,7 @@ public class SplashFrame extends JFrame {
         this.cards.add(dashboardPanel, DASHBOARD);
         this.selectPanel(DASHBOARD);  // Display the dashboard
     }
-
+    
     /**
      * Create the child GUI components appearing in this frame.
      */
