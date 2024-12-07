@@ -48,7 +48,6 @@ import edu.regis.shatu.model.aol.AssessmentLevel;
 import edu.regis.shatu.model.aol.BitOpExample;
 import edu.regis.shatu.model.aol.BitOpStep;
 import edu.regis.shatu.model.aol.EncodeAsciiExample;
-import edu.regis.shatu.model.aol.EncodeAsciiStep;
 import edu.regis.shatu.model.aol.ExampleType;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.RotateStep;
@@ -1498,18 +1497,7 @@ public class ShaTuTutor implements TutorSvc {
         TutorReply reply = new TutorReply(":Success");
         reply.setData(gson.toJson(task));
 
-        try {
-            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
-            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
-
-            TutorReply reply = new TutorReply(":Success");
-            reply.setData(gson.toJson(task));
-
-            return reply;
-
-        } catch (NonRecoverableException ex) {
-            return createError("Unknown error", ex);
-        }
+        return reply;
     }
 
     /**

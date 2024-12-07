@@ -87,12 +87,7 @@ public enum KnowledgeComponentKind {
     /**
      * Define the corresponding database id for this knowledge component.
      */
-     SHIFT_BITS("Shift Bits", 101),
-     
-    /**
-      * Define the corresponding database id for this knowledge component.
-      */
-    INITIALIZE_VARS("Initialize Variables", 102);
+     SHIFT_BITS("Shift Bits", 101);
      
     /**
      * A GUI displayable string identifying this knowledge component.
