@@ -16,6 +16,7 @@ import edu.regis.shatu.model.Account;
 import edu.regis.shatu.model.LessonSession;
 import edu.regis.shatu.model.TutoringSession;
 import edu.regis.shatu.model.User;
+import edu.regis.shatu.view.act.GetTaskAction;
 import java.awt.CardLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
@@ -360,6 +361,8 @@ public class SplashFrame extends JFrame {
 
         // Switch to the tutoring session view
         selectPanel(TUTOR);
+        
+        GetTaskAction.instance().actionPerformed(null);
     }
         
     /**
