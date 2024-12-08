@@ -17,7 +17,6 @@ import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.ExampleType;
 import edu.regis.shatu.model.aol.NewExampleRequest;
-import edu.regis.shatu.view.act.StepCompletionAction;
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -391,6 +390,10 @@ public class InitVarView extends UserRequestView implements ActionListener {
                h7.getText().trim().isEmpty();
     }
     
+    /**
+     * Initializes Buttons for this view
+     * Attaches all unique listeners for this view
+     */
     private void setupButtons() {
         // Initializes Buttons
         showButton = view.initializeButton("Show Answer");

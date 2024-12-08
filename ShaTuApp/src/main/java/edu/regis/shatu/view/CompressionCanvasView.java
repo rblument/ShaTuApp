@@ -31,7 +31,7 @@ public class CompressionCanvasView extends UserRequestView {
     
     /**
      * Required for access to the current view.
-     * Used to access universal (check, hint, new example) buttons.
+     * Used to access universal buttons (check, hint, new example).
      */
     private TutoringSessionView view;
     /**
