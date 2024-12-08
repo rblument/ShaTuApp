@@ -51,6 +51,7 @@ public class EncodeView extends UserRequestView implements ActionListener {
     private JTextArea responseArea;
     private JTextArea feedbackArea;
     private JButton checkButton, nextButton, hintButton;
+    private boolean checkHintEnabled = false;
     private JTable asciiTable;
     private JScrollPane responseScrollPane, asciiTableScrollPane, feedbackScrollPane;
     private String question;
@@ -156,6 +157,10 @@ public class EncodeView extends UserRequestView implements ActionListener {
     private void prepareNextQuestion() {
         // Do nothing, tutor should be handling things, but leaving incase a use
         // could be found later in development
+        checkHintEnabled = true;
+        hintButton.setEnabled(true);
+        checkButton.setEnabled(true);
+        updateView();
     }
     
     /**
@@ -357,9 +362,10 @@ public class EncodeView extends UserRequestView implements ActionListener {
     protected void updateView() {
         // Ensure 'view' is only initialized when SplashFrame.instance() is non-null
         if (view == null) {
-            MainFrame splashFrame = MainFrame.instance();
-            if (splashFrame != null) {
+            MainFrame mainFrame = MainFrame.instance();
+            if (mainFrame != null) {
                 view = SplashFrame.instance().getView(); // Initialize view once SplashFrame is ready
+                
             } else {
                 System.err.println("SplashFrame.instance() is null. Cannot initialize 'view'.");
                 return; // Exit updateView if the view cannot be initialized
@@ -432,7 +438,18 @@ public class EncodeView extends UserRequestView implements ActionListener {
 
         // Reset button listeners using the initialized view
         if (view != null) {
-            view.resetButtonListeners(); // Clear any listeners applied from other views
+            view.resetButtonListeners();
+            nextButton = view.getNewExampleButton();
+            hintButton = view.getHintButton();
+            checkButton = view.getCheckButton();
+            hintButton.addActionListener(this);
+            checkButton.addActionListener(this);
+            nextButton.addActionListener(this);
+        }
+        
+        if (checkHintEnabled) {
+            checkButton.setEnabled(true);
+            hintButton.setEnabled(true);
         }
 
         // Other update logic here
