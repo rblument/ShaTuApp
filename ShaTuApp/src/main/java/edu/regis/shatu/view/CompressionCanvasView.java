@@ -13,12 +13,23 @@
  */
 package edu.regis.shatu.view;
 
+import edu.regis.shatu.model.CompressRoundStep;
+import edu.regis.shatu.model.PrepScheduleStep;
+import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
+import edu.regis.shatu.model.aol.ExampleType;
 import edu.regis.shatu.model.aol.NewExampleRequest;
+import edu.regis.shatu.view.act.NewExampleAction;
+import edu.regis.shatu.view.act.StepCompletionAction;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.JButton;
 
 /**
  * Displays a single round of the SHA-256 compression algorithm.
@@ -77,12 +88,14 @@ public class CompressionCanvasView extends UserRequestView {
     private VariableLabel kLabel;
     private VariableLabel temp1Label;
     private VariableLabel temp2Label;
+    private JButton continueButton = new JButton(StepCompletionAction.instance());
 
     public CompressionCanvasView() {
         setLayout(null);
 
         initializeComponents();
         layoutComponents();
+        continueButton.setText("Continue");
     }
 
     /**
@@ -334,6 +347,11 @@ public class CompressionCanvasView extends UserRequestView {
         
         temp1Label.setFont(new Font("", Font.PLAIN, 16));
         temp2Label.setFont(new Font("", Font.PLAIN, 16));
+        
+        continueButton.addActionListener((ActionEvent e) ->
+        {
+            NewExampleAction.instance().actionPerformed(null);
+        });
     }
 
     private void layoutComponents() {
@@ -437,6 +455,24 @@ public class CompressionCanvasView extends UserRequestView {
         y += AddMod256Label.HALF_SIZE - 10;
         temp2Label.setLocation(x, y);
         add(temp2Label);
+        
+        // Add continueButton to the bottom right corner
+        int buttonWidth = 100;
+        int buttonHeight = 30;
+        int margin = 10;
+        x = getWidth() - buttonWidth - margin;
+        y = getHeight() - buttonHeight - margin;
+        continueButton.setBounds(x, y, buttonWidth, buttonHeight);
+        add(continueButton);
+    }
+    
+    @Override
+    public void doLayout() {
+        super.doLayout();
+        int buttonWidth = 100;
+        int buttonHeight = 30;
+        int margin = 10;
+        continueButton.setBounds(getWidth() - buttonWidth - margin, getHeight() - buttonHeight - margin, buttonWidth, buttonHeight);
     }
 
     /**
@@ -490,11 +526,27 @@ public class CompressionCanvasView extends UserRequestView {
     
     @Override
     public NewExampleRequest newRequest() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        NewExampleRequest ex = new NewExampleRequest(); // Will be sent to the tutor.
+        
+        ex.setExampleType(ExampleType.COMPRESS_ROUND);
+        
+        CompressRoundStep newStep = new CompressRoundStep();       
+                
+        ex.setData(gson.toJson(newStep));
+        
+        return ex;
     }
 
     @Override
     public StepCompletion stepCompletion() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        Step currentStep = model.currentTask().currentStep();
+        
+        CompressRoundStep completedStep = gson.fromJson(currentStep.getData(), CompressRoundStep.class);
+                
+        StepCompletion step = new StepCompletion(currentStep, gson.toJson(completedStep));
+        
+        step.setStep(currentStep); // Will be sent to the tutor.
+        
+        return step;
     }
 }
