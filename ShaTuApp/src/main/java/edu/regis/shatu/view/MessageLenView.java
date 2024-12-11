@@ -32,7 +32,10 @@ import javax.swing.JTextPane;
 import javax.swing.JTextArea;
 import javax.swing.JScrollPane;
 import java.awt.FlowLayout;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import javax.swing.BoxLayout;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
@@ -42,7 +45,7 @@ import javax.swing.JTextField;
  * 
  * @author rickb
  */
-public class MessageLenView extends UserRequestView implements ActionListener {
+public class MessageLenView extends UserRequestView implements ActionListener, KeyListener {
     private TutoringSessionView view;
     private JTextPane descriptionTextPane;
     private JLabel questionLabel, instructionsLabel, messageLengthLabel;
@@ -222,6 +225,7 @@ public class MessageLenView extends UserRequestView implements ActionListener {
         responseArea = new JTextArea(3, 20);
         responseArea.setLineWrap(true); // Enable line wrapping
         responseArea.setWrapStyleWord(true); // Wrap lines at word boundaries
+        responseArea.addKeyListener(this);
         responseScrollPane = new JScrollPane(responseArea);
         responseScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED); // Enable vertical scrolling
     }
@@ -416,5 +420,23 @@ public class MessageLenView extends UserRequestView implements ActionListener {
         step.setStep(currentStep); // Will be sent to the tutor.
         
         return step;
+    }
+    
+    @Override
+    public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_ENTER && responseArea.getText().equals("")) {
+            JOptionPane.showMessageDialog(this, "Please provide an answer");
+        } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+            checkButton.doClick();
+        }
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
     }
 }
