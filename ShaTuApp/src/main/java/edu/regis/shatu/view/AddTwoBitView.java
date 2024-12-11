@@ -47,11 +47,12 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
      * The modulo value for addition of binary numbers.
      */
     private final int m = 8; // will be changed and dynamically updated
-
+    
     private String binary1 = "";
     private String binary2 = "";
     private String result = "";
     
+    private TutoringSessionView view;
     private JTextField answerField;
     private JLabel instructionLabel;
     private JLabel stringLabel1;
@@ -60,7 +61,8 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
     private JLabel stringLabel4; // Only for testing that view is communicating with server
     private JButton checkButton; // Add the check button
     private JButton hintButton;
-    private JButton nextQuestionButton;
+    private JButton nextButton;
+    private boolean checkHintEnabled = false;
     
     /**
      * Initializes the AddTwoBitView by creating and laying out its child components.
@@ -77,6 +79,14 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
      */
     @Override
     public void actionPerformed(ActionEvent event) {
+        if (event.getSource() == checkButton) {
+            onCheckButton();
+        } else if (event.getSource() == hintButton) {
+            onNextHint();
+        } else if (event.getSource() == nextButton) {
+            checkHintEnabled = true;
+            onNextQuestion();
+        }
     }
 
     /**
@@ -100,8 +110,8 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
         hintButton = new JButton(HintAction.instance());
         hintButton.addActionListener(this);
         
-        nextQuestionButton = new JButton(NewExampleAction.instance());
-        nextQuestionButton.addActionListener(this);
+        nextButton = new JButton(NewExampleAction.instance());
+        nextButton.addActionListener(this);
     }
 
     /**
@@ -151,7 +161,7 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
         
-        addc(nextQuestionButton, 0, 7, 1, 1, 0.0, 0.0,
+        addc(nextButton, 0, 7, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
     }
@@ -315,11 +325,24 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
      */
     @Override
     protected void updateView() {
+        view = SplashFrame.instance().getView(); // Accessing view to use universal buttons
+        hintButton = view.getHintButton();
+        checkButton = view.getCheckButton();
+        nextButton = view.getNewExampleButton();
+        
+        // If check and hint buttons are disabled, reset listenerers and apply those used by this view
+        if(!checkHintEnabled) {
+            view.resetButtonListeners(); // Clear any listeners applied from other views          
+            hintButton.addActionListener(this);           
+            checkButton.addActionListener(this);            
+            nextButton.addActionListener(this);
+        }
+        
         if (model != null) {
             // ****TO-DO*****
             // Update the view's information from the model
             // Debugging dynamic updates to the model can be done here.
-            System.out.println("InitVarView");
+            System.out.println("AddTwoBitView");
             
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
 

@@ -85,7 +85,7 @@ public class MainFrame extends JFrame implements WindowListener {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 
         // Calculate the initial size (80% of the splashFrame width)
-        int width = (int) (screenSize.width * 0.8);
+        int width = (int) (screenSize.width * 0.5);
         int height = (int) (screenSize.height);
         setSize(width, height);
 

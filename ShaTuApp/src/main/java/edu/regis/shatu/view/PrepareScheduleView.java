@@ -32,6 +32,7 @@ import javax.swing.JTextPane;
  */
 public class PrepareScheduleView extends UserRequestView implements ActionListener {
     
+    private TutoringSessionView view;
     private JTextPane descriptionTextPane;
     private JButton continueButton = new JButton(StepCompletionAction.instance());
     
@@ -122,6 +123,14 @@ public class PrepareScheduleView extends UserRequestView implements ActionListen
      * TODO: THIS IS A PLACEHOLDER UNTIl WE HAVE HAVE THE MODEL CODE COMPLETED
      */
     protected void updateView() {
+        view = SplashFrame.instance().getView(); // Accessing view to use universal buttons
+        view.resetButtonListeners(); // Clear any listeners applied from other views
+        
+        // Universal buttons (hint, check, new example) are not needed in this view.
+        view.getCheckButton().setEnabled(false);
+        view.getHintButton().setEnabled(false);
+        view.getNewExampleButton().setEnabled(false);
+        
         if (model != null) {
             // ****TO-DO*****
             // Update the view's information from the model

@@ -51,6 +51,7 @@ import javax.swing.JTextArea;
  * @author rickb
  */
 public class ExclusiveOrView extends UserRequestView implements ActionListener, KeyListener {   
+    private TutoringSessionView view;
     private String stringX, stringY;
     private int problemSize; 
     private JTextArea descTextArea, feedbackTextArea, responseTextArea;
@@ -58,6 +59,7 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
     private GPanel questionPanel, descriptionPanel, qrPanel;
     private JPanel buttonPanel, radioButtonPanel;
     private JButton checkButton, hintButton, newExampleButton;
+    private boolean checkHintEnabled = false;
     private ButtonGroup problemSizeGroup;
     private JRadioButton fourRadioButton, eightRadioButton, sixteenRadioButton, 
                          thirtytwoRadioButton;
@@ -451,6 +453,13 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
      */
     @Override
     public void actionPerformed(ActionEvent event) {
+        if (event.getSource() == checkButton) {
+            onCheckButton();
+        } else if (event.getSource() == hintButton) {
+            onNextHint();
+        } else if (event.getSource() == newExampleButton) {
+            checkHintEnabled = true;
+        }
     }
 
     /**
@@ -512,6 +521,19 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
     
     @Override
     protected void updateView() {
+        view = SplashFrame.instance().getView(); // Accessing view to use universal buttons
+        hintButton = view.getHintButton();
+        checkButton = view.getCheckButton();
+        newExampleButton = view.getNewExampleButton();
+        
+        // If check and hint buttons are disabled, reset listenerers and apply those used by this view
+        if(!checkHintEnabled) {
+            view.resetButtonListeners(); // Clear any listeners applied from other views          
+            hintButton.addActionListener(this);           
+            checkButton.addActionListener(this);            
+            newExampleButton.addActionListener(this);
+        }
+        
         if (model != null) {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             Step step = model.currentTask().getCurrentStep();
