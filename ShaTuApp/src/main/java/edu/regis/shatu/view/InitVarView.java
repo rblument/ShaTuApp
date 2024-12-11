@@ -17,6 +17,8 @@ import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.ExampleType;
 import edu.regis.shatu.model.aol.NewExampleRequest;
+import edu.regis.shatu.view.act.NewExampleAction;
+import edu.regis.shatu.view.act.StepCompletionAction;
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -54,6 +56,7 @@ public class InitVarView extends UserRequestView implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent event) {
         if (event.getSource() == checkButton) {
+            NewExampleAction.instance().actionPerformed(null);
             boolean allCorrect = initVarStep.allAnswersCorrect();
             
             if(allCorrect){
@@ -75,21 +78,21 @@ public class InitVarView extends UserRequestView implements ActionListener {
         hintsVisible = false;
 
         h0 = new JTextField(20);
-        h0.setName("H0");
+        h0.setName("@H0");
         h1 = new JTextField(20);
-        h1.setName("H1");
+        h1.setName("@H1");
         h2 = new JTextField(20);
-        h2.setName("H2");
+        h2.setName("@H2");
         h3 = new JTextField(20);
-        h3.setName("H3");
+        h3.setName("@H3");
         h4 = new JTextField(20);
-        h4.setName("H4");
+        h4.setName("@H4");
         h5 = new JTextField(20);
-        h5.setName("H5");
+        h5.setName("@H5");
         h6 = new JTextField(20);
-        h6.setName("H6");
+        h6.setName("@H6");
         h7 = new JTextField(20);
-        h7.setName("H7");
+        h7.setName("@H7");
         
         feedbackTextArea = new JTextArea(3, 20);
         feedbackTextArea.setEditable(false);
@@ -99,6 +102,9 @@ public class InitVarView extends UserRequestView implements ActionListener {
         
         showButton = new JButton("Show Answer");
         showButton.addActionListener(e -> showAnswer());
+        hintButton = new JButton("Hint");
+        checkButton = new JButton(StepCompletionAction.instance());
+        checkButton.setText("Check");
     }
 
     private void initializeLayout() {
@@ -264,14 +270,14 @@ public class InitVarView extends UserRequestView implements ActionListener {
      * Adds a label containing an answer for its associated variable and text field.
      */
     private void addAnswerLabels() {
-        addRowWithAnswer("H0: ", h0, "Correct: " + initVarStep.getAnswer("H0"), 0, 1);
-        addRowWithAnswer("H1: ", h1, "Correct: " + initVarStep.getAnswer("H1"), 0, 2);
-        addRowWithAnswer("H2: ", h2, "Correct: " + initVarStep.getAnswer("H2"), 0, 3);
-        addRowWithAnswer("H3: ", h3, "Correct: " + initVarStep.getAnswer("H3"), 0, 4);
-        addRowWithAnswer("H4: ", h4, "Correct: " + initVarStep.getAnswer("H4"), 0, 5);
-        addRowWithAnswer("H5: ", h5, "Correct: " + initVarStep.getAnswer("H5"), 0, 6);
-        addRowWithAnswer("H6: ", h6, "Correct: " + initVarStep.getAnswer("H6"), 0, 7);
-        addRowWithAnswer("H7: ", h7, "Correct: " + initVarStep.getAnswer("H7"), 0, 8);
+        addRowWithAnswer("H0: ", h0, "Correct: " + initVarStep.getAnswer("@H0"), 0, 1);
+        addRowWithAnswer("H1: ", h1, "Correct: " + initVarStep.getAnswer("@H1"), 0, 2);
+        addRowWithAnswer("H2: ", h2, "Correct: " + initVarStep.getAnswer("@H2"), 0, 3);
+        addRowWithAnswer("H3: ", h3, "Correct: " + initVarStep.getAnswer("@H3"), 0, 4);
+        addRowWithAnswer("H4: ", h4, "Correct: " + initVarStep.getAnswer("@H4"), 0, 5);
+        addRowWithAnswer("H5: ", h5, "Correct: " + initVarStep.getAnswer("@H5"), 0, 6);
+        addRowWithAnswer("H6: ", h6, "Correct: " + initVarStep.getAnswer("@H6"), 0, 7);
+        addRowWithAnswer("H7: ", h7, "Correct: " + initVarStep.getAnswer("@H7"), 0, 8);
     }
     
     /**
@@ -445,21 +451,17 @@ public class InitVarView extends UserRequestView implements ActionListener {
 
         // Populate InitVarStep with user input
         InitVarStep completedInitVarStep = new InitVarStep();
-        completedInitVarStep.setUserAnswer("H0", h0.getText().trim());
-        completedInitVarStep.setUserAnswer("H1", h1.getText().trim());
-        completedInitVarStep.setUserAnswer("H2", h2.getText().trim());
-        completedInitVarStep.setUserAnswer("H3", h3.getText().trim());
-        completedInitVarStep.setUserAnswer("H4", h4.getText().trim());
-        completedInitVarStep.setUserAnswer("H5", h5.getText().trim());
-        completedInitVarStep.setUserAnswer("H6", h6.getText().trim());
-        completedInitVarStep.setUserAnswer("H7", h7.getText().trim());
-
-        // Serialize completedInitVarStep without adding extra layers
-        String initVarStepJson = gson.toJson(completedInitVarStep);
-        Map<String, String> dataWrapper = Map.of("data", initVarStepJson);
+        completedInitVarStep.setUserAnswer("@H0", h0.getText().trim());
+        completedInitVarStep.setUserAnswer("@H1", h1.getText().trim());
+        completedInitVarStep.setUserAnswer("@H2", h2.getText().trim());
+        completedInitVarStep.setUserAnswer("@H3", h3.getText().trim());
+        completedInitVarStep.setUserAnswer("@H4", h4.getText().trim());
+        completedInitVarStep.setUserAnswer("@H5", h5.getText().trim());
+        completedInitVarStep.setUserAnswer("@H6", h6.getText().trim());
+        completedInitVarStep.setUserAnswer("@H7", h7.getText().trim());
 
         // Create StepCompletion with serialized JSON of dataWrapper
-        StepCompletion stepCompletion = new StepCompletion(currentStep, gson.toJson(dataWrapper));
+        StepCompletion stepCompletion = new StepCompletion(currentStep, gson.toJson(completedInitVarStep));
         stepCompletion.setStep(currentStep);
         return stepCompletion;
     }

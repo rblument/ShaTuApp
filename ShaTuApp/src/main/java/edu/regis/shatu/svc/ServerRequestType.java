@@ -81,7 +81,12 @@ public enum ServerRequestType {
     /**
      * The student has answered their security question.
      */
-    VERIFY_USER(":VerifyUser");
+    VERIFY_USER(":VerifyUser"),
+    
+    /**
+     * Get the current task of the user
+     */
+    GET_TASK(":GetTask");
 
     /**
      * The name used by the server to identify this request.

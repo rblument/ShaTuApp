@@ -33,14 +33,14 @@ public class InitVarStep {
     
     public InitVarStep(){        
         // Map text fields with their correct answers to enable automated checking
-        this.answers.put("H0", "0x6a09e667");
-        this.answers.put("H1", "0xbb67ae85");
-        this.answers.put("H2", "0x3c6ef372");
-        this.answers.put("H3", "0xa54ff53a");
-        this.answers.put("H4", "0x510e527f");
-        this.answers.put("H5", "0x9b05688c");
-        this.answers.put("H6", "0x1f83d9ab");
-        this.answers.put("H7", "0x5be0cd19");
+        this.answers.put("@H0", "0x6a09e667");
+        this.answers.put("@H1", "0xbb67ae85");
+        this.answers.put("@H2", "0x3c6ef372");
+        this.answers.put("@H3", "0xa54ff53a");
+        this.answers.put("@H4", "0x510e527f");
+        this.answers.put("@H5", "0x9b05688c");
+        this.answers.put("@H6", "0x1f83d9ab");
+        this.answers.put("@H7", "0x5be0cd19");
         
         this.hint1.put("H0", "First prime number is 2");
         this.hint1.put("H1", "Second prime number is 3");
