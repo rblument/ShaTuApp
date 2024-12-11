@@ -23,6 +23,7 @@ import javax.swing.JOptionPane;
  */
 public class DashboardPanel extends javax.swing.JPanel {
     private TutoringSession tutoringSession; // Reference to current tutoringSession
+    private static boolean welcome = false;
 
     public DashboardPanel(TutoringSession tutoringSession) {
         this.tutoringSession = tutoringSession;
@@ -32,6 +33,8 @@ public class DashboardPanel extends javax.swing.JPanel {
         } else if (tutoringSession.getAccount() == null) {
             System.err.println("Account is null in DashboardPanel");
         } else {
+            if(welcome == false){
+            welcome = true;
             System.out.println("DashboardPanel initialized for user: " + 
                     tutoringSession.getAccount().getFirstName());
                 String welcomeMessage = "Welcome, " + 
@@ -43,6 +46,7 @@ public class DashboardPanel extends javax.swing.JPanel {
                 "Welcome",
                 JOptionPane.INFORMATION_MESSAGE
             );
+            }
         }
 
         initComponents();  // Initialize UI components
