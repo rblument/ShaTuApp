@@ -12,6 +12,7 @@ package edu.regis.shatu.view;
 
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.NewExampleRequest;
+import edu.regis.shatu.model.aol.RotateStep;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -108,7 +109,37 @@ public class ShaZeroView extends UserRequestView implements ActionListener, KeyL
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
     }
+    /**
+     * Performs rotation (ROR or ROL) on the given input string for the 
+     * specified number of positions.
+     *
+     * @param input     The input string to rotate.
+     * @param positions The number of positions for the rotation.
+     * @return The rotated string.
+     */
+    
+    protected String rotateString(String input, int positions, RotateStep.Direction direction) {
+        if (input == null || input.isEmpty()) {
+            return input;
+        }
 
+        int length = input.length();
+        positions = positions % length; // Ensure positions is within the string length
+
+        if (positions < 0) {
+            positions = length + positions; // Handle negative positions
+        }
+
+        // Perform the rotation based on the direction
+        String result;
+        if (direction == RotateStep.Direction.RIGHT) {
+            result = input.substring(length - positions) + input.substring(0, length - positions);
+        } else { // LEFT direction
+            result = input.substring(positions) + input.substring(0, positions);
+        }
+
+        return result;
+    }
     /**
      * Calculates the SHA Σ₀ function involving rotation and right shift operations.
      *
@@ -116,13 +147,13 @@ public class ShaZeroView extends UserRequestView implements ActionListener, KeyL
      * @return The result after performing the SHA Σ₀ function.
      */
     private String calculateSigma(int input) {
-        RotateView rotate = new RotateView();
         ShiftRightView shiftRight = new ShiftRightView();
-        
-        String answer = rotate.rotateString(input+"", X_PLACES); // on each step it will be updated accordingly
-        answer = rotate.rotateString(answer, X_PLACES + 10);// on each step it will be updated accordingly
-        answer = shiftRight.shiftRightString(Integer.parseInt(answer),X_PLACES); // on each step it will be updated accordingly 
-        
+        String inputString = Integer.toBinaryString(input); // Convert input to binary string
+
+        // Perform rotations and shift operations
+        String answer = rotateString(inputString, X_PLACES, RotateStep.Direction.RIGHT);
+        answer = rotateString(answer, X_PLACES + 10, RotateStep.Direction.RIGHT);
+        answer = shiftRight.shiftRightString(Integer.parseInt(answer, 2), X_PLACES);
         return answer;
     }
 
