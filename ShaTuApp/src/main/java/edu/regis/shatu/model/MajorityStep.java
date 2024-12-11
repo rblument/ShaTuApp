@@ -18,9 +18,9 @@ package edu.regis.shatu.model;
  */
 
 public class MajorityStep {
-    private String operand1;
-    private String operand2;
-    private String operand3;
+    private String operandA;
+    private String operandB;
+    private String operandC;
     private String result;
     
     private boolean isTruthTableVisible;
@@ -30,28 +30,28 @@ public class MajorityStep {
      */
     private int bitLength;
 
-    public String getOperand1() {
-        return operand1;
+    public String getOperandA() {
+        return operandA;
     }
 
-    public void setOperand1(String operand1) {
-        this.operand1 = operand1;
+    public void setOperandA(String operandA) {
+        this.operandA = operandA;
     }
 
-    public String getOperand2() {
-        return operand2;
+    public String getOperandB() {
+        return operandB;
     }
 
-    public void setOperand2(String operand2) {
-        this.operand2 = operand2;
+    public void setOperandB(String operandB) {
+        this.operandB = operandB;
     }
 
-    public String getOperand3() {
-        return operand3;
+    public String getOperandC() {
+        return operandC;
     }
 
-    public void setOperand3(String operand3) {
-        this.operand3 = operand3;
+    public void setOperandC(String operandC) {
+        this.operandC = operandC;
     }
 
     public String getResult() {

@@ -170,5 +170,93 @@ SHATU: SHA-256 Tutor
         <ExercisingLocation course="1" unit="0" task="0" step="0" />
     </KnowledgeComponent>
     
+    <KnowledgeComponent id="102" title="ASCII Encode Assessment" 
+            bloomLevel="Application" focus="Tutor" pedagogy="Other">
+       <Description>
+           Student has appropriately demonstrated understanding of ASCII encoding
+       </Description>
+       <ExercisingLocation course="1" unit="0" task="0" step="0" />
+   </KnowledgeComponent>
+
+   <KnowledgeComponent id="103" title="Add One Bit Assessment" 
+            bloomLevel="Application" focus="Tutor" pedagogy="Other">
+       <Description>
+           Student has appropriately demonstrated understanding of adding one bit
+       </Description>
+       <ExercisingLocation course="1" unit="0" task="0" step="0" />
+   </KnowledgeComponent>
+
+   <KnowledgeComponent id="104" title="Pad with Zeros Assessment" 
+            bloomLevel="Application" focus="Tutor" pedagogy="Other">
+       <Description>
+           Student has appropriately demonstrated understanding of padding with zeros
+       </Description>
+       <ExercisingLocation course="1" unit="0" task="0" step="0" />
+   </KnowledgeComponent>
+
+   <KnowledgeComponent id="105" title="Add Message Length Assessment" 
+            bloomLevel="Application" focus="Tutor" pedagogy="Other">
+       <Description>
+           Student has appropriately demonstrated understanding of adding message length
+       </Description>
+       <ExercisingLocation course="1" unit="0" task="0" step="0" />
+   </KnowledgeComponent>
+
+   <KnowledgeComponent id="106" title="Prepare Schedule Assessment" 
+            bloomLevel="Application" focus="Tutor" pedagogy="Other">
+       <Description>
+           Student has appropriately demonstrated understanding of preparing the schedule
+       </Description>
+       <ExercisingLocation course="1" unit="0" task="0" step="0" />
+   </KnowledgeComponent>
+
+   <KnowledgeComponent id="107" title="Initialize Variables Assessment" 
+            bloomLevel="Application" focus="Tutor" pedagogy="Other">
+       <Description>
+           Student has appropriately demonstrated understanding of initializing variables
+       </Description>
+       <ExercisingLocation course="1" unit="0" task="0" step="0" />
+   </KnowledgeComponent>
+
+   <KnowledgeComponent id="108" title="Compress Round Assessment" 
+            bloomLevel="Application" focus="Tutor" pedagogy="Other">
+       <Description>
+           Student has appropriately demonstrated understanding of the compress round
+       </Description>
+       <ExercisingLocation course="1" unit="0" task="0" step="0" />
+   </KnowledgeComponent>
+
+   <KnowledgeComponent id="109" title="Rotate n Bits Assessment" 
+            bloomLevel="Application" focus="Tutor" pedagogy="Other">
+       <Description>
+           Student has appropriately demonstrated understanding of rotating n bits
+       </Description>
+       <ExercisingLocation course="1" unit="0" task="0" step="0" />
+   </KnowledgeComponent>
+
+   <KnowledgeComponent id="110" title="XOR Bits Assessment" 
+            bloomLevel="Application" focus="Tutor" pedagogy="Other">
+       <Description>
+           Student has appropriately demonstrated understanding of XOR operation on bits
+       </Description>
+       <ExercisingLocation course="1" unit="0" task="0" step="0" />
+   </KnowledgeComponent>
+
+   <KnowledgeComponent id="111" title="Add Bits Assessment" 
+            bloomLevel="Application" focus="Tutor" pedagogy="Other">
+       <Description>
+           Student has appropriately demonstrated understanding of adding bits
+       </Description>
+       <ExercisingLocation course="1" unit="0" task="0" step="0" />
+   </KnowledgeComponent>
+
+   <KnowledgeComponent id="112" title="Majority Function Assessment" 
+            bloomLevel="Application" focus="Tutor" pedagogy="Other">
+       <Description>
+           Student has appropriately demonstrated understanding of the Majority Function
+       </Description>
+       <ExercisingLocation course="1" unit="0" task="0" step="0" />
+   </KnowledgeComponent>
+    
 </Course>
 

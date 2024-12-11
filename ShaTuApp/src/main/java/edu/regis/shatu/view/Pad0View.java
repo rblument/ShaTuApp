@@ -20,6 +20,7 @@ import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.ExampleType;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.StepSubType;
+import edu.regis.shatu.view.act.HintAction;
 import edu.regis.shatu.view.act.NewExampleAction;
 import edu.regis.shatu.view.act.StepCompletionAction;
 import java.awt.GridBagConstraints;
@@ -47,12 +48,14 @@ import javax.swing.JTextField;
  */
 public class Pad0View extends UserRequestView implements ActionListener {
     
+    private TutoringSessionView view;
     private JTextPane descriptionTextPane;
     private JLabel questionLabel, instructionsLabel, messageLengthLabel;
     private JTextField messageLengthField;
     private JTextArea responseArea;
     private JTextArea feedbackArea;
     private JButton checkButton, nextButton, hintButton;
+    private boolean checkHintEnabled = false;
     private JTable asciiTable;
     private JScrollPane responseScrollPane, asciiTableScrollPane, feedbackScrollPane;
     private String question;
@@ -78,6 +81,7 @@ public class Pad0View extends UserRequestView implements ActionListener {
         if (event.getSource() == checkButton) {
             submitAnswer();           
         } else if (event.getSource() == nextButton) {
+            checkHintEnabled = true;
             prepareNextQuestion();
         } else if (event.getSource() == hintButton) {
             requestHint();
@@ -257,7 +261,7 @@ public class Pad0View extends UserRequestView implements ActionListener {
         checkButton = new JButton(StepCompletionAction.instance());
         checkButton.addActionListener(this);
 
-        hintButton = new JButton("Hint"); // Needs to be adjusted once the tutor can handle hints.
+        hintButton = new JButton(HintAction.instance()); // Needs to be adjusted once the tutor can handle hints.
         hintButton.addActionListener(this);
 
         nextButton = new JButton(NewExampleAction.instance());
@@ -354,7 +358,18 @@ public class Pad0View extends UserRequestView implements ActionListener {
      */
     @Override
     protected void updateView() {
+        view = SplashFrame.instance().getView(); // Accessing view to use universal buttons
+        hintButton = view.getHintButton();
+        checkButton = view.getCheckButton();
+        nextButton = view.getNewExampleButton();
         
+        // If check and hint buttons are disabled, reset listenerers and apply those used by this view
+        if(!checkHintEnabled) {
+            view.resetButtonListeners(); // Clear any listeners applied from other views          
+            hintButton.addActionListener(this);           
+            checkButton.addActionListener(this);            
+            nextButton.addActionListener(this);
+        }
         /*
         When switching between steps, the current step will be the previous enum
         that a example was created for.  If that enums related stepobject has

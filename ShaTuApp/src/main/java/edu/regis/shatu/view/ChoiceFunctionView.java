@@ -48,7 +48,8 @@ import javax.swing.table.DefaultTableCellRenderer;
  * @author rickb
  */
 public class ChoiceFunctionView extends UserRequestView implements ActionListener, KeyListener {
-
+    
+    private TutoringSessionView view;
     private String stringX, stringY, stringZ;
     private int problemSize;
     private JTextArea descTextArea, feedbackTextArea, responseTextArea;
@@ -57,6 +58,7 @@ public class ChoiceFunctionView extends UserRequestView implements ActionListene
     private JPanel buttonPanel, radioButtonPanel;
     private JTable chTruthTable;
     private JButton checkButton, nextButton, hintButton, truthTableToggleButton;
+    private boolean checkHintEnabled = false;
     private ButtonGroup problemSizeGroup;
     private JRadioButton fourRadioButton, eightRadioButton, sixteenRadioButton,
             thirtytwoRadioButton;
@@ -447,6 +449,7 @@ public class ChoiceFunctionView extends UserRequestView implements ActionListene
         } else if (event.getSource() == hintButton) {
             onNextHint();
         } else if (event.getSource() == nextButton) {
+            checkHintEnabled = true;
             onNextQuestion();
         }
     }
@@ -470,7 +473,7 @@ public class ChoiceFunctionView extends UserRequestView implements ActionListene
         if (e.getKeyCode() == KeyEvent.VK_ENTER && responseTextArea.getText().equals("")) {
             feedbackTextArea.setText("Please provide an answer");
         } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-            verifyAnswer();
+            checkButton.doClick();
         }
     }
 
@@ -540,6 +543,19 @@ public class ChoiceFunctionView extends UserRequestView implements ActionListene
 
     @Override
     protected void updateView() {
+        view = SplashFrame.instance().getView(); // Accessing view to use universal buttons
+        hintButton = view.getHintButton();
+        checkButton = view.getCheckButton();
+        nextButton = view.getNewExampleButton();
+        
+        // If check and hint buttons are disabled, reset listenerers and apply those used by this view
+        if(!checkHintEnabled) {
+            view.resetButtonListeners(); // Clear any listeners applied from other views          
+            hintButton.addActionListener(this);           
+            checkButton.addActionListener(this);            
+            nextButton.addActionListener(this);
+        }
+        
         System.out.println("Choice function update view called."); // Error checking
         
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -550,10 +566,20 @@ public class ChoiceFunctionView extends UserRequestView implements ActionListene
 
         ChoiceFunctionStep example = gson.fromJson(step.getData(), ChoiceFunctionStep.class);
 
-        stringXLabel.setText("x: " + example.getOperand1());
-        stringYLabel.setText("y: " + example.getOperand2());
-        stringZLabel.setText("z: " + example.getOperand3());
-
+        if (example.getOperand1() == null || example.getOperand1().isEmpty()) {
+            stringXLabel.setText("x: Please");
+            stringYLabel.setText("y: click");
+            stringZLabel.setText("z: New Example"); 
+            hintButton.setEnabled(false);
+            checkButton.setEnabled(false);
+        }
+        else {
+            stringXLabel.setText("x: " + example.getOperand1());
+            stringYLabel.setText("y: " + example.getOperand2());
+            stringZLabel.setText("z: " + example.getOperand3());
+            hintButton.setEnabled(true);
+            checkButton.setEnabled(true);
+        }
     }
 
 }

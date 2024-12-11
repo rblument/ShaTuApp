@@ -12,11 +12,18 @@
  */
 package edu.regis.shatu.view;
 
+import edu.regis.shatu.model.MessageLenStep;
+import edu.regis.shatu.model.PrepScheduleStep;
+import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
+import edu.regis.shatu.model.aol.ExampleType;
 import edu.regis.shatu.model.aol.NewExampleRequest;
+import edu.regis.shatu.view.act.NewExampleAction;
+import edu.regis.shatu.view.act.StepCompletionAction;
 import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.JButton;
 import javax.swing.JTextPane;
 
 /**
@@ -25,7 +32,9 @@ import javax.swing.JTextPane;
  */
 public class PrepareScheduleView extends UserRequestView implements ActionListener {
     
+    private TutoringSessionView view;
     private JTextPane descriptionTextPane;
+    private JButton continueButton = new JButton(StepCompletionAction.instance());
     
     /**
      * Generates the prepare schedule view.
@@ -33,6 +42,7 @@ public class PrepareScheduleView extends UserRequestView implements ActionListen
     public PrepareScheduleView() {
         initializeComponents();
         initializeLayout();
+        continueButton.setText("Continue");
     }
     
     /**
@@ -41,7 +51,8 @@ public class PrepareScheduleView extends UserRequestView implements ActionListen
      */
     @Override
     public void actionPerformed(ActionEvent event) {
-       System.out.println("Prepare Schedule action performed method called"); //Error testing
+       if (event.getSource() == continueButton)
+           NewExampleAction.instance().actionPerformed(null);
     }
  
     /**
@@ -49,6 +60,7 @@ public class PrepareScheduleView extends UserRequestView implements ActionListen
      */
     private void initializeComponents() {
         setupDescriptionSection();
+        continueButton.addActionListener(this);
     }
     
     /**
@@ -60,6 +72,9 @@ public class PrepareScheduleView extends UserRequestView implements ActionListen
         addc(descriptionTextPane, 0, 0, 1, 1, 
                 1.0, 0.0, GridBagConstraints.CENTER, 
                 GridBagConstraints.HORIZONTAL, 5, 5, 5, 5);
+        addc(continueButton, 0, 6, 1, 1, 
+                1.0, 1.0, GridBagConstraints.CENTER, 
+                GridBagConstraints.NONE, 10, 0, 0, 0);
     }
     
      /**
@@ -108,6 +123,14 @@ public class PrepareScheduleView extends UserRequestView implements ActionListen
      * TODO: THIS IS A PLACEHOLDER UNTIl WE HAVE HAVE THE MODEL CODE COMPLETED
      */
     protected void updateView() {
+        view = SplashFrame.instance().getView(); // Accessing view to use universal buttons
+        view.resetButtonListeners(); // Clear any listeners applied from other views
+        
+        // Universal buttons (hint, check, new example) are not needed in this view.
+        view.getCheckButton().setEnabled(false);
+        view.getHintButton().setEnabled(false);
+        view.getNewExampleButton().setEnabled(false);
+        
         if (model != null) {
             // ****TO-DO*****
             // Update the view's information from the model
@@ -124,7 +147,16 @@ public class PrepareScheduleView extends UserRequestView implements ActionListen
      */
     @Override
     public NewExampleRequest newRequest() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        NewExampleRequest ex = new NewExampleRequest(); // Will be sent to the tutor.
+        
+        ex.setExampleType(ExampleType.PREPARE_SCHEDULE);
+        
+        PrepScheduleStep newPrepSchedule = new PrepScheduleStep();        
+                
+        ex.setData(gson.toJson(newPrepSchedule));
+        
+        return ex;
+    
     }
 
     /**
@@ -135,6 +167,14 @@ public class PrepareScheduleView extends UserRequestView implements ActionListen
      */
     @Override
     public StepCompletion stepCompletion() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        Step currentStep = model.currentTask().currentStep();
+        
+        PrepScheduleStep completedStep = gson.fromJson(currentStep.getData(), PrepScheduleStep.class);
+                
+        StepCompletion step = new StepCompletion(currentStep, gson.toJson(completedStep));
+        
+        step.setStep(currentStep); // Will be sent to the tutor.
+        
+        return step;
     }
 }

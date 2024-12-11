@@ -29,6 +29,8 @@ import java.awt.event.KeyListener;
  * @author rickb
  */
 public class ShaOneView extends UserRequestView implements ActionListener, KeyListener {
+    private TutoringSessionView view;
+    
     /**
      * The number of places to perform the right shift operation.
      */
@@ -41,6 +43,7 @@ public class ShaOneView extends UserRequestView implements ActionListener, KeyLi
     private JButton checkButton; // Add the check button
     private JButton hintButton;
     private JButton nextQuestionButton;
+    private boolean checkHintEnabled = false;
 
     /**
      * Initialize this view including creating and laying out its child components.
@@ -57,6 +60,7 @@ public class ShaOneView extends UserRequestView implements ActionListener, KeyLi
         } else if (event.getSource() == hintButton) {
             onNextHint();
         } else if (event.getSource() == nextQuestionButton) {
+            checkHintEnabled = true;
             onNextQuestion();
         }
     }
@@ -133,7 +137,7 @@ public class ShaOneView extends UserRequestView implements ActionListener, KeyLi
         if (e.getKeyCode() == KeyEvent.VK_ENTER && answerField.getText().equals("")) {
             JOptionPane.showMessageDialog(this, "Please provide an answer");
         } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-            verifyAnswer();
+            checkButton.doClick();
         }
     }
 
@@ -188,6 +192,19 @@ public class ShaOneView extends UserRequestView implements ActionListener, KeyLi
      * TODO: THIS IS A PLACEHOLDER UNTIl WE HAVE HAVE THE MODEL CODE COMPLETED
      */
     protected void updateView() {
+        view = SplashFrame.instance().getView(); // Accessing view to use universal buttons
+        hintButton = view.getHintButton();
+        checkButton = view.getCheckButton();
+        nextQuestionButton = view.getNewExampleButton();
+        
+        // If check and hint buttons are disabled, reset listenerers and apply those used by this view
+        if(!checkHintEnabled) {
+            view.resetButtonListeners(); // Clear any listeners applied from other views          
+            hintButton.addActionListener(this);           
+            checkButton.addActionListener(this);            
+            nextQuestionButton.addActionListener(this);
+        }
+        
         if (model != null) {
             // ****TO-DO*****
             // Update the view's information from the model
