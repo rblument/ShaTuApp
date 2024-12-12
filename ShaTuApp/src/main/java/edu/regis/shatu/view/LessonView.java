@@ -68,7 +68,7 @@ public class LessonView extends UserRequestView implements ActionListener{
     
     
     public void getXML(String filename) {
-        SwingUtilities.invokeLater(() -> {
+SwingUtilities.invokeLater(() -> {
 try {
             File xmlFile = new File("Course_1.xml"); // Replace with your XML file path
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -86,12 +86,30 @@ try {
             NodeList nodeList = root.getChildNodes();
             final String[] lines;
 //System.out.println(nodeList.item(i).getTextContent());
-            for (int j = 0; j < nodeList.getLength(); j++) {
+            for (int j = 0; j < nodeList.getLength(); j++) {            //get 1st tree child nodes
                 Node node = nodeList.item(j);
-                if (node.getNodeType() == Node.ELEMENT_NODE) {
+                if (node.getNodeType() == Node.ELEMENT_NODE ) {
                     Element element = (Element) node;
-                    lessonText.add(node.getTextContent());
-
+                   
+                    if (node.hasChildNodes()) {                         //get 2nd tree child nodes
+                        NodeList tempNodeList = node.getChildNodes();
+                        
+                        for (int k = 0; k < tempNodeList.getLength(); k++) {
+                            Node childNode = tempNodeList.item(k);
+                            if (childNode.getNodeType() == Node.ELEMENT_NODE) {
+                             
+                                 Element childElement = (Element) childNode;
+                                 if(childElement.getTextContent() != ""){
+                                    lessonText.add(childElement.getTextContent());
+                                    System.out.println(childElement.getTagName() + ": " + childElement.getTextContent()); 
+                                 }
+                            }
+                        }
+                    }
+                    else {
+                        lessonText.add(element.getTextContent());
+                    }
+                    
 
                     // Display XML Elements
                    // descriptionTextArea.append( element.getTagName() + ": " + element.getTextContent());
@@ -100,7 +118,8 @@ try {
                    // text = element.getTextContent();
                   //  playNext();
 
-                    System.out.println(element.getTextContent());
+                   // System.out.println(element.getTextContent());
+                    
                    // Thread.sleep(1000);
                 }
             }
@@ -284,7 +303,7 @@ try {
         descriptionTextArea.setText( "<html>" +
                     "<body>" +
                     "<h2>Overview</h2>" +
-                    "<p>Please click the NEXT button to start" +
+                    "<p>Click Next to Continue</p>" +
                     "</body>" +
                     "</html>"
             );
@@ -296,9 +315,14 @@ try {
     private void playNext() { 
         //buttonClicked = true;
        // Node node = nodeList.item(i);
-       if(i < lessonText.size()) {
+       if(i >= 0 && i < lessonText.size()) {
             System.out.println("playNext: " + i);
-            descriptionTextArea.setText(lessonText.get(i) + "\n" + "\n" + "Click Next To Continue");
+            descriptionTextArea.setText("<html>" +
+                    "<body>" +
+                    "<h2>" + lessonText.get(i) + "</h2>" +
+                    "<p>" + "\n" + "\n" + "Click Next to Continue </p>" +
+                    "</body>" +
+                    "</html>");
 
        }
        else {
@@ -339,13 +363,18 @@ try {
     }
     
     private void playPrevious() {
-       if(i >= 0) {
+       if(i >= 0 && i < lessonText.size()) {
             System.out.println("playPrevious: " + i);
-            descriptionTextArea.setText(lessonText.get(i));
+            descriptionTextArea.setText("<html>" +
+                    "<body>" +
+                    "<h2>" + lessonText.get(i) + "</h2>" +
+                    "<p>" + "\n" + "\n" + "Click Next to Continue </p>" +
+                    "</body>" +
+                    "</html>");
 
        }
        else {
-           i = 0;
+           i = lessonText.size();
        }
          
     }

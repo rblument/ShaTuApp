@@ -32,7 +32,7 @@ SHATU: SHA-256 Tutor
     <Unit id="0" sequence="0" title="SHA-256: See One">
         <Description>
             In this unit, the student will see an example of how each primary
-            step of the SHA-256 algorithm is performed. It also exposes the
+            operation of the SHA-256 algorithm is performed. It also exposes the
             student to the general operation of the ShaTu application.
         </Description>
         <Task id="0" sequence="0" title="Welcome"
@@ -158,6 +158,14 @@ SHATU: SHA-256 Tutor
         <Description>
             Student has appropriately demonstrated understanding of the Choice.
             Function
+        </Description>
+        <ExercisingLocation course="1" unit="0" task="0" step="0" />
+    </KnowledgeComponent>
+    
+    <KnowledgeComponent id="101" title="Shift Bits Assessment" 
+             bloomLevel="Application" focus="Tutor" pedagogy="Other">
+        <Description>
+            Student has appropriately demonstrated understanding of shifting bits
         </Description>
         <ExercisingLocation course="1" unit="0" task="0" step="0" />
     </KnowledgeComponent>
