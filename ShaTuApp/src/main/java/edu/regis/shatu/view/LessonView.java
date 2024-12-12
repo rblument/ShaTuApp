@@ -23,9 +23,9 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextPane;
-
 import java.io.File;
 import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -33,6 +33,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import java.util.ArrayList;
+
 
 /**
  *
@@ -40,15 +42,20 @@ import org.w3c.dom.NodeList;
  */
 public class LessonView extends UserRequestView implements ActionListener{
    
-   // private JTextPane descriptionTextArea;
-    private JTextArea descriptionTextArea;
+    String text;
+    private JTextPane descriptionTextArea;
+    //private JTextArea descriptionTextArea;
+    private NodeList nodeList;
     private JLabel lesson;
-    private JButton previousButton, nextButton;
+    private JButton previousButton, nextButton; //startButton;
+    //private ActionListener selection; //nextButtonListener, previousButtonListener;
     private JPanel buttonPanel; 
     private GPanel qrPanel;
-   // private static boolean continueLoop = false;
-   // private int i = 0;
+    private static boolean buttonClicked = false;
+    private int i = 0;
     Color white = new Color(255,255,255);
+    ArrayList<String> cars = new ArrayList<String>();
+    ArrayList<String> lessonText = new ArrayList<String>();
 
     /**
      * Initialize this view including creating and laying out its child components.
@@ -58,10 +65,112 @@ public class LessonView extends UserRequestView implements ActionListener{
         initializeLayout();
     }
     
-    @Override
-    public void actionPerformed(ActionEvent event) {
-            throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     
+    
+    public void getXML(String filename) {
+        SwingUtilities.invokeLater(() -> {
+try {
+            File xmlFile = new File("Course_1.xml"); // Replace with your XML file path
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            Document doc = dBuilder.parse(xmlFile);
+
+            // Normalize the XML structure
+            doc.getDocumentElement().normalize();
+
+            // Get the root element
+            Element root = doc.getDocumentElement();
+             System.out.println("Root element: " + root.getNodeName());
+
+            // Traverse the XML nodes
+            NodeList nodeList = root.getChildNodes();
+            final String[] lines;
+//System.out.println(nodeList.item(i).getTextContent());
+            for (int j = 0; j < nodeList.getLength(); j++) {
+                Node node = nodeList.item(j);
+                if (node.getNodeType() == Node.ELEMENT_NODE) {
+                    Element element = (Element) node;
+                    lessonText.add(node.getTextContent());
+
+
+                    // Display XML Elements
+                   // descriptionTextArea.append( element.getTagName() + ": " + element.getTextContent());
+                   // descriptionTextArea.setText(element.getTagName() + ": " + element.getTextContent());
+                    //descriptionTextArea.setText(element.getTextContent());  
+                   // text = element.getTextContent();
+                  //  playNext();
+
+                    System.out.println(element.getTextContent());
+                   // Thread.sleep(1000);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Thread.currentThread().interrupt();
+        }});
+        
+       
+
+
+/*// NodeList fileList = null;
+       
+          //                 descriptionTextArea.setText("Finally");
+
+        SwingUtilities.invokeLater(() -> {
+            NodeList nodeList = null;
+            
+        try {
+           // descriptionTextArea.setText("Finally");
+
+            File xmlFile = new File(filename); 
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            Document doc = dBuilder.parse(xmlFile);
+
+            // Normalize the XML structure
+            doc.getDocumentElement().normalize();
+
+            // Get the root element
+            Element root = doc.getDocumentElement();
+             System.out.println("Root element: " + root.getNodeName());
+            // Traverse the XML nodes
+            nodeList = root.getChildNodes();
+            //final String[] lines;
+            // Wait for button click
+
+            for (int i = 0; i < nodeList.getLength(); i++) {
+                Node node = nodeList.item(i);
+                
+                if (node.getNodeType() == Node.ELEMENT_NODE) {
+                    Element element = (Element) node;
+                    
+                    // Display XML Elements
+                   // descriptionTextArea.append( element.getTagName() + ": " + element.getTextContent());
+                    descriptionTextArea.setText(element.getTextContent());
+                   // descriptionTextArea.append(element.getTextContent());        
+
+                  System.out.println(element.getTextContent());
+                   // Thread.sleep(1000);
+                   // Wait for button click
+                while (!buttonClicked) {
+                try {
+                    Thread.sleep(10); // Sleep to avoid busy waiting
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                   
+                }
+            }
+            
+            buttonClicked = false; // Reset flag
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Thread.currentThread().interrupt();
+        }});
+           // throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    //return nodeList;*/
     }
  
     /**
@@ -69,7 +178,11 @@ public class LessonView extends UserRequestView implements ActionListener{
      */
     private void initializeComponents() {
             lesson = new JLabel("");
-           
+            
+           cars.add("Volvo");
+    cars.add("BMW");
+    cars.add("Ford");
+    
             setUpButtons();   
             setUpPanel();
             setupDescriptionSection();
@@ -129,11 +242,19 @@ public class LessonView extends UserRequestView implements ActionListener{
         nextButton = new JButton("Next");
         nextButton.addActionListener(this);
         
+       /* startButton = new JButton("Start");
+        startButton.addActionListener(this);    */    
+        
+        ActionListener selection = e -> {
+            JButton source = (JButton) e.getSource();
+        };
+        
         buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         buttonPanel.setBackground(white);
       //  buttonPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder());
         buttonPanel.add(previousButton);
         buttonPanel.add(nextButton);
+       // buttonPanel.add(startButton);
         
     }
     
@@ -154,51 +275,97 @@ public class LessonView extends UserRequestView implements ActionListener{
      * the encoding exercise.
      */
     private void setupDescriptionSection() {
-        descriptionTextArea = new JTextArea();
-       // descriptionTextArea = new JTextPane();
-       // descriptionTextArea.setContentType("text/html");
+       // descriptionTextArea = new JTextArea();
+        descriptionTextArea = new JTextPane();
+        descriptionTextArea.setContentType("text/html");
         descriptionTextArea.setEditable(false);
         descriptionTextArea.setBackground(null);
         //descriptionTextArea.setBorder(null); 
+        descriptionTextArea.setText( "<html>" +
+                    "<body>" +
+                    "<h2>Overview</h2>" +
+                    "<p>Please click the NEXT button to start" +
+                    "</body>" +
+                    "</html>"
+            );
+        getXML("Course_1.xml"); // Replace with your XML file path
 
+
+    }
+    
+    private void playNext() { 
+        //buttonClicked = true;
+       // Node node = nodeList.item(i);
+       if(i < lessonText.size()) {
+            System.out.println("playNext: " + i);
+            descriptionTextArea.setText(lessonText.get(i) + "\n" + "\n" + "Click Next To Continue");
+
+       }
+       else {
+           descriptionTextArea.setText("End of Lesson");
+       }
+       /* if (nodeList.item(i).getNodeType() == Node.ELEMENT_NODE) {
+            Element element = (Element) nodeList.item(i);
+            descriptionTextArea.setText(nodeList.item(i).getTextContent());
+        }*/
+
+        //NodeList nodeList = getXML("Course_1.xml");
         
-        try {
-            File xmlFile = new File("Course_1.xml"); // Replace with your XML file path
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse(xmlFile);
+       /* Node node = nodeList.item(i);
+        //descriptionTextArea.setText("Next");
+       // System.out.println(nodeList);
 
-            // Normalize the XML structure
-            doc.getDocumentElement().normalize();
-
-            // Get the root element
-            Element root = doc.getDocumentElement();
-            // System.out.println("Root element: " + root.getNodeName());
-
-            // Traverse the XML nodes
-            NodeList nodeList = root.getChildNodes();
-            final String[] lines;
-
-            for (int i = 0; i < nodeList.getLength(); i++) {
-                Node node = nodeList.item(i);
+        if (i < nodeList.getLength()) {
                 if (node.getNodeType() == Node.ELEMENT_NODE) {
                     Element element = (Element) node;
+                    System.out.println(element.getTextContent());
+
                     
                     // Display XML Elements
                    // descriptionTextArea.append( element.getTagName() + ": " + element.getTextContent());
-                   // descriptionTextArea.setText(element.getTagName() + ": " + element.getTextContent());
-                    descriptionTextArea.append(element.getTextContent());        
-
-                    System.out.println(element.getTextContent());
-                   // Thread.sleep(1000);
+                    descriptionTextArea.setText(element.getTagName() + ": " + element.getTextContent()); 
+                    i++;
+                    
+                     buttonClicked = true;
                 }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            Thread.currentThread().interrupt();
         }
-        
-        
+
+     */
+    }
+    
+    private void playPrevious() {
+       if(i >= 0) {
+            System.out.println("playPrevious: " + i);
+            descriptionTextArea.setText(lessonText.get(i));
+
+       }
+       else {
+           i = 0;
+       }
+         
+    }
+    
+    /* Handles the actionPerformed event for buttons in the view.
+     *
+     * @param event The ActionEvent that occurred.
+     */
+    @Override
+    public void actionPerformed(ActionEvent event) {
+        if (event.getSource() == previousButton) {
+           i = i-2;
+           playPrevious();
+        } /*else if (event.getSource() == startButton) {
+           //playNext();
+           //getXML("Course_1.xml");
+        }*/ else if (event.getSource() == nextButton) {
+           //if (i < nodeList.getLength()) {
+            playNext();
+            i++;
+                    System.out.println("actionPerformed: " + i);
+
+           //getXML("Course_1.xml");
+          // }
+        } 
     }
 
 }
