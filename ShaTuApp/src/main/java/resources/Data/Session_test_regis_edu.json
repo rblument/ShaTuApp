@@ -41,7 +41,7 @@
           "exercisedComponentIds": [
             1
           ],
-          "data": "{\n  \"msg\": \"\\n                  Welcome, I\\u0027m ShaTu. I\\u0027ll begin by showing you how this\\n                  application works by demonstrating each step used to create\\n                  an SHA-256 message digest including the bitwise operations\\n                  associated with these steps.\\\\n\\\\n\\n                  When I send you an information message, like this one, all you\\n                  have to do is acknowledge it by pressing the \\u0027Acknowledged\\u0027\\n                  button.                \\n                \"\n}",
+          "data": "{\n  \"msg\": \"\\n                  Welcome, I made a chang  I\\u0027m ShaTu. I\\u0027ll begin by showing you how this\\n                  application works by demonstrating each step used to create\\n                  an SHA-256 message digest including the bitwise operations\\n                  associated with these steps.\\\\n\\\\n\\n                  When I send you an information message, like this one, all you\\n                  have to do is acknowledge it by pressing the \\u0027Acknowledged\\u0027\\n                  button.                \\n                \"\n}",
           "title": "Acknowledge Welcome",
           "description": "",
           "id": 0

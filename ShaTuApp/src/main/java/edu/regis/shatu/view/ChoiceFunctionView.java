@@ -470,7 +470,7 @@ public class ChoiceFunctionView extends UserRequestView implements ActionListene
         if (e.getKeyCode() == KeyEvent.VK_ENTER && responseTextArea.getText().equals("")) {
             feedbackTextArea.setText("Please provide an answer");
         } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-            verifyAnswer();
+            checkButton.doClick();
         }
     }
 

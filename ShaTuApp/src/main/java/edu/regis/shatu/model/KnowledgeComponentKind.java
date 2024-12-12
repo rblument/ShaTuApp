@@ -27,7 +27,12 @@ public enum KnowledgeComponentKind {
     /**
      * Define the corresponding database id for this knowledge component.
      */
-     CHOICE_FUNCTION("Choice Function", 100);
+     CHOICE_FUNCTION("Choice Function", 100),
+     
+    /**
+     * Define the corresponding database id for this knowledge component.
+     */
+     SHIFT_BITS("Shift Bits", 101);
      
     /**
      * A GUI displayable string identifying this knowledge component.

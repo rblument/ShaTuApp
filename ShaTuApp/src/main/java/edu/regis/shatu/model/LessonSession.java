@@ -122,6 +122,7 @@ public class LessonSession {
     }
     
     public Task currentTask() {
+       
         return tasks.get(0);
     }
     

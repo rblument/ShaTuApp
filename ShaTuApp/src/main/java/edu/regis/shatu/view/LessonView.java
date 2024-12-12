@@ -217,7 +217,7 @@ try {
     protected void updateView() {
         if (model != null) {
             
-            System.out.println("SHA-256 Lesson");
+            System.out.println("SHA-256 Lesson......this is from :Essm View Update");
         }
     }
 
@@ -327,6 +327,11 @@ try {
                     i++;
                     
                      buttonClicked = true;
+                   // descriptionTextArea.setText(element.getTagName() + ": " + element.getTextContent());
+                    descriptionTextArea.append(element.getTextContent());        
+
+                    //System.out.println(element.getTextContent());
+                   // Thread.sleep(1000);
                 }
         }
 
