@@ -12,6 +12,7 @@
  */
 package edu.regis.shatu.view;
 
+import User_test_regis_edu.json;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import edu.regis.shatu.model.Step;
@@ -55,7 +56,6 @@ public class EncodeView extends UserRequestView implements ActionListener {
     private JScrollPane responseScrollPane, asciiTableScrollPane, feedbackScrollPane;
     private String question;
     private boolean wasHintRequested = false;
-
     
     /**
      * Initialize this view including creating and laying out its child components.
@@ -391,7 +391,7 @@ public class EncodeView extends UserRequestView implements ActionListener {
             
                 this.question = newEncodeAscii.getQuestion();
             
-                if (this.question == null) { // new example hasnt been created yet
+                if (this.question == null || this.question.equals("")) { // new example hasnt been created yet
                     questionLabel.setText("Please click new example button to get started");
                     checkButton.setEnabled(false);
                     hintButton.setEnabled(false);
@@ -402,6 +402,40 @@ public class EncodeView extends UserRequestView implements ActionListener {
                             + "string to binary: %s", question));
                     checkButton.setEnabled(true);
                     hintButton.setEnabled(true);
+                }
+            }
+            
+        /*
+        Check to see if the last subtype was a preproccessing operation.
+        If so, check for a question, if no question is available, then no need
+        to change the subtype as a new example will do that, but if a question
+        is available, the subtype needs to be changed incase the user
+        decides to answer the new operation instead of the orginial that
+        the new example was created for.  If this is not done, if the user
+        clicks the check button for the newly loaded operation where the question
+        was generated from a different operation, then the check button will
+        compare the old operation answer making it wrong.
+        */
+            else if (step.getSubType() == StepSubType.ADD_ONE_BIT || step.getSubType() == StepSubType.ADD_MSG_LENGTH || step.getSubType() == StepSubType.PAD_ZEROS) {
+                System.out.println("If branch was taken, subtype was one of the preproccessing operations"); // Error checking.
+                
+                this.question = newEncodeAscii.getQuestion();
+            
+                if (this.question == null || this.question.equals("")) { // new example hasnt been created yet
+                    questionLabel.setText("Please click new example button to get started");
+                    checkButton.setEnabled(false);
+                    hintButton.setEnabled(false);
+                }
+        
+                else { // example has been created from a different preproccessing operation.
+                    questionLabel.setText(String.format("Convert the following "
+                            + "string to binary: %s", question));
+                    checkButton.setEnabled(true);
+                    hintButton.setEnabled(true);
+                    
+                    Step currentStep = model.currentTask().currentStep(); // step created from the new example.
+                    currentStep.setSubType(StepSubType.ENCODE_ASCII);
+                    System.out.println("subtype changed to: " + currentStep.getSubType()); // Error Checking
                 }
             }
         
@@ -426,7 +460,8 @@ public class EncodeView extends UserRequestView implements ActionListener {
      * it will assign related data pertaining to this step to the related class,
      * then send that class to the tutor to handle generating a question and answer.
      * Once the example is created by the tutor, the update view for this step is
-     * called by the tutor.
+     * called by the tutor.  Take a look at NewExampleRequest.java, NewExampleAction.java
+     * and ShaTuTutor.java files to understand whats happening and for tracing.
      * 
      * @return
      */
@@ -453,11 +488,14 @@ public class EncodeView extends UserRequestView implements ActionListener {
         
         return ex;
     }
+    
      /**
      * This method is suppose to be called when the check button is clicked,
      * it should take the users answer, assign it to the related class, then
      * send it to the tutor to handle checking the answer and then will handle
-     * a new GUI for the user to view.
+     * a new GUI for the user to view.  Take a look at the StepCompletion.java,
+     * The ShaTuTutor.java, and StepCompletionAction.java files for tracing
+     * and to understand whats going on.
      * 
      * @return 
      */

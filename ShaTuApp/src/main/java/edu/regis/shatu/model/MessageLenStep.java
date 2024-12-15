@@ -22,15 +22,25 @@ public class MessageLenStep {
     
     private String question;
     
-    private String result;
+    private String correctAnswer; // Could be removed after question persistence is fleshed out.
     
     private String userAnswer;
+    
+    private String encodeAsciiAnswer;
+    
+    private String addOneBitAnswer;
+    
+    private String padWithZerosAnswer;
+    
+    private String addMessageLengthAnswer;
     
     /**
      * Constructor
      */
     public MessageLenStep() {
-        
+        if (this.question == null) {
+            this.question = "";  
+        }
     }
     
     /**
@@ -66,19 +76,23 @@ public class MessageLenStep {
     }
     
     /**
-     * Setter method for the correct answer
+     * Setter method for the correct answer. This was initially introduced
+     * before question persistence, this could potentially be refactored/deleted
+     * once question persistence is fully fleshed out.
      * @param newResult 
      */
-    public void setResult(String newResult) {
-        this.result = newResult;
+    public void setCorrectAnswer(String newResult) {
+        this.correctAnswer = newResult;
     }
     
     /**
-     * Getter method for the correct answer
+     * Getter method for the correct answer. This was initially introduced
+     * before question persistence, this could potentially be refactored/deleted
+     * once question persistence is fully fleshed out.
      * @return 
      */
-    public String getResult() {
-        return this.result;
+    public String getCorrectAnswer() {
+        return this.correctAnswer;
     }
     
     /**
@@ -95,5 +109,69 @@ public class MessageLenStep {
      */
     public String getUserAnswer() {
         return this.userAnswer;
+    }
+    
+    /**
+     * Setter method for the encode ascii answer
+     * @param newEncodeASCIIAnswer 
+     */
+    public void setEncodeASCIIAnswer(String newEncodeASCIIAnswer) {
+        this.encodeAsciiAnswer = newEncodeASCIIAnswer;
+    }
+    
+    /**
+     * Setter method for the add one bit answer
+     * @param newAddOneBitAnswer 
+     */
+    public void setAddOneBitAnswer(String newAddOneBitAnswer) {
+        this.addOneBitAnswer = newAddOneBitAnswer;
+    }
+    
+    /**
+     * Setter method for the pad with zeros answer
+     * @param newPadWithZerosAnswer 
+     */
+    public void setPadWithZerosAnswer(String newPadWithZerosAnswer) {
+        this.padWithZerosAnswer = newPadWithZerosAnswer;
+    }
+    
+    /**
+     * Setter method for the add message length answer
+     * @param newAddMessLenAnswer 
+     */
+    public void setAddMessageLengthAnswer(String newAddMessLenAnswer) {
+        this.addMessageLengthAnswer = newAddMessLenAnswer;
+    }
+    
+    /**
+     * Getter method for the encode ascii answer
+     * @return 
+     */
+    public String getEncodeASCIIAnswer() {
+        return this.encodeAsciiAnswer;
+    }
+    
+    /**
+     * Getter method for the add one bit answer
+     * @return 
+     */
+    public String getAddOneBitAnswer() {
+        return this.addOneBitAnswer;
+    }
+    
+    /**
+     * Getter method for the pad with zeros answer
+     * @return 
+     */
+    public String getPadWithZerosAnswer() {
+        return this.padWithZerosAnswer;
+    }
+    
+    /**
+     * Getter method for the add message length answer
+     * @return 
+     */
+    public String getAddMessLenAnswer() {
+        return this.addMessageLengthAnswer;
     }
 }

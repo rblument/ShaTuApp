@@ -552,10 +552,12 @@ public class ShaTuTutor implements TutorSvc {
      * @return
      */
     public TutorReply completeEncodeStep(StepCompletion completion) {
+        System.out.println("Complete encode ascii step"); // Error checking
+        
         EncodeAsciiStep completedEncodeAsciiStep = gson.fromJson(completion.getData(), EncodeAsciiStep.class); // EncodeAsciiStep that was created in the stepCompletion function in the EncodeAsciiView
 
         String userAnswer = completedEncodeAsciiStep.getUserAnswer(); // What the user submitted as the answer. 
-        String correctAnswer = completedEncodeAsciiStep.getResult();
+        String correctAnswer = completedEncodeAsciiStep.getEncodeASCIIAnswer();
 
         System.out.println("Correct Answer: " + correctAnswer); // Error checking
         System.out.println("User Answer: " + userAnswer); // Error checking
@@ -619,11 +621,12 @@ public class ShaTuTutor implements TutorSvc {
      * @return
      */
     public TutorReply completeAddOneStep(StepCompletion completion) {
+        System.out.println("Complete add one step"); // Error checking
 
         AddOneStep completedAddOneStep = gson.fromJson(completion.getData(), AddOneStep.class); // AddOneStep that was created in the stepCompletion function in the AddOneView
 
         String userAnswer = completedAddOneStep.getUserAnswer(); // What the user submitted as the answer. 
-        String correctAnswer = completedAddOneStep.getResult();
+        String correctAnswer = completedAddOneStep.getAddOneBitAnswer();
 
         System.out.println("Correct Answer: " + correctAnswer); // Error checking
         System.out.println("User Answer: " + userAnswer); // Error checking
@@ -709,11 +712,12 @@ public class ShaTuTutor implements TutorSvc {
      * @return
      */
     public TutorReply completePadZerosStep(StepCompletion completion) {
+        System.out.println("Complete pad zeros step"); // Error checking
 
         Pad0Step completedPadZeroStep = gson.fromJson(completion.getData(), Pad0Step.class);
 
         String userAnswer = completedPadZeroStep.getUserAnswer();
-        String correctAnswer = completedPadZeroStep.getResult();
+        String correctAnswer = completedPadZeroStep.getPadWithZerosAnswer();
 
         System.out.println("user answer: " + userAnswer); // Error checking
         System.out.println("Correct answer: " + correctAnswer); // Error checking
@@ -797,10 +801,12 @@ public class ShaTuTutor implements TutorSvc {
      * @return 
      */    
     public TutorReply completeAddMsgLenStep(StepCompletion completion) {
+        System.out.println("Complete add message length step"); // Error checking
+        
         MessageLenStep completedMessageLenStep = gson.fromJson(completion.getData(), MessageLenStep.class);
         
         String userAnswer = completedMessageLenStep.getUserAnswer();
-        String correctAnswer = completedMessageLenStep.getResult();
+        String correctAnswer = completedMessageLenStep.getAddMessLenAnswer();
         
         System.out.println("user answer: " + userAnswer); // Error checking
         System.out.println("Correct answer: " + correctAnswer); // Error checking
@@ -1401,7 +1407,7 @@ public class ShaTuTutor implements TutorSvc {
         //gson = new GsonBuilder().setPrettyPrinting().create();
 
         NewExampleRequest request = gson.fromJson(json, NewExampleRequest.class);
-
+        
         switch (request.getExampleType()) {
             case ASCII_ENCODE:
                 return newAsciiEncodeExample(session, request.getData());
@@ -1608,7 +1614,7 @@ public class ShaTuTutor implements TutorSvc {
 
         EncodeAsciiStep newEncodeAscii = gson.fromJson(jsonData, EncodeAsciiStep.class); // This is the EncodeAsciiStep created in the newExample function from the EncodeAsciiView.
         
-        if (newEncodeAscii.getQuestion().isEmpty() || newEncodeAscii.getQuestion() == null) {
+        if (newEncodeAscii.getQuestion().isEmpty() || newEncodeAscii.getQuestion() == null) { // No question generated
             
             System.out.println("Question was empty"); // Error checking
             
@@ -1618,15 +1624,34 @@ public class ShaTuTutor implements TutorSvc {
 
             newEncodeAscii.setQuestion(newQuestion);
             
-            newEncodeAscii.setResult(toBinaryFunction(newQuestion)); // Generates the binary version of the question, which is now the answer
+            newEncodeAscii.setCorrectAnswer(toBinaryFunction(newQuestion)); // Generates the binary version of the question, which is now the answer
             
+            newEncodeAscii.setEncodeASCIIAnswer(toBinaryFunction(newQuestion));
+            
+            newEncodeAscii.setAddOneBitAnswer(addOneFunction(newQuestion));
+            
+            newEncodeAscii.setPadWithZerosAnswer(Integer.toString(calculateZerosNeededForPadding(messageLength)));
+            
+            newEncodeAscii.setAddMessageLengthAnswer(Integer.toBinaryString(messageLength * 8));
         }
         
-        else {
-            newEncodeAscii.setResult(toBinaryFunction(newEncodeAscii.getQuestion())); // Generates the binary version of the question, which is now the answer
+        else { // Use the question generated already
+            newEncodeAscii.setCorrectAnswer(toBinaryFunction(newEncodeAscii.getQuestion())); // Generates the binary version of the question, which is now the answer
+            
+            newEncodeAscii.setEncodeASCIIAnswer(toBinaryFunction(newEncodeAscii.getQuestion()));
+            
+            newEncodeAscii.setAddOneBitAnswer(addOneFunction(newEncodeAscii.getQuestion()));
+            
+            newEncodeAscii.setPadWithZerosAnswer(Integer.toString(calculateZerosNeededForPadding(newEncodeAscii.getMessageLength())));
+            
+            newEncodeAscii.setAddMessageLengthAnswer(Integer.toBinaryString(newEncodeAscii.getMessageLength() * 8));
         }
 
-        System.out.println(newEncodeAscii.getResult()); // Error checking
+        System.out.println(newEncodeAscii.getCorrectAnswer()); // Error checking
+        System.out.println(newEncodeAscii.getEncodeASCIIAnswer()); // Error checking
+        System.out.println(newEncodeAscii.getAddOneBitAnswer()); // Error checking
+        System.out.println(newEncodeAscii.getPadWithZerosAnswer()); // Error checking
+        System.out.println(newEncodeAscii.getAddMessLenAnswer()); // Error checking
 
         Step step = new Step(1, 0, StepSubType.ENCODE_ASCII);
         step.setCurrentHintIndex(0);
@@ -1669,9 +1694,21 @@ public class ShaTuTutor implements TutorSvc {
 
         newAddOneBit.setQuestion(question);
 
-        newAddOneBit.setResult(addOneFunction(question)); // Generates the binary version of the question, which is now the answer
+        newAddOneBit.setCorrectAnswer(addOneFunction(question)); // Generates the binary version of the question, which is now the answer
+            
+        newAddOneBit.setEncodeASCIIAnswer(toBinaryFunction(newAddOneBit.getQuestion()));
+            
+        newAddOneBit.setAddOneBitAnswer(addOneFunction(newAddOneBit.getQuestion()));
+            
+        newAddOneBit.setPadWithZerosAnswer(Integer.toString(calculateZerosNeededForPadding(newAddOneBit.getMessageLength())));
+            
+        newAddOneBit.setAddMessageLengthAnswer(Integer.toBinaryString(newAddOneBit.getMessageLength() * 8));
 
-        System.out.println(newAddOneBit.getResult()); // Error checking
+        System.out.println(newAddOneBit.getCorrectAnswer()); // Error checking
+        System.out.println(newAddOneBit.getEncodeASCIIAnswer()); // Error checking
+        System.out.println(newAddOneBit.getAddOneBitAnswer()); // Error checking
+        System.out.println(newAddOneBit.getPadWithZerosAnswer()); // Error checking
+        System.out.println(newAddOneBit.getAddMessLenAnswer()); // Error checking
 
         Step step = new Step(1, 0, StepSubType.ADD_ONE_BIT);
         step.setCurrentHintIndex(0);
@@ -1689,7 +1726,7 @@ public class ShaTuTutor implements TutorSvc {
         task.setType(ExampleType.ADD_ONE_BIT);
         task.setDescription("Add one bit to the given bit string");
         task.addStep(step);
-
+        
         // Update the assessment data and save it to the database.
         int dbId = KnowledgeComponentKind.fromString("Add One Bit").dbId();
         Assessment assessment = studentModel.findAssessment(dbId);
@@ -1725,9 +1762,22 @@ public class ShaTuTutor implements TutorSvc {
 
         subStep.setQuestion(question);
 
-        subStep.setResult(Integer.toString(calculateZerosNeededForPadding(messageLength))); // Calculates the number of zeros needed to pad the message correctly
+        subStep.setCorrectAnswer(Integer.toString(calculateZerosNeededForPadding(messageLength))); // Calculates the number of zeros needed to pad the message correctly
+        
+        subStep.setEncodeASCIIAnswer(toBinaryFunction(subStep.getQuestion()));
+            
+        subStep.setAddOneBitAnswer(addOneFunction(subStep.getQuestion()));
+            
+        subStep.setPadWithZerosAnswer(Integer.toString(calculateZerosNeededForPadding(subStep.getMessageLength())));
+            
+        subStep.setAddMessageLengthAnswer(Integer.toBinaryString(subStep.getMessageLength() * 8));
 
-        System.out.println(subStep.getResult()); // Error checking
+        System.out.println(subStep.getCorrectAnswer()); // Error checking
+        System.out.println(subStep.getCorrectAnswer()); // Error checking
+        System.out.println(subStep.getEncodeASCIIAnswer()); // Error checking
+        System.out.println(subStep.getAddOneBitAnswer()); // Error checking
+        System.out.println(subStep.getPadWithZerosAnswer()); // Error checking
+        System.out.println(subStep.getAddMessLenAnswer()); // Error checking
 
         Step step = new Step(1, 0, StepSubType.PAD_ZEROS);
         step.setCurrentHintIndex(0);
@@ -1780,9 +1830,22 @@ public class ShaTuTutor implements TutorSvc {
         
         subStep.setQuestion(question);
         
-        subStep.setResult(Integer.toBinaryString(messageLength * 8)); // Calculates the number of bits that the message length represents then converts that int to a binary string. (8 bits per char)
+        subStep.setCorrectAnswer(Integer.toBinaryString(messageLength * 8)); // Calculates the number of bits that the message length represents then converts that int to a binary string. (8 bits per char)
         
-        System.out.println(subStep.getResult()); // Error checking
+        subStep.setEncodeASCIIAnswer(toBinaryFunction(subStep.getQuestion()));
+            
+        subStep.setAddOneBitAnswer(addOneFunction(subStep.getQuestion()));
+            
+        subStep.setPadWithZerosAnswer(Integer.toString(calculateZerosNeededForPadding(subStep.getMessageLength())));
+            
+        subStep.setAddMessageLengthAnswer(Integer.toBinaryString(subStep.getMessageLength() * 8));
+
+        System.out.println(subStep.getCorrectAnswer()); // Error checking
+        System.out.println(subStep.getCorrectAnswer()); // Error checking
+        System.out.println(subStep.getEncodeASCIIAnswer()); // Error checking
+        System.out.println(subStep.getAddOneBitAnswer()); // Error checking
+        System.out.println(subStep.getPadWithZerosAnswer()); // Error checking
+        System.out.println(subStep.getAddMessLenAnswer()); // Error checking
         
         Step step = new Step(1, 0, StepSubType.ADD_MSG_LENGTH);
         step.setCurrentHintIndex(0);
@@ -3236,5 +3299,9 @@ public class ShaTuTutor implements TutorSvc {
         }
 
         return result.toString();
+    }
+    
+    private void setPreProcessingAnswers(Step operationToUse) { // Placeholder parameter, change from step to whatever the master step is called.
+        //This could be used to get rid of redundant code between the preprocessing operations answers, to be used with a future master step class just for preprocessing steps.
     }
 }
