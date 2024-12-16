@@ -69,7 +69,7 @@ public class KnowledgeComponent extends TitledModel {
         
         exercisingLocations = new ArrayList<>();
     }
-
+    
     /**
      * Return the bloom level of this outcome.
      * 

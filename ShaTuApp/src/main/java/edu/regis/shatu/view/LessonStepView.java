@@ -12,8 +12,12 @@
  */
 package edu.regis.shatu.view;
 
+import edu.regis.shatu.err.NonRecoverableException;
+import edu.regis.shatu.err.ObjNotFoundException;
 import java.awt.CardLayout;
 import java.awt.Color;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
@@ -36,7 +40,14 @@ public class LessonStepView extends JPanel {
         
         setLayout(new CardLayout());
         
-        initializeComponents();
+        try {
+            initializeComponents();
+        } catch (ObjNotFoundException ex) {
+            Logger.getLogger(LessonStepView.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NonRecoverableException ex) {
+            Logger.getLogger(LessonStepView.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
         initializeLayout();
         
         setBorder(BorderFactory.createLineBorder(Color.BLACK));
@@ -45,7 +56,7 @@ public class LessonStepView extends JPanel {
     /**
      * Create the child GUI components appearing in this frame.
      */
-    private void initializeComponents() { 
+    private void initializeComponents() throws ObjNotFoundException, NonRecoverableException { 
         genericLesson = new LessonView();
     }
     

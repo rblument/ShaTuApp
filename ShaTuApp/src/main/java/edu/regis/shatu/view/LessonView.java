@@ -12,7 +12,14 @@
  */
 package edu.regis.shatu.view;
 
+import edu.regis.shatu.dao.CourseDAO;
+import edu.regis.shatu.err.NonRecoverableException;
+import edu.regis.shatu.err.ObjNotFoundException;
+import edu.regis.shatu.model.Course;
+import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
+import edu.regis.shatu.model.Task;
+import edu.regis.shatu.model.Unit;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import java.awt.Color;
 import java.awt.FlowLayout;
@@ -23,15 +30,6 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextPane;
-import java.io.File;
-import javax.swing.JTextArea;
-import javax.swing.SwingUtilities;
-import javax.swing.Timer;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import java.util.ArrayList;
 
@@ -40,157 +38,78 @@ import java.util.ArrayList;
  *
  * @author mwemapowanga
  */
-public class LessonView extends UserRequestView implements ActionListener{
+public class LessonView extends UserRequestView implements ActionListener {
    
     String text;
     private JTextPane descriptionTextArea;
-    //private JTextArea descriptionTextArea;
     private NodeList nodeList;
     private JLabel lesson;
     private JButton previousButton, nextButton; //startButton;
-    //private ActionListener selection; //nextButtonListener, previousButtonListener;
     private JPanel buttonPanel; 
     private GPanel qrPanel;
     private static boolean buttonClicked = false;
     private int i = 0;
     Color white = new Color(255,255,255);
-    ArrayList<String> cars = new ArrayList<String>();
     ArrayList<String> lessonText = new ArrayList<String>();
 
     /**
      * Initialize this view including creating and laying out its child components.
+     * @throws edu.regis.shatu.err.ObjNotFoundException
+     * @throws edu.regis.shatu.err.NonRecoverableException
      */
-    public LessonView() {       
+    public LessonView() throws ObjNotFoundException, NonRecoverableException { 
+        CourseDAO newCourse = new CourseDAO();
+        Course course = null;
+        int courseSize = 10;
+        int unitSize = 10;
+        int taskSize = 10;
+        int stepSize = 10;
+        ArrayList<Unit> unitList = null;
+        ArrayList<Task> taskList = null;
+        ArrayList<Step> stepList = null;
+        
+                
         initializeComponents();
         initializeLayout();
-    }
-    
-    
-    
-    public void getXML(String filename) {
-SwingUtilities.invokeLater(() -> {
-try {
-            File xmlFile = new File("Course_1.xml"); // Replace with your XML file path
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse(xmlFile);
-
-            // Normalize the XML structure
-            doc.getDocumentElement().normalize();
-
-            // Get the root element
-            Element root = doc.getDocumentElement();
-             System.out.println("Root element: " + root.getNodeName());
-
-            // Traverse the XML nodes
-            NodeList nodeList = root.getChildNodes();
-            final String[] lines;
-//System.out.println(nodeList.item(i).getTextContent());
-            for (int j = 0; j < nodeList.getLength(); j++) {            //get 1st tree child nodes
-                Node node = nodeList.item(j);
-                if (node.getNodeType() == Node.ELEMENT_NODE ) {
-                    Element element = (Element) node;
-                   
-                    if (node.hasChildNodes()) {                         //get 2nd tree child nodes
-                        NodeList tempNodeList = node.getChildNodes();
-                        
-                        for (int k = 0; k < tempNodeList.getLength(); k++) {
-                            Node childNode = tempNodeList.item(k);
-                            if (childNode.getNodeType() == Node.ELEMENT_NODE) {
-                             
-                                 Element childElement = (Element) childNode;
-                                 if(childElement.getTextContent() != ""){
-                                    lessonText.add(childElement.getTextContent());
-                                    System.out.println(childElement.getTagName() + ": " + childElement.getTextContent()); 
-                                 }
-                            }
-                        }
-                    }
-                    else {
-                        lessonText.add(element.getTextContent());
-                    }
-                    
-
-                    // Display XML Elements
-                   // descriptionTextArea.append( element.getTagName() + ": " + element.getTextContent());
-                   // descriptionTextArea.setText(element.getTagName() + ": " + element.getTextContent());
-                    //descriptionTextArea.setText(element.getTextContent());  
-                   // text = element.getTextContent();
-                  //  playNext();
-
-                   // System.out.println(element.getTextContent());
-                    
-                   // Thread.sleep(1000);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            Thread.currentThread().interrupt();
-        }});
         
-       
-
-
-/*// NodeList fileList = null;
-       
-          //                 descriptionTextArea.setText("Finally");
-
-        SwingUtilities.invokeLater(() -> {
-            NodeList nodeList = null;
-            
+        
         try {
-           // descriptionTextArea.setText("Finally");
-
-            File xmlFile = new File(filename); 
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse(xmlFile);
-
-            // Normalize the XML structure
-            doc.getDocumentElement().normalize();
-
-            // Get the root element
-            Element root = doc.getDocumentElement();
-             System.out.println("Root element: " + root.getNodeName());
-            // Traverse the XML nodes
-            nodeList = root.getChildNodes();
-            //final String[] lines;
-            // Wait for button click
-
-            for (int i = 0; i < nodeList.getLength(); i++) {
-                Node node = nodeList.item(i);
                 
-                if (node.getNodeType() == Node.ELEMENT_NODE) {
-                    Element element = (Element) node;
-                    
-                    // Display XML Elements
-                   // descriptionTextArea.append( element.getTagName() + ": " + element.getTextContent());
-                    descriptionTextArea.setText(element.getTextContent());
-                   // descriptionTextArea.append(element.getTextContent());        
-
-                  System.out.println(element.getTextContent());
-                   // Thread.sleep(1000);
-                   // Wait for button click
-                while (!buttonClicked) {
-                try {
-                    Thread.sleep(10); // Sleep to avoid busy waiting
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
+                for (int c = 0; c < courseSize; c++) { // Add all courses to list to be displayed to the screen
+                  course = newCourse.retrieve(c);
+                  lessonText.add(course.description);
+                  courseSize = course.courseSize;
+                  lessonText.add(Integer.toString(courseSize));
+                  
+                  for (int u = 0; u < unitSize; u++) { // Add all units to list to be displayed to the screen
+                      unitList = course.getUnits();
+                      lessonText.add(unitList.get(u).description);
+                      unitSize = unitList.size();
+                      
+                      for (int t = 0; t < unitSize; t++) { // Add all tasks to list to be displayed to the screen
+                        taskList = course.getTasks();
+                        lessonText.add(taskList.get(t).description);
+                        taskSize = taskList.size();
+                      
+                            for (int s = 0; s < unitSize; s++) { // Add all steps to list to be displayed to the screen
+                                stepList = course.getSteps();
+                                lessonText.add(stepList.get(s).description);
+                                stepSize = stepList.size();
+                            }
+                      }
+                  }
                 }
-                   
-                }
-            }
-            
-            buttonClicked = false; // Reset flag
 
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            Thread.currentThread().interrupt();
-        }});
-           // throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    //return nodeList;*/
+
+        } catch (ObjNotFoundException e) {
+            throw new ObjNotFoundException("Test");
+        }
+        
+        System.out.println("Course: " + course);
+        
     }
+    
+ 
  
     /**
      * Create the child GUI components appearing in this frame.
@@ -198,13 +117,10 @@ try {
     private void initializeComponents() {
             lesson = new JLabel("");
             
-           cars.add("Volvo");
-    cars.add("BMW");
-    cars.add("Ford");
-    
             setUpButtons();   
             setUpPanel();
             setupDescriptionSection();
+            
     }
     
     /**
@@ -261,19 +177,14 @@ try {
         nextButton = new JButton("Next");
         nextButton.addActionListener(this);
         
-       /* startButton = new JButton("Start");
-        startButton.addActionListener(this);    */    
-        
         ActionListener selection = e -> {
             JButton source = (JButton) e.getSource();
         };
         
         buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         buttonPanel.setBackground(white);
-      //  buttonPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder());
         buttonPanel.add(previousButton);
         buttonPanel.add(nextButton);
-       // buttonPanel.add(startButton);
         
     }
     
@@ -294,12 +205,10 @@ try {
      * the encoding exercise.
      */
     private void setupDescriptionSection() {
-       // descriptionTextArea = new JTextArea();
         descriptionTextArea = new JTextPane();
         descriptionTextArea.setContentType("text/html");
         descriptionTextArea.setEditable(false);
         descriptionTextArea.setBackground(null);
-        //descriptionTextArea.setBorder(null); 
         descriptionTextArea.setText( "<html>" +
                     "<body>" +
                     "<h2>Overview</h2>" +
@@ -307,68 +216,36 @@ try {
                     "</body>" +
                     "</html>"
             );
-        getXML("Course_1.xml"); // Replace with your XML file path
 
 
     }
     
     private void playNext() { 
-        //buttonClicked = true;
-       // Node node = nodeList.item(i);
        if(i >= 0 && i < lessonText.size()) {
-            System.out.println("playNext: " + i);
             descriptionTextArea.setText("<html>" +
                     "<body>" +
                     "<h2>" + lessonText.get(i) + "</h2>" +
-                    "<p>" + "\n" + "\n" + "Click Next to Continue </p>" +
+                    "<p>" + "\n" + "\n" + "Click Next To Continue </p>" +
                     "</body>" +
                     "</html>");
 
        }
        else {
-           descriptionTextArea.setText("End of Lesson");
+           descriptionTextArea.setText("<html>" +
+                    "<body>" +
+                    "<h2>" + "End of Lesson" + "</h2>" +
+                    "</body>" +
+                    "</html>");
        }
-       /* if (nodeList.item(i).getNodeType() == Node.ELEMENT_NODE) {
-            Element element = (Element) nodeList.item(i);
-            descriptionTextArea.setText(nodeList.item(i).getTextContent());
-        }*/
-
-        //NodeList nodeList = getXML("Course_1.xml");
-        
-       /* Node node = nodeList.item(i);
-        //descriptionTextArea.setText("Next");
-       // System.out.println(nodeList);
-
-        if (i < nodeList.getLength()) {
-                if (node.getNodeType() == Node.ELEMENT_NODE) {
-                    Element element = (Element) node;
-                    System.out.println(element.getTextContent());
-
-                    
-                    // Display XML Elements
-                   // descriptionTextArea.append( element.getTagName() + ": " + element.getTextContent());
-                    descriptionTextArea.setText(element.getTagName() + ": " + element.getTextContent()); 
-                    i++;
-                    
-                     buttonClicked = true;
-                   // descriptionTextArea.setText(element.getTagName() + ": " + element.getTextContent());
-                    descriptionTextArea.append(element.getTextContent());        
-
-                    //System.out.println(element.getTextContent());
-                   // Thread.sleep(1000);
-                }
-        }
-
-     */
+       
     }
     
     private void playPrevious() {
        if(i >= 0 && i < lessonText.size()) {
-            System.out.println("playPrevious: " + i);
             descriptionTextArea.setText("<html>" +
                     "<body>" +
                     "<h2>" + lessonText.get(i) + "</h2>" +
-                    "<p>" + "\n" + "\n" + "Click Next to Continue </p>" +
+                    "<p>" + "\n" + "\n" + "Click Next To Continue </p>" +
                     "</body>" +
                     "</html>");
 
@@ -388,17 +265,11 @@ try {
         if (event.getSource() == previousButton) {
            i = i-2;
            playPrevious();
-        } /*else if (event.getSource() == startButton) {
-           //playNext();
-           //getXML("Course_1.xml");
-        }*/ else if (event.getSource() == nextButton) {
-           //if (i < nodeList.getLength()) {
+        } else if (event.getSource() == nextButton) {
             playNext();
             i++;
-                    System.out.println("actionPerformed: " + i);
+                    
 
-           //getXML("Course_1.xml");
-          // }
         } 
     }
 

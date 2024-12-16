@@ -21,12 +21,12 @@ public abstract class TitledModel extends Model {
     /**
      * The title or name of this model, which can be displayed to the user.
      */
-    protected String title;
+    public String title;
     
     /**
      * A brief description of this model, which can be displayed to the user.
      */
-    protected String description;
+    public String description;
     
     /**
      * Instantiate this model with default id, title, and description

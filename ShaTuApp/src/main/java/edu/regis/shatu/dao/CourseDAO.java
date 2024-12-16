@@ -32,24 +32,38 @@ import edu.regis.shatu.model.Unit;
 import edu.regis.shatu.model.BloomLevel;
 import edu.regis.shatu.model.ExercisingLocation;
 import edu.regis.shatu.model.KnowledgeComponent;
+import static edu.regis.shatu.model.aol.StepSubType.INFO_MESSAGE;
+import static edu.regis.shatu.model.aol.StepSubType.GUI_ACTION;
 import edu.regis.shatu.svc.CourseSvc;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
  * An XML-based Data Access Object implementing CourseSvc behaviors.
  *
  * @author rickb
  */
-public class CourseDAO implements CourseSvc {
+public class CourseDAO extends MySqlDAO implements CourseSvc {
+    private static final String URL = "jdbc:mysql://localhost:3306/ShaTuDB"; // database name based on commands in setup.sql
+    private static final String USER = "root";            // Your DB details - needs full privileges 
+    private static final String PASSWORD = "bliss929";         // Your DB details
+    
+   
+    
 
     /**
      * Instantiate this Course DAO with default values.
      */
     public CourseDAO() {
+        super();
     }
 
     /**
@@ -57,32 +71,84 @@ public class CourseDAO implements CourseSvc {
      */
     @Override
     public Course retrieve(int id) throws ObjNotFoundException, NonRecoverableException {
-        String fileName = "Course_" + id + ".xml";
+        final String sql = "SELECT * FROM Course WHERE CourseId = " + id;
+
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        Course course = new Course(id);
+
 
         try {
-            XmlMgr xmlMgr = XmlMgr.instance();
-            Element root = xmlMgr.findRoot(fileName);
+            conn = DriverManager.getConnection(URL, USER, PASSWORD);
+            stmt = conn.prepareStatement(sql);
 
-            Course course = new Course(id);
+            ResultSet rs = stmt.executeQuery();
 
-            course.setTitle(XmlMgr.getAttribute(root, "title"));
+            if (rs.next()) {
+                
+                course.setTitle(rs.getString("CourseTitle"));
 
-            course.setDescription(XmlMgr.getChild(root, "Description").getTextContent());
+                course.setDescription(rs.getString("CourseDescription"));
+                
+                course.courseSize = extractCourseSize(conn);
+
+                course.setPrimaryPedagogy(extractPrimaryPedagogy(rs.getString("CoursePrimaryPedagogy")));
+
+                course.setUnits(extractUnits(conn, 0)); 
+                
+                course.setTasks(extractTasks(conn, 0));
+                
+                course.setSteps(extractSteps(conn, 0));
+ 
+                course.setOutcomes(extractKnowledgeComponents(conn,id));
+
+                return course;
+
+
+            } else {
+                throw new ObjNotFoundException("Course Id:" + id);
+            }
+        } catch (SQLException e) {
+            throw new NonRecoverableException("CourseDAO_Err_1" + e.toString(), e);
+        } finally {
+            close(conn, stmt);
+        }
+        
+    }
+    
+    /**
+     * Extract child &lt;Outcome> elements from given XML DOM parent element
+     * adding each as a Outcome to the given Course.
+     *
+     * @param parent an XML DOM Element containing one or more child
+     * &lt;Outcome> node elements.
+     * @throws ShaTuException a nonrecoverable exception also see getCause()
+     * @return a List of KnowledgeComponent outcomes
+     */
+    private ArrayList<Integer> extractKnowledgeComponentsIds(Connection conn, int StepId) 
+            throws NonRecoverableException {
+        
+        ArrayList<Integer> outcomes = new ArrayList<>();
+        String sql = "SELECT * FROM Step WHERE StepId = " + StepId;
+        
+
+        try {
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            ResultSet result = stmt.executeQuery(sql);
             
-            course.setPrimaryPedagogy(extractPrimaryPedagogy(root));
+            int id = -1; // Declare here for better error reporting below
 
-            course.setUnits(extractUnits(root));
-
-            course.setOutcomes(extractKnowledgeComponents(root));
-            System.out.println("CourseDAO outcomes: " + course.getOutcomes());
-            System.out.println("size: " + course.getOutcomes().size());
+            while (result.next()) {
+               
+                outcomes.add(result.getInt("StepOutcome"));
+                
+            }
             
-            return course;
+            return outcomes;
+            
+        } catch (SQLException e) {
+            throw new NonRecoverableException("CourseDAO_Err_2" + e.toString(), e);
 
-        } catch (ObjNotFoundException e) {
-            throw new ObjNotFoundException(String.valueOf(id));
-        } catch (XmlException e) {
-            throw new NonRecoverableException("CourseDAO_Err_1", e);
         }
     }
 
@@ -95,17 +161,30 @@ public class CourseDAO implements CourseSvc {
      * @throws ShaTuException a nonrecoverable exception also see getCause()
      * @return a List of KnowledgeComponent outcomes
      */
-    private ArrayList<KnowledgeComponent> extractKnowledgeComponents(Element parent) 
+    private ArrayList<KnowledgeComponent> extractKnowledgeComponents(Connection conn, int StepId) 
             throws NonRecoverableException {
         
         ArrayList<KnowledgeComponent> outcomes = new ArrayList<>();
+        String sql = "SELECT * FROM KnowledgeComponent WHERE KnowledgeComponentExercisingLocation = " + StepId;
         
-        NodeList nodes = parent.getElementsByTagName("KnowledgeComponent");
+        try {
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            ResultSet result = stmt.executeQuery(sql);
+            
+            while (result.next()) {
+                
+                 outcomes.add(extractKnowledgeComponent(conn, StepId));
+                       
+            }
+            
+            return outcomes;
+            
+        } catch (SQLException e) {
+            throw new NonRecoverableException("CourseDAO_Err_2" + e.toString(), e);
 
-        for (int i = 0; i < nodes.getLength(); i++)
-            outcomes.add(extractKnowledgeComponent((Element) nodes.item(i)));
+        }
        
-        return outcomes;
+           
     }
 
     /**
@@ -116,22 +195,51 @@ public class CourseDAO implements CourseSvc {
      * @return a KnowledgeComponent
      * @throws NonRecoverableException 
      */
-    private KnowledgeComponent extractKnowledgeComponent(Element element) throws NonRecoverableException {
-        KnowledgeComponent outcome = new KnowledgeComponent(XmlMgr.getIntAttribute(element, "id"));
+    private KnowledgeComponent extractKnowledgeComponent(Connection conn, int StepId) 
+            throws NonRecoverableException {
+        
+        String sql = "SELECT * FROM KnowledgeComponent WHERE KnowledgeComponentExercisingLocation = " + StepId;
+        KnowledgeComponent outcome = null;
 
-        outcome.setTitle(XmlMgr.getAttribute(element, "title"));
+        try {
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            ResultSet result = stmt.executeQuery(sql);
+            
+            int id = -1; // Declare here for better error reporting below
 
-        outcome.setBloomLevel(extractBloomLevel(element));
+            while (result.next()) {
+                
+                id = result.getInt("KnowledgeComponentId");
+                
+                outcome = new KnowledgeComponent(id);
+                
+                outcome.setTitle(result.getString("KnowledgeComponentTitle"));
+                
+                outcome.setDescription(result.getString("KnowledgeComponentDescription"));
+                
+                outcome.setBloomLevel(extractBloomLevel(result.getString("KnowledgeComponentBloomLevel")));
+               
+                    if (result.getString("KnowledgeComponentPedagogy").equals("Tutor")) {
+                        outcome.setIsDomainFocus(false); // teaching the tutor/GUI itself
+                    } else {
+                        outcome.setIsDomainFocus(true);  // teaching SHA-256 domain
+                    }
+
+                outcome.setExercisingLocations(extractExercisingLocations(conn, id));
         
-        if (XmlMgr.getAttribute(element, "focus").equals("Tutor")) {
-            outcome.setIsDomainFocus(false); // teaching the tutor/GUI itself
-        } else {
-            outcome.setIsDomainFocus(true);  // teaching SHA-256 domain
-        }
+           
+            }
         
-        outcome.setExercisingLocations(extractExercisingLocations(element));
+    
+            
+        } catch (SQLException e) {
+            throw new NonRecoverableException("CourseDAO_Err_2" + e.toString(), e);
+
+        }   
         
-        return outcome;
+    return outcome;
+
+       
     }
 
     /**
@@ -141,32 +249,70 @@ public class CourseDAO implements CourseSvc {
      * @return a List of Units
      * @throws NonRecoverableException 
      */
-    private ArrayList<Unit> extractUnits(Element parent) throws NonRecoverableException {
-        ArrayList<Unit> units = new ArrayList<>();
-
-        int id = -1; // Declare here for better error reporting below
-
-        NodeList nodes = parent.getElementsByTagName("Unit");
-
-        for (int i = 0; i < nodes.getLength(); i++) {
-            Element element = (Element) nodes.item(i);
-
-            id = XmlMgr.getIntAttribute(element, "id");
-
-            Unit unit = new Unit(id);
-
-            unit.setSequenceId(XmlMgr.getIntAttribute(element, "sequence"));
-
-            unit.setTitle(XmlMgr.getAttribute(element, "title"));
-
-            unit.setDescription(XmlMgr.contentText(element, "Description"));
+    private int extractCourseSize (Connection conn) throws NonRecoverableException {
+        int size = 0;
+        String sql = "SELECT * FROM Course";
+        
+        try {
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            ResultSet result = stmt.executeQuery(sql);
             
-            unit.setTasks(extractTasks(element));
+             while (result.next()) {
+                 size++;
+                 
+             }
+            return size;
+            
+        } catch (SQLException e) {
+            throw new NonRecoverableException("CourseDAO_Err_2" + e.toString(), e);
 
-            units.add(unit);
         }
 
-        return units;
+    }
+    
+   
+    
+    /**
+     * Extract and return the units in this course from the &lt;Unit> elements.
+     * 
+     * @param parent a &lt;Course> element
+     * @return a List of Units
+     * @throws NonRecoverableException 
+     */
+    private ArrayList<Unit> extractUnits (Connection conn, int CourseId) throws NonRecoverableException {
+        ArrayList<Unit> units = new ArrayList<>();
+        String sql = "SELECT * FROM Unit WHERE CourseId = " + CourseId;
+        
+        try {
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            ResultSet result = stmt.executeQuery(sql);
+            System.out.println("extractUnits: " + result.isClosed());
+            int id = -1; // Declare here for better error reporting below
+
+            while (result.next()) {
+                
+                id = result.getInt("UnitId");
+                
+                Unit unit = new Unit(id);
+                
+                unit.setSequenceId(result.getInt("UnitSequence"));
+                
+                unit.setTitle(result.getString("UnitTitle"));
+                
+                unit.setDescription(result.getString("UnitDescription"));
+                
+                unit.setTasks(extractTasks(conn, id));
+                
+                units.add(unit);
+                
+            }
+            
+            return units;
+            
+        } catch (SQLException e) {
+            throw new NonRecoverableException("CourseDAO_Err_2" + e.toString(), e);
+
+        }
 
     }
 
@@ -176,13 +322,29 @@ public class CourseDAO implements CourseSvc {
      * @param parent &lt;Unit>   // ToDo is this always true?
      * @return a Task list.
      */
-    private ArrayList<Task> extractTasks(Element parent) {
+    private ArrayList<Task> extractTasks(Connection conn, int UnitId) throws NonRecoverableException {
         ArrayList<Task> tasks = new ArrayList<>();
-        
-        for (Element child : XmlMgr.getChildren(parent, "Task"))
-            tasks.add(extractTask(child));
+        String sql = "SELECT * FROM Task WHERE UnitId = " + UnitId;
+
+        try {
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            ResultSet result = stmt.executeQuery(sql);
+            System.out.println("extractTasks: " + result.isClosed());
+
+            while (result.next()) {
+      
+                tasks.add(extractTask(conn, UnitId));
+                
+            }
             
-        return tasks;
+            return tasks;
+            
+        } catch (SQLException e) {
+            throw new NonRecoverableException("CourseDAO_Err_2" + e.toString(), e);
+
+        }   
+        
+       
     }
      
     /**
@@ -190,18 +352,46 @@ public class CourseDAO implements CourseSvc {
      * @param element a &lt;Task> XML element
      * @return a Task
      */
-    private Task extractTask(Element element) {
-        Task task = new Task(XmlMgr.getIntAttribute(element, "id"));
-        task.setTitle(XmlMgr.getAttribute(element, "title"));
-        task.setDescription(XmlMgr.contentText(element, "Description"));
+    private Task extractTask(Connection conn, int UnitId) throws NonRecoverableException {
+        String sql = "SELECT * FROM Task WHERE UnitId = " + UnitId;
+
+        try {
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            ResultSet result = stmt.executeQuery(sql);
+            System.out.println("extractTask: " + result.isClosed());
+
+            int id = -1; // Declare here for better error reporting below
+            Task task = new Task();
+            
+            while (result.next()) {
+                
+                id = result.getInt("TaskId");
+                
+                task = new Task(id);
+                
+                task.setSequenceId(result.getInt("TaskSequence"));
+                
+                task.setTitle(result.getString("TaskTitle"));
+                
+                task.setDescription(result.getString("TaskDescription"));
+                               
+                task.setExercisedComponentIds(extractKnowledgeComponentsIds(conn, id));
+                
+                task.setSteps(extractSteps(conn, id));
+                
+                
+  
+            }
+                
+            return task;
+
+            
+        } catch (SQLException e) {
+            throw new NonRecoverableException("CourseDAO_Err_2" + e.toString(), e);
+
+        }   
         
-        task.setSteps(extractSteps(element));
-        
-        NodeList nodes = element.getElementsByTagName("ExcercisedComponent");
-            for (int i = 0; i < nodes.getLength(); i++)
-                task.addExercisedComponentId(XmlMgr.getIntAttribute(((Element) nodes.item(i)), "componentId"));
-     
-        return task;
+ 
     }
     
     /**
@@ -211,13 +401,27 @@ public class CourseDAO implements CourseSvc {
      *                 elements.
      * @return a List of Step elements, may be empty.
      */
-    private ArrayList<Step> extractSteps(Element parent) {
+    private ArrayList<Step> extractSteps(Connection conn, int TaskId) throws NonRecoverableException {
         ArrayList<Step> steps = new ArrayList<>();
+        String sql = "SELECT * FROM Step WHERE TaskId = " + TaskId;
+
+        try {
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            ResultSet result = stmt.executeQuery(sql);
+
+            while (result.next()) {
+      
+                steps.add(extractStep(conn, TaskId));
+                
+            }
             
-        for (Element child : XmlMgr.getChildren(parent, "Step")) 
-             steps.add(extractStep(child));
+            return steps;
+            
+        } catch (SQLException e) {
+            throw new NonRecoverableException("CourseDAO_Err_2" + e.toString(), e);
+
+        }   
         
-        return steps;
     }
     
     /**
@@ -226,34 +430,62 @@ public class CourseDAO implements CourseSvc {
      * @param element a &lt;Step> element
      * @return a Step 
      */
-    private Step extractStep(Element element) {
-            Step step = new Step(XmlMgr.getIntAttribute(element, "id"),
-                                 XmlMgr.getIntAttribute(element, "sequence"),
-                                 extractStepType(element));
-         
-            step.setTitle(XmlMgr.getAttribute(element, "title"));       
-            step.setScaffolding(extractScaffolding(element));
-            step.setTimeout(extractTimeout(element));
-            step.setNotifyTutor(XmlMgr.getBooleanAttribute(element, "notifyTutor"));
+    private Step extractStep(Connection conn, int TaskId) throws NonRecoverableException {
             
-            NodeList nodes = element.getElementsByTagName("ExcercisedComponent");
-            for (int i = 0; i < nodes.getLength(); i++)
-                step.addExercisedComponentId(XmlMgr.getIntAttribute(((Element) nodes.item(i)), "componentId"));
+        ArrayList<Step> steps = new ArrayList<>();
+        String sql = "SELECT * FROM Step WHERE TaskId = " + TaskId;
+    
+        try {
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            ResultSet result = stmt.executeQuery(sql);
+            int id = -1; // Declare here for better error reporting below
+            int sequence;
+            StepSubType type;
+            Step step = null;
             
-            for (Hint hint : extractHints(element))
-                step.addHint(hint);
 
-            switch (step.getSubType()) {
-                case INFO_MESSAGE:
-                    String msg = XmlMgr.contentText(element, "Msg");
+            while (result.next()) {
+                
+                id = result.getInt("StepId");
+                
+                sequence = result.getInt("StepSequence");
+
+                type = extractStepType(result.getString("StepType"));
+                
+                step = new Step(id, sequence, type);
+                
+                step.setTitle(result.getString("StepTitle"));
+                
+                step.setDescription(result.getString("StepDescription"));
+                
+                step.setScaffolding(extractScaffolding(result.getString("StepScaffolding")));
+                            System.out.println("extractStep: " + result.isClosed());
+                
+                step.setNotifyTutor(result.getBoolean("StepNotifyTutor"));
+                                
+                step.setExercisedComponentIds(extractKnowledgeComponentsIds(conn, id));
+                
+
+                switch (step.getSubType()) {
+                case INFO_MESSAGE -> {
+                    String msg = result.getString("StepMsg");
                     InformationStep subStep = new InformationStep();
                     subStep.setMsg(msg);
                     Gson gson = new GsonBuilder().setPrettyPrinting().create();
                     step.setData(gson.toJson(subStep));
-                    break;
+                    }
+            }                
+                
             }
+        
+            return step;
             
-           return step;
+        } catch (SQLException e) {
+            throw new NonRecoverableException("CourseDAO_Err_2" + e.toString(), e);
+
+        }  
+       
+        
     }
     
     /**
@@ -265,17 +497,30 @@ public class CourseDAO implements CourseSvc {
      * @throws ShaTuException a nonrecoverable exception also see getCause()
      * @return a List of ExercisingElements
      */
-    private ArrayList<ExercisingLocation> extractExercisingLocations(Element parent) 
+    private ArrayList<ExercisingLocation> extractExercisingLocations(Connection conn, int KnowledgeComponentId) 
             throws NonRecoverableException {
         
         ArrayList<ExercisingLocation> locations = new ArrayList<>();
-        
-        NodeList nodes = parent.getElementsByTagName("ExercisingLocation");
+        String sql = "SELECT * FROM ExercisingLocation WHERE KnowledgeComponentId = " + KnowledgeComponentId;
 
-        for (int i = 0; i < nodes.getLength(); i++)
-            locations.add(extractExercisingLocation((Element) nodes.item(i)));
-       
+        try {
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            ResultSet result = stmt.executeQuery(sql);
+            
+            while (result.next()) {
+                
+                locations.add(extractExercisingLocation(conn, KnowledgeComponentId));
+
+            }
+            
         return locations;
+            
+        } catch (SQLException e) {
+            throw new NonRecoverableException("CourseDAO_Err_2" + e.toString(), e);
+
+        } 
+        
+       
     }
     
     /**
@@ -286,15 +531,37 @@ public class CourseDAO implements CourseSvc {
      * @return an ExercisingLocation
      * @throws NonRecoverableException 
      */
-    private ExercisingLocation extractExercisingLocation(Element element) throws NonRecoverableException {
+    private ExercisingLocation extractExercisingLocation(Connection conn, int KnowledgeComponentId) 
+            throws NonRecoverableException {
         ExercisingLocation location = new ExercisingLocation();
 
-        location.setCourseId(XmlMgr.getIntAttribute(element, "course"));
-        location.setUnitId(XmlMgr.getIntAttribute(element, "unit"));
-        location.setTaskId(XmlMgr.getIntAttribute(element, "task"));
-        location.setStepId(XmlMgr.getIntAttribute(element, "step"));
+        String sql = "SELECT * FROM ExercisingLocation WHERE KnowledgeComponentId = " + KnowledgeComponentId;
+
+
+        try {
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            ResultSet result = stmt.executeQuery(sql);
+            
+            while (result.next()) {
+                
+                location.setCourseId(result.getInt("CourseId"));
+                
+                location.setUnitId(result.getInt("UnitId"));
+                
+                location.setTaskId(result.getInt("TaskId"));
+                
+                location.setStepId(result.getInt("StepId"));
         
-        return location;
+            }
+                
+            return location;
+
+            
+        } catch (SQLException e) {
+            throw new NonRecoverableException("CourseDAO_Err_2" + e.toString(), e);
+
+        }   
+        
     }
     
     /**
@@ -304,8 +571,8 @@ public class CourseDAO implements CourseSvc {
      * @param element an XML element containing a 'bloomLevel' attribute.
      * @return a BloomLevel enum value.
      */
-    private BloomLevel extractBloomLevel(Element element) {
-        switch (XmlMgr.getAttribute(element, "bloomLevel")) {
+    private BloomLevel extractBloomLevel(String bloomLevel) {
+        switch (bloomLevel) {
    
             case "Knowledge":
                 return BloomLevel.KNOWLEDGE;
@@ -329,8 +596,7 @@ public class CourseDAO implements CourseSvc {
      * @param stepElement &\lt<step type="..."> XML element.
      * @return a StepSubType
      */
-    private StepSubType extractStepType(Element stepElement) {
-        String stepType = XmlMgr.getAttribute(stepElement, "type");
+    private StepSubType extractStepType(String stepType) {
         
         switch (stepType) {
             case "Information Message":
@@ -351,8 +617,7 @@ public class CourseDAO implements CourseSvc {
      *         XML element.
      * @return a ScaffoldLevel
      */
-    private ScaffoldLevel extractScaffolding(Element element) {
-        String scaffolding = XmlMgr.getAttribute(element, "scaffolding");
+    private ScaffoldLevel extractScaffolding(String scaffolding) {
         
         switch (scaffolding) {
             case "None":
@@ -374,54 +639,13 @@ public class CourseDAO implements CourseSvc {
     }
     
     /**
-     * Extract a GUI gesture from the given element.
-     * 
-     * @param element an
-     * @return GuiGesture
-     */
-    private GuiGesture extractGesture(Element element) {
-        String gesture = XmlMgr.getAttribute(element, "gesture");
-        
-        switch(gesture) {
-            case "Request Hint":
-                return GuiGesture.REQUEST_HINT;
-        
-            default:
-                String msg = "Unknown step gesture in CourseDAO: " + gesture; 
-                Logger.getLogger(CourseDAO.class.getName()).log(Level.WARNING, msg);
-                return GuiGesture.NO_OP;
-        }
-    }
-    
-    /**
-     * Extract and return a list of hints from the given parent element.
-     * 
-     * @param parent an Element possibly containing child &lt;Hint> elements.
-     * @return a List&lt;Hint>
-     */
-    private ArrayList<Hint> extractHints(Element parent) {
-        ArrayList<Hint> hints = new ArrayList<>();
-
-        for (Element child : XmlMgr.getChildren(parent, "Hint")) {
-            Hint hint = new Hint(XmlMgr.getIntAttribute(child, "id"));
-            hint.setSequenceId(XmlMgr.getIntAttribute(child, "sequence"));
-            
-            hint.setText(XmlMgr.getContentText(child));
-            
-            hints.add(hint);
-        }
-        
-        return hints;
-    }
-    
-    /**
      * Extract and return the task selection from the given &lt;Course> element.
      * 
      * @param element a &lt;Course>
      * @return a TaskSelectionKind
      */
-    private TaskSelectionKind extractPrimaryPedagogy(Element element) {
-        String pedagogy = XmlMgr.getAttribute(element, "primaryPedagogy");
+    private TaskSelectionKind extractPrimaryPedagogy(String pedagogy) {
+       // String pedagogy = XmlMgr.getAttribute(element, "primaryPedagogy");
         
         String errMsg = "";
         
@@ -456,24 +680,4 @@ public class CourseDAO implements CourseSvc {
         }
     }
     
-    /**
-     * Extract and return, if any, the child &lt;Timeout> element contained
-     * within the given parent XML element
-     * 
-     * @param parent
-     * @return a Timeout or null
-     */
-    private Timeout extractTimeout(Element parent) {
-        Element element = XmlMgr.getChild(parent, "Timeout");
-        
-        if (element == null) {
-            return null;
-        } else {
- 
-            return new Timeout(XmlMgr.getAttribute(element, "type"),
-                               XmlMgr.getIntAttribute(element, "seconds"),
-                               XmlMgr.getAttribute(element, "event"),
-                               XmlMgr.getAttribute(element, "text"));
-        }  
-    }
 }

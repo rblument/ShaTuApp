@@ -35,7 +35,31 @@ public class Course extends TitledModel {
      * 
      * The first unit in this list is the current unit.
      */
+    public int courseSize;
+    
+    /**
+     * If non-empty, mastery learning is used in this course to assign tasks
+     * from the pool of tasks in these units, which must be completed in order.
+     * 
+     * The first unit in this list is the current unit.
+     */
     private ArrayList<Unit> units;
+    
+    /**
+     * If non-empty, mastery learning is used in this course to assign tasks
+     * from the pool of tasks in these units, which must be completed in order.
+     * 
+     * The first unit in this list is the current unit.
+     */
+    private ArrayList<Step> steps;
+    
+    /**
+     * If non-empty, mastery learning is used in this course to assign tasks
+     * from the pool of tasks in these units, which must be completed in order.
+     * 
+     * The first unit in this list is the current unit.
+     */
+    private ArrayList<Task> tasks;
     
     /**
      * The knowledge component learning outcomes associated with this course.
@@ -121,6 +145,22 @@ public class Course extends TitledModel {
 
     public void setUnits(ArrayList<Unit> units) {
         this.units = units;
+    }
+    
+    public ArrayList<Task> getTasks() {
+        return tasks;
+    }
+
+    public void setTasks(ArrayList<Task> tasks) {
+        this.tasks = tasks;
+    }
+    
+    public ArrayList<Step> getSteps() {
+        return steps;
+    }
+
+    public void setSteps(ArrayList<Step> steps) {
+        this.steps = steps;
     }
     
     public void addOutcome(KnowledgeComponent outcome) {

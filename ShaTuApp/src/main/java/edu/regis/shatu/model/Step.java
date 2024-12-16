@@ -109,7 +109,7 @@ public class Step extends TitledModel {
         this.subType = subType;
         
     }
-
+    
     public StepSubType getSubType() {
         return subType;
     }

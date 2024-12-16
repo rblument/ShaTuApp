@@ -197,6 +197,10 @@ public class Task extends TitledModel {
         return sequenceId;
     }
     
+    public void setSequenceId(int sequenceId) {
+        this.sequenceId = sequenceId;
+    }
+    
     public Step getCurrentStep() {
         return steps.get(currentStepIndex);
     }
