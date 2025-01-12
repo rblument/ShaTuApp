@@ -14,9 +14,9 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
-import edu.regis.shatu.model.Task;
-import edu.regis.shatu.model.aol.ExampleType;
+import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.NewExampleRequest;
+import edu.regis.shatu.model.aol.PendingTask;
 import edu.regis.shatu.model.aol.RotateStep;
 import edu.regis.shatu.view.act.NewExampleAction;
 import edu.regis.shatu.view.act.HintAction;
@@ -24,7 +24,6 @@ import edu.regis.shatu.view.act.StepCompletionAction;
 import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import javax.swing.JButton;
@@ -82,7 +81,7 @@ public class RotateView extends UserRequestView implements ActionListener, KeyLi
     public NewExampleRequest newRequest(){
         NewExampleRequest ex = new NewExampleRequest();
        
-        ex.setExampleType(ExampleType.ROTATE_BITS);
+        ex.setExampleType(ProblemType.ROTATE_BITS);
         RotateStep newStep = new RotateStep();
         if(shortProblem.isSelected()) {
             newStep.setLength(16);
@@ -108,7 +107,7 @@ public class RotateView extends UserRequestView implements ActionListener, KeyLi
     
     @Override
     public StepCompletion stepCompletion() {
-        Step currentStep = model.currentTask().currentStep();
+        Step currentStep = model.currentTask().currentStep().getStep();
         
         RotateStep example = gson.fromJson(currentStep.getData(), RotateStep.class);
         
@@ -282,7 +281,7 @@ public class RotateView extends UserRequestView implements ActionListener, KeyLi
      */
     @Override
     protected void updateView() {
-        view = SplashFrame.instance().getView(); // Accessing view to use universal buttons
+        view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
         hintButton = view.getHintButton();
         checkButton = view.getCheckButton();
         nextButton = view.getNewExampleButton();
@@ -296,7 +295,7 @@ public class RotateView extends UserRequestView implements ActionListener, KeyLi
         }
         
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        Step step = model.currentTask().getCurrentStep();
+        Step step = model.currentTask().getCurrentStep().getStep();
         
         RotateStep example = gson.fromJson(step.getData(), RotateStep.class);
 
@@ -332,7 +331,7 @@ public class RotateView extends UserRequestView implements ActionListener, KeyLi
     }
     
     @Override
-    public void setCurrentTask(Task task) {
+    public void setCurrentTask(PendingTask task) {
         this.model.addCurrentTask(task);
         updateView();
     }

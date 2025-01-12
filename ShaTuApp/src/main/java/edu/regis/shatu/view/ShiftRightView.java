@@ -15,7 +15,7 @@ import com.google.gson.GsonBuilder;
 import edu.regis.shatu.model.BitShiftStep;
 import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
-import edu.regis.shatu.model.aol.ExampleType;
+import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.view.act.HintAction;
 import edu.regis.shatu.view.act.NewExampleAction;
@@ -323,7 +323,7 @@ public class ShiftRightView extends UserRequestView implements ActionListener, K
      */
     @Override
     protected void updateView() {
-        view = SplashFrame.instance().getView(); // Accessing view to use universal buttons
+        view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
         hintButton = view.getHintButton();
         checkButton = view.getCheckButton();
         nextButton = view.getNewExampleButton();
@@ -338,7 +338,7 @@ public class ShiftRightView extends UserRequestView implements ActionListener, K
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-        Step step = model.currentTask().getCurrentStep();
+        Step step = model.currentTask().getCurrentStep().getStep();
 
         BitShiftStep example = gson.fromJson(step.getData(), BitShiftStep.class);
         
@@ -404,7 +404,7 @@ public class ShiftRightView extends UserRequestView implements ActionListener, K
     public NewExampleRequest newRequest() {
         NewExampleRequest ex = new NewExampleRequest();
         //Set example type to the problem associated with the current view
-        ex.setExampleType(ExampleType.SHIFT_BITS);
+        ex.setExampleType(ProblemType.SHIFT_BITS);
         
         BitShiftStep newStep = new BitShiftStep();
         
@@ -418,7 +418,7 @@ public class ShiftRightView extends UserRequestView implements ActionListener, K
 
     @Override
     public StepCompletion stepCompletion() {
-        Step currentStep = model.currentTask().currentStep();
+        Step currentStep = model.currentTask().currentStep().getStep();
 
         BitShiftStep example = gson.fromJson(currentStep.getData(), BitShiftStep.class);
 

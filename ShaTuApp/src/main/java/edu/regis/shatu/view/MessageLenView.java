@@ -17,7 +17,7 @@ import com.google.gson.GsonBuilder;
 import edu.regis.shatu.model.MessageLenStep;
 import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
-import edu.regis.shatu.model.aol.ExampleType;
+import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.view.act.HintAction;
@@ -304,7 +304,7 @@ public class MessageLenView extends UserRequestView implements ActionListener {
      */
     @Override
     protected void updateView() {
-        view = SplashFrame.instance().getView(); // Accessing view to use universal buttons
+        view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
         hintButton = view.getHintButton();
         checkButton = view.getCheckButton();
         nextButton = view.getNewExampleButton();
@@ -328,7 +328,7 @@ public class MessageLenView extends UserRequestView implements ActionListener {
         
         Gson gson = new GsonBuilder().setPrettyPrinting().create(); // May not be needed here.
         
-        Step step = model.currentTask().getCurrentStep(); // will be the last step a example was created for.
+        Step step = model.currentTask().getCurrentStep().getStep(); // will be the last step a example was created for.
         
         System.out.println("Message Length substep from current step: " + step.getSubType()); // Error checking.
         
@@ -378,7 +378,7 @@ public class MessageLenView extends UserRequestView implements ActionListener {
         
         NewExampleRequest ex = new NewExampleRequest(); // Will be sent to the tutor.
         
-        ex.setExampleType(ExampleType.ADD_MSG_LENGTH);
+        ex.setExampleType(ProblemType.ADD_MSG_LENGTH);
         
         MessageLenStep newMessageLenStep = new MessageLenStep(); // New MessageLenStep class object to use for the question and answer.
         
@@ -403,7 +403,7 @@ public class MessageLenView extends UserRequestView implements ActionListener {
     public StepCompletion stepCompletion() {
         System.out.println("Message Len step completion called"); // Error checking
         
-        Step currentStep = model.currentTask().currentStep();
+        Step currentStep = model.currentTask().currentStep().getStep();
         
         MessageLenStep completedMessageLenStep = gson.fromJson(currentStep.getData(), MessageLenStep.class); // Assigns the class with the data assigned while creating the example.
         

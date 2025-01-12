@@ -14,6 +14,7 @@ package edu.regis.shatu.view;
 
 import edu.regis.shatu.model.Account;
 import edu.regis.shatu.model.LessonSession;
+import edu.regis.shatu.model.Student;
 import edu.regis.shatu.model.TutoringSession;
 import java.awt.GridBagConstraints;
 import javax.swing.JButton;
@@ -70,13 +71,14 @@ public class LessonSessionView extends GPanel {
 
         if (tutoringSession == null) {
             System.err.println("TutoringSession is null in DashboardPanel constructor");
-        } else if (tutoringSession.getAccount() == null) {
+        } else if (tutoringSession.getStudent().getAccount() == null) {
             account = new Account(); // Create default account
             account.setFirstName(" "); //Set default first name for dashboard button Welcome message
-            tutoringSession.setAccount(account); //Set default account for dashboard button Welcome message
+            Student student = new Student(account);
+            tutoringSession.setStudent(student); //Set default account for dashboard button Welcome message
             System.err.println("Account is null in DashboardPanel. Added");
         } else {
-            System.out.println("DashboardPanel initialized for user: " + tutoringSession.getAccount().getFirstName());
+            System.out.println("DashboardPanel initialized for user: " + tutoringSession.getStudent().getAccount().getFirstName());
         }
     
         initializeComponents();

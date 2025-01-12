@@ -31,7 +31,8 @@ public enum BloomLevel {
      APPLICATION("Application"),
      ANALYSIS("Analysis"),
      SYNTHESIS("Synthesis"),
-     EVALUATION("Evaluation");
+     EVALUATION("Evaluation"),
+     ERROR("Error");
      
     /**
      * A GUI displayable string identifying this taxonomy level.
@@ -49,5 +50,20 @@ public enum BloomLevel {
      */
     public String title() {
         return title;
+    }
+    
+    /**
+     * Return the enum value for the given title.
+     * 
+     * @param aTitle
+     * @return 
+     */
+    public static BloomLevel findValue(String aTitle) {
+        for (BloomLevel kind : values()) {
+            if (kind.title().equalsIgnoreCase(aTitle))
+                return kind;
+        }
+        
+        return ERROR;
     }
 }

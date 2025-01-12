@@ -15,73 +15,39 @@ package edu.regis.shatu.model;
 import edu.regis.shatu.model.aol.StudentModel;
 
 /**
- * A Student user who is being tutored by the ShaTu tutor.
+ * A Student is a user who is being tutored by the ShaTu tutor and
+ * consequently has an associated student model.
  * 
  * @author rickb
  */
-public class Student extends User {    
+public class Student {    
     /**
-     * The first name of this user.
+     * The account associated with this student.
      */
-    protected String firstName;
-    
-    /**
-     * The last name of this student user.
-     */
-    protected String lastName;
+    private final Account account;
     
     /**
      * Convenience reference to this Student's student model.
      */
     private StudentModel studentModel;
     
-    public Student() {
-        this("test@regis.edu", "HelloWorld");
-    }
-  
     /**
-     * Initialize this Student with a default student model and the given user
-     * id and password.
+     * Initialize this student with the given account information.
      * 
-     * @param userId a String (e.g. "name@university.edu").
-     * @param password an SHA-256 encrypted password.
+     * @param account the account associated with this student.
      */
-    public Student(String userId, String password) { 
-        this.userId = userId;
-        this.password = password;
-        studentModel = new StudentModel(userId);
+    public Student(Account account) {
+        this.account = account;
+        studentModel = new StudentModel(account.getUserId());
     }
-
+    
     /**
-     * Return this StudentUser's first name.
-     * @return the name String
+     * Return the account associated with this student
+     * 
+     * @return the Account associated with this student
      */
-    public String getFirstName() {
-        return firstName;
-    }
-
-    /**
-     * Assign this Student User's first name.
-     * @param firstName the name String
-     */
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    /**
-     * Return this Student User's last name
-     * @return the name String
-     */
-    public String getLastName() {
-        return lastName;
-    }
-
-    /**
-     * Assign this Student User's last name.
-     * @param lastName the name String
-     */
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public Account getAccount() {
+        return account;
     }
     
     /**
@@ -93,12 +59,17 @@ public class Student extends User {
         return studentModel;
     }
 
+    /**
+     * Return this student's student model.
+     * 
+     * @param studentModel the StudentModel for this student.
+     */
     public void setStudentModel(StudentModel studentModel) {
         this.studentModel = studentModel;
     }
 
     @Override
     public String toString() {
-        return "Student: " + userId;
+        return "Student: " + account.getUserId();
     }
 }

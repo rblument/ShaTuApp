@@ -17,7 +17,7 @@ import com.google.gson.GsonBuilder;
 import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.BitOpStep;
-import edu.regis.shatu.model.aol.ExampleType;
+import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.view.act.HintAction;
 import edu.regis.shatu.view.act.NewExampleAction;
@@ -287,7 +287,7 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
 
         NewExampleRequest ex = new NewExampleRequest();
 
-        ex.setExampleType(ExampleType.ADD_BITS);
+        ex.setExampleType(ProblemType.ADD_BITS);
 
         BitOpStep newStep = new BitOpStep();
 
@@ -304,7 +304,7 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
      */
     @Override
     public StepCompletion stepCompletion() {
-        Step currentStep = model.currentTask().currentStep();
+        Step currentStep = model.currentTask().currentStep().getStep();
 
         BitOpStep example = gson.fromJson(currentStep.getData(), BitOpStep.class);
         
@@ -325,7 +325,7 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
      */
     @Override
     protected void updateView() {
-        view = SplashFrame.instance().getView(); // Accessing view to use universal buttons
+        view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
         hintButton = view.getHintButton();
         checkButton = view.getCheckButton();
         nextButton = view.getNewExampleButton();
@@ -347,7 +347,7 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
 
-        Step step = model.currentTask().getCurrentStep();
+        Step step = model.currentTask().getCurrentStep().getStep();
         
         BitOpStep example = gson.fromJson(step.getData(), BitOpStep.class);
         

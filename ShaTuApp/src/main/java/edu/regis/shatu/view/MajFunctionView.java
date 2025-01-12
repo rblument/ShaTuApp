@@ -16,7 +16,7 @@ import edu.regis.shatu.model.MajorityStep;
 import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.view.act.StepCompletionAction;
-import edu.regis.shatu.model.aol.ExampleType;
+import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.view.act.HintAction;
 import edu.regis.shatu.view.act.NewExampleAction;
@@ -86,7 +86,7 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
         NewExampleRequest ex = new NewExampleRequest();
 
         //Set example type to the problem associated with the current view
-        ex.setExampleType(ExampleType.MAJORITY_FUNCTION);
+        ex.setExampleType(ProblemType.MAJORITY_FUNCTION);
 
         MajorityStep newStep = new MajorityStep();
 
@@ -101,7 +101,7 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
 
     @Override
     public StepCompletion stepCompletion() {
-        Step currentStep = model.currentTask().currentStep();
+        Step currentStep = model.currentTask().currentStep().getStep();
 
         MajorityStep example = gson.fromJson(currentStep.getData(), MajorityStep.class);
 
@@ -614,7 +614,7 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
     
     @Override
     protected void updateView() {
-        view = SplashFrame.instance().getView(); // Accessing view to use universal buttons
+        view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
         hintButton = view.getHintButton();
         checkButton = view.getCheckButton();
         nextButton = view.getNewExampleButton();
@@ -629,7 +629,7 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
         
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-        Step step = model.currentTask().getCurrentStep();
+        Step step = model.currentTask().getCurrentStep().getStep();
         //Get the data from the model as a RotateStep object
         MajorityStep example = gson.fromJson(step.getData(), MajorityStep.class);
 

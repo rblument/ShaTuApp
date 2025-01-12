@@ -15,7 +15,7 @@ package edu.regis.shatu.view;
 import edu.regis.shatu.model.InitVarStep;
 import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
-import edu.regis.shatu.model.aol.ExampleType;
+import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.view.act.NewExampleAction;
 import edu.regis.shatu.view.act.StepCompletionAction;
@@ -411,7 +411,7 @@ public class InitVarView extends UserRequestView implements ActionListener {
     
     @Override
     protected void updateView() {
-        view = SplashFrame.instance().getView(); // Accessing view to use universal buttons
+        view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
         view.resetButtonListeners(); // Clear any listeners applied from other views
         feedbackTextArea.setText(""); // Resets text feedback area      
         setupButtons();
@@ -430,8 +430,8 @@ public class InitVarView extends UserRequestView implements ActionListener {
             // This should originate from a lack of data within the database. 
             // Populating it should aid in resolving this error.
             System.out.println("Initialize update view called.");
-            System.out.println("----Init Var Task Title-----"+model.currentTask().getTitle());
-            System.out.println("----Init Var Step Title-----"+model.currentTask().getCurrentStep().getTitle());        
+            System.out.println("----Init Var Task Title-----"+model.currentTask().getTask().getTitle());
+            System.out.println("----Init Var Step Title-----"+model.currentTask().getCurrentStep().getStep().getTitle());        
         }
     }
 
@@ -440,14 +440,14 @@ public class InitVarView extends UserRequestView implements ActionListener {
         NewExampleRequest ex = new NewExampleRequest();
         
         //Set example type to the problem associated with the current view
-        ex.setExampleType(ExampleType.INITIALIZE_VARS);
+        ex.setExampleType(ProblemType.INITIALIZE_VARS);
         
         return ex;
     }
 
     @Override
     public StepCompletion stepCompletion() {
-        Step currentStep = model.currentTask().currentStep();
+        Step currentStep = model.currentTask().currentStep().getStep();
 
         // Populate InitVarStep with user input
         InitVarStep completedInitVarStep = new InitVarStep();

@@ -15,12 +15,13 @@ package edu.regis.shatu.view.act;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import edu.regis.shatu.err.IllegalArgException;
+import edu.regis.shatu.model.Account;
 import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.StepCompletionReply;
 import edu.regis.shatu.model.Task;
-import edu.regis.shatu.model.User;
-import edu.regis.shatu.model.aol.ExampleType;
+import edu.regis.shatu.model.aol.PendingTask;
+import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.svc.ClientRequest;
 import edu.regis.shatu.svc.ServerRequestType;
@@ -99,7 +100,7 @@ public class StepCompletionAction extends ShaTuGuiAction {
     @Override
     public void actionPerformed(ActionEvent evt) {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        User user = SplashFrame.instance().getUser();
+        Account account = SplashFrame.instance().getAccount();
         //Catches a possible IllegalArgumentException thrown by the 
         //getUserRequestView() method
         try{
@@ -111,8 +112,8 @@ public class StepCompletionAction extends ShaTuGuiAction {
             //Construct the request with the users data and NewExampleRequest
             //returned by the newRequest() method
             ClientRequest request = new ClientRequest(ServerRequestType.COMPLETED_STEP);
-            request.setUserId(user.getUserId());
-            request.setSessionId(MainFrame.instance().getModel().getSecurityToken());
+            request.setUserId(account.getUserId());
+            request.setSecurityToken(MainFrame.instance().getModel().getSecurityToken());
             request.setData(gson.toJson(ex));
            
             //Send the request to the tutor and save the reply
@@ -127,22 +128,25 @@ public class StepCompletionAction extends ShaTuGuiAction {
 
                     break;
 
-                default:               
-                    Task task = gson.fromJson(reply.getData(), Task.class);
+                default:    
+                    PendingTask pendingTask = gson.fromJson(reply.getData(), PendingTask.class);
+                    Task task = pendingTask.getTask();
+                   // Task task = gson.fromJson(reply.getData(), Task.class);
 
-                    if (task.getType() == ExampleType.STEP_COMPLETION_REPLY) {
+                    if (task.getType() == ProblemType.STEP_COMPLETION_REPLY) {
                         String selection1 = "Move on to Next Task";
                         String selection2 = "Try Same Problem Again";
                         String selection3 = "Try a Similar Problem";
                         String selection4 = "Show the correct Answer";
 
-                        Step step = task.getCurrentStep();
+                        Step step = pendingTask.getCurrentStep().getStep();
+                        //Step step = task.getCurrentStep();
                         if (step.getSubType() == StepSubType.STEP_COMPLETION_REPLY) {
                             StepCompletionReply stepReply = gson.fromJson(step.getData(), StepCompletionReply.class);
 
                             if (stepReply.isCorrect()) {
                                 if (stepReply.isNewTask()) {
-                                    String prompt = "Congratulations, the anser you submitted is correct. " +
+                                    String prompt = "Congratulations, the answer you submitted is correct. " +
                                             "As I believe you've mastered this outcome, I suggest moving on to a different task. " +
                                             "However, if you'd like you can try a similar problem again.";
                                     String[] options = {selection1, selection3};
@@ -155,59 +159,59 @@ public class StepCompletionAction extends ShaTuGuiAction {
                                             System.out.println("Next Task");
                                             switch (GuiController.instance().getStepView().getSelectedPanel()) {
                                                 case ENCODE -> {
-                                                    task.setType(ExampleType.ADD_ONE_BIT);
+                                                    task.setType(ProblemType.ADD_ONE_BIT);
                                                     StepSelection.ADD1.getLabel().select();
                                                 }
                                                 case ADD1 -> {
-                                                    task.setType(ExampleType.PAD_ZEROS);
+                                                    task.setType(ProblemType.PAD_ZEROS);
                                                     StepSelection.PAD.getLabel().select();
                                                 }
                                                 case PAD -> {
-                                                    task.setType(ExampleType.ADD_MSG_LENGTH);
+                                                    task.setType(ProblemType.ADD_MSG_LENGTH);
                                                     StepSelection.LENGTH.getLabel().select();
                                                 }
                                                 case LENGTH -> {
-                                                    task.setType(ExampleType.PREPARE_SCHEDULE);
+                                                    task.setType(ProblemType.PREPARE_SCHEDULE);
                                                     StepSelection.PREPARE.getLabel().select();
                                                 }
                                                 case PREPARE -> {
-                                                    task.setType(ExampleType.INITIALIZE_VARS);
+                                                    task.setType(ProblemType.INITIALIZE_VARS);
                                                     StepSelection.INIT_VARS.getLabel().select();
                                                 }
                                                 case INIT_VARS -> {
-                                                    task.setType(ExampleType.COMPRESS_ROUND);
+                                                    task.setType(ProblemType.COMPRESS_ROUND);
                                                     StepSelection.COMPRESS.getLabel().select();
                                                 }
                                                 case COMPRESS -> {
-                                                    task.setType(ExampleType.ROTATE_BITS);
+                                                    task.setType(ProblemType.ROTATE_BITS);
                                                     StepSelection.ROTATE_BITS.getLabel().select();
                                                 }
                                                 case ROTATE_BITS -> {
-                                                    task.setType(ExampleType.SHIFT_BITS);
+                                                    task.setType(ProblemType.SHIFT_BITS);
                                                     StepSelection.SHIFT_RIGHT.getLabel().select();
                                                 }
                                                 case SHIFT_RIGHT -> {
-                                                    task.setType(ExampleType.XOR_BITS);
+                                                    task.setType(ProblemType.XOR_BITS);
                                                     StepSelection.XOR.getLabel().select();
                                                 }
                                                 case XOR -> {
-                                                    task.setType(ExampleType.ADD_BITS);
+                                                    task.setType(ProblemType.ADD_BITS);
                                                     StepSelection.ADD_TWO_BIT.getLabel().select();
                                                 }
                                                 case ADD_TWO_BIT -> {
-                                                    task.setType(ExampleType.CHOICE_FUNCTION);
+                                                    task.setType(ProblemType.CHOICE_FUNCTION);
                                                     StepSelection.CHOICE_FUNCTION.getLabel().select();
                                                 }
                                                 case CHOICE_FUNCTION -> {
-                                                    task.setType(ExampleType.MAJORITY_FUNCTION);
+                                                    task.setType(ProblemType.MAJORITY_FUNCTION);
                                                     StepSelection.MAJ_FUNCTION.getLabel().select();
                                                 }
                                                 case MAJ_FUNCTION -> {
-                                                    task.setType(ExampleType.SHA_ZERO);
+                                                    task.setType(ProblemType.SHA_ZERO);
                                                     StepSelection.SHA_ZERO.getLabel().select();
                                                 }
                                                 case SHA_ZERO -> {
-                                                    task.setType(ExampleType.SHA_ONE);
+                                                    task.setType(ProblemType.SHA_ONE);
                                                     StepSelection.SHA_ONE.getLabel().select();
                                                 }
                                                 case SHA_ONE -> {

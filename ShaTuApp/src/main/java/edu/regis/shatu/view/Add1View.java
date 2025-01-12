@@ -17,7 +17,7 @@ import com.google.gson.GsonBuilder;
 import edu.regis.shatu.model.AddOneStep;
 import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
-import edu.regis.shatu.model.aol.ExampleType;
+import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.view.act.HintAction;
@@ -358,7 +358,7 @@ public class Add1View extends UserRequestView implements ActionListener {
      */
     @Override
     protected void updateView() {
-        view = SplashFrame.instance().getView(); // Accessing view to use universal buttons
+        view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
         hintButton = view.getHintButton();
         checkButton = view.getCheckButton();
         nextButton = view.getNewExampleButton();
@@ -382,7 +382,7 @@ public class Add1View extends UserRequestView implements ActionListener {
         
         Gson gson = new GsonBuilder().setPrettyPrinting().create(); // May not be needed here.
         
-        Step step = model.currentTask().getCurrentStep(); // Will be the last subtype a example was created for or empty
+        Step step = model.currentTask().getCurrentStep().getStep(); // Will be the last subtype a example was created for or empty
         
         System.out.println("Add 1 View substep from current step: " + step.getSubType()); // Error checking
         System.out.println("add one bit type: " + type); // Error checking
@@ -441,7 +441,7 @@ public class Add1View extends UserRequestView implements ActionListener {
         
         NewExampleRequest ex = new NewExampleRequest();
         
-        ex.setExampleType(ExampleType.ADD_ONE_BIT);
+        ex.setExampleType(ProblemType.ADD_ONE_BIT);
         
         AddOneStep newAddOneStep = new AddOneStep(); // New class object.
         
@@ -465,7 +465,7 @@ public class Add1View extends UserRequestView implements ActionListener {
     @Override
     public StepCompletion stepCompletion() {
         
-        Step currentStep = model.currentTask().currentStep(); // step created from the new example.
+        Step currentStep = model.currentTask().currentStep().getStep(); // step created from the new example.
         
         AddOneStep completedAddOneStep = gson.fromJson(currentStep.getData(), AddOneStep.class); // Class object created from the new example.
         

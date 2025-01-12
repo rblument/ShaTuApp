@@ -15,8 +15,8 @@ package edu.regis.shatu.svc;
 import edu.regis.shatu.err.IllegalArgException;
 import edu.regis.shatu.err.NonRecoverableException;
 import edu.regis.shatu.err.ObjNotFoundException;
+import edu.regis.shatu.model.Student;
 import edu.regis.shatu.model.StudentModelFieldKind;
-import edu.regis.shatu.model.User;
 import edu.regis.shatu.model.aol.Assessment;
 import edu.regis.shatu.model.aol.StudentModel;
 
@@ -30,11 +30,10 @@ public interface StudentModelSvc {
     /**
      * Insert the given StudentModel into the DB.
      *
-     * @param model a student model containing the information to insert
-     * @throws IllegalArgException a student model with the given id already exists
+     * @param student whose model is being created.
      * @throws NonRecoverableException also see getCause().getErrorCode().
      */
-    void create(StudentModel model) throws IllegalArgException, NonRecoverableException;
+    public void create(Student student) throws NonRecoverableException;
     
     /**
      * Return the student model with the given id.

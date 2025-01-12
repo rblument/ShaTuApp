@@ -15,9 +15,9 @@ package edu.regis.shatu.view.act;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import edu.regis.shatu.err.IllegalArgException;
-import edu.regis.shatu.model.User;
-import edu.regis.shatu.model.Task;
+import edu.regis.shatu.model.Account;
 import edu.regis.shatu.model.aol.NewExampleRequest;
+import edu.regis.shatu.model.aol.PendingTask;
 import edu.regis.shatu.svc.ClientRequest;
 import edu.regis.shatu.svc.ServerRequestType;
 import edu.regis.shatu.svc.SvcFacade;
@@ -100,7 +100,7 @@ public class NewExampleAction extends ShaTuGuiAction {
         
 
         System.out.println("Here1");
-        User user = SplashFrame.instance().getUser();
+        Account account = SplashFrame.instance().getAccount();
         System.out.println("Here2");
         //Catches a possible IllegalArgumentException thrown by the 
         try{
@@ -115,8 +115,8 @@ public class NewExampleAction extends ShaTuGuiAction {
            //Construct the request with the users data and NewExampleRequest
            //returned by the newRequest() method
            ClientRequest request = new ClientRequest(ServerRequestType.NEW_EXAMPLE);
-           request.setUserId(user.getUserId());
-           request.setSessionId(MainFrame.instance().getModel().getSecurityToken());
+           request.setUserId(account.getUserId());
+           request.setSecurityToken(MainFrame.instance().getModel().getSecurityToken());
            request.setData(gson.toJson(ex));
            //Send the request to the tutor and save the reply
            TutorReply reply = SvcFacade.instance().tutorRequest(request);
@@ -129,7 +129,9 @@ public class NewExampleAction extends ShaTuGuiAction {
                 System.out.println("got a reply");
                //If the status was not an error, we can update the model and the
                //view with the new task sent by the tutor
-               exView.setCurrentTask(gson.fromJson(reply.getData(), Task.class)); 
+                
+                exView.setCurrentTask(gson.fromJson(reply.getData(), PendingTask.class)); 
+             //  exView.setCurrentTask(gson.fromJson(reply.getData(), Task.class)); 
             }
         }catch(IllegalArgException e){
            System.out.println("Illegal arg exception " + e);

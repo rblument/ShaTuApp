@@ -26,7 +26,9 @@ public enum GuiGesture {
     /**
      * Represent an error state read when creating a course.
      */
-    NO_OP("No Op");
+    NO_OP("No Op"),
+    
+    ERROR("Error");
     
     /**
      * A pretty print name for this GUI action.
@@ -59,5 +61,20 @@ public enum GuiGesture {
     @Override
     public String toString() {
         return name;
+    }
+    
+     /**
+     * Return the enum value for the given title.
+     * 
+     * @param aTitle
+     * @return 
+     */
+    public static GuiGesture findValue(String aTitle) {
+        for (GuiGesture kind : values()) {
+            if (kind.getName().equalsIgnoreCase(aTitle))
+                return kind;
+        }
+        
+        return ERROR;
     }
 }

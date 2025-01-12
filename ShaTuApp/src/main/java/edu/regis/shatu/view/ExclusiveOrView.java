@@ -19,7 +19,7 @@ import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.BitOpExample;
 import edu.regis.shatu.model.aol.BitOpStep;
-import edu.regis.shatu.model.aol.ExampleType;
+import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.view.act.HintAction;
 import edu.regis.shatu.view.act.NewExampleAction;
@@ -521,7 +521,7 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
     
     @Override
     protected void updateView() {
-        view = SplashFrame.instance().getView(); // Accessing view to use universal buttons
+        view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
         hintButton = view.getHintButton();
         checkButton = view.getCheckButton();
         newExampleButton = view.getNewExampleButton();
@@ -536,7 +536,7 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
         
         if (model != null) {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            Step step = model.currentTask().getCurrentStep();
+            Step step = model.currentTask().getCurrentStep().getStep();
 
             try {
                 BitOpStep bitOpStep = gson.fromJson(step.getData(), BitOpStep.class);
@@ -573,7 +573,7 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
         
         NewExampleRequest ex = new NewExampleRequest();
                 
-        ex.setExampleType(ExampleType.XOR_BITS);
+        ex.setExampleType(ProblemType.XOR_BITS);
         
         BitOpExample newStep = new BitOpExample();
         
@@ -586,7 +586,7 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
 
     @Override
     public StepCompletion stepCompletion() {
-        Step currentStep = model.currentTask().currentStep();
+        Step currentStep = model.currentTask().currentStep().getStep();
 
         BitOpStep example = gson.fromJson(currentStep.getData(), BitOpStep.class);
 

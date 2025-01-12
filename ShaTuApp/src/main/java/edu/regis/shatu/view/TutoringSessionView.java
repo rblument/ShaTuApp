@@ -13,6 +13,9 @@
 package edu.regis.shatu.view;
 
 import edu.regis.shatu.model.TutoringSession;
+import edu.regis.shatu.model.aol.PendingStep;
+import edu.regis.shatu.model.aol.PendingTask;
+import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.view.act.HintAction;
 import edu.regis.shatu.view.act.NewExampleAction;
 import edu.regis.shatu.view.act.StepCompletionAction;
@@ -28,8 +31,11 @@ import javax.swing.JSplitPane;
 
 
 /**
- * Displays a tutoring session (the top-level GUI view for the application).
+ * Displays a tutoring session that allows a student to practice.
  *
+ * The "Do One" view that allows either a student to select a task to practice 
+ * or the tutor selects a task based on the current student model.
+ * 
  * Various aspects of the tutoring session are displayed in the child components
  * of this view.
  *
@@ -90,8 +96,24 @@ public class TutoringSessionView extends GPanel {
      */
     public void setModel(TutoringSession model) {
         this.model = model;
+        
+        PendingTask pTask = model.currentTask();
+        PendingStep pStep = pTask.getCurrentStep();
+        StepSubType subType = pStep.getStep().getSubType();
+        displayStep(subType.getViewName());
 
         stepView.setModel(model);
+    }
+    
+    /**
+     * Display the given selection's view in the StepView handling appropriate
+     * highlighting of the associated JLabel selector (see StepSelection enum).
+     * 
+     * @param selection 
+     */
+    public void displayStep(StepSelection selection) {
+        stepSelectorView.selectStep(selection);
+        stepView.selectPanel(selection);
     }
 
     /**
@@ -103,7 +125,6 @@ public class TutoringSessionView extends GPanel {
         stepView = new StepView(); 
         stepSelectorView = new StepSelectorView();
         
-        // Buttons for 'check', 'new example', and 'hint'
         checkButton = this.initializeButton(StepCompletionAction.instance());
         hintButton = this.initializeButton(HintAction.instance());
         newExampleButton = this.initializeButton(NewExampleAction.instance());
@@ -111,7 +132,7 @@ public class TutoringSessionView extends GPanel {
             checkButton.setEnabled(true);
             hintButton.setEnabled(true);
         });
-        //button for returning to dashboard
+   
         dashboardButton = new JButton("Go to Dashboard");
         dashboardButton.addActionListener(e -> navigateToDashboard());
         //button for logging out

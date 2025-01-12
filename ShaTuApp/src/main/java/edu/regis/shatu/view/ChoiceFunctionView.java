@@ -17,7 +17,7 @@ import com.google.gson.GsonBuilder;
 import edu.regis.shatu.model.ChoiceFunctionStep;
 import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
-import edu.regis.shatu.model.aol.ExampleType;
+import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.view.act.HintAction;
 import edu.regis.shatu.view.act.NewExampleAction;
@@ -86,7 +86,7 @@ public class ChoiceFunctionView extends UserRequestView implements ActionListene
         NewExampleRequest ex = new NewExampleRequest();
 
         //Set example type to the problem associated with the current view
-        ex.setExampleType(ExampleType.CHOICE_FUNCTION);
+        ex.setExampleType(ProblemType.CHOICE_FUNCTION);
 
         ChoiceFunctionStep newStep = new ChoiceFunctionStep();
 
@@ -101,7 +101,7 @@ public class ChoiceFunctionView extends UserRequestView implements ActionListene
 
     @Override
     public StepCompletion stepCompletion() {
-        Step currentStep = model.currentTask().currentStep();
+        Step currentStep = model.currentTask().currentStep().getStep();
 
         ChoiceFunctionStep example = gson.fromJson(currentStep.getData(), ChoiceFunctionStep.class);
 
@@ -543,7 +543,7 @@ public class ChoiceFunctionView extends UserRequestView implements ActionListene
 
     @Override
     protected void updateView() {
-        view = SplashFrame.instance().getView(); // Accessing view to use universal buttons
+        view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
         hintButton = view.getHintButton();
         checkButton = view.getCheckButton();
         nextButton = view.getNewExampleButton();
@@ -560,7 +560,7 @@ public class ChoiceFunctionView extends UserRequestView implements ActionListene
         
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-        Step step = model.currentTask().getCurrentStep();
+        Step step = model.currentTask().getCurrentStep().getStep();
         
         System.out.println("Choice value View substep from current step: " + step.getSubType()); // Error checking
 

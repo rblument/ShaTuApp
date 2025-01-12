@@ -17,7 +17,7 @@ import com.google.gson.GsonBuilder;
 import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.EncodeAsciiStep;
-import edu.regis.shatu.model.aol.ExampleType;
+import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.view.act.HintAction;
@@ -365,7 +365,7 @@ public class EncodeView extends UserRequestView implements ActionListener {
         if (view == null) {
             MainFrame mainFrame = MainFrame.instance();
             if (mainFrame != null) {
-                view = SplashFrame.instance().getView(); // Initialize view once SplashFrame is ready
+                view = SplashFrame.instance().getTutoringSessionView(); // Initialize view once SplashFrame is ready
                 
             } else {
                 System.err.println("SplashFrame.instance() is null. Cannot initialize 'view'.");
@@ -392,7 +392,7 @@ public class EncodeView extends UserRequestView implements ActionListener {
         
             Gson gson = new GsonBuilder().setPrettyPrinting().create(); // May not be needed here.
         
-            Step step = model.currentTask().getCurrentStep(); // Will be the last subtype a example was created for or empty
+            Step step = model.currentTask().getCurrentStep().getStep(); // Will be the last subtype a example was created for or empty
         
             System.out.println("Encode Ascii substep from current step: " + step.getSubType()); // Error checking
             System.out.println("Encode Ascii type: " + type); // Error checking
@@ -471,7 +471,7 @@ public class EncodeView extends UserRequestView implements ActionListener {
         
         NewExampleRequest ex = new NewExampleRequest();
         
-        ex.setExampleType(ExampleType.ASCII_ENCODE);
+        ex.setExampleType(ProblemType.ASCII_ENCODE);
         
         EncodeAsciiStep encodeAsciiStep = new EncodeAsciiStep(); // New class object.
         
@@ -500,7 +500,7 @@ public class EncodeView extends UserRequestView implements ActionListener {
     @Override
     public StepCompletion stepCompletion() {
         
-        Step currentStep = model.currentTask().currentStep(); // step created from the new example.
+        Step currentStep = model.currentTask().currentStep().getStep(); // step created from the new example.
         
         EncodeAsciiStep completedEncodeAsciiStep = gson.fromJson(currentStep.getData(), EncodeAsciiStep.class); // Class object created from the new example.
         

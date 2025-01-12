@@ -24,7 +24,7 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 
 /**
- *
+ * ToDo: Should this be a HilightLabel?
  * @author rickb
  */
 public class BitOpLabel extends JLabel implements MouseListener {
@@ -97,7 +97,8 @@ public class BitOpLabel extends JLabel implements MouseListener {
     }
     
     public void select() {
-        GuiController.instance().getStepSelectorView().displayStep(stepSelection);
+       // GuiController.instance().getStepSelectorView().displayStep(stepSelection);
+        SplashFrame.instance().getTutoringSessionView().displayStep(stepSelection);
         isSelected = true;
         setBackground(SELECTED_BACKGROUND);
     }

@@ -86,6 +86,10 @@ public class StudentModel {
         return assessments.get(knowledgeComponentId);
     }
     
+    public HashMap<Integer, Assessment> getAssessments() {
+        return assessments;
+    }
+    
     /**
      * Return the current scaffolding level being used to support the student.
      * 

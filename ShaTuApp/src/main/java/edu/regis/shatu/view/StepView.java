@@ -13,9 +13,12 @@
 package edu.regis.shatu.view;
 
 import edu.regis.shatu.err.IllegalArgException;
+import edu.regis.shatu.model.Step;
+import edu.regis.shatu.model.Task;
 import edu.regis.shatu.model.TutoringSession;
-
-import edu.regis.shatu.view.act.NewExampleAction;
+import edu.regis.shatu.model.aol.PendingStep;
+import edu.regis.shatu.model.aol.PendingTask;
+import edu.regis.shatu.model.aol.StepSubType;
 import java.awt.CardLayout;
 import java.awt.Color;
 import javax.swing.BorderFactory;
@@ -25,68 +28,69 @@ import javax.swing.JPanel;
  * A view displaying a current task and step in the tutoring session, which
  * typically allows a student to practice a specific aspect of the SHA-256
  * algorithm, such as performing the XOR function.
- * 
+ *
  * @author rickb
  */
-public class StepView extends JPanel {       
+public class StepView extends JPanel {
+
     /**
-     * The name of the card (child view) currently displayed in this view.
-     * Pass this value to getUserRequestView(...) to obtain the actual view.
+     * The name of the card (child view) currently displayed in this view. Pass
+     * this value to getUserRequestView(...) to obtain the actual view.
      */
     private StepSelection selectedPanel;
-    
+
     /**
-     * The child ASCII child view (card) that can be displayed in this view 
+     * The child ASCII child view (card) that can be displayed in this view
      */
     private EncodeView encodeView;
-    
+
     private CompressionCanvasView compressionView;
-    
+
     private PrepareScheduleView prepareScheduleView;
-    
+
     private Add1View add1View;
-    
+
     private Pad0View padView;
-    
+
     private RotateView rotateView;
-    
+
     private InitVarView initVarView;
 
     private ShiftRightView shiftRightView;
-    
+
     private ExclusiveOrView exclusiveOrView;
 
     private AddTwoBitView addTwoBitView;
-    
+
     private MajFunctionView majFunction;
-    
+
     private ShaZeroView shaZero;
-    
+
     private ShaOneView shaOne;
-    
+
     private ChoiceFunctionView choiceFunctionView;
-    
+
     private StepCompletionReplyView stepReplyView;
-    
+
     private TutoringSession model;
-    
+
     private MessageLenView messageLenView;
 
-
     /**
-     * Initialize and layout the child components (cards) displayed in this view.
+     * Initialize and layout the child components (cards) displayed in this
+     * view.
      */
     public StepView() {
         GuiController.instance().setStepView(this);
-        
+
         setLayout(new CardLayout());
-        
+
         initializeComponents();
         initializeLayout();
-        
+
         setBorder(BorderFactory.createLineBorder(Color.BLACK));
 
-        selectPanel(StepSelection.ENCODE);   
+        selectPanel(StepSelection.ENCODE);
     }
 
     public TutoringSession getModel() {
@@ -104,63 +108,56 @@ public class StepView extends JPanel {
             System.out.println("StepView.setModel " + e);
         }
     }
-    
+
     /**
-     * Display the child view with the given name. Request a task from the 
-     * tutor for views that display a problem to be solved for the student
-     * 
-     * @param name a StepSelection
+     * Display the child view with the given name. Request a task from the tutor
+     * for views that display a problem to be solved for the student
+     *
+     * @param name a StepSelection panel name (null doesn't change views)
      */
-    public void selectPanel(StepSelection name){
-        CardLayout cl = (CardLayout) getLayout();
-       
-        cl.show(this, name.toString());
-        
-        selectedPanel = name;
-        
-        try {
-            getUserRequestView().setModel(model);
-        } catch (IllegalArgException e) {
-            // If we get here, we're somehow displaying a view we don't know
-            // about, which is a clear coding error.
-            System.out.println("StepView.setModel " + e);
+    public void selectPanel(StepSelection name) {
+        if (name != null) {
+            CardLayout cl = (CardLayout) getLayout();
+
+            cl.show(this, name.toString());
+
+            selectedPanel = name;
+
+            try {
+                getUserRequestView().setModel(model);
+            } catch (IllegalArgException e) {
+                // If we get here, we're somehow displaying a view we don't know
+                // about, which is a clear coding error.
+                System.out.println("StepView.setModel " + e);
+            }
+
         }
-        
-        //ToDo: Unfinished switch statement for views that need to get a task from 
-        //the tutor when selected
-        // DONT DO THIS. Should not ask the tutor everytime a view is displayed.
-        //switch(selectedPanel){
-        //   case ROTATE_BITS:
-        //      NewExampleAction.instance();
-        //   default:
-        //}
     }
-    
-    
+
     /**
      * Method invoked when a new task is requested of the tutor. If the current
-     * selected panel is a view that can make a request to the tutor, return 
-     * the view. Otherwise, throws an Illegal Argument Exception
-     * 
-     * @return a UserRequestView object 
-     * @throws IllegalArgException when the selected panel is not part of the 
+     * selected panel is a view that can make a request to the tutor, return the
+     * view. Otherwise, throws an Illegal Argument Exception
+     *
+     * @return a UserRequestView object
+     * @throws IllegalArgException when the selected panel is not part of the
      * UserRequestView Class
      */
-    public UserRequestView getUserRequestView() throws IllegalArgException{
+    public UserRequestView getUserRequestView() throws IllegalArgException {
         // ToDo: Need to add the view for each function 
-        switch(selectedPanel){
+        switch (selectedPanel) {
             case ADD1:
                 return add1View;
             case ADD_TWO_BIT:
                 return addTwoBitView;
-            case CHOICE_FUNCTION: 
+            case CHOICE_FUNCTION:
                 return choiceFunctionView;
             case COMPRESS:
                 return compressionView;
             case ENCODE:
                 return encodeView;
             case INIT_VARS:
-                    return initVarView;
+                return initVarView;
             case MAJ_FUNCTION:
                 return majFunction;
             case ROTATE_BITS:
@@ -173,22 +170,22 @@ public class StepView extends JPanel {
                 return shaZero;
             case SHA_ONE:
                 return shaOne;
-            case SHIFT_RIGHT:                
+            case SHIFT_RIGHT:
                 return shiftRightView;
             case STEP_REPLY:
-                    return stepReplyView;
+                return stepReplyView;
             case XOR:
                 return exclusiveOrView;
             case LENGTH:
                 return messageLenView;
-   
+
             default:
 
                 String msg = "Illegal User RequestView in StepView selection " + selectedPanel;
                 throw new IllegalArgException(msg);
-       }
+        }
     }
-    
+
     public StepSelection getSelectedPanel() {
         return selectedPanel;
     }
@@ -196,7 +193,7 @@ public class StepView extends JPanel {
     /**
      * Create the child GUI components appearing in this frame.
      */
-    private void initializeComponents() { 
+    private void initializeComponents() {
         encodeView = new EncodeView();
         prepareScheduleView = new PrepareScheduleView();
         compressionView = new CompressionCanvasView();
@@ -216,7 +213,7 @@ public class StepView extends JPanel {
         stepReplyView = new StepCompletionReplyView();
         messageLenView = new MessageLenView();
     }
-    
+
     /**
      * Layout the child components in this view
      */
@@ -237,7 +234,6 @@ public class StepView extends JPanel {
         add(exclusiveOrView, StepSelection.XOR.toString());
         add(choiceFunctionView, StepSelection.CHOICE_FUNCTION.toString());
         add(messageLenView, StepSelection.LENGTH.toString());
-
 
         add(stepReplyView, StepSelection.STEP_REPLY.toString());
     }

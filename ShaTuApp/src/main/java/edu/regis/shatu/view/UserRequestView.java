@@ -19,6 +19,7 @@ import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.Task;
 import edu.regis.shatu.model.TutoringSession;
 import edu.regis.shatu.model.aol.NewExampleRequest;
+import edu.regis.shatu.model.aol.PendingTask;
 import java.util.Random;
 
 /**
@@ -102,7 +103,7 @@ public abstract class UserRequestView extends GPanel {
      * 
      * @param task 
      */
-    public void setCurrentTask(Task task) {
+    public void setCurrentTask(PendingTask task) {
        model.addCurrentTask(task);
        updateView();
     }

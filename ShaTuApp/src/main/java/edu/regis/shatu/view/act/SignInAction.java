@@ -14,7 +14,7 @@ package edu.regis.shatu.view.act;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import edu.regis.shatu.model.User;
+import edu.regis.shatu.model.Account;
 import edu.regis.shatu.model.TutoringSession;
 import edu.regis.shatu.svc.ClientRequest;
 import edu.regis.shatu.svc.ServerRequestType;
@@ -95,9 +95,9 @@ public class SignInAction extends ShaTuGuiAction {
     @Override
     public void actionPerformed(ActionEvent evt) {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        User user = SplashFrame.instance().getUser();
+        Account account = SplashFrame.instance().getAccount();
         ClientRequest request = new ClientRequest(ServerRequestType.SIGN_IN);
-        request.setData(gson.toJson(user));
+        request.setData(gson.toJson(account));
         TutorReply reply = SvcFacade.instance().tutorRequest(request);
 
         switch (reply.getStatus()) {

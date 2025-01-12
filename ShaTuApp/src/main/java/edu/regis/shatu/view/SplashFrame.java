@@ -15,8 +15,6 @@ package edu.regis.shatu.view;
 import edu.regis.shatu.model.Account;
 import edu.regis.shatu.model.LessonSession;
 import edu.regis.shatu.model.TutoringSession;
-import edu.regis.shatu.model.User;
-import edu.regis.shatu.view.act.GetTaskAction;
 import java.awt.CardLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
@@ -130,13 +128,14 @@ public class SplashFrame extends JFrame {
     private LessonSession lessonSession;
     
     /**
-     * The panel which displays the ShaTuApp tutoring view;
-     * Used for practicing skills.
+     * The "Do One" tutoring view (see its documentation).
      */
     private TutoringSessionView tutoringSessionView;
     
+    /**
+     * This is the domain model for this 
+     */
     private TutoringSession tutoringSession;
-    
     
     /**
      * A panel which allows the user to create a new student account with 
@@ -190,33 +189,26 @@ public class SplashFrame extends JFrame {
     }
     
     /**
-     * Return the student login information displayed in this frame.
-     * 
-     * See getAccount()
-     * 
-     * @return a User (userId and password)
-     */
-    public User getUser() {
-       return splashPanel.getModel();
-    }
-    
-    /**
      * Return the user account information 
-     * 
-     * See getUser()
      * 
      * @return an Account (userId, passwd, first and last name)
      */
     public Account getAccount() {
         String panel = this.selectedPanel;
         
-        System.out.println("Get Account : " + panel);
-        
+        // ToDo: This appears to be a mess
+        //System.out.println("***** Selected Panel *********** " + panel);
         switch (panel) {
-            case "ForgotPasswordPanel":
+            case SPLASH:
+            case TUTOR:
+            case DASHBOARD:
+                return splashPanel.getModel();
+            case FORGOT_PASSWORD:
                 return forgotPasswordPanel.getModel();
-            case "ResetPasswordPanel":
+            case RESET_PASSWORD:
+                System.out.println("RESET");
                 return resetPasswordPanel.getModel();
+               
             default:
                 return newAccountPanel.getModel();
                 
@@ -264,28 +256,15 @@ public class SplashFrame extends JFrame {
      * @param session 
      */
     public void setSession(TutoringSession session) {
-        this.tutoringSession = session;  // Store the session for later use
-        if (this.tutoringSession == null) {
-            System.err.println("Failed to store TutoringSession in SplashFrame");
-        } else {
-            System.out.println("TutoringSession successfully stored in SplashFrame");
-        }
-    }
-    
-    /**
-     * Returns the current session for the SplashFrame.
-     * @return The current TutoringSession instance.
-     */
-    public TutoringSession getSession() {
-        return this.tutoringSession;
+        tutoringSession = session;
     }
     
      /**
-     * Enables access to the current view
+     * Enables access to the current tutoring session view
      * @return an instance of the current view
      */
-    public TutoringSessionView getView(){
-        return this.tutoringSessionView;
+    public TutoringSessionView getTutoringSessionView(){
+        return tutoringSessionView;
     }
     
     /**
@@ -304,16 +283,16 @@ public class SplashFrame extends JFrame {
      */
     public void logout() {        
         // Ensure that tutoring session is not null before attempting to clear
-        if (this.tutoringSession != null && this.tutoringSession.getAccount() != null) {
+        if (this.tutoringSession != null && this.tutoringSession.getStudent().getAccount() != null) {
             // Clear account information
-            this.tutoringSession.getAccount().clear();
+            this.tutoringSession.getStudent().getAccount().clear();
         }
 
         // Invalidate or set the tutoring session to null
         this.tutoringSession = null;
 
         // Clear the splash panel model by setting it to a new user and reset the fields
-        this.splashPanel.setModel(new User());  // Reset the splash panel model
+        this.splashPanel.setModel(new Account());  // Reset the splash panel model
         this.splashPanel.clearFields();  // Clear the userId and password fields
 
         // Swap to splash screen for login
@@ -324,66 +303,58 @@ public class SplashFrame extends JFrame {
      * Sets the current card panel to Dashboard.
      * @param session
      */
-    public void selectDashboard(TutoringSession session) {
-        if (session == null) {
-            System.err.println("TutoringSession is null in selectDashboard");
-            return;  // Exit early to prevent passing a null session
-        }
+    public void selectDashboard(TutoringSession session) {   
+        tutoringSession = session;
 
-        this.setSession(session);  // Store the session for later use
-        this.dashboardPanel = new DashboardPanel(session);  // Pass session to DashboardPanel
-        this.cards.add(dashboardPanel, DASHBOARD);
-        this.selectPanel(DASHBOARD);  // Display the dashboard
-        System.out.println("SplashFrame.java: selectDashboard: session = " + session.getAccount().getFirstName());
+        if (dashboardPanel == null) {
+            dashboardPanel = new DashboardPanel(session);
+        } else {
+            dashboardPanel.setModel(session);
+        }
+        
+        cards.add(dashboardPanel, DASHBOARD);
+        
+        selectPanel(DASHBOARD);  // Display the dashboard
     }
-   
 
      /**
      * Selects a personalized practice screen for each user upon selecting
      * the dashboard's practice button.
-     * @param session
      */
      public void selectPracticeScreen() {
-        TutoringSession session = getSession(); // Retrieve the session
-        if (session == null) {
-            System.err.println("Session is null when switching to practice screen.");
-            return;
+         if (tutoringSessionView == null) {
+            tutoringSessionView = new TutoringSessionView(); 
+            cards.add(tutoringSessionView, TUTOR);
         }
-
-        // Initialize the TutoringSessionView if it's not already initialized
-        if (this.tutoringSessionView == null) {
-            this.tutoringSessionView = new TutoringSessionView(); // Create the tutoring session view
-            cards.add(tutoringSessionView, TUTOR);  // Add it to the CardLayout
-        }
-
-        // Set the model (session) for the TutoringSessionView
-        this.tutoringSessionView.setModel(session);
 
         // Dynamically resize the frame to fit the screen
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        int width = (int) (screenSize.width * 0.5); // 50% of the screen width
-        int height = (int) (screenSize.height * 0.56); // 56% of the screen height
-
-        setPreferredSize(new Dimension(width, height));
-        pack();
-
-        // Switch to the tutoring session view
-        selectPanel(TUTOR);
+        // ToDo:
+        // code for somewhere else?
         
-        GetTaskAction.instance().actionPerformed(null);
+       // Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+       // int width = (int) (screenSize.width * 0.5); // 50% of the screen width
+       // int height = (int) (screenSize.height * 0.56); // 56% of the screen height
+
+       // setPreferredSize(new Dimension(width, height));
+       // pack();
+        
+        // Set the model (session) for the TutoringSessionView
+        tutoringSessionView.setModel(tutoringSession);
+        
+              // Switch to the tutoring session view
+        selectPanel(TUTOR);
     }
         
     /**
      * Selects a personalized lesson screen for each user upon selecting
      * the dashboard's practice teach me.
      */
-        public void selectLessonScreen() {
+    public void selectLessonScreen() {
         LessonSession session = getLessonSession(); // Retrieve the lesson session
-        TutoringSession tsession = getSession(); // Retrieve the session
 
         //Initialize the LessonSessionView if it's not already initialized
         if (this.lessonSessionView == null) {
-            this.lessonSessionView = new LessonSessionView(tsession); // Create the lesson session view
+            this.lessonSessionView = new LessonSessionView(tutoringSession); // Create the lesson session view
             cards.add(lessonSessionView, LESSON);  // Add it to the CardLayout
         }
         
@@ -419,10 +390,10 @@ public class SplashFrame extends JFrame {
      * Display to the user they entered an unknown user during a sign in.
      */
     public void unknownUser() {
-        User user = splashPanel.getModel();
+        Account account = splashPanel.getModel();
        
         JOptionPane.showMessageDialog(this, 
-                user.getUserId() + " is not a known user.\n\nPerhaps, try creating a 'New User' first.",
+                account.getUserId() + " is not a known user.\n\nPerhaps, try creating a 'New User' first.",
                 "Warning", JOptionPane.ERROR_MESSAGE);
     }
     
@@ -472,7 +443,7 @@ public class SplashFrame extends JFrame {
         
             SwingUtilities.getRootPane(but).setDefaultButton(but);
         }
-        else {
+        else if (name.equals(NEW_USER)) {
             this.newAccountPanel.updateFocus();
         }
     }
@@ -510,17 +481,20 @@ public class SplashFrame extends JFrame {
 
     /**
      * Create the child GUI components appearing in this frame.
+     * 
+     * Note, as the Tutoring Session View references this Splash Frame,
+     * we delay its creation until it's actually required (as triggered
+     * from the Dashboard Panel).
      */
     private void initializeComponents() {
-       
-        this.cards = new JPanel(new CardLayout());
+        cards = new JPanel(new CardLayout());
         
-        this.splashPanel = new SplashPanel();
-        this.newAccountPanel = new NewAccountPanel();
-        this.forgotPasswordPanel = new ForgotPasswordPanel();
-                        
-        this.cards.add(splashPanel, SPLASH);
-        this.cards.add(newAccountPanel, NEW_USER);
-        this.cards.add(forgotPasswordPanel, FORGOT_PASSWORD);
+        splashPanel = new SplashPanel();
+        newAccountPanel = new NewAccountPanel();
+        forgotPasswordPanel = new ForgotPasswordPanel();
+                      
+        cards.add(splashPanel, SPLASH);
+        cards.add(newAccountPanel, NEW_USER);
+        cards.add(forgotPasswordPanel, FORGOT_PASSWORD); 
     }
 }

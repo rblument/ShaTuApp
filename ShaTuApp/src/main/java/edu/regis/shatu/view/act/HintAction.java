@@ -15,12 +15,11 @@ package edu.regis.shatu.view.act;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import edu.regis.shatu.err.IllegalArgException;
+import edu.regis.shatu.model.Account;
 import edu.regis.shatu.model.Hint;
 import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
-import edu.regis.shatu.model.Task;
-import edu.regis.shatu.model.User;
-import edu.regis.shatu.model.aol.ExampleType;
+import edu.regis.shatu.model.aol.PendingStep;
 import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.svc.ClientRequest;
 import edu.regis.shatu.svc.ServerRequestType;
@@ -100,7 +99,7 @@ public class HintAction extends ShaTuGuiAction {
     {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         
-        User user = SplashFrame.instance().getUser();
+        Account account = SplashFrame.instance().getAccount();
         
         try {
             //Get the current view that initiated the StepCompletionRequest
@@ -113,8 +112,8 @@ public class HintAction extends ShaTuGuiAction {
             //Construct the request with the users data and NewExampleRequest
             //returned by the newRequest() method
             ClientRequest request = new ClientRequest(ServerRequestType.REQUEST_HINT);
-            request.setUserId(user.getUserId());
-            request.setSessionId(MainFrame.instance().getModel().getSecurityToken());
+            request.setUserId(account.getUserId());
+            request.setSecurityToken(MainFrame.instance().getModel().getSecurityToken());
             request.setData(gson.toJson(ex));
            
             //Send the request to the tutor and save the reply
@@ -129,10 +128,11 @@ public class HintAction extends ShaTuGuiAction {
                     break;
 
                 default:
-                    Step step = gson.fromJson(reply.getData(), Step.class);
+                    PendingStep pendingStep = gson.fromJson(reply.getData(), PendingStep.class);
+                    Step step = pendingStep.getStep();
                     if (step.getSubType() == StepSubType.REQUEST_HINT) {
-                        Hint hint = step.getCurrentHint();
-                        exView.getModel().currentTask().currentStep().setCurrentHintIndex(step.getCurrentHintIndex() + 1);
+                        Hint hint = pendingStep.getCurrentHint();
+                        exView.getModel().currentTask().currentStep().setCurrentHintIndex(pendingStep.getCurrentHintIndex() + 1);
                         String prompt = hint.getText();
                         JOptionPane.showMessageDialog(MainFrame.instance(),
                                 prompt, "Tutor Reply", JOptionPane.INFORMATION_MESSAGE);
