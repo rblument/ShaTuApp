@@ -121,7 +121,7 @@ public class NewExampleAction extends ShaTuGuiAction {
            //Send the request to the tutor and save the reply
            TutorReply reply = SvcFacade.instance().tutorRequest(request);
         switch (reply.getStatus()) {
-            case "ERR":
+            case ":ERR":
                 // If we get here, there is a coding error in the tutor svc
                 System.out.println("Coding error  status: " + reply.getStatus());
                 break;

@@ -28,6 +28,7 @@ import edu.regis.shatu.model.BloomLevel;
 import edu.regis.shatu.model.CourseDigest;
 import edu.regis.shatu.model.ExercisingLocation;
 import edu.regis.shatu.model.KnowledgeComponent;
+import edu.regis.shatu.model.UnitDigest;
 import edu.regis.shatu.model.aol.OutcomeGranularity;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.TaskKind;
@@ -87,7 +88,7 @@ public class CourseDAO extends MySqlDAO implements CourseSvc {
                 throw new ObjNotFoundException("Course Id:" + courseId);
             }
         } catch (SQLException e) {
-            throw new NonRecoverableException("UserDAO-ERR-2" + e.toString(), e);
+            throw new NonRecoverableException("CourseDAO-ERR-1" + e.toString(), e);
         } finally {
             close(conn, stmt);
         }
@@ -97,14 +98,14 @@ public class CourseDAO extends MySqlDAO implements CourseSvc {
      * {@inheritDoc}
      */
     @Override
-    public CourseDigest retrieveDigest(int courseId) throws ObjNotFoundException, NonRecoverableException {
+    public CourseDigest retrieveDigest(int courseId, Connection conn)
+            throws ObjNotFoundException, NonRecoverableException {
+        
         final String sql = "SELECT Title,Description FROM Course WHERE Id = ?";
 
-        Connection conn = null;
         PreparedStatement stmt = null;
 
         try {
-            conn = DriverManager.getConnection(URL);
             stmt = conn.prepareStatement(sql);
 
             stmt.setInt(1, courseId);
@@ -123,9 +124,46 @@ public class CourseDAO extends MySqlDAO implements CourseSvc {
                 throw new ObjNotFoundException("Course Id:" + courseId);
             }
         } catch (SQLException e) {
-            throw new NonRecoverableException("UserDAO-ERR-3" + e.toString(), e);
+            throw new NonRecoverableException("CourseDAO-ERR-2" + e.toString(), e);
         } finally {
-            close(conn, stmt);
+            close(stmt);
+        }
+    }
+    
+     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public UnitDigest retrieveUnitDigest(int courseId, int unitId, Connection conn)
+            throws ObjNotFoundException, NonRecoverableException {
+        
+        final String sql = "SELECT Title,Description FROM Unit WHERE CourseId = ? AND UnitId = ?";
+
+        PreparedStatement stmt = null;
+
+        try {
+            stmt = conn.prepareStatement(sql);
+
+            stmt.setInt(1, courseId);
+            stmt.setInt(2, unitId);
+
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                UnitDigest digest = new UnitDigest(unitId);
+
+                digest.setTitle(rs.getString(1));
+                digest.setDescription(rs.getString(2));
+                
+                return digest;
+
+            } else {
+                throw new ObjNotFoundException("Unit Id:" + courseId);
+            }
+        } catch (SQLException e) {
+            throw new NonRecoverableException("CourseDAO-ERR-3" + e.toString(), e);
+        } finally {
+            close(stmt);
         }
     }
     
@@ -166,7 +204,7 @@ public class CourseDAO extends MySqlDAO implements CourseSvc {
                 throw new ObjNotFoundException("Course Id:" + courseId);
             }
         } catch (SQLException e) {
-            throw new NonRecoverableException("UserDAO-ERR-3" + e.toString(), e);
+            throw new NonRecoverableException("CourseDAO-ERR-4" + e.toString(), e);
         } finally {
             close(stmt);
         }
@@ -221,7 +259,7 @@ public class CourseDAO extends MySqlDAO implements CourseSvc {
              return outcomes;
         
         } catch (SQLException e) {
-            throw new NonRecoverableException("UserDAO-ERR-4" + e.toString(), e);
+            throw new NonRecoverableException("CourseDAO-ERR-5" + e.toString(), e);
         } finally {
             close(stmt);
         }
@@ -261,7 +299,7 @@ public class CourseDAO extends MySqlDAO implements CourseSvc {
             
             return units;
         } catch (SQLException e) {
-            throw new NonRecoverableException("UserDAO-ERR-5" + e.toString(), e);
+            throw new NonRecoverableException("CourseDAO-ERR-6" + e.toString(), e);
         } finally {
             close(stmt); // Don't close the connection, retrieve(courseId) will
         }
@@ -312,7 +350,7 @@ public class CourseDAO extends MySqlDAO implements CourseSvc {
             
             return tasks;
         } catch (SQLException e) {
-            throw new NonRecoverableException("UserDAO-ERR-6" + e.toString(), e);
+            throw new NonRecoverableException("CourseDAO-ERR-7" + e.toString(), e);
         } finally {
             close(stmt); // Don't close the connection, retrieve(courseId) will
         }
@@ -363,7 +401,7 @@ public class CourseDAO extends MySqlDAO implements CourseSvc {
             
             return steps;
         } catch (SQLException e) {
-            throw new NonRecoverableException("UserDAO-ERR-7" + e.toString(), e);
+            throw new NonRecoverableException("CourseDAO-ERR-8" + e.toString(), e);
         } finally {
             close(stmt); // Don't close the connection, retrieve(courseId) will
         }
@@ -403,7 +441,7 @@ public class CourseDAO extends MySqlDAO implements CourseSvc {
             return hints;
             
          } catch (SQLException e) {
-            throw new NonRecoverableException("UserDAO-ERR-8" + e.toString(), e);
+            throw new NonRecoverableException("CourseDAO-ERR-9" + e.toString(), e);
         } finally {
             close(stmt); // Don't close the connection, retrieve(courseId) will
         }
@@ -483,7 +521,7 @@ public class CourseDAO extends MySqlDAO implements CourseSvc {
                 throw new NonRecoverableException(errMsg, new InconsistentDBException(errMsg));
             }
         } catch (SQLException e) {
-            throw new NonRecoverableException("UserDAO-ERR-9" + e.toString(), e);
+            throw new NonRecoverableException("CourseDAO-ERR-10" + e.toString(), e);
         } finally {
             close(stmt); // Don't close the connection, retrieve(courseId) will
         }
@@ -514,7 +552,7 @@ public class CourseDAO extends MySqlDAO implements CourseSvc {
                 throw new NonRecoverableException(errMsg, new InconsistentDBException(errMsg));
             }
         } catch (SQLException e) {
-            throw new NonRecoverableException("UserDAO-ERR-10" + e.toString(), e);
+            throw new NonRecoverableException("CourseDAO-ERR-11" + e.toString(), e);
         } finally {
             close(stmt); // Don't close the connection, retrieve(courseId) will
         }
@@ -558,7 +596,7 @@ public class CourseDAO extends MySqlDAO implements CourseSvc {
             return locations;
             
         } catch (SQLException e) {
-            throw new NonRecoverableException("UserDAO-ERR-11" + e.toString(), e);
+            throw new NonRecoverableException("CourseDAO-ERR-12" + e.toString(), e);
         } finally {
             close(stmt); // Don't close the connection, retrieve(courseId) will
         }

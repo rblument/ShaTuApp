@@ -13,12 +13,7 @@
 package edu.regis.shatu.view;
 
 import edu.regis.shatu.err.IllegalArgException;
-import edu.regis.shatu.model.Step;
-import edu.regis.shatu.model.Task;
 import edu.regis.shatu.model.TutoringSession;
-import edu.regis.shatu.model.aol.PendingStep;
-import edu.regis.shatu.model.aol.PendingTask;
-import edu.regis.shatu.model.aol.StepSubType;
 import java.awt.CardLayout;
 import java.awt.Color;
 import javax.swing.BorderFactory;

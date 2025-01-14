@@ -204,13 +204,12 @@ public class AccountDAO extends MySqlDAO implements AccountSvc {
         PreparedStatement stmt = null;
 
         try {
-            conn = DriverManager.getConnection(URL);
             stmt = conn.prepareStatement(sql);
 
             stmt.setString(1, userId);
 
             ResultSet rs = stmt.executeQuery();
-
+            
             if (rs.next()) {
                 Account account = new Account(userId);
 

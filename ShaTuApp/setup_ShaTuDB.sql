@@ -266,13 +266,164 @@ VALUES
 INSERT INTO KnowledgeComponent
 (Id, CourseId, Title,
  Description,
- BloomLevel, IsDomainFocus, Pedagogy,
- ExercisingLocations, Granularity)
+ BloomLevel, IsDomainFocus, Pedagogy, ExercisingLocations, Granularity)
 VALUES
 (0, 1, 'Information Message Acknowledgement', 
  'Student has appropriately demonstrated acknowleding information messages presented by the tutor.',
- 'Application', 0, 'Other',
- '0', 'Knowledge Component');
+ 'Application', 0, 'Other', '0', 'Knowledge Component');
+
+INSERT INTO KnowledgeComponent
+(Id, CourseId, Title,
+ Description,
+ BloomLevel, IsDomainFocus, Pedagogy, ExercisingLocations, Granularity)
+VALUES
+(10, 1, 'Step Completion Reply', 
+ 'Student has appropriately demonstrated step completion.',
+ 'Application', 0, 'Other', '0', 'Knowledge Component');
+
+INSERT INTO KnowledgeComponent
+(Id, CourseId, Title,
+ Description,
+ BloomLevel, IsDomainFocus, Pedagogy, ExercisingLocations, Granularity)
+VALUES
+(20, 1, 'Hint Request', 
+ 'Student has appropriately requested a step hint.',
+ 'Application', 0, 'Other', '0', 'Knowledge Component');
+
+INSERT INTO KnowledgeComponent
+(Id, CourseId, Title,
+ Description,
+ BloomLevel, IsDomainFocus, Pedagogy, ExercisingLocations, Granularity)
+VALUES
+(100, 1, 'Encode ASCII', 
+ 'Convert an English Text String into its ASCII equivalent.',
+ 'Application', 0, 'Other', '0', 'Knowledge Component');
+
+INSERT INTO KnowledgeComponent
+(Id, CourseId, Title,
+ Description,
+ BloomLevel, IsDomainFocus, Pedagogy, ExercisingLocations, Granularity)
+VALUES
+(101, 1, 'Encode Hex', 
+ 'Convert to Hex equivalent',
+ 'Application', 0, 'Other', '0', 'Knowledge Component');
+
+INSERT INTO KnowledgeComponent
+(Id, CourseId, Title,
+ Description,
+ BloomLevel, IsDomainFocus, Pedagogy, ExercisingLocations, Granularity)
+VALUES
+(102, 1, 'Binary Hex', 
+ 'Convert to Binary equivalent',
+ 'Application', 0, 'Other', '0', 'Knowledge Component');
+
+INSERT INTO KnowledgeComponent
+(Id, CourseId, Title,
+ Description,
+ BloomLevel, IsDomainFocus, Pedagogy, ExercisingLocations, Granularity)
+VALUES
+(110, 1, 'Add One Bit', 
+ 'Add a single bit to the end of a bit string.',
+ 'Application', 0, 'Other', '0', 'Knowledge Component');
+
+INSERT INTO KnowledgeComponent
+(Id, CourseId, Title,
+ Description,
+ BloomLevel, IsDomainFocus, Pedagogy, ExercisingLocations, Granularity)
+VALUES
+(120, 1, 'Pad with Zeroes', 
+ 'Pad a bit string to the appropriate length with zeroes',
+ 'Application', 0, 'Other', '0', 'Knowledge Component');
+
+INSERT INTO KnowledgeComponent
+(Id, CourseId, Title,
+ Description,
+ BloomLevel, IsDomainFocus, Pedagogy, ExercisingLocations, Granularity)
+VALUES
+(130, 1, 'Add a msg length to the bit string', 
+ 'Add the appropriate message length to the bit string',
+ 'Application', 0, 'Other', '0', 'Knowledge Component');
+
+INSERT INTO KnowledgeComponent
+(Id, CourseId, Title,
+ Description,
+ BloomLevel, IsDomainFocus, Pedagogy, ExercisingLocations, Granularity)
+VALUES
+(140, 1, 'Prepare Schedue', 
+ 'Prepare the schedule',
+ 'Application', 0, 'Other', '0', 'Knowledge Component');
+
+INSERT INTO KnowledgeComponent
+(Id, CourseId, Title,
+ Description,
+ BloomLevel, IsDomainFocus, Pedagogy, ExercisingLocations, Granularity)
+VALUES
+(150, 1, 'Initialize Variables', 
+ 'Initialize the compression round variables.',
+ 'Application', 0, 'Other', '0', 'Knowledge Component');
+    
+INSERT INTO KnowledgeComponent
+(Id, CourseId, Title,
+ Description,
+ BloomLevel, IsDomainFocus, Pedagogy, ExercisingLocations, Granularity)
+VALUES
+(160, 1, 'Compression Round', 
+ 'Sequence the Compression Round.',
+ 'Application', 0, 'Other', '0', 'Knowledge Component');
+    
+INSERT INTO KnowledgeComponent
+(Id, CourseId, Title,
+ Description,
+ BloomLevel, IsDomainFocus, Pedagogy, ExercisingLocations, Granularity)
+VALUES
+(170, 1, 'Rotate BIts', 
+ 'Rotate a bit string.',
+ 'Application', 0, 'Other', '0', 'Knowledge Component');
+    
+INSERT INTO KnowledgeComponent
+(Id, CourseId, Title,
+ Description,
+ BloomLevel, IsDomainFocus, Pedagogy, ExercisingLocations, Granularity)
+VALUES
+(180, 1, 'Shift Bits', 
+ 'Shift a bit string.',
+ 'Application', 0, 'Other', '0', 'Knowledge Component');
+    
+INSERT INTO KnowledgeComponent
+(Id, CourseId, Title,
+ Description,
+ BloomLevel, IsDomainFocus, Pedagogy, ExercisingLocations, Granularity)
+VALUES
+(190, 1, 'XOR Bits', 
+ 'XOR a bit string.',
+ 'Application', 0, 'Other', '0', 'Knowledge Component');
+    
+INSERT INTO KnowledgeComponent
+(Id, CourseId, Title,
+ Description,
+ BloomLevel, IsDomainFocus, Pedagogy, ExercisingLocations, Granularity)
+VALUES
+(200, 1, 'Majority Function', 
+ 'Use the majority function on appropriate bit strings.',
+ 'Application', 0, 'Other', '0', 'Knowledge Component');
+
+INSERT INTO KnowledgeComponent
+(Id, CourseId, Title,
+ Description,
+ BloomLevel, IsDomainFocus, Pedagogy, ExercisingLocations, Granularity)
+VALUES
+(210, 1, 'Choice Function', 
+ 'Demonstrate the choice function on appropriate bit strings.',
+ 'Application', 0, 'Other', '0', 'Knowledge Component'); 
+
+INSERT INTO KnowledgeComponent
+(Id, CourseId, Title,
+ Description,
+ BloomLevel, IsDomainFocus, Pedagogy, ExercisingLocations, Granularity)
+VALUES
+(220, 1, 'Add bit strings', 
+ 'Demonstrate the ability to add two bit strings together.',
+ 'Application', 0, 'Other', '0', 'Knowledge Component'); 
 
 
 INSERT INTO ExercisingLocation

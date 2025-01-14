@@ -252,6 +252,15 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
         }
     }
 
+    /**
+     * Retrive
+     * @param userId
+     * @param conn
+     * @return
+     * @throws ObjNotFoundException
+     * @throws SQLException
+     * @throws NonRecoverableException 
+     */
     private ArrayList<Assessment> retrieveAssessments(String userId, Connection conn)
             throws ObjNotFoundException, SQLException, NonRecoverableException {
 
@@ -271,13 +280,14 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
         while (rs.next()) {
             int assessmentId = rs.getInt(1);
 
-            KnowledgeComponent outcome = course.findKnowledgeComponent(rs.getInt(2));
+            int knowledgeComponentId = rs.getInt(2);
+            KnowledgeComponent outcome = course.findKnowledgeComponent(knowledgeComponentId);
 
             AssessmentLevel level = AssessmentLevel.fromString(rs.getString(3));
 
             Assessment assessment = new Assessment(outcome, level);
 
-            assessment.setId(assessmentId);
+            assessment.setId(knowledgeComponentId);
             assessment.setExposures(rs.getInt(4));
             assessment.setSuccessess(rs.getInt(5));
             assessment.setHints(rs.getInt(6));

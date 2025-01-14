@@ -22,6 +22,7 @@ import edu.regis.shatu.model.CourseDigest;
 import edu.regis.shatu.model.Student;
 import edu.regis.shatu.model.Task;
 import edu.regis.shatu.model.TutoringSession;
+import edu.regis.shatu.model.UnitDigest;
 import edu.regis.shatu.model.aol.PendingStep;
 import edu.regis.shatu.model.aol.PendingTask;
 import edu.regis.shatu.svc.CourseSvc;
@@ -40,16 +41,11 @@ import java.util.GregorianCalendar;
 
 /**
  *
- * A Data Access Object implementing {@link SessionSvc} behaviors.
+ * A Data Access Object implementing tutoring {@link SessionSvc} behaviors.
  * 
  * @author rickb
  */
 public class SessionDAO extends MySqlDAO implements SessionSvc {
-    /**
-     * Data directory containing student session files.
-     */
-    private static final String DATA_DIRECTORY = "src/main/java/resources/Data/";
-    
     /**
      * {@inheritDoc}
      */
@@ -89,7 +85,7 @@ public class SessionDAO extends MySqlDAO implements SessionSvc {
             }
 
         } catch (SQLException e) {
-            throw new NonRecoverableException("UserDAO-ERR-1", e);
+            throw new NonRecoverableException("SessionDAO-ERR-1", e);
 
         } finally {
             close(conn, stmt);
@@ -130,18 +126,32 @@ public class SessionDAO extends MySqlDAO implements SessionSvc {
                 int unitId = rs.getInt(6);
                
                 CourseSvc courseSvc = ServiceFactory.findCourseSvc();
-                CourseDigest digest = courseSvc.retrieveDigest(courseId);
-                session.setCourse(digest);
+                try {
+                    CourseDigest digest = courseSvc.retrieveDigest(courseId, conn);
+                    session.setCourse(digest);
+                 } catch (ObjNotFoundException ex) {
+                    String errMsg = "SessionDAO-ERR-2 Course digest not found for courseId " + courseId;
+                    throw new NonRecoverableException(errMsg);
+                }
+                
+                try {
+                    UnitDigest unitDigest = courseSvc.retrieveUnitDigest(courseId, unitId, conn);
+                    session.setUnit(unitDigest);
+                    
+                } catch (ObjNotFoundException ex) {
+                    String errMsg = "SessionDAO-ERR-3 Unit " + unitId + " not found in course " + courseId;
+                    throw new NonRecoverableException(errMsg);
+                }
                 
                 session.setTasks(retrievePendingTasks(session, conn));
                 
                 return session;
 
             } else {
-                throw new ObjNotFoundException("User Id:" + userId);
+                throw new ObjNotFoundException("Session not found for userId:" + userId);
             }
         } catch (SQLException e) {
-            throw new NonRecoverableException("UserDAO-ERR-5" + e.toString(), e);
+            throw new NonRecoverableException("SessionDAO-ERR-4" + e.toString(), e);
         } finally {
             close(conn, stmt);
         }
@@ -172,7 +182,7 @@ public class SessionDAO extends MySqlDAO implements SessionSvc {
                 throw new ObjNotFoundException("User Id:" + userId);
             }
         } catch (SQLException e) {
-            throw new NonRecoverableException("SessionDAO-ERR-1" + e.toString(), e);
+            throw new NonRecoverableException("SessionDAO-ERR-5" + e.toString(), e);
         } finally {
             close(conn, stmt);
         }
@@ -232,7 +242,7 @@ public class SessionDAO extends MySqlDAO implements SessionSvc {
             return rs.next();
 
         } catch (SQLException ex) {
-            throw new NonRecoverableException("SessionDAO-ERR-2" + ex.toString(), ex);
+            throw new NonRecoverableException("SessionDAO-ERR-6" + ex.toString(), ex);
         } finally {
             close(stmt);
         }
@@ -262,7 +272,7 @@ public class SessionDAO extends MySqlDAO implements SessionSvc {
             }
 
         } catch (SQLException e) {
-            throw new NonRecoverableException("SessionDAO-ERR-3", e);
+            throw new NonRecoverableException("SessionDAO-ERR-7", e);
 
         } finally {
             close(stmt);
@@ -293,11 +303,11 @@ public class SessionDAO extends MySqlDAO implements SessionSvc {
                 pStep.setId(pId);
                 return pId;
             } else {
-                throw new NonRecoverableException("SessionDAO-ERR-4: PendingStep AutoIncrement Failed");
+                throw new NonRecoverableException("SessionDAO-ERR-8: PendingStep AutoIncrement Failed");
             }
   
         } catch (SQLException e) {
-            throw new NonRecoverableException("SessionDAO-ERR-5", e);
+            throw new NonRecoverableException("SessionDAO-ERR-9", e);
 
         } finally {
             close(stmt);
@@ -344,9 +354,9 @@ public class SessionDAO extends MySqlDAO implements SessionSvc {
   
         } catch (ObjNotFoundException ex) {
             String errMsg = "Task not found in pending task" + taskId;
-            throw new NonRecoverableException("SessionDAO-ERR-6", new InconsistentDBException(errMsg));
+            throw new NonRecoverableException("SessionDAO-ERR-10", new InconsistentDBException(errMsg));
         } catch (SQLException e) {
-            throw new NonRecoverableException("SessionDAO-ERR-7", e);
+            throw new NonRecoverableException("SessionDAO-ERR-11", e);
 
         } finally {
             close(stmt);
@@ -376,11 +386,11 @@ public class SessionDAO extends MySqlDAO implements SessionSvc {
                 return pStep;
             } else {
                 String errMsg = "PendingStep not found in pending task" + pendingStepId;
-                throw new NonRecoverableException("SessionDAO-ERR-8", new InconsistentDBException(errMsg));
+                throw new NonRecoverableException("SessionDAO-ERR-12", new InconsistentDBException(errMsg));
             }
 
         } catch (SQLException e) {
-            throw new NonRecoverableException("SessionDAO-ERR-9", e);
+            throw new NonRecoverableException("SessionDAO-ERR-13", e);
 
         } finally {
             close(stmt);

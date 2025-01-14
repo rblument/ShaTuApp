@@ -30,7 +30,7 @@ public class LaunchReply {
     
     
     public LaunchReply() {
-        status = "ERR";
+        status = ":ERR";
     }
 
     public String getStatus() {

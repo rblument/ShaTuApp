@@ -36,7 +36,7 @@ public class TutorReply {
      * A reply from the tutor with an ERR status.
      */
     public TutorReply() {
-        this("ERR");
+        this(":ERR");
     }
     
     /**

@@ -19,6 +19,7 @@ import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.NewExampleRequest;
+import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.view.act.HintAction;
 import edu.regis.shatu.view.act.NewExampleAction;
 import edu.regis.shatu.view.act.StepCompletionAction;
@@ -48,7 +49,7 @@ import javax.swing.table.DefaultTableCellRenderer;
  * @author rickb
  */
 public class ChoiceFunctionView extends UserRequestView implements ActionListener, KeyListener {
-    
+
     private TutoringSessionView view;
     private String stringX, stringY, stringZ;
     private int problemSize;
@@ -110,7 +111,7 @@ public class ChoiceFunctionView extends UserRequestView implements ActionListene
         example.setResult(userResponse);
 
         StepCompletion step = new StepCompletion(currentStep, gson.toJson(example));
-        
+
         step.setStep(currentStep);
 
         return step;
@@ -200,7 +201,7 @@ public class ChoiceFunctionView extends UserRequestView implements ActionListene
         ActionListener selection = e -> {
             JRadioButton source = (JRadioButton) e.getSource();
             updateProblemSi(source);
-         };
+        };
 
         fourRadioButton.addActionListener(selection);
         eightRadioButton.addActionListener(selection);
@@ -375,7 +376,7 @@ public class ChoiceFunctionView extends UserRequestView implements ActionListene
         chTruthTablePane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
         truthTablePanel = new GPanel();
-        
+
         setupTruthTableToggleButton();
 
         truthTablePanel.addc(truthTableLabel, 0, 0, 1, 1, 0.0, 0.0,
@@ -389,12 +390,12 @@ public class ChoiceFunctionView extends UserRequestView implements ActionListene
         truthTablePanel.addc(chTruthTablePane, 0, 2, 1, 1, 1.0, 1.0,
                 GridBagConstraints.CENTER, GridBagConstraints.BOTH,
                 5, 5, 5, 5);
-        
+
         truthTablePanel.addc(truthTableToggleButton, 1, 2, 1, 1, 0.0, 0.0,
-            GridBagConstraints.EAST, GridBagConstraints.NONE,
-            5, 5, 5, 5);
+                GridBagConstraints.EAST, GridBagConstraints.NONE,
+                5, 5, 5, 5);
     }
-    
+
     /**
      * On button press will show/hide Truth Table
      */
@@ -412,16 +413,16 @@ public class ChoiceFunctionView extends UserRequestView implements ActionListene
                 if (isCurrentlyVisible) {
                     truthTableToggleButton.setText("Show Truth Table");
                 } else {
-                truthTableToggleButton.setText("Hide Truth Table");
+                    truthTableToggleButton.setText("Hide Truth Table");
                 }
-        }
-    });
-    //start by hiding truth table for practice mode
-    chTruthTablePane.setVisible(false);
-    truthTableLabel.setVisible(false);
-    chFunctionLabel.setVisible(false);
-}
-    
+            }
+        });
+        //start by hiding truth table for practice mode
+        chTruthTablePane.setVisible(false);
+        truthTableLabel.setVisible(false);
+        chFunctionLabel.setVisible(false);
+    }
+
     /**
      * Configures the appearance of the truth table.
      */
@@ -547,38 +548,39 @@ public class ChoiceFunctionView extends UserRequestView implements ActionListene
         hintButton = view.getHintButton();
         checkButton = view.getCheckButton();
         nextButton = view.getNewExampleButton();
-        
+
         // If check and hint buttons are disabled, reset listenerers and apply those used by this view
-        if(!checkHintEnabled) {
+        if (!checkHintEnabled) {
             view.resetButtonListeners(); // Clear any listeners applied from other views          
-            hintButton.addActionListener(this);           
-            checkButton.addActionListener(this);            
+            hintButton.addActionListener(this);
+            checkButton.addActionListener(this);
             nextButton.addActionListener(this);
         }
-        
+
         System.out.println("Choice function update view called."); // Error checking
-        
+
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
         Step step = model.currentTask().getCurrentStep().getStep();
-        
+
         System.out.println("Choice value View substep from current step: " + step.getSubType()); // Error checking
 
-        ChoiceFunctionStep example = gson.fromJson(step.getData(), ChoiceFunctionStep.class);
+        if (step.getSubType() == StepSubType.CHOICE_FUNCTION) {
+            ChoiceFunctionStep example = gson.fromJson(step.getData(), ChoiceFunctionStep.class);
 
-        if (example.getOperand1() == null || example.getOperand1().isEmpty()) {
-            stringXLabel.setText("x: Please");
-            stringYLabel.setText("y: click");
-            stringZLabel.setText("z: New Example"); 
-            hintButton.setEnabled(false);
-            checkButton.setEnabled(false);
-        }
-        else {
-            stringXLabel.setText("x: " + example.getOperand1());
-            stringYLabel.setText("y: " + example.getOperand2());
-            stringZLabel.setText("z: " + example.getOperand3());
-            hintButton.setEnabled(true);
-            checkButton.setEnabled(true);
+            if (example.getOperand1() == null || example.getOperand1().isEmpty()) {
+                stringXLabel.setText("x: Please");
+                stringYLabel.setText("y: click");
+                stringZLabel.setText("z: New Example");
+                hintButton.setEnabled(false);
+                checkButton.setEnabled(false);
+            } else {
+                stringXLabel.setText("x: " + example.getOperand1());
+                stringYLabel.setText("y: " + example.getOperand2());
+                stringZLabel.setText("z: " + example.getOperand3());
+                hintButton.setEnabled(true);
+                checkButton.setEnabled(true);
+            }
         }
     }
 

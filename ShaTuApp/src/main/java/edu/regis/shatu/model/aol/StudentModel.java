@@ -58,6 +58,7 @@ public class StudentModel {
     }
     
     public void addAssessment(int knowledgeComponentId, Assessment assessment) {
+        System.out.println("***** StuMod.addAssess: id: " + knowledgeComponentId);
         assessments.put(knowledgeComponentId, assessment);
     }
     

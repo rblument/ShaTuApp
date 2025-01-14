@@ -121,7 +121,7 @@ public class StepCompletionAction extends ShaTuGuiAction {
 
            
             switch (reply.getStatus()) {
-                case "ERR":
+                case ":ERR":
                     // If we get here, there is a coding error in the tutor svc
                     //frame.displayError("Ooops, an unexpected error occurred: SI_1");
                     System.out.println("Coding error  status: " + reply.getStatus());

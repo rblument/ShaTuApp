@@ -17,6 +17,7 @@ import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.NewExampleRequest;
+import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.view.act.HintAction;
 import edu.regis.shatu.view.act.NewExampleAction;
 import edu.regis.shatu.view.act.StepCompletionAction;
@@ -339,24 +340,29 @@ public class ShiftRightView extends UserRequestView implements ActionListener, K
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
         Step step = model.currentTask().getCurrentStep().getStep();
+        System.out.println("Current Step: " + step.getSubType());
+        System.out.println(" Data: " + step.getData());
 
-        BitShiftStep example = gson.fromJson(step.getData(), BitShiftStep.class);
+        // If we got here by the user selecting this step/view, the current
+        // task could be anything. 
+        if (step.getSubType() == StepSubType.SHIFT_BITS) {
+            BitShiftStep example = gson.fromJson(step.getData(), BitShiftStep.class);
         
-        System.out.println("Shift right update display called");
-        operand = example.getOperand();
-        if (operand == null || operand.isEmpty()) {
-            operand = "Please click New Example";
-            checkButton.setEnabled(false);
-            hintButton.setEnabled(false);
-        }
-        else {
-            checkButton.setEnabled(true);
-            hintButton.setEnabled(true);
-        }
-        shiftLength = example.getShiftLength();
-        operandLabel.setText(operand);
-        instructionLabel.setText("Logical right shift the input given below by "
+            System.out.println("Shift right update display called");
+            operand = example.getOperand();
+            if (operand == null || operand.isEmpty()) {
+                operand = "Please click New Example";
+                checkButton.setEnabled(false);
+                hintButton.setEnabled(false);
+            } else {
+                checkButton.setEnabled(true);
+                hintButton.setEnabled(true);
+            }
+            shiftLength = example.getShiftLength();
+            operandLabel.setText(operand);
+            instructionLabel.setText("Logical right shift the input given below by "
               + shiftLength + " bits:");
+        }
     }
 
 

@@ -384,7 +384,7 @@ public class Pad0View extends UserRequestView implements ActionListener {
         Step step = model.currentTask().getCurrentStep().getStep(); // will be the last step a example was created for.
         
         System.out.println("Pad 0 View substep from current step: " + step.getSubType()); // Error checking.
-        
+         if (step.getSubType() == StepSubType.PAD_ZEROS) {
         Pad0Step newPadZeroObject = gson.fromJson(step.getData(), Pad0Step.class); // Issues can happen here if the class contains similar named variables
         
         // Clear any existing feedback and response from the previous question.
@@ -421,6 +421,7 @@ public class Pad0View extends UserRequestView implements ActionListener {
             this.revalidate(); // Refreshes the view
             this.repaint(); // Refreshes the view
         }
+         }
     }
 
     /**

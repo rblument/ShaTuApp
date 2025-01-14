@@ -57,7 +57,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.util.GregorianCalendar;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
 import java.util.logging.Level;
@@ -145,8 +144,21 @@ public class ShaTuTutor implements TutorSvc {
 
                         Account account = ServiceFactory.findAccountSvc().retrieve(userId);
                         student = new Student(account);
+                        
+                        try {
+                            StudentModelSvc stuModSvc = ServiceFactory.findStudentModelSvc();
+                            studentModel = stuModSvc.retrieve(userId);
+                            student.setStudentModel(studentModel);
+                    
+                        } catch (ObjNotFoundException ex) {
+                            TutorReply reply = new TutorReply(":ERR");
+                            reply.setData("Student model not found for: " + userId );
+                            return reply;
+                        }
+    
+                        
                         session = ServiceFactory.findSessionSvc().retrieve(student);
-                        studentModel = student.getStudentModel();
+        
                     } else {
                         TutorReply reply = new TutorReply(":ERR");
                         reply.setData("Illegal Security Token");
@@ -317,6 +329,18 @@ public class ShaTuTutor implements TutorSvc {
 
             if (dbAcct.getPassword().equals(requestAcct.getPassword())) {
                 student = new Student(dbAcct);
+                String userId = dbAcct.getUserId();
+                
+                try {
+                    StudentModelSvc stuModSvc = ServiceFactory.findStudentModelSvc();
+                    studentModel = stuModSvc.retrieve(userId);
+                    student.setStudentModel(studentModel);
+                    
+                } catch (ObjNotFoundException ex) {
+                    TutorReply reply = new TutorReply(":ERR");
+                    reply.setData("Student model not found in sign in for: " + userId );
+                    return reply;
+                }
 
                 SessionSvc svc = ServiceFactory.findSessionSvc();
                 TutoringSession session = svc.retrieve(student);
@@ -1792,8 +1816,8 @@ public class ShaTuTutor implements TutorSvc {
     private Student createStudent(Account account, Course course)
             throws NonRecoverableException {
 
-        Student student = new Student(account);
-        StudentModel studentModel = student.getStudentModel();
+        student = new Student(account);
+        studentModel = student.getStudentModel();
 
         for (KnowledgeComponent outcome : course.getOutcomes()) {
             Assessment assessment = new Assessment(outcome, AssessmentLevel.NOT_STARTED);
@@ -2364,8 +2388,10 @@ public class ShaTuTutor implements TutorSvc {
         task.addStep(step);
 
         // Update the assessment data and save it to the database.
-        int dbId = KnowledgeComponentKind.fromString("Shift Bits").dbId();
-        Assessment assessment = studentModel.findAssessment(dbId);
+        int knowledgeCompId = KnowledgeComponentKind.fromString("Shift Bits").dbId();
+        System.out.println("knowledCompId: " + knowledgeCompId);
+        Assessment assessment = studentModel.findAssessment(knowledgeCompId);
+        
         assessment.incrementExposures();
 
         try {

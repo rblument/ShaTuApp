@@ -27,67 +27,67 @@ public enum KnowledgeComponentKind {
     /**
      * Define the corresponding database id for this knowledge component.
      */
-     ASCII_ENCODE("ASCII Encode", 102),
+     ASCII_ENCODE("ASCII Encode", 100),
      
     /**
      * Define the corresponding database id for this knowledge component.
      */
-     ADD_ONE_BIT("Add One Bit", 103),
+     ADD_ONE_BIT("Add One Bit", 110),
      
     /**
      * Define the corresponding database id for this knowledge component.
      */
-     CHOICE_FUNCTION("Choice Function", 100),
+     CHOICE_FUNCTION("Choice Function", 210),
     
     /**
      * Define the corresponding database id for this knowledge component.
      */
-     PAD_ZEROS("Pad with Zeros", 104),
+     PAD_ZEROS("Pad with Zeros", 120),
      
     /**
      * Define the corresponding database id for this knowledge component.
      */
-     ADD_MSG_LENGTH("Add Message Length", 105),
+     ADD_MSG_LENGTH("Add Message Length", 130),
      
     /**
      * Define the corresponding database id for this knowledge component.
      */
-     PREPARE_SCHEDULE("Prepare Schedule", 106),
+     PREPARE_SCHEDULE("Prepare Schedule", 140),
      
     /**
      * Define the corresponding database id for this knowledge component.
      */
-     INITIALIZE_VARS("Initialize Variables", 107),
+     INITIALIZE_VARS("Initialize Variables", 150),
      
     /**
      * Define the corresponding database id for this knowledge component.
      */
-     COMPRESS_ROUND("Compress Round", 108),
+     COMPRESS_ROUND("Compress Round", 160),
      
     /**
      * Define the corresponding database id for this knowledge component.
      */
-     ROTATE_BITS("Rotate n BITS", 109),
+     ROTATE_BITS("Rotate n BITS", 170),
      
     /**
      * Define the corresponding database id for this knowledge component.
      */
-     XOR_BITS("XOR Bits", 110),
+     XOR_BITS("XOR Bits", 190),
      
     /**
      * Define the corresponding database id for this knowledge component.
      */
-     ADD_BITS("Add Bits", 111),
+     ADD_BITS("Add Bits", 220),
      
     /**
      * Define the corresponding database id for this knowledge component.
      */
-     MAJORITY_FUNCTION("Majority Function", 112),
+     MAJORITY_FUNCTION("Majority Function", 200),
      
     /**
      * Define the corresponding database id for this knowledge component.
      */
-     SHIFT_BITS("Shift Bits", 101);
+     SHIFT_BITS("Shift Bits", 180);
      
     /**
      * A GUI displayable string identifying this knowledge component.

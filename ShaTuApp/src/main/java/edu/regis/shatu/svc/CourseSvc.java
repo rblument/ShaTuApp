@@ -17,6 +17,7 @@ import edu.regis.shatu.err.ObjNotFoundException;
 import edu.regis.shatu.model.Course;
 import edu.regis.shatu.model.CourseDigest;
 import edu.regis.shatu.model.Task;
+import edu.regis.shatu.model.UnitDigest;
 import java.sql.Connection;
 
 /**
@@ -44,11 +45,29 @@ public interface CourseSvc {
      * Use {@link #retrieve()} except it returns to return the entire course.
      *
      * @param courseId  integer key of the course to load.
+     * @param conn an open DB connection , which isn't closed by this method
      * @return The CourseDigest with the given id.
      * @exception ObjNotFoundException No course with the given id exists.
      * @throws NonRecoverableException also see getCause().getErrorCode().
      */
-    CourseDigest retrieveDigest(int courseId) throws ObjNotFoundException, NonRecoverableException;
+    CourseDigest retrieveDigest(int courseId, Connection conn) 
+            throws ObjNotFoundException, NonRecoverableException;
+    
+        /**
+     * Locate and return a digest of the unit with the given course and unit ids.
+     * 
+     * Use {@link #retrieve()} except it returns to return the entire course.
+     *
+     * @param unitId  integer key of the course to load.
+     * @param courseId integer key of the unit within this course to load.
+     * @param conn an open DB connection , which isn't closed by this method
+     * @return The UnitDigest with the given id.
+     * @exception ObjNotFoundException No course with the given id exists.
+     * @throws NonRecoverableException also see getCause().getErrorCode().
+     */
+    UnitDigest retrieveUnitDigest(int courseId, int unitId, Connection conn)
+            throws ObjNotFoundException, NonRecoverableException;
+    
     
     /**
      * Retrieve the identified task from the database.
@@ -60,6 +79,7 @@ public interface CourseSvc {
      * @throws ObjNotFoundException No task with the given id exists in the DB.NonRecoverableException=
      * @throws NonRecoverableException also see getCause().getErrorCode().
      */
-    Task retrieveTask(int courseId, int taskId, Connection conn) throws ObjNotFoundException, NonRecoverableException;
+    Task retrieveTask(int courseId, int taskId, Connection conn) 
+            throws ObjNotFoundException, NonRecoverableException;
 
 }
