@@ -13,8 +13,8 @@
 package edu.regis.shatu.view;
 
 import edu.regis.shatu.model.Account;
+import edu.regis.shatu.model.Student;
 import edu.regis.shatu.model.TutoringSession;
-import edu.regis.shatu.model.User;
 import edu.regis.shatu.svc.SHA_256;
 import edu.regis.shatu.view.act.ForgotPasswordAction;
 import edu.regis.shatu.view.act.NewUserAction;
@@ -27,7 +27,6 @@ import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -52,7 +51,7 @@ public class SplashPanel extends GPanel {
      /**
      * The user model displayed in this view.
      */
-    private User model;
+    private Account model;
     
     /**
      * The user's id of the form "user@university.edu".
@@ -85,7 +84,7 @@ public class SplashPanel extends GPanel {
     public SplashPanel() {
 	super();
         
-        model = new User();
+        model = new Account();
 
 	initializeComponents();
 	layoutComponents();
@@ -108,12 +107,8 @@ public class SplashPanel extends GPanel {
      * @return a User model with the user id and password fields set (the 
      *         password is encrypted)
      */
-    public User getModel() {
-	model.setUserId(userId.getText());
-        
-        String encryptedPass = SHA_256.instance().sha256(new String(password.getPassword()));
-        
-        model.setPassword(encryptedPass);
+    public Account getModel() {
+	updateModel();
 
 	return model;
     }
@@ -124,7 +119,7 @@ public class SplashPanel extends GPanel {
      * 
      * @param model the user (id) to display
      */
-    public void setModel(User model) {
+    public void setModel(Account model) {
 	this.model = model;
 
 	userId.setText(model.getUserId());
@@ -162,16 +157,30 @@ public class SplashPanel extends GPanel {
     private TutoringSession authenticateUser(String userId, String encryptedPass) {
         // Simulate server-side authentication and session creation
         if (userId != null && encryptedPass.equals("validEncryptedPassword")) {
-            TutoringSession session = new TutoringSession();
+            
             Account account = new Account();
             account.setUserId(userId);
             account.setPassword(encryptedPass);
-            session.setAccount(account);
+            
+            Student student = new Student(account);
+            
+            TutoringSession session = new TutoringSession(student);
+            
             return session;
         }
         return null;
     }
     
+    /**
+     * Update our domain model with the information currently in this view.
+     */
+    private void updateModel() {
+        model.setUserId(userId.getText());
+        
+        String encryptedPass = SHA_256.instance().sha256(new String(password.getPassword()));
+        
+        model.setPassword(encryptedPass);
+    }
     
     /**
      * Create the primary child components used in this view
@@ -187,10 +196,12 @@ public class SplashPanel extends GPanel {
 
 	signInBut = new JButton(SignInAction.instance());
 	signInBut.setEnabled(false);
+        /*
         signInBut.addActionListener(e -> {
         // Fetch the userId and encrypted password
         String userIdInput = userId.getText();
 
+        
         if (!userIdInput.isEmpty()) {
                 // Encrypt the password for validation (if needed)
                 String encryptedPass = SHA_256.instance().sha256(new String(password.getPassword()));
@@ -200,9 +211,10 @@ public class SplashPanel extends GPanel {
             } else {
                 JOptionPane.showMessageDialog(this, "Please enter your User ID", "Error", JOptionPane.ERROR_MESSAGE);
             }
-        });
+        }
+        );
 
-        
+        */
         createAcctBut = new JButton(NewUserAction.instance());
         
         forgotPasswordBut = new JButton(ForgotPasswordAction.instance());
@@ -226,7 +238,7 @@ public class SplashPanel extends GPanel {
             GridBagConstraints.NORTHWEST,  GridBagConstraints.BOTH,
             5,5,5,5);
         
-        JLabel copyright = new JLabel("(C) 2019-2024 Johanna and Richard Blumenthal. All Rights Reserved");
+        JLabel copyright = new JLabel("(C) 2019-2025 Johanna and Richard Blumenthal. All Rights Reserved");
         copyright.setForeground(new Color(241,196,0));
         copyright.setFont(new Font("Dialog", Font.PLAIN, 10));
         addc(copyright, 0,3, 2,1, 1.0,1.0,

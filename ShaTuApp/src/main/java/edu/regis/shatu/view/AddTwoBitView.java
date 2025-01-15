@@ -17,8 +17,9 @@ import com.google.gson.GsonBuilder;
 import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.BitOpStep;
-import edu.regis.shatu.model.aol.ExampleType;
+import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.NewExampleRequest;
+import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.view.act.HintAction;
 import edu.regis.shatu.view.act.NewExampleAction;
 import edu.regis.shatu.view.act.StepCompletionAction;
@@ -35,23 +36,25 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
 /**
- * AddTwoBitView class represents a GUI view for adding two binary numbers modulo 2^m.
- * Users can input their answers in a JTextField and check correctness.
- * Provides functionality for hints and moving to the next question.
+ * AddTwoBitView class represents a GUI view for adding two binary numbers
+ * modulo 2^m. Users can input their answers in a JTextField and check
+ * correctness. Provides functionality for hints and moving to the next
+ * question.
  *
  * @author rickb
  * @author Amanda Roskelley
  */
 public class AddTwoBitView extends UserRequestView implements ActionListener, KeyListener {
+
     /**
      * The modulo value for addition of binary numbers.
      */
     private final int m = 8; // will be changed and dynamically updated
-    
+
     private String binary1 = "";
     private String binary2 = "";
     private String result = "";
-    
+
     private TutoringSessionView view;
     private JTextField answerField;
     private JLabel instructionLabel;
@@ -63,15 +66,16 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
     private JButton hintButton;
     private JButton nextButton;
     private boolean checkHintEnabled = false;
-    
+
     /**
-     * Initializes the AddTwoBitView by creating and laying out its child components.
+     * Initializes the AddTwoBitView by creating and laying out its child
+     * components.
      */
     public AddTwoBitView() {
         initializeComponents();
         initializeLayout();
     }
-    
+
     /**
      * Handles action events for components.
      *
@@ -93,23 +97,23 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
      * Creates child GUI components for the view.
      */
     private void initializeComponents() {
-        instructionLabel = new JLabel("Add two binary numbers using modulo 2^"+ m + " addition");
-        
-        stringLabel1 = new JLabel("binary number1 : " );
-        stringLabel2 = new JLabel("binary number2 : " );
-        stringLabel3 = new JLabel("Hit New Example to get set of binary numbers" );
+        instructionLabel = new JLabel("Add two binary numbers using modulo 2^" + m + " addition");
+
+        stringLabel1 = new JLabel("binary number1 : ");
+        stringLabel2 = new JLabel("binary number2 : ");
+        stringLabel3 = new JLabel("Hit New Example to get set of binary numbers");
         stringLabel4 = new JLabel();  //only for testing that view is communicating with server
-        
+
         answerField = new JTextField(10);
         answerField.addKeyListener(this);
 
         // Create and initialize the checkButton
         checkButton = new JButton(StepCompletionAction.instance());
         checkButton.addActionListener(this);
-        
+
         hintButton = new JButton(HintAction.instance());
         hintButton.addActionListener(this);
-        
+
         nextButton = new JButton(NewExampleAction.instance());
         nextButton.addActionListener(this);
     }
@@ -121,7 +125,6 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
         GridBagConstraints centerConstraints = new GridBagConstraints();
         centerConstraints.anchor = GridBagConstraints.CENTER;
         centerConstraints.insets = new Insets(5, 5, 5, 5);
-        
 
         // Add instructionLabel centered
         addc(instructionLabel, 0, 0, 1, 1, 0.0, 0.0,
@@ -137,11 +140,11 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
         addc(stringLabel2, 0, 2, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
-        
+
         addc(stringLabel3, 0, 3, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
-        
+
         // To provide answer for easier testing during build of application
         addc(stringLabel4, 0, 9, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
@@ -156,11 +159,11 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
         addc(checkButton, 0, 5, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
-        
+
         addc(hintButton, 0, 6, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
-        
+
         addc(nextButton, 0, 7, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
@@ -264,22 +267,22 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
      */
     private void onNextHint() {
         JOptionPane.showMessageDialog(this, "Hint");
-        }
-       
+    }
+
     /**
      * Handles the action for the Check button.
      */
     private void onCheckButton() {
         if (answerField.getText().equals("")) {
             JOptionPane.showMessageDialog(this, "Please provide an answer");
-        } 
+        }
     }
 
     /**
      * Create and return the server request this view makes when a user selects
      * that they want to practice a new add two n bits example.
-     * 
-     * @return 
+     *
+     * @return
      */
     @Override
     public NewExampleRequest newRequest() {
@@ -287,7 +290,7 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
 
         NewExampleRequest ex = new NewExampleRequest();
 
-        ex.setExampleType(ExampleType.ADD_BITS);
+        ex.setExampleType(ProblemType.ADD_BITS);
 
         BitOpStep newStep = new BitOpStep();
 
@@ -297,75 +300,75 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
     }
 
     /**
-     * Gets the current step, then gets the next example, completes the current step
-     * and then gets the next step.
-     * 
-     * @return 
+     * Gets the current step, then gets the next example, completes the current
+     * step and then gets the next step.
+     *
+     * @return
      */
     @Override
     public StepCompletion stepCompletion() {
-        Step currentStep = model.currentTask().currentStep();
+        Step currentStep = model.currentTask().currentStep().getStep();
 
         BitOpStep example = gson.fromJson(currentStep.getData(), BitOpStep.class);
-        
+
         String userResponse = answerField.getText().replaceAll("\\s", "");
-        
+
         example.getExample().setResult(userResponse);
 
         StepCompletion step = new StepCompletion(currentStep, gson.toJson(example));
-        
+
         step.setStep(currentStep);
 
         return step;
     }
-    
+
     /**
      * Update the view with the new operands.
-     * 
+     *
      */
     @Override
     protected void updateView() {
-        view = SplashFrame.instance().getView(); // Accessing view to use universal buttons
+        view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
         hintButton = view.getHintButton();
         checkButton = view.getCheckButton();
         nextButton = view.getNewExampleButton();
-        
+
         // If check and hint buttons are disabled, reset listenerers and apply those used by this view
-        if(!checkHintEnabled) {
+        if (!checkHintEnabled) {
             view.resetButtonListeners(); // Clear any listeners applied from other views          
-            hintButton.addActionListener(this);           
-            checkButton.addActionListener(this);            
+            hintButton.addActionListener(this);
+            checkButton.addActionListener(this);
             nextButton.addActionListener(this);
         }
-        
+
         if (model != null) {
             // ****TO-DO*****
             // Update the view's information from the model
             // Debugging dynamic updates to the model can be done here.
             System.out.println("AddTwoBitView");
-            
+
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
+            Step step = model.currentTask().getCurrentStep().getStep();
 
-        Step step = model.currentTask().getCurrentStep();
-        
-        BitOpStep example = gson.fromJson(step.getData(), BitOpStep.class);
-        
-        try {
-            binary1 = example.getExample().getOperand1();
-            binary2 = example.getExample().getOperand2();
-            result = calculateModulo(binary1, binary2); 
-            checkButton.setEnabled(true);
-            hintButton.setEnabled(true);
+            if (step.getSubType() == StepSubType.ADD_BITS) {
+                BitOpStep example = gson.fromJson(step.getData(), BitOpStep.class);
+
+                try {
+                    binary1 = example.getExample().getOperand1();
+                    binary2 = example.getExample().getOperand2();
+                    result = calculateModulo(binary1, binary2);
+                    checkButton.setEnabled(true);
+                    hintButton.setEnabled(true);
+                } catch (NullPointerException e) {
+                    System.out.println("Example is empty.");
+                    checkButton.setEnabled(false);
+                    hintButton.setEnabled(false);
+                }
+
+                stringLabel1.setText("binary number1: " + binary1);
+                stringLabel2.setText("binary number2: " + binary2);
+            }
         }
-        catch (NullPointerException e) {
-            System.out.println("Example is empty.");
-            checkButton.setEnabled(false);
-            hintButton.setEnabled(false);
-        }
-        
-        stringLabel1.setText("binary number1: " + binary1);
-        stringLabel2.setText("binary number2: " + binary2);
-        }
-    }    
+    }
 }

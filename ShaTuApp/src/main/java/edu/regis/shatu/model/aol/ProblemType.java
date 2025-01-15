@@ -13,11 +13,11 @@
 package edu.regis.shatu.model.aol;
 
 /**
- * The legal types of practice examples that a student can request.
+ * The legal types of practice problems that a student can request.
  * 
  * @author rickb
  */
-public enum ExampleType {
+public enum ProblemType {
     /**
      * Represents a request to 
      * 
@@ -61,7 +61,9 @@ public enum ExampleType {
     /**
      * The initial default value in a NewExampleRequest
      */
-    DEFAULT("Unknown");
+    DEFAULT("Unknown"),
+    
+    ERROR("ERROR");
     
      /**
      * The name used by the server to identify this request.
@@ -73,7 +75,7 @@ public enum ExampleType {
      * 
      * @param requestName 
      */
-    ExampleType(String requestName) {
+    ProblemType(String requestName) {
         this.requestName = requestName;
     }
     
@@ -94,5 +96,20 @@ public enum ExampleType {
     @Override
     public String toString() {
         return requestName;
+    }
+    
+       /**
+     * Return the enum value for the given title.
+     * 
+     * @param aTitle
+     * @return 
+     */
+    public static ProblemType findValue(String aTitle) {
+        for (ProblemType kind : values()) {
+            if (kind.getRequestName().equalsIgnoreCase(aTitle))
+                return kind;
+        }
+        
+        return ERROR;
     }
 }

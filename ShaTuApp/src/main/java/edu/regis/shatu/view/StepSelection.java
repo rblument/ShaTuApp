@@ -22,55 +22,62 @@ public enum StepSelection {
     /**
      * Encode the input message as ASCII bytes step.
      */
-    ENCODE(new HighlightLabel("Encode as ASCII")), 
+    ENCODE("Encode as ASCII"), 
 
-    ADD1(new HighlightLabel("Add '1' bit")), 
+    ADD1("Add '1' bit"), 
     
-    PAD(new HighlightLabel("Pad with '0's")), 
+    PAD("Pad with '0's"), 
     
-    LENGTH(new HighlightLabel("Add Msg Length")), 
+    LENGTH("Add Msg Length"), 
     
-    XOR (new HighlightLabel("Exclusive OR (XOR)")),
+    XOR("Exclusive OR (XOR)"),
     
-    CHOICE_FUNCTION(new HighlightLabel("Value of the Choice (Ch) function")),
+    CHOICE_FUNCTION("Value of the Choice (Ch) function"),
   
-    PREPARE(new HighlightLabel("Prepare Schedule")),
+    PREPARE("Prepare Schedule"),
    
-    INIT_VARS(new HighlightLabel("Initialize Variables")), 
+    INIT_VARS("Initialize Variables"), 
     
-    COMPRESS(new HighlightLabel("Compress Round")),
+    COMPRESS("Compress Round"),
 
-    ROTATE_BITS(new HighlightLabel("Rotate n bits")),
+    ROTATE_BITS("Rotate n bits"),
 
-    SHIFT_RIGHT(new HighlightLabel("Shift right")),
+    SHIFT_RIGHT("Shift right"),
 
-    ADD_TWO_BIT(new HighlightLabel("Add two 𝑛 bit")),
+    ADD_TWO_BIT("Add two 𝑛 bit"),
     
-    MAJ_FUNCTION(new HighlightLabel("Maj function value")),
+    MAJ_FUNCTION("Maj function value"),
     
-    SHA_ZERO(new HighlightLabel("SHA Sum 0 value")),
+    SHA_ZERO("SHA Sum 0 value"),
     
-    SHA_ONE(new HighlightLabel("SHA Sum 1 value")),
+    SHA_ONE("SHA Sum 1 value"),
     
     /**
      * Lesson Labels for LessonStepSelectionView
      */   
-    OVERVIEW(new HighlightLabel("Overview")),
+    OVERVIEW("Overview"),
     
-    MESSAGE_PREPROCESSING(new HighlightLabel("Message Preprocessing")),
+    MESSAGE_PREPROCESSING("Message Preprocessing"),
     
-    HASH_COMPUTATION(new HighlightLabel("Hash Computation")),
+    HASH_COMPUTATION("Hash Computation"),
     
-    CONCLUSION(new HighlightLabel("Conclusion")),
+    CONCLUSION("Conclusion"),
         
     // Isn't displayed in StepSelectionView
-    STEP_REPLY(new HighlightLabel("Step Reply"));
+    STEP_REPLY("Step Reply");
 
-    private HighlightLabel label;
+    /**
+     * A Highlight Label associated with this enum, which can be displayed
+     */
+    private final HighlightLabel label;
     
-    StepSelection(HighlightLabel label) {
-        this.label = label;
-        label.setStepSelection(this);
+    /**
+     * 
+     * @param text pretty print text displayed for the associated label
+     */
+    StepSelection(String text) {
+        this.label = new HighlightLabel(text);
+        label.setViewName(name()); // Note, the enum name, not the text.
     }
     
     public HighlightLabel getLabel() {

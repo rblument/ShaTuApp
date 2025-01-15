@@ -22,6 +22,11 @@ package edu.regis.shatu.model;
  */
 public class ExercisingLocation {
     /**
+     * The unique id of this exercising location in the database.
+     */
+    private int id;
+    
+    /**
      * The id of the associated course.
      */
     private int courseId;
@@ -42,9 +47,23 @@ public class ExercisingLocation {
     private int stepId;
     
     public ExercisingLocation() {
-        
+        this(Model.DEFAULT_ID);
+    }
+    
+    public ExercisingLocation(int id) {
+        this.id = id;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    
+    
     public int getCourseId() {
         return courseId;
     }

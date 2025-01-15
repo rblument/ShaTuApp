@@ -43,6 +43,12 @@ public class Course extends TitledModel {
     protected ArrayList<KnowledgeComponent> outcomes;
     
     /**
+     * A convenience list of mappings between outcomes and the locations (tasks
+     * and step) within this course where these outcomes are addressed.
+     */
+    protected ArrayList<ExercisingLocation> exercisingLocations;
+    
+    /**
      * Initialize this course with a default id, empty units, and outcomes
      */
     public Course() {
@@ -59,6 +65,7 @@ public class Course extends TitledModel {
         
         units = new ArrayList<>();
         outcomes = new ArrayList<>();
+        exercisingLocations = new ArrayList<>();
     }
 
     public TaskSelectionKind getPrimaryPedagogy() {
@@ -157,5 +164,27 @@ public class Course extends TitledModel {
                 return outcome;
     
         throw new ObjNotFoundException("KnowledgeComponent: " + componentId);
+    }
+
+    public ArrayList<ExercisingLocation> getExercisingLocations() {
+        return exercisingLocations;
+    }
+
+    public void setExercisingLocations(ArrayList<ExercisingLocation> exercisingLocations) {
+        this.exercisingLocations = exercisingLocations;
+    }
+    
+    /**
+     * Return the exercising location, if any, in this course with the given id.
+     * 
+     * @param id the id of an exercising location
+     * @return an ExercisingLocation or null
+     */
+    public ExercisingLocation findLocation(int id) {
+        for (ExercisingLocation location : exercisingLocations)
+            if (location.getId() == id)
+                return location;
+        
+        return null;
     }
 }

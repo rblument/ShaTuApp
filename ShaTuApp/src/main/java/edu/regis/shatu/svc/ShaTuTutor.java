@@ -25,10 +25,6 @@ import edu.regis.shatu.model.CompressRoundStep;
 import edu.regis.shatu.model.Course;
 import edu.regis.shatu.model.Hint;
 import edu.regis.shatu.model.InitVarStep;
-import edu.regis.shatu.model.TutoringSession;
-import edu.regis.shatu.model.User;
-import edu.regis.shatu.model.aol.BitOpExample;
-import edu.regis.shatu.model.aol.BitOpStep;
 import edu.regis.shatu.model.EncodeAsciiStep;
 import edu.regis.shatu.model.KnowledgeComponent;
 import edu.regis.shatu.model.KnowledgeComponentKind;
@@ -44,14 +40,14 @@ import edu.regis.shatu.model.StudentModelFieldKind;
 import edu.regis.shatu.model.Task;
 import edu.regis.shatu.model.TutoringSession;
 import edu.regis.shatu.model.Unit;
-import edu.regis.shatu.model.User;
 import edu.regis.shatu.model.aol.Assessment;
 import edu.regis.shatu.model.aol.AssessmentLevel;
 import edu.regis.shatu.model.aol.BitOpExample;
 import edu.regis.shatu.model.aol.BitOpStep;
-import edu.regis.shatu.model.aol.EncodeAsciiExample;
-import edu.regis.shatu.model.aol.ExampleType;
+import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.NewExampleRequest;
+import edu.regis.shatu.model.aol.PendingStep;
+import edu.regis.shatu.model.aol.PendingTask;
 import edu.regis.shatu.model.aol.RotateStep;
 import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.model.aol.StudentModel;
@@ -60,7 +56,7 @@ import edu.regis.shatu.model.aol.Timeout;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
-import java.util.HashSet;
+import java.util.GregorianCalendar;
 import java.util.Map;
 import java.util.Random;
 import java.util.logging.Level;
@@ -133,25 +129,44 @@ public class ShaTuTutor implements TutorSvc {
 
         String methodName = new String(m);
 
-        // Most methods require verifying the given security token with the known one.
+        // Most methods require verifying the given security token with the 
+        // one current known in the DB for the given user.
         switch (methodName) {
             case "completedStep":
             case "completedTask":
+            case "getTask":
             case "newExample":
             case "requestHint":
-            case "getTask":
-
+            case "resetPassword":
+                String userId = request.getUserId();
                 try {
-                    session = verifySession(request.getUserId(), request.getSessionId());
+                    if (verifySession(userId, request.getSecurityToken())) {
 
-                    // Retrieve the student model since we're going to eventually update. 
-                    student = ServiceFactory.findStudentSvc().retrieve(session.getAccount().getUserId());
-                    studentModel = student.getStudentModel();
+                        Account account = ServiceFactory.findAccountSvc().retrieve(userId);
+                        student = new Student(account);
+                        
+                        try {
+                            StudentModelSvc stuModSvc = ServiceFactory.findStudentModelSvc();
+                            studentModel = stuModSvc.retrieve(userId);
+                            student.setStudentModel(studentModel);
+                    
+                        } catch (ObjNotFoundException ex) {
+                            TutorReply reply = new TutorReply(":ERR");
+                            reply.setData("Student model not found for: " + userId );
+                            return reply;
+                        }
+    
+                        
+                        session = ServiceFactory.findSessionSvc().retrieve(student);
+        
+                    } else {
+                        TutorReply reply = new TutorReply(":ERR");
+                        reply.setData("Illegal Security Token");
+                        return reply;
+                    }
 
                 } catch (ObjNotFoundException ex) {
-                    return createError("No session exists for user: " + request.getUserId(), ex);
-                } catch (IllegalArgException ex) {
-                    return createError("Illegal session token sent for user: " + request.getUserId(), ex);
+                    return createError("No session exists for user: " + userId, ex);
                 } catch (NonRecoverableException ex) {
                     return createError(ex.toString(), ex);
                 }
@@ -189,31 +204,24 @@ public class ShaTuTutor implements TutorSvc {
      * This method handles ":CreateAccount" requests from the GUI client.
      *
      * @param jsonAcct a JSon encoded Account object
+     * @throws NonRecoverableException perhaps see getCause().getErrorCode().
      * @return a TutorReply if successful the status is "Created", otherwise the
-     * status is "ERR".
+     * status is ":ERR".
      */
     public TutorReply createAccount(String jsonAcct) throws NonRecoverableException {
         Account acct = gson.fromJson(jsonAcct, Account.class);
-        Student stud = gson.fromJson(jsonAcct, Student.class);
+
         int courseId = DEFAULT_COURSE_ID; // Currently only one course
 
-        StudentSvc stuSvc = ServiceFactory.findStudentSvc();
-
-        if (stuSvc.exists(acct.getUserId())) {
-            return new TutorReply("IllegalUserId");
-        }
-        
         try {
-            ServiceFactory.findUserSvc().create(acct);
+            ServiceFactory.findAccountSvc().create(acct);
 
             try {
-                CourseSvc courseSvc = ServiceFactory.findCourseSvc();
-                
-                Course course = courseSvc.retrieve(courseId);
-                
-                session = createSession(acct, course);
+                Course course = ServiceFactory.findCourseSvc().retrieve(courseId);
 
-                createStudent(stud, course, session);
+                student = createStudent(acct, course);
+
+                createSession(student, course);
 
                 return new TutorReply("Created");
 
@@ -221,38 +229,36 @@ public class ShaTuTutor implements TutorSvc {
                 return createError("Unknown course: " + courseId, null);
             }
 
-        } catch (IllegalArgException ex) {
-            // Should never get here since we tested whether the account exists
+        } catch (IllegalArgException ex) { // The account already exists
             return new TutorReply("IllegalUserId");
         }
     }
+
     /**
-     * Verifies the user is in the database and the security question and answer match.
+     * Verifies the user is in the database and the security question and answer
+     * match.
      *
      * This method handles ":VerifyUser" requests from the GUI client.
      *
      * @param jsonAcct a JSon encoded Account object
      * @return a TutorReply if successful the status is "Created", otherwise the
-     * status is "ERR".
+     * status is ":ERR".
      * @throws edu.regis.shatu.err.NonRecoverableException
      */
     public TutorReply verifyUser(String jsonAcct) throws NonRecoverableException {
-        Account acct = gson.fromJson(jsonAcct, Account.class);
-        User user = gson.fromJson(jsonAcct, User.class);
+        Account requestAcct = gson.fromJson(jsonAcct, Account.class);
 
-        StudentSvc stuSvc = ServiceFactory.findStudentSvc();
-        if (!stuSvc.exists(acct.getUserId())) {
+        AccountSvc acctSvc = ServiceFactory.findAccountSvc();
+        if (!acctSvc.exists(requestAcct.getUserId())) {
             return new TutorReply("IllegalUserId");
         }
-        
-        try {
-            User dbUserAnswer = ServiceFactory.findUserSvc().retrieveAnswer(user.getUserId());
-            User dbUserQuestion = ServiceFactory.findUserSvc().retrieveQuestion(user.getUserId());
-           
 
-            if ((dbUserAnswer.getSecurityAnswer().equals(user.getSecurityAnswer())) && 
-                    (dbUserQuestion.getSecurityQuestion() == user.getSecurityQuestion())) {
-             
+        try {
+            Account dbAcct = acctSvc.retrieve(requestAcct.getUserId());
+
+            if ((dbAcct.getSecurityAnswer().equals(requestAcct.getSecurityAnswer()))
+                    && (dbAcct.getSecurityQuestion() == requestAcct.getSecurityQuestion())) {
+
                 TutorReply reply = new TutorReply("Verified");
 
                 return reply;
@@ -268,8 +274,9 @@ public class ShaTuTutor implements TutorSvc {
                     .getName()).log(Level.SEVERE, null, ex);
             return new TutorReply();
         }
-        
+
     }
+
     /**
      * Resets password for user currently in database
      *
@@ -277,27 +284,30 @@ public class ShaTuTutor implements TutorSvc {
      *
      * @param jsonAcct a JSon encoded Account object
      * @return a TutorReply if successful the status is "Created", otherwise the
-     * status is "ERR".
+     * status is ":ERR".
      * @throws edu.regis.shatu.err.NonRecoverableException
      */
     public TutorReply resetPassword(String jsonAcct) throws NonRecoverableException {
         Account acct = gson.fromJson(jsonAcct, Account.class);
-        User user = gson.fromJson(jsonAcct, Student.class);
 
-        StudentSvc stuSvc = ServiceFactory.findStudentSvc();
+        AccountSvc acctSvc = ServiceFactory.findAccountSvc();
 
-        if (!stuSvc.exists(acct.getUserId())) {
+        if (!acctSvc.exists(acct.getUserId())) {
             return new TutorReply("IllegalUserId");
         }
-        
-        
+
         try {
-            ServiceFactory.findUserSvc().update(user, acct.getPassword());  //does this get new password?
+            acctSvc.update(acct);
+
+            // ToDo: Account updated.
             return new TutorReply("PasswordReset");
 
         } catch (ObjNotFoundException ex) {
             // Should never get here since we tested whether the account exists
             return new TutorReply("IllegalUserId");
+        } catch (IllegalArgException ex) {
+            // ToDo: More specific err information returned 
+            return new TutorReply("IllegalArg");
         }
     }
 
@@ -312,14 +322,28 @@ public class ShaTuTutor implements TutorSvc {
      */
     public TutorReply signIn(String jsonUser) {
         System.out.println("Received sign in: " + jsonUser);
-        User user = gson.fromJson(jsonUser, User.class);
+        Account requestAcct = gson.fromJson(jsonUser, Account.class);
 
         try {
-            User dbUser = ServiceFactory.findUserSvc().retrieve(user.getUserId());
+            Account dbAcct = ServiceFactory.findAccountSvc().retrieve(requestAcct.getUserId());
 
-            if (dbUser.getPassword().equals(user.getPassword())) {
+            if (dbAcct.getPassword().equals(requestAcct.getPassword())) {
+                student = new Student(dbAcct);
+                String userId = dbAcct.getUserId();
+                
+                try {
+                    StudentModelSvc stuModSvc = ServiceFactory.findStudentModelSvc();
+                    studentModel = stuModSvc.retrieve(userId);
+                    student.setStudentModel(studentModel);
+                    
+                } catch (ObjNotFoundException ex) {
+                    TutorReply reply = new TutorReply(":ERR");
+                    reply.setData("Student model not found in sign in for: " + userId );
+                    return reply;
+                }
+
                 SessionSvc svc = ServiceFactory.findSessionSvc();
-                TutoringSession session = svc.retrieve(user.getUserId());
+                TutoringSession session = svc.retrieve(student);
 
                 TutorReply reply = new TutorReply("Authenticated");
 
@@ -339,10 +363,10 @@ public class ShaTuTutor implements TutorSvc {
             return new TutorReply();
         }
     }
-    
+
     public TutorReply getTask(String jsonObj) {
         System.out.println("get task method");
-        
+
         Task task = new Task();
         int[] taskOrder = {102, 103, 104, 105, 106, 107, 108, 109, 101, 110, 111, 100, 112};
         int currentTask = 102;
@@ -356,45 +380,45 @@ public class ShaTuTutor implements TutorSvc {
         }
         System.out.println("Current task: " + currentTask);
 
-        switch(currentTask) {
+        switch (currentTask) {
             case 106:
-                task.setType(ExampleType.PREPARE_SCHEDULE);
+                task.setType(ProblemType.PREPARE_SCHEDULE);
                 break;
             case 108:
-                task.setType(ExampleType.COMPRESS_ROUND);
+                task.setType(ProblemType.COMPRESS_ROUND);
                 break;
             case 101:
-                task.setType(ExampleType.SHIFT_BITS);
+                task.setType(ProblemType.SHIFT_BITS);
                 break;
             case 110:
-                task.setType(ExampleType.XOR_BITS);
+                task.setType(ProblemType.XOR_BITS);
                 break;
             case 111:
-                task.setType(ExampleType.ADD_BITS);
+                task.setType(ProblemType.ADD_BITS);
                 break;
             case 112:
-                task.setType(ExampleType.MAJORITY_FUNCTION);
+                task.setType(ProblemType.MAJORITY_FUNCTION);
                 break;
             case 103:
-                task.setType(ExampleType.ADD_ONE_BIT);
+                task.setType(ProblemType.ADD_ONE_BIT);
                 break;
             case 104:
-                task.setType(ExampleType.PAD_ZEROS);
+                task.setType(ProblemType.PAD_ZEROS);
                 break;
             case 109:
-                task.setType(ExampleType.ROTATE_BITS);
+                task.setType(ProblemType.ROTATE_BITS);
                 break;
             case 107:
-                task.setType(ExampleType.INITIALIZE_VARS);
+                task.setType(ProblemType.INITIALIZE_VARS);
                 break;
             case 100:
-                task.setType(ExampleType.CHOICE_FUNCTION);
+                task.setType(ProblemType.CHOICE_FUNCTION);
                 break;
             case 105:
-                task.setType(ExampleType.ADD_MSG_LENGTH);
+                task.setType(ProblemType.ADD_MSG_LENGTH);
                 break;
             default:
-                task.setType(ExampleType.ASCII_ENCODE);
+                task.setType(ProblemType.ASCII_ENCODE);
                 break;
         }
         TutorReply reply = new TutorReply(":Success");
@@ -532,39 +556,40 @@ public class ShaTuTutor implements TutorSvc {
         RotateStep example = gson.fromJson(completion.getData(), RotateStep.class);
         int amount = example.getAmount();
         String data = example.getData();
-        
+
         String expectedResult = performBitRotation(data, amount);
-        
+
         StepCompletionReply stepReply = new StepCompletionReply();
         String result = example.getUserResponse();
-        
+
         stepReply.setCorrectAnswer(expectedResult);
         stepReply.setResponse(result);
-        
+
         System.out.println("Answer: " + expectedResult);
-        
+
         if (expectedResult.equals(result)) {
             stepReply.setIsCorrect(true);
             stepReply.setIsRepeatStep(false);
             stepReply.setIsNewStep(true);
             stepReply.setIsNewTask(true);
             stepReply.setIsNextStep(false);
-            
+
             // Update the assessment data and save it to the database.
             int dbId = KnowledgeComponentKind.fromString("Rotate n BITS").dbId();
-            Assessment assessment = studentModel.findAssessment(dbId); 
+            Assessment assessment = studentModel.findAssessment(dbId);
             assessment.incrementSuccessess();
-            
+
             int exposures = assessment.getExposures();
             int successes = assessment.getSuccessess();
-            
+
             if (exposures > 0 && (double) successes / exposures > 0.6) {
                 stepReply.setIsNewTask(true);
                 System.out.println("%%%%%%%%%%% Next Task Recommended");
                 assessment.setAssessment(AssessmentLevel.COMPLETED);
+            } else {
+                stepReply.setIsNewTask(false);
             }
-            else stepReply.setIsNewTask(false);
-            
+
             try {
                 StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
                 modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.SUCCESSES);
@@ -572,7 +597,7 @@ public class ShaTuTutor implements TutorSvc {
             } catch (NonRecoverableException ex) {
                 return createError("Unknown error", ex);
             }
-            
+
         } else {
             stepReply.setIsCorrect(false);
             stepReply.setIsRepeatStep(true);
@@ -582,23 +607,29 @@ public class ShaTuTutor implements TutorSvc {
         }
 
         Step step = new Step(1, 0, StepSubType.STEP_COMPLETION_REPLY);
-        step.setCurrentHintIndex(0);
-        step.setNotifyTutor(true);
-        step.setIsCompleted(false);
+
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);
         step.setData(gson.toJson(stepReply));
 
         Task task = new Task();
         task.setKind(TaskKind.PROBLEM);
-        task.setType(ExampleType.STEP_COMPLETION_REPLY);
+        task.setType(ProblemType.STEP_COMPLETION_REPLY);
         task.setDescription("Choose your next action");
-        task.addStep(step); 
+        task.addStep(step);
+
+        PendingStep pendingStep = new PendingStep(step);
+        pendingStep.setCurrentHintIndex(0);
+        pendingStep.setNotifyTutor(true);
+        pendingStep.setIsCompleted(false);
+
+        PendingTask pendingTask = new PendingTask(task);
+        pendingTask.setCurrentStep(pendingStep);
 
         TutorReply reply = new TutorReply(":Success");
 
-        reply.setData(gson.toJson(task));
-        
+        reply.setData(gson.toJson(pendingTask));
+
         return reply;
     }
 
@@ -637,22 +668,23 @@ public class ShaTuTutor implements TutorSvc {
             stepReply.setIsNewStep(true);
             stepReply.setIsNewTask(true);
             stepReply.setIsNextStep(false);
-            
+
             // Update the assessment data and save it to the database.
             int dbId = KnowledgeComponentKind.fromString("ASCII Encode").dbId();
-            Assessment assessment = studentModel.findAssessment(dbId); 
+            Assessment assessment = studentModel.findAssessment(dbId);
             assessment.incrementSuccessess();
-            
+
             int exposures = assessment.getExposures();
             int successes = assessment.getSuccessess();
-            
+
             if (exposures > 0 && (double) successes / exposures > 0.6) {
                 stepReply.setIsNewTask(true);
                 System.out.println("%%%%%%%%%%% Next Task Recommended");
                 assessment.setAssessment(AssessmentLevel.COMPLETED);
+            } else {
+                stepReply.setIsNewTask(false);
             }
-            else stepReply.setIsNewTask(false);
-            
+
             try {
                 StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
                 modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.SUCCESSES);
@@ -672,23 +704,29 @@ public class ShaTuTutor implements TutorSvc {
         }
 
         Step step = new Step(1, 0, StepSubType.STEP_COMPLETION_REPLY);
-        step.setCurrentHintIndex(0);
-        step.setNotifyTutor(true);
-        step.setIsCompleted(false);
-        // ToDo: fix timeouts
+
+        // ToDo: fix timeouts  
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);
         step.setData(gson.toJson(stepReply));
 
         Task task = new Task();
         task.setKind(TaskKind.PROBLEM);
-        task.setType(ExampleType.STEP_COMPLETION_REPLY);
+        task.setType(ProblemType.STEP_COMPLETION_REPLY);
         task.setDescription("Choose your next action");
         task.addStep(step);
 
+        PendingStep pendingStep = new PendingStep(step);
+        pendingStep.setCurrentHintIndex(0);
+        pendingStep.setNotifyTutor(true);
+        pendingStep.setIsCompleted(false);
+
+        PendingTask pendingTask = new PendingTask(task);
+        pendingTask.setCurrentStep(pendingStep);
+
         TutorReply reply = new TutorReply(":Success");
 
-        reply.setData(gson.toJson(task));
+        reply.setData(gson.toJson(pendingTask));
 
         return reply;
     }
@@ -729,21 +767,22 @@ public class ShaTuTutor implements TutorSvc {
 
             // ToDo: currently only one step in a task, so there isn't a next one???
             stepReply.setIsNextStep(false);
-            
+
             // Update the assessment data and save it to the database.
             int dbId = KnowledgeComponentKind.fromString("Add One Bit").dbId();
-            Assessment assessment = studentModel.findAssessment(dbId); 
+            Assessment assessment = studentModel.findAssessment(dbId);
             assessment.incrementSuccessess();
 
             int exposures = assessment.getExposures();
             int successes = assessment.getSuccessess();
-            
+
             if (exposures > 0 && (double) successes / exposures > 0.6) {
                 stepReply.setIsNewTask(true);
                 System.out.println("%%%%%%%%%%% Next Task Recommended");
                 assessment.setAssessment(AssessmentLevel.COMPLETED);
+            } else {
+                stepReply.setIsNewTask(false);
             }
-            else stepReply.setIsNewTask(false);
 
             try {
                 StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
@@ -753,7 +792,7 @@ public class ShaTuTutor implements TutorSvc {
             } catch (NonRecoverableException ex) {
                 return createError("Unknown error", ex);
             }
-            
+
         } else { // User was wrong
             System.out.println("Answer was not correct, correct if branch taken."); // Error checking
             stepReply.setIsCorrect(false);
@@ -764,9 +803,6 @@ public class ShaTuTutor implements TutorSvc {
         }
 
         Step step = new Step(1, 0, StepSubType.STEP_COMPLETION_REPLY);
-        step.setCurrentHintIndex(0);
-        step.setNotifyTutor(true);
-        step.setIsCompleted(false);
         // ToDo: fix timeouts
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);
@@ -774,13 +810,21 @@ public class ShaTuTutor implements TutorSvc {
 
         Task task = new Task();
         task.setKind(TaskKind.PROBLEM);
-        task.setType(ExampleType.STEP_COMPLETION_REPLY);
+        task.setType(ProblemType.STEP_COMPLETION_REPLY);
         task.setDescription("Choose your next action");
         task.addStep(step);
 
+        PendingStep pendingStep = new PendingStep(step);
+        pendingStep.setCurrentHintIndex(0);
+        pendingStep.setNotifyTutor(true);
+        pendingStep.setIsCompleted(false);
+
+        PendingTask pendingTask = new PendingTask(task);
+        pendingTask.setCurrentStep(pendingStep);
+
         TutorReply reply = new TutorReply(":Success");
 
-        reply.setData(gson.toJson(task));
+        reply.setData(gson.toJson(pendingTask));
 
         return reply;
     }
@@ -821,10 +865,10 @@ public class ShaTuTutor implements TutorSvc {
 
             // ToDo: currently only one step in a task, so there isn't a next one???
             stepReply.setIsNextStep(false);
-            
+
             // Update the assessment data and save it to the database.
             int dbId = KnowledgeComponentKind.fromString("Pad with Zeros").dbId();
-            Assessment assessment = studentModel.findAssessment(dbId); 
+            Assessment assessment = studentModel.findAssessment(dbId);
             assessment.incrementSuccessess();
 
             try {
@@ -834,15 +878,16 @@ public class ShaTuTutor implements TutorSvc {
             } catch (NonRecoverableException ex) {
                 return createError("Unknown error", ex);
             }
-            
+
             int exposures = assessment.getExposures();
             int successes = assessment.getSuccessess();
-            
+
             if (exposures > 0 && (double) successes / exposures > 0.6) {
                 stepReply.setIsNewTask(true);
                 System.out.println("%%%%%%%%%%% Next Task Recommended");
+            } else {
+                stepReply.setIsNewTask(false);
             }
-            else stepReply.setIsNewTask(false);
 
         } else { // User was wrong
             System.out.println("Answer was not correct, correct if branch taken."); // Error checking
@@ -854,9 +899,7 @@ public class ShaTuTutor implements TutorSvc {
         }
 
         Step step = new Step(1, 0, StepSubType.STEP_COMPLETION_REPLY);
-        step.setCurrentHintIndex(0);
-        step.setNotifyTutor(true);
-        step.setIsCompleted(false);
+
         // ToDo: fix timeouts
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);
@@ -864,65 +907,75 @@ public class ShaTuTutor implements TutorSvc {
 
         Task task = new Task();
         task.setKind(TaskKind.PROBLEM);
-        task.setType(ExampleType.STEP_COMPLETION_REPLY);
+        task.setType(ProblemType.STEP_COMPLETION_REPLY);
         task.setDescription("Choose your next action");
         task.addStep(step);
 
+        PendingStep pendingStep = new PendingStep(step);
+        pendingStep.setCurrentHintIndex(0);
+        pendingStep.setNotifyTutor(true);
+        pendingStep.setIsCompleted(false);
+
+        PendingTask pendingTask = new PendingTask(task);
+        pendingTask.setCurrentStep(pendingStep);
+
         TutorReply reply = new TutorReply(":Success");
 
-        reply.setData(gson.toJson(task));
+        reply.setData(gson.toJson(pendingTask));
 
         return reply;
     }
-    
+
     /**
-     * Function that is called from the overrided stepCompletion method from the MessageLenView.  
-     * Checks the users answer with the correct answer and will provide the user
-     * with further guidance.
+     * Function that is called from the overrided stepCompletion method from the
+     * MessageLenView. Checks the users answer with the correct answer and will
+     * provide the user with further guidance.
+     *
      * @param completion
-     * @return 
-     */    
+     * @return
+     */
     public TutorReply completeAddMsgLenStep(StepCompletion completion) {
         MessageLenStep completedMessageLenStep = gson.fromJson(completion.getData(), MessageLenStep.class);
-        
+
         String userAnswer = completedMessageLenStep.getUserAnswer();
         String correctAnswer = completedMessageLenStep.getResult();
-        
+
         System.out.println("user answer: " + userAnswer); // Error checking
         System.out.println("Correct answer: " + correctAnswer); // Error checking
-        
+
         StepCompletionReply stepReply = new StepCompletionReply();
         stepReply.setCorrectAnswer(correctAnswer);
         stepReply.setResponse(userAnswer);
-        
+
         if (userAnswer.equals(correctAnswer)) { // User was correct
             System.out.println("Answer was correct, correct if branch taken."); // Error checking
             stepReply.setIsCorrect(true);
             stepReply.setIsRepeatStep(false);
             stepReply.setIsNewStep(true);
-             
+
             // ToDo: Use the student model to figure out whether we want
             // to give the student another practice problem of the same
             // type or move on to an entirely different problem.
             stepReply.setIsNewTask(true);
-            
+
             // ToDo: currently only one step in a task, so there isn't a next one???
             stepReply.setIsNextStep(false);
-            
+
             // Update the assessment data and save it to the database.
             int dbId = KnowledgeComponentKind.fromString("Add Message Length").dbId();
-            Assessment assessment = studentModel.findAssessment(dbId); 
+            Assessment assessment = studentModel.findAssessment(dbId);
             assessment.incrementSuccessess();
 
             int exposures = assessment.getExposures();
             int successes = assessment.getSuccessess();
-            
+
             if (exposures > 0 && (double) successes / exposures > 0.6) {
                 stepReply.setIsNewTask(true);
                 System.out.println("%%%%%%%%%%% Next Task Recommended");
                 assessment.setAssessment(AssessmentLevel.COMPLETED);
+            } else {
+                stepReply.setIsNewTask(false);
             }
-            else stepReply.setIsNewTask(false);
 
             try {
                 StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
@@ -932,7 +985,7 @@ public class ShaTuTutor implements TutorSvc {
             } catch (NonRecoverableException ex) {
                 return createError("Unknown error", ex);
             }
-            
+
         } else { // User was wrong
             System.out.println("Answer was not correct, correct if branch taken."); // Error checking
             stepReply.setIsCorrect(false);
@@ -941,33 +994,38 @@ public class ShaTuTutor implements TutorSvc {
             stepReply.setIsNewTask(false);
             stepReply.setIsNextStep(false);
         }
-        
+
         Step step = new Step(1, 0, StepSubType.STEP_COMPLETION_REPLY);
-        step.setCurrentHintIndex(0);
-        step.setNotifyTutor(true);
-        step.setIsCompleted(false);
         // ToDo: fix timeouts
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);
         step.setData(gson.toJson(stepReply));
-        
+
         Task task = new Task();
         task.setKind(TaskKind.PROBLEM);
-        task.setType(ExampleType.STEP_COMPLETION_REPLY);
+        task.setType(ProblemType.STEP_COMPLETION_REPLY);
         task.setDescription("Choose your next action");
-        task.addStep(step); 
-        
+        task.addStep(step);
+
+        PendingStep pendingStep = new PendingStep(step);
+        pendingStep.setCurrentHintIndex(0);
+        pendingStep.setNotifyTutor(true);
+        pendingStep.setIsCompleted(false);
+
+        PendingTask pendingTask = new PendingTask(task);
+        pendingTask.setCurrentStep(pendingStep);
+
         TutorReply reply = new TutorReply(":Success");
-    
-        reply.setData(gson.toJson(task));
-        
+
+        reply.setData(gson.toJson(pendingTask));
+
         return reply;
     }
 
     public TutorReply completePrepareScheduleStep(StepCompletion completion) {
         StepCompletionReply stepReply = new StepCompletionReply();
         stepReply.setResponse(" ");
-        
+
         stepReply.setIsCorrect(true);
         stepReply.setIsRepeatStep(false);
         stepReply.setIsNewStep(true);
@@ -982,7 +1040,7 @@ public class ShaTuTutor implements TutorSvc {
 
         // Update the assessment data and save it to the database.
         int dbId = KnowledgeComponentKind.fromString("Prepare Schedule").dbId();
-        Assessment assessment = studentModel.findAssessment(dbId); 
+        Assessment assessment = studentModel.findAssessment(dbId);
         assessment.incrementSuccessess();
 
         int exposures = assessment.getExposures();
@@ -992,8 +1050,9 @@ public class ShaTuTutor implements TutorSvc {
             stepReply.setIsNewTask(true);
             System.out.println("%%%%%%%%%%% Next Task Recommended");
             assessment.setAssessment(AssessmentLevel.COMPLETED);
+        } else {
+            stepReply.setIsNewTask(false);
         }
-        else stepReply.setIsNewTask(false);
 
         try {
             StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
@@ -1003,26 +1062,32 @@ public class ShaTuTutor implements TutorSvc {
         } catch (NonRecoverableException ex) {
             return createError("Unknown error", ex);
         }
-        
+
         Step step = new Step(1, 0, StepSubType.STEP_COMPLETION_REPLY);
-        step.setCurrentHintIndex(0);
-        step.setNotifyTutor(true);
-        step.setIsCompleted(false);
+
         // ToDo: fix timeouts
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);
         step.setData(gson.toJson(stepReply));
-        
+
         Task task = new Task();
         task.setKind(TaskKind.PROBLEM);
-        task.setType(ExampleType.STEP_COMPLETION_REPLY);
+        task.setType(ProblemType.STEP_COMPLETION_REPLY);
         task.setDescription("Choose your next action");
-        task.addStep(step); 
-        
+        task.addStep(step);
+
+        PendingStep pendingStep = new PendingStep(step);
+        pendingStep.setCurrentHintIndex(0);
+        pendingStep.setNotifyTutor(true);
+        pendingStep.setIsCompleted(false);
+
+        PendingTask pendingTask = new PendingTask(task);
+        pendingTask.setCurrentStep(pendingStep);
+
         TutorReply reply = new TutorReply(":Success");
-    
-        reply.setData(gson.toJson(task));
-        
+
+        reply.setData(gson.toJson(pendingTask));
+
         return reply;
     }
 
@@ -1061,7 +1126,7 @@ public class ShaTuTutor implements TutorSvc {
         StepCompletionReply stepReply = new StepCompletionReply();
         stepReply.setIsCorrect(allCorrect);
         stepReply.setCorrectAnswer(correctAnswers.toString().replaceAll("[{}]", "").replaceAll("@\\w{2}=|,", "").trim());
-        
+
         stepReply.setResponse(userAnswers.toString().replaceAll("[{}]", "").replaceAll("@\\w{2}=|,", "").trim());
 
         // Update the student model
@@ -1073,7 +1138,7 @@ public class ShaTuTutor implements TutorSvc {
             assessment.incrementSuccessess();
         }
         assessment.incrementExposures();
-        
+
         // Determine whether to recommend a new task
         int successes = assessment.getSuccessess();
         if (successes > 0) {
@@ -1083,7 +1148,7 @@ public class ShaTuTutor implements TutorSvc {
         } else {
             stepReply.setIsNewTask(false);
         }
-        
+
         try {
             StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
             modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.SUCCESSES);
@@ -1098,9 +1163,6 @@ public class ShaTuTutor implements TutorSvc {
 
         // Wrap the StepCompletionReply into a Task and TutorReply
         Step step = new Step(1, 0, StepSubType.STEP_COMPLETION_REPLY);
-        step.setCurrentHintIndex(0);
-        step.setNotifyTutor(true);
-        step.setIsCompleted(false);
 
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);
@@ -1108,12 +1170,20 @@ public class ShaTuTutor implements TutorSvc {
 
         Task task = new Task();
         task.setKind(TaskKind.PROBLEM);
-        task.setType(ExampleType.STEP_COMPLETION_REPLY);
+        task.setType(ProblemType.STEP_COMPLETION_REPLY);
         task.setDescription("Review your results and choose the next action.");
         task.addStep(step);
 
+        PendingStep pendingStep = new PendingStep(step);
+        pendingStep.setCurrentHintIndex(0);
+        pendingStep.setNotifyTutor(true);
+        pendingStep.setIsCompleted(false);
+
+        PendingTask pendingTask = new PendingTask(task);
+        pendingTask.setCurrentStep(pendingStep);
+
         TutorReply reply = new TutorReply(":Success");
-        reply.setData(gson.toJson(task));
+        reply.setData(gson.toJson(pendingTask));
 
         return reply;
     }
@@ -1121,7 +1191,7 @@ public class ShaTuTutor implements TutorSvc {
     public TutorReply completeCompressRoundStep(StepCompletion completion) {
         StepCompletionReply stepReply = new StepCompletionReply();
         stepReply.setResponse(" ");
-        
+
         stepReply.setIsCorrect(true);
         stepReply.setIsRepeatStep(false);
         stepReply.setIsNewStep(true);
@@ -1136,7 +1206,7 @@ public class ShaTuTutor implements TutorSvc {
 
         // Update the assessment data and save it to the database.
         int dbId = KnowledgeComponentKind.fromString("Compress Round").dbId();
-        Assessment assessment = studentModel.findAssessment(dbId); 
+        Assessment assessment = studentModel.findAssessment(dbId);
         assessment.incrementSuccessess();
 
         int exposures = assessment.getExposures();
@@ -1146,8 +1216,9 @@ public class ShaTuTutor implements TutorSvc {
             stepReply.setIsNewTask(true);
             System.out.println("%%%%%%%%%%% Next Task Recommended");
             assessment.setAssessment(AssessmentLevel.COMPLETED);
+        } else {
+            stepReply.setIsNewTask(false);
         }
-        else stepReply.setIsNewTask(false);
 
         try {
             StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
@@ -1157,26 +1228,32 @@ public class ShaTuTutor implements TutorSvc {
         } catch (NonRecoverableException ex) {
             return createError("Unknown error", ex);
         }
-        
+
         Step step = new Step(1, 0, StepSubType.STEP_COMPLETION_REPLY);
-        step.setCurrentHintIndex(0);
-        step.setNotifyTutor(true);
-        step.setIsCompleted(false);
+
         // ToDo: fix timeouts
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);
         step.setData(gson.toJson(stepReply));
-        
+
         Task task = new Task();
         task.setKind(TaskKind.PROBLEM);
-        task.setType(ExampleType.STEP_COMPLETION_REPLY);
+        task.setType(ProblemType.STEP_COMPLETION_REPLY);
         task.setDescription("Choose your next action");
-        task.addStep(step); 
-        
+        task.addStep(step);
+
+        PendingStep pendingStep = new PendingStep(step);
+        pendingStep.setCurrentHintIndex(0);
+        pendingStep.setNotifyTutor(true);
+        pendingStep.setIsCompleted(false);
+
+        PendingTask pendingTask = new PendingTask(task);
+        pendingTask.setCurrentStep(pendingStep);
+
         TutorReply reply = new TutorReply(":Success");
-    
-        reply.setData(gson.toJson(task));
-        
+
+        reply.setData(gson.toJson(pendingTask));
+
         return reply;
     }
 
@@ -1206,22 +1283,23 @@ public class ShaTuTutor implements TutorSvc {
 
             // ToDo: currently only one step in a task, so there isn't a next one???
             stepReply.setIsNextStep(false);
-            
+
             // Update the assessment data and save it to the database.
             int dbId = KnowledgeComponentKind.fromString("Shift Bits").dbId();
-            Assessment assessment = studentModel.findAssessment(dbId); 
+            Assessment assessment = studentModel.findAssessment(dbId);
             assessment.incrementSuccessess();
-            
+
             int exposures = assessment.getExposures();
             int successes = assessment.getSuccessess();
-            
+
             if (exposures > 0 && (double) successes / exposures > 0.6) {
                 stepReply.setIsNewTask(true);
                 System.out.println("%%%%%%%%%%% Next Task Recommended");
                 assessment.setAssessment(AssessmentLevel.COMPLETED);
+            } else {
+                stepReply.setIsNewTask(false);
             }
-            else stepReply.setIsNewTask(false);
-            
+
             try {
                 StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
                 modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.SUCCESSES);
@@ -1240,9 +1318,7 @@ public class ShaTuTutor implements TutorSvc {
         }
 
         Step step = new Step(1, 0, StepSubType.STEP_COMPLETION_REPLY);
-        step.setCurrentHintIndex(0);
-        step.setNotifyTutor(true);
-        step.setIsCompleted(false);
+
         // ToDo: fix timeouts
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);
@@ -1250,13 +1326,21 @@ public class ShaTuTutor implements TutorSvc {
 
         Task task = new Task();
         task.setKind(TaskKind.PROBLEM);
-        task.setType(ExampleType.STEP_COMPLETION_REPLY);
+        task.setType(ProblemType.STEP_COMPLETION_REPLY);
         task.setDescription("Choose your next action");
         task.addStep(step);
 
+        PendingStep pendingStep = new PendingStep(step);
+        pendingStep.setCurrentHintIndex(0);
+        pendingStep.setNotifyTutor(true);
+        pendingStep.setIsCompleted(false);
+
+        PendingTask pendingTask = new PendingTask(task);
+        pendingTask.setCurrentStep(pendingStep);
+
         TutorReply reply = new TutorReply(":Success");
 
-        reply.setData(gson.toJson(task));
+        reply.setData(gson.toJson(pendingTask));
 
         return reply;
     }
@@ -1291,21 +1375,22 @@ public class ShaTuTutor implements TutorSvc {
 
             // ToDo: currently only one step in a task, so there isn't a next one???
             stepReply.setIsNextStep(false);
-            
+
             // Update the assessment data and save it to the database.
             int dbId = KnowledgeComponentKind.fromString("XOR Bits").dbId();
-            Assessment assessment = studentModel.findAssessment(dbId); 
+            Assessment assessment = studentModel.findAssessment(dbId);
             assessment.incrementSuccessess();
 
             int exposures = assessment.getExposures();
             int successes = assessment.getSuccessess();
-            
+
             if (exposures > 0 && (double) successes / exposures > 0.6) {
                 stepReply.setIsNewTask(true);
                 System.out.println("%%%%%%%%%%% Next Task Recommended");
                 assessment.setAssessment(AssessmentLevel.COMPLETED);
+            } else {
+                stepReply.setIsNewTask(false);
             }
-            else stepReply.setIsNewTask(false);
 
             try {
                 StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
@@ -1315,7 +1400,7 @@ public class ShaTuTutor implements TutorSvc {
             } catch (NonRecoverableException ex) {
                 return createError("Unknown error", ex);
             }
-            
+
         } else {
             stepReply.setIsCorrect(false);
             stepReply.setIsRepeatStep(true);
@@ -1325,9 +1410,7 @@ public class ShaTuTutor implements TutorSvc {
         }
 
         Step step = new Step(1, 0, StepSubType.STEP_COMPLETION_REPLY);
-        step.setCurrentHintIndex(0);
-        step.setNotifyTutor(true);
-        step.setIsCompleted(false);
+
         // ToDo: fix timeouts
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);
@@ -1336,13 +1419,21 @@ public class ShaTuTutor implements TutorSvc {
 
         Task task = new Task();
         task.setKind(TaskKind.PROBLEM);
-        task.setType(ExampleType.STEP_COMPLETION_REPLY);
+        task.setType(ProblemType.STEP_COMPLETION_REPLY);
         task.setDescription("Choose your next action");
         task.addStep(step);
 
+        PendingStep pendingStep = new PendingStep(step);
+        pendingStep.setCurrentHintIndex(0);
+        pendingStep.setNotifyTutor(true);
+        pendingStep.setIsCompleted(false);
+
+        PendingTask pendingTask = new PendingTask(task);
+        pendingTask.setCurrentStep(pendingStep);
+
         TutorReply reply = new TutorReply(":Success");
 
-        reply.setData(gson.toJson(task));
+        reply.setData(gson.toJson(pendingTask));
 
         return reply;
     }
@@ -1377,21 +1468,22 @@ public class ShaTuTutor implements TutorSvc {
 
             // ToDo: currently only one step in a task, so there isn't a next one???
             stepReply.setIsNextStep(false);
-            
+
             // Update the assessment data and save it to the database.
             int dbId = KnowledgeComponentKind.fromString("Add Bits").dbId();
-            Assessment assessment = studentModel.findAssessment(dbId); 
+            Assessment assessment = studentModel.findAssessment(dbId);
             assessment.incrementSuccessess();
 
             int exposures = assessment.getExposures();
             int successes = assessment.getSuccessess();
-            
+
             if (exposures > 0 && (double) successes / exposures > 0.6) {
                 stepReply.setIsNewTask(true);
                 System.out.println("%%%%%%%%%%% Next Task Recommended");
                 assessment.setAssessment(AssessmentLevel.COMPLETED);
+            } else {
+                stepReply.setIsNewTask(false);
             }
-            else stepReply.setIsNewTask(false);
 
             try {
                 StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
@@ -1401,7 +1493,7 @@ public class ShaTuTutor implements TutorSvc {
             } catch (NonRecoverableException ex) {
                 return createError("Unknown error", ex);
             }
-            
+
         } else {
             stepReply.setIsCorrect(false);
             stepReply.setIsRepeatStep(true);
@@ -1411,9 +1503,7 @@ public class ShaTuTutor implements TutorSvc {
         }
 
         Step step = new Step(1, 0, StepSubType.STEP_COMPLETION_REPLY);
-        step.setCurrentHintIndex(0);
-        step.setNotifyTutor(true);
-        step.setIsCompleted(false);
+
         // ToDo: fix timeouts
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);
@@ -1422,13 +1512,21 @@ public class ShaTuTutor implements TutorSvc {
 
         Task task = new Task();
         task.setKind(TaskKind.PROBLEM);
-        task.setType(ExampleType.STEP_COMPLETION_REPLY);
+        task.setType(ProblemType.STEP_COMPLETION_REPLY);
         task.setDescription("Choose your next action");
         task.addStep(step);
 
+        PendingStep pendingStep = new PendingStep(step);
+        pendingStep.setCurrentHintIndex(0);
+        pendingStep.setNotifyTutor(true);
+        pendingStep.setIsCompleted(false);
+
+        PendingTask pendingTask = new PendingTask(task);
+        pendingTask.setCurrentStep(pendingStep);
+
         TutorReply reply = new TutorReply(":Success");
 
-        reply.setData(gson.toJson(task));
+        reply.setData(gson.toJson(pendingTask));
 
         return reply;
     }
@@ -1463,21 +1561,22 @@ public class ShaTuTutor implements TutorSvc {
 
             // ToDo: currently only one step in a task, so there isn't a next one???
             stepReply.setIsNextStep(false);
-            
+
             // Update the assessment data and save it to the database.
             int dbId = KnowledgeComponentKind.fromString("Majority Function").dbId();
-            Assessment assessment = studentModel.findAssessment(dbId); 
+            Assessment assessment = studentModel.findAssessment(dbId);
             assessment.incrementSuccessess();
 
             int exposures = assessment.getExposures();
             int successes = assessment.getSuccessess();
-            
+
             if (exposures > 0 && (double) successes / exposures > 0.6) {
                 stepReply.setIsNewTask(true);
                 System.out.println("%%%%%%%%%%% Next Task Recommended");
                 assessment.setAssessment(AssessmentLevel.COMPLETED);
+            } else {
+                stepReply.setIsNewTask(false);
             }
-            else stepReply.setIsNewTask(false);
 
             try {
                 StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
@@ -1487,7 +1586,7 @@ public class ShaTuTutor implements TutorSvc {
             } catch (NonRecoverableException ex) {
                 return createError("Unknown error", ex);
             }
-            
+
         } else {
             stepReply.setIsCorrect(false);
             stepReply.setIsRepeatStep(true);
@@ -1497,9 +1596,7 @@ public class ShaTuTutor implements TutorSvc {
         }
 
         Step step = new Step(1, 0, StepSubType.STEP_COMPLETION_REPLY);
-        step.setCurrentHintIndex(0);
-        step.setNotifyTutor(true);
-        step.setIsCompleted(false);
+
         // ToDo: fix timeouts
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);
@@ -1507,13 +1604,21 @@ public class ShaTuTutor implements TutorSvc {
 
         Task task = new Task();
         task.setKind(TaskKind.PROBLEM);
-        task.setType(ExampleType.STEP_COMPLETION_REPLY);
+        task.setType(ProblemType.STEP_COMPLETION_REPLY);
         task.setDescription("Choose your next action");
         task.addStep(step);
 
+        PendingStep pendingStep = new PendingStep(step);
+        pendingStep.setCurrentHintIndex(0);
+        pendingStep.setNotifyTutor(true);
+        pendingStep.setIsCompleted(false);
+
+        PendingTask pendingTask = new PendingTask(task);
+        pendingTask.setCurrentStep(pendingStep);
+
         TutorReply reply = new TutorReply(":Success");
 
-        reply.setData(gson.toJson(task));
+        reply.setData(gson.toJson(pendingTask));
 
         return reply;
     }
@@ -1547,18 +1652,19 @@ public class ShaTuTutor implements TutorSvc {
 
             // Update the assessment data and save it to the database.
             int dbId = KnowledgeComponentKind.fromString("Choice Function").dbId();
-            Assessment assessment = studentModel.findAssessment(dbId); 
+            Assessment assessment = studentModel.findAssessment(dbId);
             assessment.incrementSuccessess();
 
             int exposures = assessment.getExposures();
             int successes = assessment.getSuccessess();
-            
+
             if (exposures > 0 && (double) successes / exposures > 0.8) {
                 stepReply.setIsNewTask(true);
                 System.out.println("%%%%%%%%%%% Next Task Recommended");
                 assessment.setAssessment(AssessmentLevel.COMPLETED);
+            } else {
+                stepReply.setIsNewTask(false);
             }
-            else stepReply.setIsNewTask(false);
 
             try {
                 StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
@@ -1568,7 +1674,7 @@ public class ShaTuTutor implements TutorSvc {
             } catch (NonRecoverableException ex) {
                 return createError("Unknown error", ex);
             }
-            
+
         } else {
             stepReply.setIsCorrect(false);
             stepReply.setIsRepeatStep(true);
@@ -1578,9 +1684,7 @@ public class ShaTuTutor implements TutorSvc {
         }
 
         Step step = new Step(1, 0, StepSubType.STEP_COMPLETION_REPLY);
-        step.setCurrentHintIndex(0);
-        step.setNotifyTutor(true);
-        step.setIsCompleted(false);
+
         // ToDo: fix timeouts
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);
@@ -1588,13 +1692,21 @@ public class ShaTuTutor implements TutorSvc {
 
         Task task = new Task();
         task.setKind(TaskKind.PROBLEM);
-        task.setType(ExampleType.STEP_COMPLETION_REPLY);
+        task.setType(ProblemType.STEP_COMPLETION_REPLY);
         task.setDescription("Choose your next action");
         task.addStep(step);
 
+        PendingStep pendingStep = new PendingStep(step);
+        pendingStep.setCurrentHintIndex(0);
+        pendingStep.setNotifyTutor(true);
+        pendingStep.setIsCompleted(false);
+
+        PendingTask pendingTask = new PendingTask(task);
+        pendingTask.setCurrentStep(pendingStep);
+
         TutorReply reply = new TutorReply(":Success");
 
-        reply.setData(gson.toJson(task));
+        reply.setData(gson.toJson(pendingTask));
 
         return reply;
     }
@@ -1666,36 +1778,34 @@ public class ShaTuTutor implements TutorSvc {
      * @throws NonRecoverableException
      * @return the new TutoringSession
      */
-    private TutoringSession createSession(Account account, Course course) throws NonRecoverableException {
+    private TutoringSession createSession(Student student, Course course) throws NonRecoverableException {
+        Account account = student.getAccount();
+
+        TutoringSession tSession = new TutoringSession(student);
+        tSession.setStartDate(new GregorianCalendar());
+        tSession.setCourse(course.getDigest());
+        tSession.setUnit(course.currentUnit().getDigest());
+        
+        Task task = getFirstTask(course);
+        PendingTask pendingTask = new PendingTask(task);
+        pendingTask.setCurrentStep(new PendingStep(task.getCurrentStep()));   
+        tSession.addTask(pendingTask);
+   
+        // Generate the security token for this tutoring session.
+        Random rnd = new Random();
+        String clearToken = "Session" + account.getUserId() + Integer.toString(rnd.nextInt());
+        tSession.setSecurityToken(SHA_256.instance().sha256(clearToken));
+
         try {
-            Task task = getFirstTask(course);
-
-            TutoringSession tSession = new TutoringSession();
-            tSession.setAccount(account);
-            
-            Random rnd = new Random();
-            String clearToken = "Session" + account.getUserId() + Integer.toString(rnd.nextInt());
-            tSession.setSecurityToken(SHA_256.instance().sha256(clearToken));
-            
-            tSession.setCourse(course.getDigest());
-            
-            Unit unit = course.currentUnit();
-            if (unit != null) {
-                tSession.setUnit(unit.getDigest());
-            }
-
-            tSession.addTask(task);
-
             ServiceFactory.findSessionSvc().create(tSession);
 
             return tSession;
 
         } catch (IllegalArgException ex) {
-            // Should never get here
-            throw new NonRecoverableException("Session already exists " + account.getUserId());
+            throw new NonRecoverableException("Session already exists", ex);
         }
     }
-        
+
     /**
      * Create and save the student and their initial student model.
      *
@@ -1703,48 +1813,23 @@ public class ShaTuTutor implements TutorSvc {
      * @param course
      * @return
      */
-    private Student createStudent(Student student, Course course, TutoringSession session)
+    private Student createStudent(Account account, Course course)
             throws NonRecoverableException {
 
-        //Student student = new Student(acct.getUserId(), acct.getPassword());
-        StudentModel model = student.getStudentModel();
+        student = new Student(account);
+        studentModel = student.getStudentModel();
 
-        try {
-            // As the student has at least one task and step to complete,
-            // add the associated knowledge component assessment(s) to the 
-            // student model of the student.
-            HashSet<Integer> componentIds = new HashSet<>();
-            for (Task task : session.getTasks()) {
-                for (int componentId : task.getExercisedComponentIds()) {
-                    componentIds.add(componentId);
-                }
+        for (KnowledgeComponent outcome : course.getOutcomes()) {
+            Assessment assessment = new Assessment(outcome, AssessmentLevel.NOT_STARTED);
 
-                for (Step step : task.getSteps()) {
-                    for (int cid : step.getExercisedComponentIds()) {
-                        componentIds.add(cid);
-                    }
-                }
-            }
-
-            for (int id : componentIds) {
-                if (!model.containsAssessment(id)) {
-                    KnowledgeComponent comp = course.findKnowledgeComponent(id);
-                    model.addAssessment(id, new Assessment(comp, AssessmentLevel.VERY_LOW));
-
-                }
-            }
-
-            StudentSvc svc = ServiceFactory.findStudentSvc();
-            svc.create(student);
-            return student;
-
-        } catch (IllegalArgException e) {
-            // We should never get here since 
-            throw new NonRecoverableException("Student already exists " + student.getUserId());
-
-        } catch (ObjNotFoundException e) {
-            throw new NonRecoverableException("Inconsistent Course in DB knowledge component" + course.getId());
+            studentModel.addAssessment(outcome.getId(), assessment);
         }
+
+        StudentModelSvc stuSvc = ServiceFactory.findStudentModelSvc();
+
+        stuSvc.create(student);
+
+        return student;
 
     }
 
@@ -1757,17 +1842,13 @@ public class ShaTuTutor implements TutorSvc {
      * @return the current TutoringSession associated with the given user id and
      * session id
      */
-    private TutoringSession verifySession(String userId, String sessionId)
-            throws ObjNotFoundException, IllegalArgException, NonRecoverableException {
+    private boolean verifySession(String userId, String sessionId)
+            throws ObjNotFoundException, NonRecoverableException {
 
         SessionSvc svc = ServiceFactory.findSessionSvc();
-        TutoringSession locSession = svc.retrieve(userId);
+        String dbToken = svc.retrieveSecurityToken(userId);
 
-        if (locSession.getSecurityToken().equals(sessionId)) {
-            return locSession;
-        } else {
-            throw new IllegalArgException("Illegal session id for user: " + userId);
-        }
+        return dbToken.equals(sessionId);
     }
 
     /**
@@ -1775,9 +1856,9 @@ public class ShaTuTutor implements TutorSvc {
      *
      * @param course
      * @return a Task that should be completed first.
-     * @throws IllegalArgException see the message text.
+     * @throws NonRecoverableException see the message text.
      */
-    private Task getFirstTask(Course course) throws IllegalArgException {
+    private Task getFirstTask(Course course) throws NonRecoverableException {
         switch (course.getPrimaryPedagogy()) {
             case STUDENT_CHOICE:
                 return null; // ToDo
@@ -1786,13 +1867,13 @@ public class ShaTuTutor implements TutorSvc {
                 Unit unit = course.findUnitBySequenceId(0);
 
                 if (unit == null) {
-                    throw new IllegalArgException("Unit 0 not found in course: " + course.getId());
+                    throw new NonRecoverableException("Unit 0 not found in course: " + course.getId());
                 }
 
                 Task task = unit.findTaskBySequence(0);
 
                 if (task == null) {
-                    throw new IllegalArgException("Task 0 not found in Unit 0 of course: " + course.getId());
+                    throw new NonRecoverableException("Task 0 not found in Unit 0 of course: " + course.getId());
                 }
 
                 return task;
@@ -1804,11 +1885,10 @@ public class ShaTuTutor implements TutorSvc {
                 return null; // ToDo
 
             default:
-                throw new IllegalArgException("Unknwon task selection in course: " + course.getId());
+                throw new NonRecoverableException("Unknwon task selection in course: " + course.getId());
         }
     }
 
-    
     /**
      * Handles client requests for a new ASCII encode example.
      *
@@ -1819,31 +1899,26 @@ public class ShaTuTutor implements TutorSvc {
         System.out.println("Start tutor newEncodeAsciiexample"); // Error checking
 
         EncodeAsciiStep newEncodeAscii = gson.fromJson(jsonData, EncodeAsciiStep.class); // This is the EncodeAsciiStep created in the newExample function from the EncodeAsciiView.
-        
+
         if (newEncodeAscii.getQuestion().isEmpty() || newEncodeAscii.getQuestion() == null) {
-            
+
             System.out.println("Question was empty"); // Error checking
-            
+
             int messageLength = newEncodeAscii.getMessageLength(); // Set in the newExample function from the EncodeAsciiView, represents the String length that will be generated for the question.
 
             String newQuestion = generateRandomString(messageLength); // Generates a random string to convert to binary
 
             newEncodeAscii.setQuestion(newQuestion);
-            
+
             newEncodeAscii.setResult(toBinaryFunction(newQuestion)); // Generates the binary version of the question, which is now the answer
-            
-        }
-        
-        else {
+
+        } else {
             newEncodeAscii.setResult(toBinaryFunction(newEncodeAscii.getQuestion())); // Generates the binary version of the question, which is now the answer
         }
 
         System.out.println(newEncodeAscii.getResult()); // Error checking
 
         Step step = new Step(1, 0, StepSubType.ENCODE_ASCII);
-        step.setCurrentHintIndex(0);
-        step.setNotifyTutor(true);
-        step.setIsCompleted(false);
 
         // ToDo: fix timeouts
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
@@ -1853,7 +1928,7 @@ public class ShaTuTutor implements TutorSvc {
 
         Task task = new Task();
         task.setKind(TaskKind.PROBLEM);
-        task.setType(ExampleType.ASCII_ENCODE);
+        task.setType(ProblemType.ASCII_ENCODE);
         task.setDescription("Convert the question to binary.");
         task.addStep(step);
 
@@ -1866,8 +1941,16 @@ public class ShaTuTutor implements TutorSvc {
             StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
             modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
 
+            PendingStep pendingStep = new PendingStep(step);
+            pendingStep.setCurrentHintIndex(0);
+            pendingStep.setNotifyTutor(true);
+            pendingStep.setIsCompleted(false);
+
+            PendingTask pendingTask = new PendingTask(task);
+            pendingTask.setCurrentStep(pendingStep);
+
             TutorReply reply = new TutorReply(":Success");
-            reply.setData(gson.toJson(task));
+            reply.setData(gson.toJson(pendingTask));
 
             return reply;
 
@@ -1898,9 +1981,6 @@ public class ShaTuTutor implements TutorSvc {
         System.out.println(newAddOneBit.getResult()); // Error checking
 
         Step step = new Step(1, 0, StepSubType.ADD_ONE_BIT);
-        step.setCurrentHintIndex(0);
-        step.setNotifyTutor(true);
-        step.setIsCompleted(false);
 
         // ToDo: fix timeouts
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
@@ -1910,7 +1990,7 @@ public class ShaTuTutor implements TutorSvc {
 
         Task task = new Task();
         task.setKind(TaskKind.PROBLEM);
-        task.setType(ExampleType.ADD_ONE_BIT);
+        task.setType(ProblemType.ADD_ONE_BIT);
         task.setDescription("Add one bit to the given bit string");
         task.addStep(step);
 
@@ -1923,8 +2003,15 @@ public class ShaTuTutor implements TutorSvc {
             StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
             modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
 
+            PendingStep pendingStep = new PendingStep(step);
+            pendingStep.setCurrentHintIndex(0);
+            pendingStep.setNotifyTutor(true);
+            pendingStep.setIsCompleted(false);
+
+            PendingTask pendingTask = new PendingTask(task);
+            pendingTask.setCurrentStep(pendingStep);
             TutorReply reply = new TutorReply(":Success");
-            reply.setData(gson.toJson(task));
+            reply.setData(gson.toJson(pendingTask));
 
             return reply;
 
@@ -1954,9 +2041,7 @@ public class ShaTuTutor implements TutorSvc {
         System.out.println(subStep.getResult()); // Error checking
 
         Step step = new Step(1, 0, StepSubType.PAD_ZEROS);
-        step.setCurrentHintIndex(0);
-        step.setNotifyTutor(true);
-        step.setIsCompleted(false);
+
         // ToDo: fix timeouts
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);
@@ -1965,7 +2050,7 @@ public class ShaTuTutor implements TutorSvc {
 
         Task task = new Task();
         task.setKind(TaskKind.PROBLEM);
-        task.setType(ExampleType.PAD_ZEROS);
+        task.setType(ProblemType.PAD_ZEROS);
         task.setDescription("Calculate zeros needed to pad the message");
         task.addStep(step);
 
@@ -1978,8 +2063,16 @@ public class ShaTuTutor implements TutorSvc {
             StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
             modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
 
+            PendingStep pendingStep = new PendingStep(step);
+            pendingStep.setCurrentHintIndex(0);
+            pendingStep.setNotifyTutor(true);
+            pendingStep.setIsCompleted(false);
+
+            PendingTask pendingTask = new PendingTask(task);
+            pendingTask.setCurrentStep(pendingStep);
+
             TutorReply reply = new TutorReply(":Success");
-            reply.setData(gson.toJson(task));
+            reply.setData(gson.toJson(pendingTask));
 
             return reply;
 
@@ -1997,21 +2090,19 @@ public class ShaTuTutor implements TutorSvc {
         System.out.println("Start tutor newAddMsgLenExample"); // Error checking
 
         MessageLenStep subStep = gson.fromJson(jsonData, MessageLenStep.class);
-        
+
         int messageLength = subStep.getMessageLength();
-        
+
         String question = generateRandomString(messageLength);
-        
+
         subStep.setQuestion(question);
-        
+
         subStep.setResult(Integer.toBinaryString(messageLength * 8)); // Calculates the number of bits that the message length represents then converts that int to a binary string. (8 bits per char)
-        
+
         System.out.println(subStep.getResult()); // Error checking
-        
+
         Step step = new Step(1, 0, StepSubType.ADD_MSG_LENGTH);
-        step.setCurrentHintIndex(0);
-        step.setNotifyTutor(true);
-        step.setIsCompleted(false);
+
         // ToDo: fix timeouts
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);
@@ -2020,7 +2111,7 @@ public class ShaTuTutor implements TutorSvc {
 
         Task task = new Task();
         task.setKind(TaskKind.PROBLEM);
-        task.setType(ExampleType.ADD_MSG_LENGTH);
+        task.setType(ProblemType.ADD_MSG_LENGTH);
         task.setDescription("Calculate the message length for the last 64 bits of the message length step");
         task.addStep(step);
 
@@ -2033,8 +2124,16 @@ public class ShaTuTutor implements TutorSvc {
             StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
             modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
 
+            PendingStep pendingStep = new PendingStep(step);
+            pendingStep.setCurrentHintIndex(0);
+            pendingStep.setNotifyTutor(true);
+            pendingStep.setIsCompleted(false);
+
+            PendingTask pendingTask = new PendingTask(task);
+            pendingTask.setCurrentStep(pendingStep);
+
             TutorReply reply = new TutorReply(":Success");
-            reply.setData(gson.toJson(task));
+            reply.setData(gson.toJson(pendingTask));
 
             return reply;
 
@@ -2050,22 +2149,19 @@ public class ShaTuTutor implements TutorSvc {
      */
     private TutorReply newPrepareScheduleExample(TutoringSession session, String jsonData) {
         PrepScheduleStep subStep = gson.fromJson(jsonData, PrepScheduleStep.class);
-       
+
         Step step = new Step(1, 0, StepSubType.PREPARE_SCHEDULE);
-        step.setCurrentHintIndex(0);
-        step.setNotifyTutor(true);
-        step.setIsCompleted(false);
+
         // ToDo: fix timeouts
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);
         step.setData(gson.toJson(subStep));
 
-        
         Task task = new Task();
         task.setKind(TaskKind.PROBLEM);
-        task.setType(ExampleType.PREPARE_SCHEDULE);
+        task.setType(ProblemType.PREPARE_SCHEDULE);
         task.addStep(step);
-        
+
         // Update the assessment data and save it to the database.
         int dbId = KnowledgeComponentKind.fromString("Prepare Schedule").dbId();
         Assessment assessment = studentModel.findAssessment(dbId);
@@ -2075,8 +2171,16 @@ public class ShaTuTutor implements TutorSvc {
             StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
             modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
 
+            PendingStep pendingStep = new PendingStep(step);
+            pendingStep.setCurrentHintIndex(0);
+            pendingStep.setNotifyTutor(true);
+            pendingStep.setIsCompleted(false);
+
+            PendingTask pendingTask = new PendingTask(task);
+            pendingTask.setCurrentStep(pendingStep);
+
             TutorReply reply = new TutorReply(":Success");
-            reply.setData(gson.toJson(task));
+            reply.setData(gson.toJson(pendingTask));
 
             return reply;
 
@@ -2086,29 +2190,26 @@ public class ShaTuTutor implements TutorSvc {
     }
 
     /**
-    * Handles client requests for a new initialize vars example.
-    *
-    * @return a TutorReply
-    */
-   private TutorReply newInitializeVarsExample(TutoringSession session, String jsonData) {
-       
+     * Handles client requests for a new initialize vars example.
+     *
+     * @return a TutorReply
+     */
+    private TutorReply newInitializeVarsExample(TutoringSession session, String jsonData) {
+
         InitVarStep subStep = gson.fromJson(jsonData, InitVarStep.class);
-       
+
         Step step = new Step(1, 0, StepSubType.INITIALIZE_VARS);
-        step.setCurrentHintIndex(0);
-        step.setNotifyTutor(true);
-        step.setIsCompleted(false);
+
         // ToDo: fix timeouts
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);
         step.setData(gson.toJson(subStep));
 
-        
         Task task = new Task();
         task.setKind(TaskKind.PROBLEM);
-        task.setType(ExampleType.INITIALIZE_VARS);
+        task.setType(ProblemType.INITIALIZE_VARS);
         task.addStep(step);
-        
+
         // Update the assessment data and save it to the database.
         int dbId = KnowledgeComponentKind.fromString("Initialize Variables").dbId();
         Assessment assessment = studentModel.findAssessment(dbId);
@@ -2117,15 +2218,23 @@ public class ShaTuTutor implements TutorSvc {
             StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
             modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
 
+            PendingStep pendingStep = new PendingStep(step);
+            pendingStep.setCurrentHintIndex(0);
+            pendingStep.setNotifyTutor(true);
+            pendingStep.setIsCompleted(false);
+
+            PendingTask pendingTask = new PendingTask(task);
+            pendingTask.setCurrentStep(pendingStep);
+
             TutorReply reply = new TutorReply(":Success");
-            reply.setData(gson.toJson(task));
+            reply.setData(gson.toJson(pendingTask));
 
             return reply;
 
         } catch (NonRecoverableException ex) {
             return createError("Unknown error", ex);
         }
-   }
+    }
 
     /**
      * Handles client requests for a new compress round example.
@@ -2134,22 +2243,19 @@ public class ShaTuTutor implements TutorSvc {
      */
     private TutorReply newCompressRoundExample(TutoringSession session, String jsonData) {
         CompressRoundStep subStep = gson.fromJson(jsonData, CompressRoundStep.class);
-       
+
         Step step = new Step(1, 0, StepSubType.COMPRESS_ROUND);
-        step.setCurrentHintIndex(0);
-        step.setNotifyTutor(true);
-        step.setIsCompleted(false);
+
         // ToDo: fix timeouts
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);
         step.setData(gson.toJson(subStep));
 
-        
         Task task = new Task();
         task.setKind(TaskKind.PROBLEM);
-        task.setType(ExampleType.COMPRESS_ROUND);
+        task.setType(ProblemType.COMPRESS_ROUND);
         task.addStep(step);
-        
+
         // Update the assessment data and save it to the database.
         int dbId = KnowledgeComponentKind.fromString("Compress Round").dbId();
         Assessment assessment = studentModel.findAssessment(dbId);
@@ -2159,8 +2265,16 @@ public class ShaTuTutor implements TutorSvc {
             StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
             modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
 
+            PendingStep pendingStep = new PendingStep(step);
+            pendingStep.setCurrentHintIndex(0);
+            pendingStep.setNotifyTutor(true);
+            pendingStep.setIsCompleted(false);
+
+            PendingTask pendingTask = new PendingTask(task);
+            pendingTask.setCurrentStep(pendingStep);
+
             TutorReply reply = new TutorReply(":Success");
-            reply.setData(gson.toJson(task));
+            reply.setData(gson.toJson(pendingTask));
 
             return reply;
 
@@ -2174,7 +2288,7 @@ public class ShaTuTutor implements TutorSvc {
      *
      * @return a TutorReply
      */
-     private TutorReply newRotateBitsExample(TutoringSession session, String jsonData) {
+    private TutorReply newRotateBitsExample(TutoringSession session, String jsonData) {
         RotateStep example = gson.fromJson(jsonData, RotateStep.class);
 
         // Check if the data (bit string) is provided, if not, generate it
@@ -2185,14 +2299,12 @@ public class ShaTuTutor implements TutorSvc {
 
         Step step = new Step(1, 0, StepSubType.ROTATE_BITS);
         step.setData(gson.toJson(example));
-        step.setIsCompleted(false);
-        step.setNotifyTutor(true);
 
         Task task = new Task();
         task.setKind(TaskKind.PROBLEM);
-        task.setType(ExampleType.ROTATE_BITS);
+        task.setType(ProblemType.ROTATE_BITS);
         task.addStep(step);
-        
+
         // Update the assessment data and save it to the database.
         int dbId = KnowledgeComponentKind.fromString("Rotate n BITS").dbId();
         Assessment assessment = studentModel.findAssessment(dbId);
@@ -2202,8 +2314,16 @@ public class ShaTuTutor implements TutorSvc {
             StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
             modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
 
+            PendingStep pendingStep = new PendingStep(step);
+            pendingStep.setCurrentHintIndex(0);
+            pendingStep.setNotifyTutor(true);
+            pendingStep.setIsCompleted(false);
+
+            PendingTask pendingTask = new PendingTask(task);
+            pendingTask.setCurrentStep(pendingStep);
+
             TutorReply reply = new TutorReply(":Success");
-            reply.setData(gson.toJson(task));
+            reply.setData(gson.toJson(pendingTask));
 
             return reply;
 
@@ -2211,13 +2331,15 @@ public class ShaTuTutor implements TutorSvc {
             return createError("Unknown error", ex);
         }
     }
-     /**
-      * Performs bit rotation on the example string to get correct answer for
-      *   comparison to user's answer.
-      * @param data
-      * @param amount
-      * @return result
-      */
+
+    /**
+     * Performs bit rotation on the example string to get correct answer for
+     * comparison to user's answer.
+     *
+     * @param data
+     * @param amount
+     * @return result
+     */
     private String performBitRotation(String data, int amount) {
         String fdata = data.replaceAll("\\s+", "");
         int length = fdata.length();
@@ -2226,9 +2348,10 @@ public class ShaTuTutor implements TutorSvc {
         if (amount < 0) {
             amount = length + amount;
         }
-           String result = fdata.substring(length - amount) + fdata.substring(0, length - amount);
+        String result = fdata.substring(length - amount) + fdata.substring(0, length - amount);
         return result;
     }
+
     /**
      * Handles client requests for a new shift bits zeros example.
      *
@@ -2251,9 +2374,7 @@ public class ShaTuTutor implements TutorSvc {
         substep.setResult(bitShiftFunction(operand, shiftLength, shiftRight, bitLength));
 
         Step step = new Step(1, 0, StepSubType.SHIFT_BITS);
-        step.setCurrentHintIndex(0);
-        step.setNotifyTutor(true);
-        step.setIsCompleted(false);
+
         // ToDo: fix timeouts
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);
@@ -2262,21 +2383,31 @@ public class ShaTuTutor implements TutorSvc {
 
         Task task = new Task();
         task.setKind(TaskKind.PROBLEM);
-        task.setType(ExampleType.SHIFT_BITS);
+        task.setType(ProblemType.SHIFT_BITS);
         task.setDescription("Compute the result of the bitshift on the operand");
         task.addStep(step);
 
         // Update the assessment data and save it to the database.
-        int dbId = KnowledgeComponentKind.fromString("Shift Bits").dbId();
-        Assessment assessment = studentModel.findAssessment(dbId);
+        int knowledgeCompId = KnowledgeComponentKind.fromString("Shift Bits").dbId();
+        System.out.println("knowledCompId: " + knowledgeCompId);
+        Assessment assessment = studentModel.findAssessment(knowledgeCompId);
+        
         assessment.incrementExposures();
 
         try {
             StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
             modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
 
+            PendingStep pendingStep = new PendingStep(step);
+            pendingStep.setCurrentHintIndex(0);
+            pendingStep.setNotifyTutor(true);
+            pendingStep.setIsCompleted(false);
+
+            PendingTask pendingTask = new PendingTask(task);
+            pendingTask.setCurrentStep(pendingStep);
+
             TutorReply reply = new TutorReply(":Success");
-            reply.setData(gson.toJson(task));
+            reply.setData(gson.toJson(pendingTask));
 
             return reply;
 
@@ -2321,9 +2452,7 @@ public class ShaTuTutor implements TutorSvc {
         subStep.setMultiStep(rnd.nextBoolean());
 
         Step step = new Step(1, 0, StepSubType.XOR_BITS);
-        step.setCurrentHintIndex(0);
-        step.setNotifyTutor(true);
-        step.setIsCompleted(false);
+
         // ToDo: fix timeouts
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);
@@ -2332,7 +2461,7 @@ public class ShaTuTutor implements TutorSvc {
 
         Task task = new Task();
         task.setKind(TaskKind.PROBLEM);
-        task.setType(ExampleType.XOR_BITS);
+        task.setType(ProblemType.XOR_BITS);
         task.setDescription("Xor the bits in the two operands");
         task.addStep(step);
 
@@ -2345,8 +2474,16 @@ public class ShaTuTutor implements TutorSvc {
             StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
             modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
 
+            PendingStep pendingStep = new PendingStep(step);
+            pendingStep.setCurrentHintIndex(0);
+            pendingStep.setNotifyTutor(true);
+            pendingStep.setIsCompleted(false);
+
+            PendingTask pendingTask = new PendingTask(task);
+            pendingTask.setCurrentStep(pendingStep);
+
             TutorReply reply = new TutorReply(":Success");
-            reply.setData(gson.toJson(task));
+            reply.setData(gson.toJson(pendingTask));
 
             return reply;
 
@@ -2414,9 +2551,7 @@ public class ShaTuTutor implements TutorSvc {
         subStep.setMultiStep(rnd.nextBoolean());
 
         Step step = new Step(1, 0, StepSubType.ADD_BITS);
-        step.setCurrentHintIndex(0);
-        step.setNotifyTutor(true);
-        step.setIsCompleted(false);
+
         // ToDo: fix timeouts
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);
@@ -2425,7 +2560,7 @@ public class ShaTuTutor implements TutorSvc {
 
         Task task = new Task();
         task.setKind(TaskKind.PROBLEM);
-        task.setType(ExampleType.ADD_BITS);
+        task.setType(ProblemType.ADD_BITS);
         task.setDescription("addition modulo 2^256 the bits in the two operands");
         task.addStep(step);
 
@@ -2438,8 +2573,16 @@ public class ShaTuTutor implements TutorSvc {
             StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
             modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
 
+            PendingStep pendingStep = new PendingStep(step);
+            pendingStep.setCurrentHintIndex(0);
+            pendingStep.setNotifyTutor(true);
+            pendingStep.setIsCompleted(false);
+
+            PendingTask pendingTask = new PendingTask(task);
+            pendingTask.setCurrentStep(pendingStep);
+
             TutorReply reply = new TutorReply(":Success");
-            reply.setData(gson.toJson(task));
+            reply.setData(gson.toJson(pendingTask));
 
             return reply;
 
@@ -2470,9 +2613,7 @@ public class ShaTuTutor implements TutorSvc {
         substep.setResult(majorityFunction(operand1, operand2, operand3, bitLength));
 
         Step step = new Step(1, 0, StepSubType.MAJORITY_FUNCTION);
-        step.setCurrentHintIndex(0);
-        step.setNotifyTutor(true);
-        step.setIsCompleted(false);
+
         // ToDo: fix timeouts
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);
@@ -2481,7 +2622,7 @@ public class ShaTuTutor implements TutorSvc {
 
         Task task = new Task();
         task.setKind(TaskKind.PROBLEM);
-        task.setType(ExampleType.MAJORITY_FUNCTION);
+        task.setType(ProblemType.MAJORITY_FUNCTION);
         task.setDescription("Compute the result of the majority function on the three operands");
         task.addStep(step);
 
@@ -2494,8 +2635,16 @@ public class ShaTuTutor implements TutorSvc {
             StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
             modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
 
+            PendingStep pendingStep = new PendingStep(step);
+            pendingStep.setCurrentHintIndex(0);
+            pendingStep.setNotifyTutor(true);
+            pendingStep.setIsCompleted(false);
+
+            PendingTask pendingTask = new PendingTask(task);
+            pendingTask.setCurrentStep(pendingStep);
+
             TutorReply reply = new TutorReply(":Success");
-            reply.setData(gson.toJson(task));
+            reply.setData(gson.toJson(pendingTask));
 
             return reply;
 
@@ -2526,9 +2675,7 @@ public class ShaTuTutor implements TutorSvc {
         substep.setResult(choiceFunction(operand1, operand2, operand3, bitLength));
 
         Step step = new Step(1, 0, StepSubType.CHOICE_FUNCTION);
-        step.setCurrentHintIndex(0);
-        step.setNotifyTutor(true);
-        step.setIsCompleted(false);
+
         // ToDo: fix timeouts
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);
@@ -2537,7 +2684,7 @@ public class ShaTuTutor implements TutorSvc {
 
         Task task = new Task();
         task.setKind(TaskKind.PROBLEM);
-        task.setType(ExampleType.CHOICE_FUNCTION);
+        task.setType(ProblemType.CHOICE_FUNCTION);
         task.setDescription("Compute the result of the choice function on the three operands");
         task.addStep(step);
 
@@ -2550,8 +2697,16 @@ public class ShaTuTutor implements TutorSvc {
             StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
             modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
 
+            PendingStep pendingStep = new PendingStep(step);
+            pendingStep.setCurrentHintIndex(0);
+            pendingStep.setNotifyTutor(true);
+            pendingStep.setIsCompleted(false);
+
+            PendingTask pendingTask = new PendingTask(task);
+            pendingTask.setCurrentStep(pendingStep);
+
             TutorReply reply = new TutorReply(":Success");
-            reply.setData(gson.toJson(task));
+            reply.setData(gson.toJson(pendingTask));
 
             return reply;
 
@@ -2685,11 +2840,12 @@ public class ShaTuTutor implements TutorSvc {
 
         return answer;
     }
-    
+
     /**
      * Function that can take a string and convert it to binary
+     *
      * @param question
-     * @return 
+     * @return
      */
     private String toBinaryFunction(String question) {
         String answer;
@@ -2946,19 +3102,23 @@ public class ShaTuTutor implements TutorSvc {
         Step step = completion.getStep();
         step.addHint(hintOne);
         step.addHint(hintTwo);
-        step.setNotifyTutor(true);
-        step.setIsCompleted(false);
+
         step.setSubType(StepSubType.REQUEST_HINT);
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);
         step.setData(gson.toJson(stepReply));
 
+        PendingStep pendingStep = new PendingStep(step);
+        pendingStep.setCurrentHintIndex(0);
+        pendingStep.setNotifyTutor(true);
+        pendingStep.setIsCompleted(false);
+
         TutorReply reply = new TutorReply(":Success");
-        reply.setData(gson.toJson(step));
+        reply.setData(gson.toJson(pendingStep));
 
         // Update the assessment data and save it to the database.
         int dbId = KnowledgeComponentKind.fromString("ASCII Encode").dbId();
-        Assessment assessment = studentModel.findAssessment(dbId); 
+        Assessment assessment = studentModel.findAssessment(dbId);
         assessment.incrementHints();
 
         try {
@@ -2989,19 +3149,23 @@ public class ShaTuTutor implements TutorSvc {
 
         Step step = completion.getStep();
         step.addHint(hintOne);
-        step.setNotifyTutor(true);
-        step.setIsCompleted(false);
+
         step.setSubType(StepSubType.REQUEST_HINT);
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);
         step.setData(gson.toJson(stepReply));
 
+        PendingStep pendingStep = new PendingStep(step);
+        pendingStep.setCurrentHintIndex(0);
+        pendingStep.setNotifyTutor(true);
+        pendingStep.setIsCompleted(false);
+
         TutorReply reply = new TutorReply(":Success");
-        reply.setData(gson.toJson(step));
+        reply.setData(gson.toJson(pendingStep));
 
         // Update the assessment data and save it to the database.
         int dbId = KnowledgeComponentKind.fromString("Add One Bit").dbId();
-        Assessment assessment = studentModel.findAssessment(dbId); 
+        Assessment assessment = studentModel.findAssessment(dbId);
         assessment.incrementHints();
 
         try {
@@ -3032,19 +3196,23 @@ public class ShaTuTutor implements TutorSvc {
 
         Step step = completion.getStep();
         step.addHint(hintOne);
-        step.setNotifyTutor(true);
-        step.setIsCompleted(false);
+
         step.setSubType(StepSubType.REQUEST_HINT);
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);
         step.setData(gson.toJson(stepReply));
 
+        PendingStep pendingStep = new PendingStep(step);
+        pendingStep.setCurrentHintIndex(0);
+        pendingStep.setNotifyTutor(true);
+        pendingStep.setIsCompleted(false);
+
         TutorReply reply = new TutorReply(":Success");
-        reply.setData(gson.toJson(step));
+        reply.setData(gson.toJson(pendingStep));
 
         // Update the assessment data and save it to the database.
         int dbId = KnowledgeComponentKind.fromString("Pad with Zeros").dbId();
-        Assessment assessment = studentModel.findAssessment(dbId); 
+        Assessment assessment = studentModel.findAssessment(dbId);
         assessment.incrementHints();
 
         try {
@@ -3075,19 +3243,23 @@ public class ShaTuTutor implements TutorSvc {
 
         Step step = completion.getStep();
         step.addHint(hintOne);
-        step.setNotifyTutor(true);
-        step.setIsCompleted(false);
+
         step.setSubType(StepSubType.REQUEST_HINT);
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);
         step.setData(gson.toJson(stepReply));
 
+        PendingStep pendingStep = new PendingStep(step);
+        pendingStep.setCurrentHintIndex(0);
+        pendingStep.setNotifyTutor(true);
+        pendingStep.setIsCompleted(false);
+
         TutorReply reply = new TutorReply(":Success");
-        reply.setData(gson.toJson(step));
+        reply.setData(gson.toJson(pendingStep));
 
         // Update the assessment data and save it to the database.
         int dbId = KnowledgeComponentKind.fromString("Add Message Length").dbId();
-        Assessment assessment = studentModel.findAssessment(dbId); 
+        Assessment assessment = studentModel.findAssessment(dbId);
         assessment.incrementHints();
 
         try {
@@ -3123,19 +3295,23 @@ public class ShaTuTutor implements TutorSvc {
         Step step = completion.getStep();
         step.addHint(hintOne);
         step.addHint(hintTwo);
-        step.setNotifyTutor(true);
-        step.setIsCompleted(false);
+
         step.setSubType(StepSubType.REQUEST_HINT);
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);
         step.setData(gson.toJson(stepReply));
 
+        PendingStep pendingStep = new PendingStep(step);
+        pendingStep.setCurrentHintIndex(0);
+        pendingStep.setNotifyTutor(true);
+        pendingStep.setIsCompleted(false);
+
         TutorReply reply = new TutorReply(":Success");
-        reply.setData(gson.toJson(step));
+        reply.setData(gson.toJson(pendingStep));
 
         // Update the assessment data and save it to the database.
         int dbId = KnowledgeComponentKind.fromString("Prepare Schedule").dbId();
-        Assessment assessment = studentModel.findAssessment(dbId); 
+        Assessment assessment = studentModel.findAssessment(dbId);
         assessment.incrementHints();
 
         try {
@@ -3182,8 +3358,6 @@ public class ShaTuTutor implements TutorSvc {
             step.addHint(hintLevel3);
         }
 
-        step.setNotifyTutor(true);
-        step.setIsCompleted(false);
         step.setSubType(StepSubType.REQUEST_HINT);
 
         // Add timeout
@@ -3193,12 +3367,17 @@ public class ShaTuTutor implements TutorSvc {
         // Serialize the reply with hints
         step.setData(gson.toJson(stepReply));
 
+        PendingStep pendingStep = new PendingStep(step);
+        pendingStep.setCurrentHintIndex(0);
+        pendingStep.setNotifyTutor(true);
+        pendingStep.setIsCompleted(false);
+
         TutorReply reply = new TutorReply(":Success");
-        reply.setData(gson.toJson(step));
+        reply.setData(gson.toJson(pendingStep));
 
         // Update the assessment data and save it to the database.
         int dbId = KnowledgeComponentKind.fromString("Initialize Variables").dbId();
-        Assessment assessment = studentModel.findAssessment(dbId); 
+        Assessment assessment = studentModel.findAssessment(dbId);
         assessment.incrementHints();
 
         try {
@@ -3234,19 +3413,23 @@ public class ShaTuTutor implements TutorSvc {
         Step step = completion.getStep();
         step.addHint(hintOne);
         step.addHint(hintTwo);
-        step.setNotifyTutor(true);
-        step.setIsCompleted(false);
+
         step.setSubType(StepSubType.REQUEST_HINT);
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);
         step.setData(gson.toJson(stepReply));
 
+        PendingStep pendingStep = new PendingStep(step);
+        pendingStep.setCurrentHintIndex(0);
+        pendingStep.setNotifyTutor(true);
+        pendingStep.setIsCompleted(false);
+
         TutorReply reply = new TutorReply(":Success");
-        reply.setData(gson.toJson(step));
+        reply.setData(gson.toJson(pendingStep));
 
         // Update the assessment data and save it to the database.
         int dbId = KnowledgeComponentKind.fromString("Compress Round").dbId();
-        Assessment assessment = studentModel.findAssessment(dbId); 
+        Assessment assessment = studentModel.findAssessment(dbId);
         assessment.incrementHints();
 
         try {
@@ -3277,19 +3460,23 @@ public class ShaTuTutor implements TutorSvc {
 
         Step step = completion.getStep();
         step.addHint(hintOne);
-        step.setNotifyTutor(true);
-        step.setIsCompleted(false);
+
         step.setSubType(StepSubType.REQUEST_HINT);
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);
         step.setData(gson.toJson(stepReply));
 
+        PendingStep pendingStep = new PendingStep(step);
+        pendingStep.setCurrentHintIndex(0);
+        pendingStep.setNotifyTutor(true);
+        pendingStep.setIsCompleted(false);
+
         TutorReply reply = new TutorReply(":Success");
-        reply.setData(gson.toJson(step));
+        reply.setData(gson.toJson(pendingStep));
 
         // Update the assessment data and save it to the database.
         int dbId = KnowledgeComponentKind.fromString("Rotate n BITS").dbId();
-        Assessment assessment = studentModel.findAssessment(dbId); 
+        Assessment assessment = studentModel.findAssessment(dbId);
         assessment.incrementHints();
 
         try {
@@ -3341,21 +3528,25 @@ public class ShaTuTutor implements TutorSvc {
         Step step = completion.getStep();
         step.addHint(hintOne);
         step.addHint(hintTwo);
-        step.setNotifyTutor(true);
-        step.setIsCompleted(false);
+
         step.setSubType(StepSubType.REQUEST_HINT);
         // ToDo: fix timeouts
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);
         step.setData(gson.toJson(stepReply));
 
+        PendingStep pendingStep = new PendingStep(step);
+        pendingStep.setCurrentHintIndex(0);
+        pendingStep.setNotifyTutor(true);
+        pendingStep.setIsCompleted(false);
+
         TutorReply reply = new TutorReply(":Success");
 
-        reply.setData(gson.toJson(step));
-        
+        reply.setData(gson.toJson(pendingStep));
+
         // Update the assessment data and save it to the database.
         int dbId = KnowledgeComponentKind.fromString("Shift Bits").dbId();
-        Assessment assessment = studentModel.findAssessment(dbId); 
+        Assessment assessment = studentModel.findAssessment(dbId);
         assessment.incrementHints();
 
         try {
@@ -3386,19 +3577,23 @@ public class ShaTuTutor implements TutorSvc {
 
         Step step = completion.getStep();
         step.addHint(hintOne);
-        step.setNotifyTutor(true);
-        step.setIsCompleted(false);
+
         step.setSubType(StepSubType.REQUEST_HINT);
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);
         step.setData(gson.toJson(stepReply));
 
+        PendingStep pendingStep = new PendingStep(step);
+        pendingStep.setCurrentHintIndex(0);
+        pendingStep.setNotifyTutor(true);
+        pendingStep.setIsCompleted(false);
+
         TutorReply reply = new TutorReply(":Success");
-        reply.setData(gson.toJson(step));
+        reply.setData(gson.toJson(pendingStep));
 
         // Update the assessment data and save it to the database.
         int dbId = KnowledgeComponentKind.fromString("XOR Bits").dbId();
-        Assessment assessment = studentModel.findAssessment(dbId); 
+        Assessment assessment = studentModel.findAssessment(dbId);
         assessment.incrementHints();
 
         try {
@@ -3429,19 +3624,23 @@ public class ShaTuTutor implements TutorSvc {
 
         Step step = completion.getStep();
         step.addHint(hintOne);
-        step.setNotifyTutor(true);
-        step.setIsCompleted(false);
+
         step.setSubType(StepSubType.REQUEST_HINT);
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);
         step.setData(gson.toJson(stepReply));
 
+        PendingStep pendingStep = new PendingStep(step);
+        pendingStep.setCurrentHintIndex(0);
+        pendingStep.setNotifyTutor(true);
+        pendingStep.setIsCompleted(false);
+
         TutorReply reply = new TutorReply(":Success");
-        reply.setData(gson.toJson(step));
+        reply.setData(gson.toJson(pendingStep));
 
         // Update the assessment data and save it to the database.
         int dbId = KnowledgeComponentKind.fromString("Add Bits").dbId();
-        Assessment assessment = studentModel.findAssessment(dbId); 
+        Assessment assessment = studentModel.findAssessment(dbId);
         assessment.incrementHints();
 
         try {
@@ -3472,19 +3671,23 @@ public class ShaTuTutor implements TutorSvc {
 
         Step step = completion.getStep();
         step.addHint(hintOne);
-        step.setNotifyTutor(true);
-        step.setIsCompleted(false);
+
         step.setSubType(StepSubType.REQUEST_HINT);
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);
         step.setData(gson.toJson(stepReply));
 
+        PendingStep pendingStep = new PendingStep(step);
+        pendingStep.setCurrentHintIndex(0);
+        pendingStep.setNotifyTutor(true);
+        pendingStep.setIsCompleted(false);
+
         TutorReply reply = new TutorReply(":Success");
-        reply.setData(gson.toJson(step));
+        reply.setData(gson.toJson(pendingStep));
 
         // Update the assessment data and save it to the database.
         int dbId = KnowledgeComponentKind.fromString("Majority Function").dbId();
-        Assessment assessment = studentModel.findAssessment(dbId); 
+        Assessment assessment = studentModel.findAssessment(dbId);
         assessment.incrementHints();
 
         try {
@@ -3515,19 +3718,23 @@ public class ShaTuTutor implements TutorSvc {
 
         Step step = completion.getStep();
         step.addHint(hintOne);
-        step.setNotifyTutor(true);
-        step.setIsCompleted(false);
+
         step.setSubType(StepSubType.REQUEST_HINT);
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);
         step.setData(gson.toJson(stepReply));
 
+        PendingStep pendingStep = new PendingStep(step);
+        pendingStep.setCurrentHintIndex(0);
+        pendingStep.setNotifyTutor(true);
+        pendingStep.setIsCompleted(false);
+
         TutorReply reply = new TutorReply(":Success");
-        reply.setData(gson.toJson(step));
-        
+        reply.setData(gson.toJson(pendingStep));
+
         // Update the assessment data and save it to the database.
         int dbId = KnowledgeComponentKind.fromString("Choice Function").dbId();
-        Assessment assessment = studentModel.findAssessment(dbId); 
+        Assessment assessment = studentModel.findAssessment(dbId);
         assessment.incrementHints();
 
         try {

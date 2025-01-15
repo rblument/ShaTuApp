@@ -58,6 +58,7 @@ public class StudentModel {
     }
     
     public void addAssessment(int knowledgeComponentId, Assessment assessment) {
+        System.out.println("***** StuMod.addAssess: id: " + knowledgeComponentId);
         assessments.put(knowledgeComponentId, assessment);
     }
     
@@ -84,6 +85,10 @@ public class StudentModel {
      */
     public Assessment findAssessment(int knowledgeComponentId) {
         return assessments.get(knowledgeComponentId);
+    }
+    
+    public HashMap<Integer, Assessment> getAssessments() {
+        return assessments;
     }
     
     /**

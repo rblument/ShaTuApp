@@ -19,8 +19,9 @@ import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.BitOpExample;
 import edu.regis.shatu.model.aol.BitOpStep;
-import edu.regis.shatu.model.aol.ExampleType;
+import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.NewExampleRequest;
+import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.view.act.HintAction;
 import edu.regis.shatu.view.act.NewExampleAction;
 import edu.regis.shatu.view.act.StepCompletionAction;
@@ -50,10 +51,11 @@ import javax.swing.JTextArea;
  *
  * @author rickb
  */
-public class ExclusiveOrView extends UserRequestView implements ActionListener, KeyListener {   
+public class ExclusiveOrView extends UserRequestView implements ActionListener, KeyListener {
+
     private TutoringSessionView view;
     private String stringX, stringY;
-    private int problemSize; 
+    private int problemSize;
     private JTextArea descTextArea, feedbackTextArea, responseTextArea;
     private JScrollPane feedbackPane, responsePane;
     private GPanel questionPanel, descriptionPanel, qrPanel;
@@ -61,14 +63,13 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
     private JButton checkButton, hintButton, newExampleButton;
     private boolean checkHintEnabled = false;
     private ButtonGroup problemSizeGroup;
-    private JRadioButton fourRadioButton, eightRadioButton, sixteenRadioButton, 
-                         thirtytwoRadioButton;
-    private JLabel viewNameLabel, stringXLabel, stringYLabel, answerLabel, 
-                   problemSizeLabel, instructionLabel;
+    private JRadioButton fourRadioButton, eightRadioButton, sixteenRadioButton,
+            thirtytwoRadioButton;
+    private JLabel viewNameLabel, stringXLabel, stringYLabel, answerLabel,
+            problemSizeLabel, instructionLabel;
 
-    
     private static final Random random = new Random();
-    
+
     /**
      * Initialize this view including creating and laying out its child
      * components.
@@ -95,39 +96,37 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
     /**
      * Layout the child components in this view.
      */
-    private void initializeLayout() {  
+    private void initializeLayout() {
         addc(descriptionPanel, 0, 0, 1, 1, 1.0, 0.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
                 5, 5, 5, 5);
-      
+
         addc(answerLabel, 0, 1, 1, 1, 1.0, 0.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
                 5, 5, 5, 5);
-        
+
         addc(qrPanel, 0, 2, 3, 1, 1.0, 1.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
-                5, 5, 5, 5); 
+                5, 5, 5, 5);
     }
-    
-    
-    
-     /**
+
+    /**
      * Sets up the description area
      */
     private void setUpDescription() {
         viewNameLabel = new JLabel("The Exclusive OR");
         viewNameLabel.setFont(new Font("", Font.BOLD, 20));
-        
+
         descTextArea = new JTextArea();
         descTextArea.setEditable(false);
         descTextArea.setLineWrap(true);
         descTextArea.setWrapStyleWord(true);
         descTextArea.setOpaque(false);
-        descTextArea.append("The exclusive OR compares two n-length binary strings. When comparing the strings, if both bits are the same, the output is 0, else its 1."); 
-        
+        descTextArea.append("The exclusive OR compares two n-length binary strings. When comparing the strings, if both bits are the same, the output is 0, else its 1.");
+
         descTextArea.setPreferredSize(new Dimension(800, 50));
     }
-    
+
     /**
      * Creates the description panel
      */
@@ -145,9 +144,9 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
         descriptionPanel.addc(questionPanel, 0, 2, 1, 1, 1.0, 1.0,
                 GridBagConstraints.CENTER, GridBagConstraints.BOTH,
                 5, 5, 5, 5);
-       
+
     }
-    
+
     /**
      * Sets up the radio buttons and action listener
      */
@@ -156,67 +155,67 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
         eightRadioButton = new JRadioButton("8 bits");
         sixteenRadioButton = new JRadioButton("16 bits");
         thirtytwoRadioButton = new JRadioButton("32 bits");
-        
+
         ActionListener selection = e -> {
             JRadioButton source = (JRadioButton) e.getSource();
             updateProblemSize(source);
             generateNewQuestion();
         };
-        
+
         fourRadioButton.addActionListener(selection);
         eightRadioButton.addActionListener(selection);
         sixteenRadioButton.addActionListener(selection);
         thirtytwoRadioButton.addActionListener(selection);
-        
+
         problemSizeGroup = new ButtonGroup();
         problemSizeGroup.add(fourRadioButton);
         problemSizeGroup.add(eightRadioButton);
         problemSizeGroup.add(sixteenRadioButton);
         problemSizeGroup.add(thirtytwoRadioButton);
-        
+
         fourRadioButton.setSelected(true); //Set default radio button to true
-        
+
         radioButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         radioButtonPanel.add(fourRadioButton);
         radioButtonPanel.add(eightRadioButton);
         radioButtonPanel.add(sixteenRadioButton);
-        radioButtonPanel.add(thirtytwoRadioButton);    
+        radioButtonPanel.add(thirtytwoRadioButton);
     }
-    
+
     /**
      * Updates the size of the problem to display.
-     * 
+     *
      * @param source The radio button that triggered the even.
      */
-    private void updateProblemSize(JRadioButton source){
+    private void updateProblemSize(JRadioButton source) {
         if (source == fourRadioButton) {
             problemSize = 4;
         } else if (source == eightRadioButton) {
             problemSize = 8;
         } else if (source == sixteenRadioButton) {
             problemSize = 16;
-        } else if (source == thirtytwoRadioButton){
+        } else if (source == thirtytwoRadioButton) {
             problemSize = 32;
         }
     }
-    
+
     /**
-     * Initializes the question components and adds them to the question panel. 
+     * Initializes the question components and adds them to the question panel.
      */
     private void setUpQuestionArea() {
         problemSize = 4;
         stringX = generateInputString();
         stringY = generateInputString();
-        
+
         stringXLabel = new JLabel("x: " + stringX);
         stringYLabel = new JLabel("y: " + stringY);
-        
+
         problemSizeLabel = new JLabel("Select Problem Size:");
         instructionLabel = new JLabel("Perform an XOR using the two "
                 + "inputs given below:");
-        
+
         questionPanel = new GPanel();
-        
+
         questionPanel.addc(problemSizeLabel, 0, 0, 1, 1, 0.0, 0.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
                 5, 5, 5, 5);
@@ -229,12 +228,12 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
         questionPanel.addc(stringXLabel, 0, 3, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
-        
+
         questionPanel.addc(stringYLabel, 0, 4, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
     }
-    
+
     /**
      * Initializes the response area
      */
@@ -243,11 +242,11 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
         responseTextArea = new JTextArea(3, 20);
         responseTextArea.setLineWrap(true);
         responseTextArea.setWrapStyleWord(true);
-        
+
         responsePane = new JScrollPane(responseTextArea);
         responsePane.setPreferredSize(new Dimension(800, 200));
     }
-    
+
     /**
      * Initialized the feedback area
      */
@@ -257,41 +256,41 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
         feedbackTextArea.setLineWrap(true);
         feedbackTextArea.setWrapStyleWord(true);
         feedbackTextArea.setBackground(null);
-        
+
         feedbackPane = new JScrollPane(feedbackTextArea);
         feedbackPane.setPreferredSize(new Dimension(800, 200));
     }
-    
-     /**
+
+    /**
      * Sets up the Check, Next, and Hint buttons and their action listeners
      */
     private void setUpButtons() {
         checkButton = new JButton(StepCompletionAction.instance());
         checkButton.addActionListener(this);
-        
+
         hintButton = new JButton(HintAction.instance());
         hintButton.addActionListener(this);
-        
+
         newExampleButton = new JButton(NewExampleAction.instance());
         newExampleButton.addActionListener(this);
-        
+
         buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         buttonPanel.add(checkButton);
         buttonPanel.add(hintButton);
         buttonPanel.add(newExampleButton);
     }
-    
-     /**
-     * Creates a GPanel containing the response and feedback JScrollPanes and 
-     * the button panel. 
+
+    /**
+     * Creates a GPanel containing the response and feedback JScrollPanes and
+     * the button panel.
      */
-    private void setUpQRPanel(){
+    private void setUpQRPanel() {
         qrPanel = new GPanel();
-        
+
         qrPanel.addc(responsePane, 0, 0, 1, 1, 1.0, 1.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
                 5, 5, 5, 5);
-        
+
         qrPanel.addc(feedbackPane, 0, 1, 1, 1, 1.0, 1.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
                 5, 5, 5, 5);
@@ -300,11 +299,12 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
     }
-    
+
     /**
-     * Generates an n-bit binary string (length 4, 8, 16, or 32) to be used as an input into the 
-     * Ch function. Every four bits are separated by a space to improve readability.
-     * 
+     * Generates an n-bit binary string (length 4, 8, 16, or 32) to be used as
+     * an input into the Ch function. Every four bits are separated by a space
+     * to improve readability.
+     *
      * @return A string to be used as an input into the function.
      */
     private String generateInputString() {
@@ -323,7 +323,7 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
                 num = random.nextInt();
                 tempString = String.format("%4s", Integer.toBinaryString(num & 0xF)).replace(' ', '0');
                 inputStringBuilder.append(tempString);
-                
+
                 inputStringBuilder.append(" ");
                 num = random.nextInt();
                 tempString = String.format("%4s", Integer.toBinaryString(num & 0xF)).replace(' ', '0');
@@ -333,45 +333,48 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
                 num = random.nextInt();
                 tempString = String.format("%4s", Integer.toBinaryString(num & 0xF)).replace(' ', '0');
                 inputStringBuilder.append(tempString);
-                
+
                 for (int i = 0; i < 3; i++) {
                     inputStringBuilder.append(" ");
                     num = random.nextInt();
                     tempString = String.format("%4s", Integer.toBinaryString(num & 0xF)).replace(' ', '0');
                     inputStringBuilder.append(tempString);
-                }   break;
+                }
+                break;
             case 32:
                 num = random.nextInt();
                 tempString = String.format("%4s", Integer.toBinaryString(num & 0xF)).replace(' ', '0');
                 inputStringBuilder.append(tempString);
-                
+
                 for (int i = 0; i < 7; i++) {
                     inputStringBuilder.append(" ");
                     num = random.nextInt();
                     tempString = String.format("%4s", Integer.toBinaryString(num & 0xF)).replace(' ', '0');
                     inputStringBuilder.append(tempString);
-                }   break;
+                }
+                break;
             default:
                 break;
         }
-        
+
         inputString = inputStringBuilder.toString();
-        
+
         return inputString;
     }
-    
-     /**
-     * Formats the result output by the choice function based on the size of the 
+
+    /**
+     * Formats the result output by the choice function based on the size of the
      * problem.
+     *
      * @param answer the output of the choice function
-     * 
+     *
      * @return the binary string representation of the answer
      */
     private String formatResult(long answer) {
         String finalResult = "";
-        
+
         switch (problemSize) {
-            case 4: 
+            case 4:
                 finalResult = String.format("%4s", Long.toBinaryString(answer)).replace(' ', '0');
                 break;
             case 8:
@@ -381,36 +384,35 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
                 finalResult = String.format("%16s", Long.toBinaryString(answer)).replace(' ', '0');
                 break;
             case 32:
-                finalResult = String.format("%32s", Long.toBinaryString(answer)).replace(' ', '0');   
+                finalResult = String.format("%32s", Long.toBinaryString(answer)).replace(' ', '0');
                 break;
             default:
                 break;
         }
         return finalResult;
     }
-    
+
     /**
      * Generates and displays three new input strings.
      */
-    private void generateNewQuestion() { 
+    private void generateNewQuestion() {
         responseTextArea.setText("");
         feedbackTextArea.setText("");
-        
+
         stringX = generateInputString();
         stringY = generateInputString();
-        
+
         stringXLabel.setText("x: " + stringX);
         stringYLabel.setText("y: " + stringY);
     }
 
     /**
      * Performs the XOR operation on two binary strings.
-     * 
-     * The method compares
-     * corresponding bits of the two binary strings and produces a new string
-     * where a bit is set to '1' if the corresponding bits in the input strings
-     * are different and '0' otherwise.
-     * 
+     *
+     * The method compares corresponding bits of the two binary strings and
+     * produces a new string where a bit is set to '1' if the corresponding bits
+     * in the input strings are different and '0' otherwise.
+     *
      * @param binary1 The first binary string.
      * @param binary2 The second binary string.
      * @return The result of XOR operation as a binary string.
@@ -500,7 +502,7 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
      * Verifies the user's answer against the correct answer.
      */
     private void verifyAnswer() {
-        
+
     }
 
     /**
@@ -514,55 +516,59 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
      */
     private void onCheckButton() {
     }
-/**
- * XOR Example Request Added
- * @return 
- */
-    
+
+    /**
+     * XOR Example Request Added
+     *
+     * @return
+     */
+
     @Override
     protected void updateView() {
-        view = SplashFrame.instance().getView(); // Accessing view to use universal buttons
+        view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
         hintButton = view.getHintButton();
         checkButton = view.getCheckButton();
         newExampleButton = view.getNewExampleButton();
-        
+
         // If check and hint buttons are disabled, reset listenerers and apply those used by this view
-        if(!checkHintEnabled) {
+        if (!checkHintEnabled) {
             view.resetButtonListeners(); // Clear any listeners applied from other views          
-            hintButton.addActionListener(this);           
-            checkButton.addActionListener(this);            
+            hintButton.addActionListener(this);
+            checkButton.addActionListener(this);
             newExampleButton.addActionListener(this);
         }
-        
+
         if (model != null) {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            Step step = model.currentTask().getCurrentStep();
+            Step step = model.currentTask().getCurrentStep().getStep();
 
-            try {
-                BitOpStep bitOpStep = gson.fromJson(step.getData(), BitOpStep.class);
-                if (bitOpStep != null && bitOpStep.getExample() != null) {
-                    stringX = bitOpStep.getExample().getOperand1();
-                    stringY = bitOpStep.getExample().getOperand2();
-                } else {
-                    throw new NullPointerException("BitOpStep or its example is null");
+            if (step.getSubType() == StepSubType.XOR_BITS) {
+                try {
+                    BitOpStep bitOpStep = gson.fromJson(step.getData(), BitOpStep.class);
+                    if (bitOpStep != null && bitOpStep.getExample() != null) {
+                        stringX = bitOpStep.getExample().getOperand1();
+                        stringY = bitOpStep.getExample().getOperand2();
+                    } else {
+                        throw new NullPointerException("BitOpStep or its example is null");
+                    }
+
+                    stringXLabel.setText("x: " + stringX);
+                    stringYLabel.setText("y: " + stringY);
+
+                    checkButton.setEnabled(true);
+                    hintButton.setEnabled(true);
+                } catch (JsonSyntaxException | NullPointerException e) {
+                    stringX = "Please click";
+                    stringY = "New Example";
+
+                    stringXLabel.setText("x: " + stringX);
+                    stringYLabel.setText("y: " + stringY);
+
+                    checkButton.setEnabled(false);
+                    hintButton.setEnabled(false);
+
+                    System.err.println("Error updating view: " + e.getMessage());
                 }
-
-                stringXLabel.setText("x: " + stringX);
-                stringYLabel.setText("y: " + stringY);
-                
-                checkButton.setEnabled(true);
-                hintButton.setEnabled(true);
-            } catch (JsonSyntaxException | NullPointerException e) {
-                stringX = "Please click";
-                stringY = "New Example";
-
-                stringXLabel.setText("x: " + stringX);
-                stringYLabel.setText("y: " + stringY);
-                
-                checkButton.setEnabled(false);
-                hintButton.setEnabled(false);
-
-                System.err.println("Error updating view: " + e.getMessage());
             }
         }
     }
@@ -570,23 +576,23 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
     @Override
     public NewExampleRequest newRequest() {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        
+
         NewExampleRequest ex = new NewExampleRequest();
-                
-        ex.setExampleType(ExampleType.XOR_BITS);
-        
+
+        ex.setExampleType(ProblemType.XOR_BITS);
+
         BitOpExample newStep = new BitOpExample();
-        
+
         newStep.setPreSize(problemSize);
-        
+
         ex.setData(gson.toJson(newStep));
-        
+
         return ex;
     }
 
     @Override
     public StepCompletion stepCompletion() {
-        Step currentStep = model.currentTask().currentStep();
+        Step currentStep = model.currentTask().currentStep().getStep();
 
         BitOpStep example = gson.fromJson(currentStep.getData(), BitOpStep.class);
 
@@ -595,7 +601,7 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
         example.getExample().setResult(userResponse);
 
         StepCompletion step = new StepCompletion(currentStep, gson.toJson(example));
-        
+
         step.setStep(currentStep);
 
         return step;

@@ -16,9 +16,9 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import edu.regis.shatu.model.LessonSession;
 import edu.regis.shatu.model.StepCompletion;
-import edu.regis.shatu.model.Task;
 import edu.regis.shatu.model.TutoringSession;
 import edu.regis.shatu.model.aol.NewExampleRequest;
+import edu.regis.shatu.model.aol.PendingTask;
 import java.util.Random;
 
 /**
@@ -47,7 +47,7 @@ public abstract class UserRequestView extends GPanel {
     /**
      * Convenience utility for converting between Java and JSon objects.
      */
-    protected Gson gson;
+    protected Gson gson = new GsonBuilder().setPrettyPrinting().create();;
     
     /**
      * Convenience utility for generating pseudo-random numbers.
@@ -65,6 +65,11 @@ public abstract class UserRequestView extends GPanel {
      * @return NewExampleRequest
      */
     public abstract NewExampleRequest newRequest();
+    
+    /**
+     * Update this (subclass) view to display the current tutoring session model.
+     */
+    protected abstract void updateView();
 
     /**
      * Create and return a new step completion request, which indicates the
@@ -79,7 +84,6 @@ public abstract class UserRequestView extends GPanel {
     }
     
     public void setModel(TutoringSession model) {
-        gson = new GsonBuilder().setPrettyPrinting().create();
         random = new Random();
         this.model = model;
         updateView();
@@ -102,15 +106,8 @@ public abstract class UserRequestView extends GPanel {
      * 
      * @param task 
      */
-    public void setCurrentTask(Task task) {
+    public void setCurrentTask(PendingTask task) {
        model.addCurrentTask(task);
        updateView();
-    }
-    
-    /**
-     * Display the current model in this view.
-     */
-    protected void updateView() {
-        throw new UnsupportedOperationException("Not supported yet. Override this is subclass view"); 
     }
 }

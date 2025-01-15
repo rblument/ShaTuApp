@@ -68,9 +68,11 @@ public class HighlightLabel extends JLabel implements MouseListener {
     private static final Color SELECTED_BACKGROUND = Color.WHITE;
     
     /**
-     * The view that is displayed when this label is selected.
+     * The view that is displayed when this label is selected (this is
+     * the exact enum name for the StepSelection enum value for this view,
+     * such as SHIFT_RIGHT.
      */
-    private StepSelection stepSelection;
+    private String viewName;
     
     private boolean isSelected;
 
@@ -79,7 +81,7 @@ public class HighlightLabel extends JLabel implements MouseListener {
      * empirically.
      * 
      * @param text the text of this label
-     * @param stepSelection the name of the step (view) that is displayed when
+     * @param viewName the name of the view (step) that is displayed when
      *                      this label is selected.
      */
     public HighlightLabel(String text) { //, StepSelection stepSelection) 
@@ -97,17 +99,23 @@ public class HighlightLabel extends JLabel implements MouseListener {
         this.addMouseListener(this);
     }
     
-    public void setStepSelection(StepSelection stepSelection) {
-        this.stepSelection = stepSelection;
+    public void setViewName(String viewName) {
+        this.viewName = viewName;
     }
     
+    /**
+     * Select this label and display its associated step view
+     */
     public void select() {
-        GuiController.instance().getStepSelectorView().displayStep(stepSelection);
+        SplashFrame.instance().getTutoringSessionView().displayStep(StepSelection.valueOf(viewName));
         isSelected = true;
         setBackground(SELECTED_BACKGROUND);
         setBorder(SELECTED_BORDER);
     }
     
+    /**
+     * De-highlight this label.
+     */
     public void deselect() {
         isSelected = false;
         setBackground(NORMAL_BACKGROUND);

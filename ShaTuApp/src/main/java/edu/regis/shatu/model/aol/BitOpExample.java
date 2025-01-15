@@ -30,7 +30,7 @@ public class BitOpExample {
     /**
      * The bit-level operation demonstrated in this example.
      */
-    private ExampleType operation;
+    private ProblemType operation;
     
     /**
      * The number of bits in this example's initial operands.
@@ -82,11 +82,11 @@ public class BitOpExample {
         
     }
 
-    public ExampleType getOperation() {
+    public ProblemType getOperation() {
         return operation;
     }
 
-    public void setOperation(ExampleType operation) {
+    public void setOperation(ProblemType operation) {
         this.operation = operation;
     }
 

@@ -40,7 +40,7 @@ public class StepSelectorView extends GPanel {
         initializeComponents();
         layoutComponents();
         
-        StepSelection.ENCODE.getLabel().select(); // Will callback displayStep
+       // StepSelection.ENCODE.getLabel().select(); // Will callback displayStep
     }
     
     /**
@@ -49,11 +49,17 @@ public class StepSelectorView extends GPanel {
      * 
      * @param selection 
      */
-    public void displayStep(StepSelection selection) {
-        if (selectedStep != selection)
-            selectedStep.getLabel().deselect();
+    public void selectStep(StepSelection selection) {
+        // Can this ever be NULL? i.e. leave the same panel displayed
+        if (selectedStep != null)
+            if (selectedStep != selection)
+                selectedStep.getLabel().deselect();
         
-        GuiController.instance().getStepView().selectPanel(selection);
+        //GuiController.instance().getStepView().selectPanel(selection);
+        selectedStep = selection;
+    }
+    
+    public void setSelectedStep(StepSelection selection) {
         selectedStep = selection;
     }
     
@@ -63,6 +69,8 @@ public class StepSelectorView extends GPanel {
     private void initializeComponents() {  
         // Note: the child components are found in the StepSelection enum.
         //       For example, StepSelection.ENCODE.getLabel()
+        
+        
     }
     
      /**

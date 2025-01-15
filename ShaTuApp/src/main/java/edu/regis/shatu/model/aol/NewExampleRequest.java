@@ -22,7 +22,7 @@ public class NewExampleRequest {
     /**
      * Specifies the type of example being requested.
      */
-    private ExampleType exampleType;
+    private ProblemType exampleType;
      
     /**
      * A JSon encoded object specific to our example type.
@@ -33,16 +33,16 @@ public class NewExampleRequest {
      * Initialize with default values
      */
     public NewExampleRequest() {
-        exampleType = ExampleType.DEFAULT;
+        exampleType = ProblemType.DEFAULT;
 
         data = "";
     }
 
-    public ExampleType getExampleType() {
+    public ProblemType getExampleType() {
         return exampleType;
     }
 
-    public void setExampleType(ExampleType exampleType) {
+    public void setExampleType(ProblemType exampleType) {
         this.exampleType = exampleType;
     }
 

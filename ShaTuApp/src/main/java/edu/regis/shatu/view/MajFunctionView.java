@@ -3,10 +3,12 @@
  * <p>
  * (C) Johanna & Richard Blumenthal, All rights reserved
  * <p>
- * Unauthorized use, duplication, or distribution without the authors' permission is strictly prohibited.
+ * Unauthorized use, duplication, or distribution without the authors'
+ * permission is strictly prohibited.
  * <p>
- * Unless required by applicable law or agreed to in writing, this software is distributed on an "AS IS" basis
- * without warranties or conditions of any kind, either expressed or implied.
+ * Unless required by applicable law or agreed to in writing, this software is
+ * distributed on an "AS IS" basis without warranties or conditions of any kind,
+ * either expressed or implied.
  */
 package edu.regis.shatu.view;
 
@@ -16,8 +18,9 @@ import edu.regis.shatu.model.MajorityStep;
 import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.view.act.StepCompletionAction;
-import edu.regis.shatu.model.aol.ExampleType;
+import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.NewExampleRequest;
+import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.view.act.HintAction;
 import edu.regis.shatu.view.act.NewExampleAction;
 import javax.swing.*;
@@ -29,52 +32,52 @@ import java.awt.event.KeyListener;
 import javax.swing.table.DefaultTableCellRenderer;
 
 /**
- * This class represents the GUI for the Majority (Maj) function exercise.
- * Given three 𝑛-bit binary numbers, the user is asked to output the value of the Majority (Maj) function.
+ * This class represents the GUI for the Majority (Maj) function exercise. Given
+ * three 𝑛-bit binary numbers, the user is asked to output the value of the
+ * Majority (Maj) function.
  * <p>
  * The ASCII character the student is being asked to convert.
  * <p>
- * Binary numbers used for the exercise:
- * - Binary number 1: 101100
- * - Binary number 2: 011011
- * - Binary number 3: 110011
+ * Binary numbers used for the exercise: - Binary number 1: 101100 - Binary
+ * number 2: 011011 - Binary number 3: 110011
  * <p>
  * The user can input their answer and check it against the correct result.
  * Additionally, hints and next questions are available to guide the user.
  * <p>
- * Inline comments have been added throughout the code to explain specific sections and methods.
+ * Inline comments have been added throughout the code to explain specific
+ * sections and methods.
  *
  * @author rickb, mpowanga
  */
-
 public class MajFunctionView extends UserRequestView implements ActionListener, KeyListener {
+
     private TutoringSessionView view;
     private String stringX, stringY, stringZ;
-    private int problemSize; 
+    private int problemSize;
     private JTextArea descTextArea, responseTextArea;
     private JScrollPane responsePane, majTruthTablePane;
     private GPanel truthTablePanel, questionPanel, descriptionPanel, qrPanel;
-    private JPanel buttonPanel, radioButtonPanel; 
+    private JPanel buttonPanel, radioButtonPanel;
     private JTable majTruthTable;
     private JButton checkButton, nextButton, hintButton;
     private boolean checkHintEnabled = false;
     private ButtonGroup problemSizeGroup;
-    private JRadioButton fourRadioButton, eightRadioButton, sixteenRadioButton, 
-                         thirtytwoRadioButton;
-    private JLabel viewNameLabel, truthTableLabel, majFunctionLabel, 
-                   stringXLabel, stringYLabel, stringZLabel, answerLabel, 
-                   problemSizeLabel, instructionLabel;
-    
-   // private static final Random random = new Random();
+    private JRadioButton fourRadioButton, eightRadioButton, sixteenRadioButton,
+            thirtytwoRadioButton;
+    private JLabel viewNameLabel, truthTableLabel, majFunctionLabel,
+            stringXLabel, stringYLabel, stringZLabel, answerLabel,
+            problemSizeLabel, instructionLabel;
 
+    // private static final Random random = new Random();
     /**
-     * Initialize this view including creating and laying out its child components.
+     * Initialize this view including creating and laying out its child
+     * components.
      */
     public MajFunctionView() {
         initializeComponents();
         initializeLayout();
     }
-    
+
     /**
      * Create and return the server request this view makes when a user selects
      * that they want to practice a new choice function example.
@@ -86,7 +89,7 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
         NewExampleRequest ex = new NewExampleRequest();
 
         //Set example type to the problem associated with the current view
-        ex.setExampleType(ExampleType.MAJORITY_FUNCTION);
+        ex.setExampleType(ProblemType.MAJORITY_FUNCTION);
 
         MajorityStep newStep = new MajorityStep();
 
@@ -101,7 +104,7 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
 
     @Override
     public StepCompletion stepCompletion() {
-        Step currentStep = model.currentTask().currentStep();
+        Step currentStep = model.currentTask().currentStep().getStep();
 
         MajorityStep example = gson.fromJson(currentStep.getData(), MajorityStep.class);
 
@@ -110,12 +113,12 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
         example.setResult(userResponse);
 
         StepCompletion step = new StepCompletion(currentStep, gson.toJson(example));
-        
+
         step.setStep(currentStep);
 
         return step;
     }
-    
+
     /**
      * Create the child GUI components appearing in this frame.
      */
@@ -127,33 +130,33 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
         setUpButtons();
         setUpTruthTable();
         setUpDescriptionPanel();
-        setUpQRPanel();   
+        setUpQRPanel();
     }
 
     /**
      * Layout the child components in this view.
-    */ 
-    private void initializeLayout() { 
+     */
+    private void initializeLayout() {
         addc(descriptionPanel, 0, 0, 1, 1, 1.0, 0.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
                 5, 5, 5, 5);
-      
+
         addc(answerLabel, 0, 1, 1, 1, 1.0, 0.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
                 5, 5, 5, 5);
-        
+
         addc(qrPanel, 0, 2, 3, 1, 1.0, 1.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
                 5, 5, 5, 5);
     }
-    
+
     /**
      * Sets up the description area
      */
     private void setUpDescription() {
         viewNameLabel = new JLabel("The Majority Function");
         viewNameLabel.setFont(new Font("", Font.BOLD, 20));
-        
+
         descTextArea = new JTextArea();
         descTextArea.setEditable(false);
         descTextArea.setLineWrap(true);
@@ -163,7 +166,7 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
                             The Majority function takes three 32-bit words as input and outputs one 32-bit word. When comparing the three inputs,
                             this function outputs the bit that shows up the most between x, y, and z."""); //Works for now. Describe better later    
     }
-    
+
     /**
      * Creates the description panel
      */
@@ -181,12 +184,12 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
         descriptionPanel.addc(questionPanel, 0, 2, 1, 1, 0.0, 0.0,
                 GridBagConstraints.SOUTHWEST, GridBagConstraints.NONE,
                 5, 5, 5, 5);
-       
+
         descriptionPanel.addc(truthTablePanel, 1, 2, 1, 1, 1.0, 1.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
                 5, 5, 5, 5);
     }
-    
+
     /**
      * Sets up the radio buttons and action listener
      */
@@ -195,69 +198,69 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
         eightRadioButton = new JRadioButton("8 bits");
         sixteenRadioButton = new JRadioButton("16 bits");
         thirtytwoRadioButton = new JRadioButton("32 bits");
-        
+
         ActionListener selection = e -> {
             JRadioButton source = (JRadioButton) e.getSource();
             updateProblemSize(source);
-        //    generateNewQuestion();
+            //    generateNewQuestion();
         };
-        
+
         fourRadioButton.addActionListener(selection);
         eightRadioButton.addActionListener(selection);
         sixteenRadioButton.addActionListener(selection);
         thirtytwoRadioButton.addActionListener(selection);
-        
+
         problemSizeGroup = new ButtonGroup();
         problemSizeGroup.add(fourRadioButton);
         problemSizeGroup.add(eightRadioButton);
         problemSizeGroup.add(sixteenRadioButton);
         problemSizeGroup.add(thirtytwoRadioButton);
-        
+
         fourRadioButton.setSelected(true); //Set default radio button to true
-        
+
         radioButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         radioButtonPanel.add(fourRadioButton);
         radioButtonPanel.add(eightRadioButton);
         radioButtonPanel.add(sixteenRadioButton);
-        radioButtonPanel.add(thirtytwoRadioButton);    
+        radioButtonPanel.add(thirtytwoRadioButton);
     }
-    
+
     /**
      * Updates the size of the problem to display.
-     * 
+     *
      * @param source The radio button that triggered the even.
      */
-    private void updateProblemSize(JRadioButton source){
+    private void updateProblemSize(JRadioButton source) {
         if (source == fourRadioButton) {
             problemSize = 4;
         } else if (source == eightRadioButton) {
             problemSize = 8;
         } else if (source == sixteenRadioButton) {
             problemSize = 16;
-        } else if (source == thirtytwoRadioButton){
+        } else if (source == thirtytwoRadioButton) {
             problemSize = 32;
         }
     }
-    
+
     /**
-     * Initializes the question components and adds them to the question panel. 
+     * Initializes the question components and adds them to the question panel.
      */
     private void setUpQuestionArea() {
         problemSize = 4;
         stringX = "foo"; // generateInputString();
         stringY = "var"; // generateInputString();
         stringZ = "baz"; // generateInputString();
-        
+
         stringXLabel = new JLabel("x: " + stringX);
         stringYLabel = new JLabel("y: " + stringY);
         stringZLabel = new JLabel("z: " + stringZ);
-        
+
         problemSizeLabel = new JLabel("Select Problem Size:");
         instructionLabel = new JLabel("Solve the majority function using the three "
                 + "inputs given below:");
-        
+
         questionPanel = new GPanel();
-        
+
         questionPanel.addc(problemSizeLabel, 0, 0, 1, 1, 0.0, 0.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
                 5, 5, 5, 5);
@@ -270,16 +273,16 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
         questionPanel.addc(stringXLabel, 0, 3, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
-        
+
         questionPanel.addc(stringYLabel, 0, 4, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
-        
+
         questionPanel.addc(stringZLabel, 0, 5, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
     }
-    
+
     /**
      * Initializes the response area
      */
@@ -288,39 +291,39 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
         responseTextArea = new JTextArea(3, 20);
         responseTextArea.setLineWrap(true);
         responseTextArea.setWrapStyleWord(true);
-        
+
         responsePane = new JScrollPane(responseTextArea);
         responsePane.setPreferredSize(new Dimension(800, 200));
     }
-    
+
     /**
-     * Sets up the Check, New Example, and Hint buttons and their action listeners
+     * Sets up the Check, New Example, and Hint buttons and their action
+     * listeners
      */
     private void setUpButtons() {
-        
-        
+
         checkButton = new JButton(StepCompletionAction.instance());
         checkButton.addActionListener(this);
-        
+
         hintButton = new JButton(HintAction.instance());
         hintButton.addActionListener(this);
-        
+
         nextButton = new JButton(NewExampleAction.instance());
         nextButton.addActionListener(this);
-        
+
         buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         buttonPanel.add(checkButton);
         buttonPanel.add(nextButton);
-        buttonPanel.add(hintButton);   
+        buttonPanel.add(hintButton);
     }
-    
+
     /**
-     * Creates a GPanel containing the response JScrollPanes and 
-     * the button panel. 
+     * Creates a GPanel containing the response JScrollPanes and the button
+     * panel.
      */
-    private void setUpQRPanel(){ //Rename function (frPanel?)
+    private void setUpQRPanel() { //Rename function (frPanel?)
         qrPanel = new GPanel();
-        
+
         qrPanel.addc(responsePane, 0, 0, 1, 1, 1.0, 1.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
                 5, 5, 5, 5);
@@ -329,7 +332,7 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
     }
-    
+
     /**
      * Sets up the truth table associated with the Majority Function.
      */
@@ -338,43 +341,43 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
         truthTableLabel = new JLabel("Maj Function Truth Table");
         truthTableLabel.setFont(new Font("", Font.BOLD, 14));
         majFunctionLabel = new JLabel("𝑀𝑎𝑗(𝑥,𝑦,𝑧)=(𝑥∧𝑦)⨁(𝑥∧𝑧)⨁(𝑦∧𝑧)");
-        
+
         Object[] columnNames = {"x", "y", "z", "(𝑥∧𝑦)", "(𝑥∧𝑧)", "(𝑦∧𝑧)", "(𝑥∧𝑦)⨁(𝑥∧𝑧)⨁(𝑦∧𝑧)"};
-        Object[][] data = {{0, 0, 0, 0, 0, 0, 0}, 
-                           {0, 0, 1, 0, 0, 0, 0}, 
-                           {0, 1, 0, 0, 0, 0, 0},
-                           {0, 1, 1, 0, 0, 1, 1}, 
-                           {1, 0, 0, 0, 0, 0, 0}, 
-                           {1, 0, 1, 0, 1, 0, 1}, 
-                           {1, 1, 0, 1, 0, 0, 1}, 
-                           {1, 1, 1, 1, 1, 1, 1}};
-        
+        Object[][] data = {{0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 1, 0, 0, 0, 0},
+        {0, 1, 0, 0, 0, 0, 0},
+        {0, 1, 1, 0, 0, 1, 1},
+        {1, 0, 0, 0, 0, 0, 0},
+        {1, 0, 1, 0, 1, 0, 1},
+        {1, 1, 0, 1, 0, 0, 1},
+        {1, 1, 1, 1, 1, 1, 1}};
+
         majTruthTable = new JTable(data, columnNames);
         configureChTruthTable();
-        
+
         majTruthTablePane = new JScrollPane(majTruthTable);
         majTruthTablePane.setPreferredSize(new Dimension(400, 151));
         majTruthTablePane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         majTruthTablePane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        
+
         truthTablePanel = new GPanel(); //Separate GPanel info to new function
-        
+
         truthTablePanel.addc(truthTableLabel, 0, 0, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
-        
+
         truthTablePanel.addc(majFunctionLabel, 0, 1, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
-        
+
         truthTablePanel.addc(majTruthTablePane, 0, 2, 1, 1, 1.0, 1.0,
                 GridBagConstraints.CENTER, GridBagConstraints.BOTH,
                 5, 5, 5, 5);
-        
+
         truthTablePanel.setVisible(false);
 
     }
-    
+
     /**
      * Configures the appearance of the truth table.
      */
@@ -388,9 +391,9 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
         majTruthTable.getColumnModel().getColumn(1).setPreferredWidth(25);
         majTruthTable.getColumnModel().getColumn(2).setPreferredWidth(25);
         majTruthTable.getColumnModel().getColumn(6).setPreferredWidth(130);
-        
+
     }
-    
+
     /**
      * Handles the actionPerformed event for buttons in the view.
      *
@@ -405,7 +408,7 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
             onNextQuestion();
         }
     }
-    
+
     @Override
     public void keyTyped(KeyEvent e) {
     }
@@ -422,11 +425,12 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
     @Override
     public void keyReleased(KeyEvent e) {
     }
-    
-     /**
-     * Generates an n-bit binary string (length 4, 8, 16, or 32) to be used as an input into the 
-     * Maj function. Every four bits are separated by a space to improve readability.
-     * 
+
+    /**
+     * Generates an n-bit binary string (length 4, 8, 16, or 32) to be used as
+     * an input into the Maj function. Every four bits are separated by a space
+     * to improve readability.
+     *
      * @return A string to be used as an input into the function.
      */
     /*
@@ -482,12 +486,12 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
         
         return inputString;
     } */
-    
     /**
-     * Formats the result output by the choice function based on the size of the 
+     * Formats the result output by the choice function based on the size of the
      * problem.
+     *
      * @param answer the output of the choice function
-     * 
+     *
      * @return the binary string representation of the answer
      */
     /*
@@ -512,7 +516,6 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
         }
         return finalResult;
     } */
-    
     /**
      * Generates and displays three new input strings.
      *//*
@@ -527,7 +530,7 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
         stringYLabel.setText("y: " + stringY);
         stringZLabel.setText("z: " + stringZ);
     }*/
-    
+
     /**
      * Evaluates the maj function maj(x, y, z).
      *
@@ -560,9 +563,9 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
 
         return binaryResult;
     }*/
-
     /**
-     * Verifies the user's answer against the correct result and shows a message dialog.
+     * Verifies the user's answer against the correct result and shows a message
+     * dialog.
      */
     private void verifyAnswer() {/*
         String correctAnswer = majorityFunction(stringX, stringY, stringZ);
@@ -579,8 +582,6 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
         }*/
     }
 
-    
-
     /**
      * Displays a message dialog indicating the start of the next question.
      */
@@ -596,14 +597,14 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
 
     /**
      * Displays a message dialog indicating the provision of a hint.
-    */
+     */
     private void onNextHint() {
         truthTablePanel.setVisible(true);
     }
 
     /**
      * Handles the click event of the check button, verifying the user's answer.
-    */
+     */
     private void onCheckButton() {
         if (responseTextArea.getText().equals("")) {
             JOptionPane.showMessageDialog(this, "Please provide an answer");
@@ -611,41 +612,43 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
             verifyAnswer();
         }
     }
-    
+
     @Override
     protected void updateView() {
-        view = SplashFrame.instance().getView(); // Accessing view to use universal buttons
+        view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
         hintButton = view.getHintButton();
         checkButton = view.getCheckButton();
         nextButton = view.getNewExampleButton();
-        
+
         // If check and hint buttons are disabled, reset listenerers and apply those used by this view
-        if(!checkHintEnabled) {
+        if (!checkHintEnabled) {
             view.resetButtonListeners(); // Clear any listeners applied from other views          
-            hintButton.addActionListener(this);           
-            checkButton.addActionListener(this);            
+            hintButton.addActionListener(this);
+            checkButton.addActionListener(this);
             nextButton.addActionListener(this);
         }
-        
+
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-        Step step = model.currentTask().getCurrentStep();
-        //Get the data from the model as a RotateStep object
-        MajorityStep example = gson.fromJson(step.getData(), MajorityStep.class);
+        Step step = model.currentTask().getCurrentStep().getStep();
 
-        if (example.getOperandA() == null || example.getOperandA().isEmpty()) {
-            stringXLabel.setText("x: Please");
-            stringYLabel.setText("y: click");
-            stringZLabel.setText("z: New Example"); 
-            hintButton.setEnabled(false);
-            checkButton.setEnabled(false);
+        if (step.getSubType() == StepSubType.MAJORITY_FUNCTION) {
+            //Get the data from the model as a RotateStep object
+            MajorityStep example = gson.fromJson(step.getData(), MajorityStep.class);
+
+            if (example.getOperandA() == null || example.getOperandA().isEmpty()) {
+                stringXLabel.setText("x: Please");
+                stringYLabel.setText("y: click");
+                stringZLabel.setText("z: New Example");
+                hintButton.setEnabled(false);
+                checkButton.setEnabled(false);
+            } else {
+                stringXLabel.setText("x: " + example.getOperandA());
+                stringYLabel.setText("y: " + example.getOperandB());
+                stringZLabel.setText("z: " + example.getOperandC());
+                hintButton.setEnabled(true);
+                checkButton.setEnabled(true);
+            }
         }
-        else {
-            stringXLabel.setText("x: " + example.getOperandA());
-            stringYLabel.setText("y: " + example.getOperandB());
-            stringZLabel.setText("z: " + example.getOperandC());
-            hintButton.setEnabled(true);
-            checkButton.setEnabled(true);
-        }
-}
+    }
 }

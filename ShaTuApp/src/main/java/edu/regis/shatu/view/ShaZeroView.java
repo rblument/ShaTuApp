@@ -226,7 +226,7 @@ public class ShaZeroView extends UserRequestView implements ActionListener, KeyL
      * TODO: THIS IS A PLACEHOLDER UNTIl WE HAVE HAVE THE MODEL CODE COMPLETED
      */
     protected void updateView() {
-        view = SplashFrame.instance().getView(); // Accessing view to use universal buttons
+        view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
         hintButton = view.getHintButton();
         checkButton = view.getCheckButton();
         nextButton = view.getNewExampleButton();

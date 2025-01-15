@@ -14,21 +14,17 @@
 package edu.regis.shatu.view;
 
 import edu.regis.shatu.model.CompressRoundStep;
-import edu.regis.shatu.model.PrepScheduleStep;
 import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
-import edu.regis.shatu.model.aol.ExampleType;
+import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.view.act.NewExampleAction;
 import edu.regis.shatu.view.act.StepCompletionAction;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
-import java.awt.GridBagConstraints;
-import java.awt.Insets;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import javax.swing.JButton;
 
 /**
@@ -522,7 +518,7 @@ public class CompressionCanvasView extends UserRequestView {
      * TODO: THIS IS A PLACEHOLDER UNTIl WE HAVE HAVE THE MODEL CODE COMPLETED
      */
     protected void updateView() {
-        view = SplashFrame.instance().getView(); // Accessing view to use universal buttons
+        view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
         view.resetButtonListeners(); // Clear any listeners applied from other views
         view.getCheckButton().setEnabled(false);
         view.getHintButton().setEnabled(false);
@@ -540,7 +536,7 @@ public class CompressionCanvasView extends UserRequestView {
     public NewExampleRequest newRequest() {
         NewExampleRequest ex = new NewExampleRequest(); // Will be sent to the tutor.
         
-        ex.setExampleType(ExampleType.COMPRESS_ROUND);
+        ex.setExampleType(ProblemType.COMPRESS_ROUND);
         
         CompressRoundStep newStep = new CompressRoundStep();       
                 
@@ -551,7 +547,7 @@ public class CompressionCanvasView extends UserRequestView {
 
     @Override
     public StepCompletion stepCompletion() {
-        Step currentStep = model.currentTask().currentStep();
+        Step currentStep = model.currentTask().currentStep().getStep();
         
         CompressRoundStep completedStep = gson.fromJson(currentStep.getData(), CompressRoundStep.class);
                 

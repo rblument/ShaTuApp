@@ -12,7 +12,6 @@
  */
 package edu.regis.shatu.model;
 
-import edu.regis.shatu.model.aol.ScaffoldLevel;
 import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.model.aol.Timeout;
 import java.util.ArrayList;
@@ -27,12 +26,7 @@ import java.util.ArrayList;
  * 
  * @author rickb
  */
-public class Step extends TitledModel {
-    /**
-     * The scaffold level associated with this step.
-     */
-    private ScaffoldLevel scaffolding;
-    
+public class Step extends TitledModel {   
     /**
      * The type of this step, which determines the object specified in this
      * step's data along with a potential cont
@@ -41,39 +35,18 @@ public class Step extends TitledModel {
     /**
      * Which step this is in the parent task.
      */
-    protected int sequenceId = 1;
-    
-    /**
-     * The hint currently available to the student (index into hints).
-     */
-    protected int currentHintIndex = 0;
+    protected int sequenceIndex = 1;
     
     /**
      * The hints, if any, associated with this step (in order to be given).
      */
-    protected final ArrayList<Hint> hints;
+    protected ArrayList<Hint> hints;
     
     /**
      * The amount of seconds the student can take on this step before the GUI
      * prompts the student concerning their inaction.
      */
     protected Timeout timeout;
-    
-    /**
-     * If true, the GUI immediately notifies the tutor when the student performs
-     * this step.
-     */
-    protected boolean notifyTutor;
-    
-    /**
-     * True, if the student has completed this step, otherwise false.
-     * 
-     * Note, if this is true and notifyTutor is true, the tutor has been
-     * notified that the student completed this step. Otherwise, the tutor
-     * will be notified when the student completes the parent task associated
-     * with this step.
-     */
-    protected boolean isCompleted;
     
     /**
      * The knowledge component outcomes demonstrated/exercised by this step.
@@ -93,18 +66,16 @@ public class Step extends TitledModel {
      * @param sequenceId
      * @param subType
      */
-    public Step(int id,int sequenceId, StepSubType subType) {
+    public Step(int id, int sequenceIndex, StepSubType subType) {
         super(id);
         
-        this.sequenceId = sequenceId;
+        this.sequenceIndex = sequenceIndex;
 
         timeout = null;
 
         exercisedComponentIds = new ArrayList<>();
         
         hints = new ArrayList<>();
-           
-        isCompleted = false;
         
         this.subType = subType;
         
@@ -120,14 +91,6 @@ public class Step extends TitledModel {
         this.subType = subType;
     }
 
-    public ScaffoldLevel getScaffolding() {
-        return scaffolding;
-    }
-
-    public void setScaffolding(ScaffoldLevel scaffolding) {
-        this.scaffolding = scaffolding;
-    }
-
     public ArrayList<Hint> getHints() {
         return hints;
     }
@@ -139,9 +102,13 @@ public class Step extends TitledModel {
 
 	return null;
     }
+    
+    public void setHints(ArrayList<Hint> hints) {
+        this.hints = hints;
+    }
 
-    public int getSequenceId() {
-        return sequenceId;
+    public int getSequenceIndex() {
+        return sequenceIndex;
     }
 
     public Timeout getTimeout() {
@@ -155,45 +122,6 @@ public class Step extends TitledModel {
     public void addHint(Hint hint) {
         System.out.println("Adding hint");
         hints.add(hint);
-    }
-    
-    public Hint getCurrentHint() {
-        if (hints.isEmpty()) {
-            Hint noHint = new Hint();
-            noHint.setText("Sorry, no hints available");
-            return noHint;
-        }
-        
-        // Reset the index to 0 if it exceeds the list size
-        if (currentHintIndex >= hints.size()) {
-            currentHintIndex = 0;
-        }
-        
-        return hints.get(currentHintIndex);
-    }
-
-    public int getCurrentHintIndex() {
-        return currentHintIndex;
-    }
-
-    public void setCurrentHintIndex(int currentHint) {
-        this.currentHintIndex = currentHint;
-    }
-
-    public boolean isNotifyTutor() {
-        return notifyTutor;
-    }
-
-    public void setNotifyTutor(boolean notifyTutor) {
-        this.notifyTutor = notifyTutor;
-    }
-
-    public boolean isCompleted() {
-        return isCompleted;
-    }
-
-    public void setIsCompleted(boolean isCompleted) {
-        this.isCompleted = isCompleted;
     }
     
     public void addExercisedComponentId(int componentId) {

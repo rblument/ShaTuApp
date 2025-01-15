@@ -24,7 +24,7 @@ import javax.swing.border.Border;
 
 
 /**
- *
+ * ToDo: Should this be a HilightLabel class?
  * @author rickb
  */
 public class AddMod256Label extends JLabel implements MouseListener {
@@ -91,7 +91,8 @@ public class AddMod256Label extends JLabel implements MouseListener {
     }
     
     public void select() {
-        GuiController.instance().getStepSelectorView().displayStep(stepSelection);
+       // GuiController.instance().getStepSelectorView().displayStep(stepSelection);
+        SplashFrame.instance().getTutoringSessionView().displayStep(stepSelection);
         isSelected = true;
         setBackground(SELECTED_BACKGROUND);
     }

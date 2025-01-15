@@ -14,9 +14,8 @@ package edu.regis.shatu.svc;
 
 import edu.regis.shatu.dao.CourseDAO;
 import edu.regis.shatu.dao.SessionDAO;
-import edu.regis.shatu.dao.StudentDAO;
 import edu.regis.shatu.dao.StudentModelDAO;
-import edu.regis.shatu.dao.UserDAO;
+import edu.regis.shatu.dao.AccountDAO;
 
 /**
  * A singleton providing a concrete implementation of the service factory used
@@ -24,10 +23,20 @@ import edu.regis.shatu.dao.UserDAO;
  * 
  * Use of the service factory allows easier changes to how the services are
  * actually implemented without directly affecting the consumers who use them.
+ * For example, returning a POJO versus returning a network-based service.
  * 
  * @author rickb
  */
 public class ServiceFactory {
+    /**
+     * Return a reference to the user service.
+     * 
+     * @return AccountSvc
+     */
+    public static AccountSvc findAccountSvc() {
+        return new AccountDAO();
+    }
+    
     /**
      * Return a reference to the course service.
      * 
@@ -47,24 +56,12 @@ public class ServiceFactory {
     }
     
     /**
-     * Return a reference to the student service.
+     * Return a reference to the student model service.
      * 
-     * @return StudentSvc
+     * @return StudentModelSvc
      */
-    public static StudentSvc findStudentSvc() {
-        return new StudentDAO();
-    }
     
     public static StudentModelSvc findStudentModelSvc() {
         return new StudentModelDAO();
-    }
-    
-    /**
-     * Return a reference to the user service.
-     * 
-     * @return UserSvc
-     */
-    public static UserSvc findUserSvc() {
-        return new UserDAO();
     }
 }

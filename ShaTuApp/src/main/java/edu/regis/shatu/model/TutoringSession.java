@@ -12,6 +12,7 @@
  */
 package edu.regis.shatu.model;
 
+import edu.regis.shatu.model.aol.PendingTask;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
 
@@ -20,7 +21,12 @@ import java.util.GregorianCalendar;
  * 
  * @author rickb
  */
-public class TutoringSession {   
+public class TutoringSession { 
+    /**
+     * The id of this session in the database.
+     */
+    private int id;
+    
     /**
      * An SHA-256 encrypted security token that must be communicated to the
      * tutor/server in all subsequent requests after signing in.
@@ -30,8 +36,6 @@ public class TutoringSession {
     /**
      * The student being tutored in this session.
      */
-    private Account account;
-    
     private Student student;
     
     /**
@@ -62,13 +66,24 @@ public class TutoringSession {
      * remaining tasks are pending. Multiple tasks occur when a student 
      * overrides the task proposed by the tutor.
      */
-    private ArrayList<Task> tasks;
+    private ArrayList<PendingTask> tasks;
 
     /**
      * Initialize this session with default information.
+     * 
+     * @param student the Student being tutored in this session.
      */
-    public TutoringSession() {
+    public TutoringSession(Student student) {
+        this.student = student;
         tasks = new ArrayList<>();
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getSecurityToken() {
@@ -87,19 +102,6 @@ public class TutoringSession {
         this.student = student;
     }
 
-    /**
-     * Return the student being tutored in this tutoring session.
-     * 
-     * @return a Student
-     */
-    public Account getAccount() {
-        return account;
-    }
-
-    public void setAccount(Account account) {
-        this.account = account;
-    }
-
     public CourseDigest getCourse() {
         return course;
     }
@@ -116,7 +118,11 @@ public class TutoringSession {
         this.unit = unit;
     }
     
-    public boolean isIsActive() {
+    public boolean isActive() {
+        return isActive;
+    }
+    
+    public boolean getIsActive(){
         return isActive;
     }
 
@@ -132,33 +138,33 @@ public class TutoringSession {
         this.startDate = startDate;
     }
     
-    public Task currentTask() {
+    public PendingTask currentTask() {
         return tasks.get(0);
     }
     
-    public void addTask(Task task) {
+    public void addTask(PendingTask task) {
         tasks.add(task);
     }
     
-    public void addCurrentTask(Task task) {
+    public void addCurrentTask(PendingTask task) {
         tasks.add(0, task);
     }
 
-    public ArrayList<Task> getTasks() {
+    public ArrayList<PendingTask> getTasks() {
         return tasks;
     }
 
-    public void setTasks(ArrayList<Task> tasks) {
+    public void setTasks(ArrayList<PendingTask> tasks) {
         this.tasks = tasks;
     }
     
-    public void removeTask(Task task) {
+    public void removeTask(PendingTask task) {
         tasks.remove(task);
     }
     
     public void removeTask(int taskId) {
-        for (Task task : tasks) 
-            if (task.getId() == taskId)
-                removeTask(task);
+        for (PendingTask pendingTask : tasks) 
+            if (pendingTask.getTask().getId() == taskId)
+                removeTask(pendingTask);
     }
 }

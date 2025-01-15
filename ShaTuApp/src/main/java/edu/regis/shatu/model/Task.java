@@ -12,9 +12,8 @@
  */
 package edu.regis.shatu.model;
 
-import edu.regis.shatu.model.aol.ExampleType;
+import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.Problem;
-import edu.regis.shatu.model.aol.ScaffoldLevel;
 import edu.regis.shatu.model.aol.TaskKind;
 import edu.regis.shatu.model.aol.TaskState;
 import java.util.ArrayList;
@@ -37,20 +36,16 @@ public class Task extends TitledModel {
     private TaskKind kind = TaskKind.PROBLEM;
     
     /**
-     * The type of this task, which can be used to determine the appropriate
-     * view to display, if different from each of its steps.
+     * If the kind of this task is PROBLEM, then this is the type of problem
+     * being presented in this task, which can be used to determin the view
+     * to display.
      */
-    private ExampleType type;
-    
-    /**
-     * The scaffolding support for this task.
-     */
-    private ScaffoldLevel scaffolding = ScaffoldLevel.EXTREME;
+    private ProblemType type;
     
     /**
      * The sequence in which this task is performed in its problem.
      */
-    private int sequenceId;
+    private int sequenceIndex;
     
     /**
      * The current step (in index into steps).
@@ -104,20 +99,12 @@ public class Task extends TitledModel {
         this.kind = kind;
     }
 
-    public ExampleType getType() {
+    public ProblemType getType() {
         return type;
     }
 
-    public void setType(ExampleType type) {
+    public void setType(ProblemType type) {
         this.type = type;
-    }
-
-    public ScaffoldLevel getScaffolding() {
-        return scaffolding;
-    }
-
-    public void setScaffolding(ScaffoldLevel scaffolding) {
-        this.scaffolding = scaffolding;
     }
     
     public TaskState getState() {
@@ -153,9 +140,22 @@ public class Task extends TitledModel {
     public Step currentStep() {    
         System.out.println("*** Task.currentStep: " + steps.size());
         for (Step step : steps)
-            if (step.getSequenceId() == currentStepIndex)
+            if (step.getSequenceIndex() == currentStepIndex)
                 return step;
 
+        return null;
+    }
+    
+    /**
+     * 
+     * @param stepId the database id of the step to find.
+     * @return 
+     */
+    public Step findStepById(int stepId) {
+        for (Step step : steps)
+            if (step.getId() == stepId)
+                return step;
+        
         return null;
     }
     
@@ -166,24 +166,11 @@ public class Task extends TitledModel {
      * @param completion the Step that was completed by the student.
      */
     public void completedStep(StepCompletion completion) { 
-        completion.getStep().setIsCompleted(true);
+       // completion.getStep().setIsCompleted(true);
         
         state.addStepCompletion(completion);
     }
     
-    /**
-     * Return whether this task is completed.
-     * 
-     * @return true if all of the steps in this task have been completed, 
-     *         otherwise false
-     */
-    public boolean isTaskCompleted() {
-        for (Step step : steps)
-            if (!step.isCompleted())
-                return false;
-        
-        return true;
-    }
 
     public Problem getProblem() {
         return problem;
@@ -193,8 +180,12 @@ public class Task extends TitledModel {
         this.problem = problem;
     }  
 
-    public int getSequenceId() {
-        return sequenceId;
+    public int getSequenceIndex() {
+        return sequenceIndex;
+    }
+    
+    public void setSequenceIndex(int sequenceIndex) {
+        this.sequenceIndex = sequenceIndex;
     }
     
     public Step getCurrentStep() {
