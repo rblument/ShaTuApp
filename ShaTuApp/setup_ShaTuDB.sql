@@ -180,15 +180,6 @@ CREATE TABLE Assessment (
 
 # Populate tables
 
-INSERT INTO User (Email, Password) 
-   VALUES ('test@regis.edu', sha2('TestP@ss', 256));
-
-INSERT INTO Student (UserId, FirstName, LastName)
-   VALUES ('test@regis.edu', 'Testy', 'McTest');
-
-INSERT INTO StudentModel (UserId, ScaffoldLevel)
-   VALUES ('test@regis.edu', 'Extreme');
-
 INSERT INTO Course
 (Id,
  Title,
