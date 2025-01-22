@@ -32,7 +32,7 @@ public enum StepSelection {
     
     XOR("Exclusive OR (XOR)"),
     
-    CHOICE_FUNCTION("Value of the Choice (Ch) function"),
+    CHOICE_FUNCTION("Choice Function (Ch)"),
   
     PREPARE("Prepare Schedule"),
    
