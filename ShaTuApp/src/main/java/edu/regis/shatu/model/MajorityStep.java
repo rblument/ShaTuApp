@@ -24,15 +24,33 @@ package edu.regis.shatu.model;
 
 public class MajorityStep {
     
-    // Operand strings represent binary representations of the input bits
-    private String operandA; // First input operand for the majority function
-    private String operandB; // Second input operand for the majority function
-    private String operandC; // Third input operand for the majority function
+    /**
+     * First input operand for the majority function.
+     * Represents a binary string.
+     */
+    private String operandA;
     
-    // Result of the majority function computed from operandA, operandB, and operandC
+    /**
+     * Second input operand for the majority function.
+     * Represents a binary string.
+     */
+    private String operandB;
+    
+    /**
+     * Third input operand for the majority function.
+     * Represents a binary string.
+     */
+    private String operandC;
+    
+    /**
+     * Result of the majority function computed from operandA, operandB, and operandC.
+     * Stored as a binary string.
+     */
     private String result;
     
-    // Flag to indicate whether the truth table (used for teaching/visualization) is visible
+    /**
+     * Flag indicating whether the truth table (used for teaching/visualization) is visible.
+     */
     private boolean isTruthTableVisible;
     
     /**
