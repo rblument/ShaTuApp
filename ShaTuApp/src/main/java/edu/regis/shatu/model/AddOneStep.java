@@ -18,12 +18,16 @@ package edu.regis.shatu.model;
  */
 public class AddOneStep {
     
+    /* The length of the message */
     private int messageLength;
     
+    /* Question prompted to user for this step */
     private String question;
     
+    /* The corect result */
     private String result; // Correct Answer
     
+    /* The answer provided by the user  */
     private String userAnswer;
    
     /**
@@ -43,7 +47,7 @@ public class AddOneStep {
     
     /**
      * Getter method for message length
-     * @return 
+     * @return Integer
      */
     public int getMessageLength() {
         return this.messageLength;
@@ -59,7 +63,7 @@ public class AddOneStep {
     
     /**
      * Getter method for the question
-     * @return 
+     * @return String
      */
     public String getQuestion() {
         return this.question;
@@ -75,7 +79,7 @@ public class AddOneStep {
     
     /**
      * Getter method for the correct answer (result)
-     * @return 
+     * @return String
      */
     public String getResult() {
         return this.result;
@@ -91,7 +95,7 @@ public class AddOneStep {
     
     /**
      * Getter method for the user answer
-     * @return 
+     * @return String
      */
     public String getUserAnswer() {
         return this.userAnswer;
