@@ -24,14 +24,29 @@ public class InformationStep {
      */
     private String msg;
     
+    /**
+     * This is the information step method that establishes the message
+     * the student must acknowledge.
+     */
     public InformationStep() {
         msg = "";
     }
-
+    
+    /**
+     * This is the string method that gets the message the student must 
+     * acknowledge
+     * @return the message in this method. The message returned is the one 
+     * the student must acknowledge. 
+     */
     public String getMsg() {
         return msg;
     }
-
+    
+    /**
+     * This is a void method that sets the message object as the one the student
+     * must acknowledge. 
+     * @param msg establishes the local value for msg.
+     */
     public void setMsg(String msg) {
         this.msg = msg;
     }
