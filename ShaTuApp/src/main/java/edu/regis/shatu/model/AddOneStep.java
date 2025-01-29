@@ -18,16 +18,24 @@ package edu.regis.shatu.model;
  */
 public class AddOneStep {
     
-    /* The length of the message */
+    /**
+     * The length of the message
+     */
     private int messageLength;
     
-    /* Question prompted to user for this step */
+    /**
+     * Question prompted to user for this step
+     */
     private String question;
     
-    /* The corect result */
+    /**
+     * The correct result
+     */
     private String result; // Correct Answer
     
-    /* The answer provided by the user  */
+    /**
+     * The answer provided by the user
+     */
     private String userAnswer;
    
     /**
