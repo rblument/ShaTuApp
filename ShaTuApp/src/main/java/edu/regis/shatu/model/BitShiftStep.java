@@ -19,11 +19,30 @@ package edu.regis.shatu.model;
  */
 public class BitShiftStep
 {
-    private String operand;         //Operation to perfomr on bit 
-    private String result;          //Result of bit shift
-    private int bitLength;          //Length of bit
-    private int shiftLength;        //Length bit is shifted
-    private boolean shiftRight;     //Direction of shift Right or Not Right
+     /**
+     * The object on which the operation is performed.
+     */
+    private String operand;
+    
+     /**
+     * The result of the bit shift.
+     */
+    private String result;
+    
+     /**
+     * The length of the current bit.
+     */
+    private int bitLength;
+    
+     /**
+     * The length the bit is shifted.
+     */
+    private int shiftLength;
+    
+     /**
+     * The direction of the bit shift Right not Not Right.
+     */
+    private boolean shiftRight;
     
     // Getter and Setter for operand
     public String getOperand() {
