@@ -54,43 +54,49 @@ public class Account {
     protected boolean isStudent;
 
     /**
-     * 
+     * Default constructor for the Account class. Sets up a new account with
+     * blank/default values for all fields.
      */
     public Account() {
-        this("", "", 0, "");
+        this("", "", 0, ""); // Calls the detailed constructor with empty/default values for all fields.
     }
 
     /**
-     * Initialize this user with the given user id and default password.
-     *
-     * @param userId
+     * Constructor that takes only a userID.
+     * Allows user to create an account only specifying the login ID.
+     * The rest of the values are default
+     * 
+     * @param userId The user's login ID (e.g., "name@university.edu").
      */
     public Account(String userId) {
         this(userId, "", 0, "");
     }
     
-   /**
-     * Initialize this user with the given user id and default password.
+    /**
+     * Constructor that takes a userId and a password.
+     * Allows setting both the user's login ID and password, while leaving
+     * the security question and answer fields as default values.
      *
-     * @param userId
-     * @param password an SHA-256 encrypted password.
+     * @param userId The user's login ID (e.g., "name@university.edu").
+     * @param password The user's SHA-256 encrypted password.
      */
     public Account(String userId, String password) {
         this(userId, password, 0, "");
     }
 
     /**
-     * Initialize this user with the given user id and password
-     *
-     * @param userId a String (e.g. "name@university.edu").
-     * @param password an SHA-256 encrypted password.
-     * @param securityQuestion
-     * @param securityAnswer
-     */
+    * Full constructor for creating an Account.
+    * Sets up all the fields of the account with provided values.
+    *
+    * @param userId The user's login ID (e.g., "name@university.edu").
+    * @param password The user's SHA-256 encrypted password.
+    * @param securityQuestion The ID of the security question selected by the user.
+    * @param securityAnswer The user's SHA-256 encrypted answer to the security question.
+    */
     public Account(String userId, String password, int securityQuestion,
             String securityAnswer) {
-        this.userId = userId;
-        this.password = password;
+        this.userId = userId; 
+        this.password = password; 
         this.securityQuestion = securityQuestion;
         this.securityAnswer = securityAnswer;
         isStudent = true;
