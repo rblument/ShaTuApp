@@ -12,35 +12,14 @@
  */
 package edu.regis.shatu.svc;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import org.junit.jupiter.api.BeforeAll;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import edu.regis.shatu.dao.CourseDAO;
-import edu.regis.shatu.err.NonRecoverableException;
-import edu.regis.shatu.err.ObjNotFoundException;
+
 import edu.regis.shatu.model.TutoringSession;
-//import edu.regis.shatu.model.User;
-import edu.regis.shatu.model.aol.BitOpExample;
-import edu.regis.shatu.model.aol.BitOpStep;
-import edu.regis.shatu.model.Course;
-import edu.regis.shatu.model.CourseDigest;
-import edu.regis.shatu.model.InformationStep;
-import edu.regis.shatu.model.aol.EncodeAsciiExample;
-//import edu.regis.shatu.model.aol.EncodeAsciiStep;
-import edu.regis.shatu.model.aol.NewExampleRequest;
-import edu.regis.shatu.model.Step;
-import edu.regis.shatu.model.aol.StepSubType;
-//import edu.regis.shatu.model.Task;
-import edu.regis.shatu.model.aol.TaskKind;
-import edu.regis.shatu.model.Unit;
-import edu.regis.shatu.model.UnitDigest;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
-import org.junit.jupiter.api.Order;
 
 /**
  * Unit test for the ShaTu tutor object.

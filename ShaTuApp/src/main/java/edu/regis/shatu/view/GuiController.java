@@ -14,6 +14,7 @@ package edu.regis.shatu.view;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
 import edu.regis.shatu.model.StepCompletionReply;
 import edu.regis.shatu.svc.ClientRequest;
 import edu.regis.shatu.svc.SHA_256;

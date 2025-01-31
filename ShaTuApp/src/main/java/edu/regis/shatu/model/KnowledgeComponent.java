@@ -12,8 +12,9 @@
  */
 package edu.regis.shatu.model;
 
-import edu.regis.shatu.model.aol.OutcomeGranularity;
 import java.util.ArrayList;
+
+import edu.regis.shatu.model.aol.OutcomeGranularity;
 
 /**
  * Per VanLehn (2006), a component of knowledge (concept, rule, procedure, 

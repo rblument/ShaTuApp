@@ -12,18 +12,12 @@
  */
 package edu.regis.shatu.view;
 
-import edu.regis.shatu.model.Account;
-import edu.regis.shatu.model.Student;
-import edu.regis.shatu.model.TutoringSession;
-import edu.regis.shatu.svc.SHA_256;
-import edu.regis.shatu.view.act.ForgotPasswordAction;
-import edu.regis.shatu.view.act.NewUserAction;
-import edu.regis.shatu.view.act.SignInAction;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.util.logging.Logger;
+
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -33,6 +27,14 @@ import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
+
+import edu.regis.shatu.model.Account;
+import edu.regis.shatu.model.Student;
+import edu.regis.shatu.model.TutoringSession;
+import edu.regis.shatu.svc.SHA_256;
+import edu.regis.shatu.view.act.ForgotPasswordAction;
+import edu.regis.shatu.view.act.NewUserAction;
+import edu.regis.shatu.view.act.SignInAction;
 
 /**
  * A splash panel introducing the ShaTut tutor, which also allows the user to 

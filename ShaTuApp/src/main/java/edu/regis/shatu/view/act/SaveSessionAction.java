@@ -12,10 +12,12 @@
  */
 package edu.regis.shatu.view.act;
 
-import edu.regis.shatu.util.ImgFactory;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+
 import javax.swing.KeyStroke;
+
+import edu.regis.shatu.util.ImgFactory;
 
 /**
  * Handler for GUI gestures requesting to save the current session.

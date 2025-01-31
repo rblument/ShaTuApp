@@ -13,15 +13,16 @@
 
 package edu.regis.shatu;
 
-import edu.regis.shatu.svc.ShaTuServer;
-import edu.regis.shatu.util.ResourceMgr;
-import edu.regis.shatu.view.MainFrame;
-import edu.regis.shatu.view.SplashFrame;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
+
+import edu.regis.shatu.svc.ShaTuServer;
+import edu.regis.shatu.util.ResourceMgr;
+import edu.regis.shatu.view.MainFrame;
+import edu.regis.shatu.view.SplashFrame;
 
 /**
  * A standalone implementation of the SHA-256 intelligent tutoring application.

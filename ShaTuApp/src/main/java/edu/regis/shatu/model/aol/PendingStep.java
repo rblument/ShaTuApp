@@ -12,10 +12,11 @@
  */
 package edu.regis.shatu.model.aol;
 
+import java.util.ArrayList;
+
 import edu.regis.shatu.model.Hint;
 import edu.regis.shatu.model.Model;
 import edu.regis.shatu.model.Step;
-import java.util.ArrayList;
 
 /**
  * The current step within a pending task that a student needs to complete as 

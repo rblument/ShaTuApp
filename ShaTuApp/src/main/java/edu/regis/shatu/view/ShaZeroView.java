@@ -10,15 +10,21 @@
  */
 package edu.regis.shatu.view;
 
-import edu.regis.shatu.model.StepCompletion;
-import edu.regis.shatu.model.aol.NewExampleRequest;
-import edu.regis.shatu.model.aol.RotateStep;
-import javax.swing.*;
-import java.awt.*;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JTextField;
+
+import edu.regis.shatu.model.StepCompletion;
+import edu.regis.shatu.model.aol.NewExampleRequest;
+import edu.regis.shatu.model.aol.RotateStep;
 
 /**
  * ShaZero class represents the GUI view for performing the SHA Σ₀ function, involving rotation and right shift operations.

@@ -12,17 +12,6 @@
  */
 package edu.regis.shatu.view;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import edu.regis.shatu.model.Step;
-import edu.regis.shatu.model.StepCompletion;
-import edu.regis.shatu.model.aol.BitOpStep;
-import edu.regis.shatu.model.aol.ProblemType;
-import edu.regis.shatu.model.aol.NewExampleRequest;
-import edu.regis.shatu.model.aol.StepSubType;
-import edu.regis.shatu.view.act.HintAction;
-import edu.regis.shatu.view.act.NewExampleAction;
-import edu.regis.shatu.view.act.StepCompletionAction;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
@@ -30,10 +19,24 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.math.BigInteger;
+
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import edu.regis.shatu.model.Step;
+import edu.regis.shatu.model.StepCompletion;
+import edu.regis.shatu.model.aol.BitOpStep;
+import edu.regis.shatu.model.aol.NewExampleRequest;
+import edu.regis.shatu.model.aol.ProblemType;
+import edu.regis.shatu.model.aol.StepSubType;
+import edu.regis.shatu.view.act.HintAction;
+import edu.regis.shatu.view.act.NewExampleAction;
+import edu.regis.shatu.view.act.StepCompletionAction;
 
 /**
  * AddTwoBitView class represents a GUI view for adding two binary numbers

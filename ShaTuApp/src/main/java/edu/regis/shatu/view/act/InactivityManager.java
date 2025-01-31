@@ -12,15 +12,16 @@
  */
 package edu.regis.shatu.view.act;
 
-import edu.regis.shatu.view.MainFrame;
-import edu.regis.shatu.view.act.BackToLogin;
 import java.awt.AWTEvent;
 import java.awt.Toolkit;
 import java.awt.event.AWTEventListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+
 import javax.swing.JOptionPane;
 import javax.swing.Timer;
+
+import edu.regis.shatu.view.MainFrame;
 
 /**
  * An inactivity tracker that tracks the mouse movement and keyboard

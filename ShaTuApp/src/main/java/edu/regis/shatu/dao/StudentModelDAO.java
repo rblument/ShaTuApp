@@ -12,7 +12,14 @@
  */
 package edu.regis.shatu.dao;
 
-import static edu.regis.shatu.dao.MySqlDAO.URL;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+
 import edu.regis.shatu.err.NonRecoverableException;
 import edu.regis.shatu.err.ObjNotFoundException;
 import edu.regis.shatu.model.Course;
@@ -26,13 +33,6 @@ import edu.regis.shatu.model.aol.StudentModel;
 import edu.regis.shatu.svc.CourseSvc;
 import edu.regis.shatu.svc.ServiceFactory;
 import edu.regis.shatu.svc.StudentModelSvc;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
 
 /**
  * A Data Access Object implementing {@link StudentModelSvc } behaviors.

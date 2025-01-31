@@ -12,10 +12,12 @@
  */
 package edu.regis.shatu.view.act;
 
-import edu.regis.shatu.util.ImgFactory;
 import java.awt.Image;
+
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
+
+import edu.regis.shatu.util.ImgFactory;
 
 /**
  * Abstract root for all GUI actions in the ShaTu application.

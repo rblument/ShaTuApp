@@ -12,7 +12,6 @@
  */
 package edu.regis.shatu.svc;
 
-import edu.regis.shatu.err.IllegalArgException;
 import edu.regis.shatu.err.NonRecoverableException;
 import edu.regis.shatu.err.ObjNotFoundException;
 import edu.regis.shatu.model.Student;

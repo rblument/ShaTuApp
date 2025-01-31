@@ -12,7 +12,17 @@
  */
 package edu.regis.shatu.dao;
 
-import static edu.regis.shatu.dao.MySqlDAO.URL;
+import java.io.File;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.GregorianCalendar;
+
 import edu.regis.shatu.err.IllegalArgException;
 import edu.regis.shatu.err.InconsistentDBException;
 import edu.regis.shatu.err.NonRecoverableException;
@@ -28,16 +38,6 @@ import edu.regis.shatu.model.aol.PendingTask;
 import edu.regis.shatu.svc.CourseSvc;
 import edu.regis.shatu.svc.ServiceFactory;
 import edu.regis.shatu.svc.SessionSvc;
-import java.io.File;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.GregorianCalendar;
 
 /**
  *

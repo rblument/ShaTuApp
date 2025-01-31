@@ -12,12 +12,14 @@
  */
 package edu.regis.shatu.view;
 
-import edu.regis.shatu.err.IllegalArgException;
-import edu.regis.shatu.model.TutoringSession;
 import java.awt.CardLayout;
 import java.awt.Color;
+
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
+
+import edu.regis.shatu.err.IllegalArgException;
+import edu.regis.shatu.model.TutoringSession;
 
 /**
  * A view displaying a current task and step in the tutoring session, which

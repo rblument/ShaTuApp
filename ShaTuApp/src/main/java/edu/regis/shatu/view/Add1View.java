@@ -12,33 +12,36 @@
  */
 package edu.regis.shatu.view;
 
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.JTextPane;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
 import edu.regis.shatu.model.AddOneStep;
 import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
-import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.NewExampleRequest;
+import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.view.act.HintAction;
 import edu.regis.shatu.view.act.NewExampleAction;
 import edu.regis.shatu.view.act.StepCompletionAction;
-import java.awt.GridBagConstraints;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JTextPane;
-import javax.swing.JTextArea;
-import javax.swing.JTable;
-import javax.swing.JScrollPane;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.DefaultTableCellRenderer;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import javax.swing.BoxLayout;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
 
 /**
  * A view that requests the student to add a single '1' bit to the byte prompt.

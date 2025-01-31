@@ -10,23 +10,36 @@
  */
 package edu.regis.shatu.view;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import edu.regis.shatu.model.BitShiftStep;
-import edu.regis.shatu.model.Step;
-import edu.regis.shatu.model.StepCompletion;
-import edu.regis.shatu.model.aol.ProblemType;
-import edu.regis.shatu.model.aol.NewExampleRequest;
-import edu.regis.shatu.model.aol.StepSubType;
-import edu.regis.shatu.view.act.HintAction;
-import edu.regis.shatu.view.act.NewExampleAction;
-import edu.regis.shatu.view.act.StepCompletionAction;
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import edu.regis.shatu.model.BitShiftStep;
+import edu.regis.shatu.model.Step;
+import edu.regis.shatu.model.StepCompletion;
+import edu.regis.shatu.model.aol.NewExampleRequest;
+import edu.regis.shatu.model.aol.ProblemType;
+import edu.regis.shatu.model.aol.StepSubType;
+import edu.regis.shatu.view.act.HintAction;
+import edu.regis.shatu.view.act.NewExampleAction;
+import edu.regis.shatu.view.act.StepCompletionAction;
 
 /**
  * ShiftRightView class represents the GUI view for performing the right shift operation on a binary number.

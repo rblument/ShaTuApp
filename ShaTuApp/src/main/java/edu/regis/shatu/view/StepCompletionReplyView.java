@@ -12,15 +12,17 @@
  */
 package edu.regis.shatu.view;
 
-import edu.regis.shatu.model.StepCompletion;
-import edu.regis.shatu.model.aol.NewExampleRequest;
 import java.awt.CardLayout;
 import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
+
+import edu.regis.shatu.model.StepCompletion;
+import edu.regis.shatu.model.aol.NewExampleRequest;
 
 /**
  * Displays the result of a student completing a step, which gives the student

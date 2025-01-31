@@ -12,8 +12,15 @@
  */
 package edu.regis.shatu.view.act;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.util.logging.Logger;
+
+import javax.swing.JOptionPane;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
 import edu.regis.shatu.err.IllegalArgException;
 import edu.regis.shatu.model.Account;
 import edu.regis.shatu.model.Hint;
@@ -29,12 +36,6 @@ import edu.regis.shatu.view.GuiController;
 import edu.regis.shatu.view.MainFrame;
 import edu.regis.shatu.view.SplashFrame;
 import edu.regis.shatu.view.UserRequestView;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import java.util.logging.Logger;
-import static javax.swing.Action.MNEMONIC_KEY;
-import static javax.swing.Action.SHORT_DESCRIPTION;
-import javax.swing.JOptionPane;
 
 /**
  * An (MVC) controller handling a GUI gesture representing a user's request to 

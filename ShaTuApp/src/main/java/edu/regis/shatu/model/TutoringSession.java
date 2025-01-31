@@ -12,9 +12,10 @@
  */
 package edu.regis.shatu.model;
 
-import edu.regis.shatu.model.aol.PendingTask;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
+
+import edu.regis.shatu.model.aol.PendingTask;
 
 /**
  * A SHA tutoring session, which is displayed in the tutor.

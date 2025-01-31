@@ -12,19 +12,12 @@
  */
 package edu.regis.shatu.view;
 
-import edu.regis.shatu.model.InitVarStep;
-import edu.regis.shatu.model.Step;
-import edu.regis.shatu.model.StepCompletion;
-import edu.regis.shatu.model.aol.ProblemType;
-import edu.regis.shatu.model.aol.NewExampleRequest;
-import edu.regis.shatu.view.act.NewExampleAction;
-import edu.regis.shatu.view.act.StepCompletionAction;
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Map;
+
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -32,6 +25,14 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+
+import edu.regis.shatu.model.InitVarStep;
+import edu.regis.shatu.model.Step;
+import edu.regis.shatu.model.StepCompletion;
+import edu.regis.shatu.model.aol.NewExampleRequest;
+import edu.regis.shatu.model.aol.ProblemType;
+import edu.regis.shatu.view.act.NewExampleAction;
+import edu.regis.shatu.view.act.StepCompletionAction;
 
 /**
  *
