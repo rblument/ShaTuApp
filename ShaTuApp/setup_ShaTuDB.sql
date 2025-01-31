@@ -1,35 +1,26 @@
-# 
-# SHATU: SHA-256 Tutor
-# 
-# (C) Johanna & Richard Blumenthal, All rights reserved
-#
-# Unauthorized use, duplication or distribution without the authors'
-#  permission is strictly prohibited.
-# 
-#  Unless required by applicable law or agreed to in writing, this
-#  software is distributed on an "AS IS" basis without warranties
-# or conditions of any kind, either expressed or implied.
-#
+
+-- SHATU: SHA-256 Tutor
+-- (C) Johanna & Richard Blumenthal, All rights reserved
+-- Unauthorized use, duplication or distribution without the authors' permission is strictly prohibited.
+-- Unless required by applicable law or agreed to in writing, this software is distributed on an "AS IS" basis without warranties or conditions of any kind, either expressed or implied.
+-- Authors: chand, rickb
+-- Created: Nov 8, 2024
 
 
-# Authors:  chand, rickb
-# Created: Nov 8, 2024
-#
-
-# If the ShaTuDB exists, drop it. In general, you will lose any existing data.
+-- If the ShaTuDB exists, drop it. In general, you will lose any existing data.
 DROP DATABASE IF EXISTS ShaTuDB;
 
-#
-# Create a database in MySql named: DiceTsDB
+
+-- Create a database in MySql named: DiceTsDB
 CREATE DATABASE ShaTuDB;
 
-# Create user representing the DICE tutor.
+-- Create user representing the DICE tutor.
 CREATE USER 'ShaTuTs'@'localhost' IDENTIFIED BY 'ShaTu2023';
 
-# Give the ShaTu tutor the following priveledges.
+-- Give the ShaTu tutor the following priveledges.
 GRANT SELECT,INSERT,UPDATE,DELETE,CREATE,DROP ON ShaTuDB.* TO 'ShaTuTs'@'localhost';
 
-# Add tables to new database
+-- Add tables to new database
 USE ShaTuDB;
 
 CREATE TABLE Account (
@@ -175,10 +166,10 @@ CREATE TABLE Assessment (
    Hints INT
 );
 
-# Truncate Table Assessment;
-# Will delete data, but also reset the next id counter to zero
+-- Truncate Table Assessment;
+-- Will delete data, but also reset the next id counter to zero
 
-# Populate tables
+-- Populate tables
 
 INSERT INTO Course
 (Id,
