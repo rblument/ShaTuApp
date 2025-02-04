@@ -108,6 +108,9 @@ public class WorkingVarLabel extends JLabel implements MouseListener {
         if (!isSelected) {
             select();
         }
+        else if (isSelected) {
+            deselect();
+        }
     }
 
     @Override
