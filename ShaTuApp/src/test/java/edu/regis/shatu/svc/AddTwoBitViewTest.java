@@ -12,15 +12,11 @@
  */
 package edu.regis.shatu.svc;
 
-import edu.regis.shatu.view.AddTwoBitView;
-import java.awt.event.KeyEvent;
-import javax.swing.JTextField;
-import static org.junit.Assert.assertTrue;
-import org.junit.Test;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeAll;
 //import org.mockito.Mockito;
 //import static org.mockito.Mockito.when;
+
+import edu.regis.shatu.view.AddTwoBitView;
 
 /**
  *

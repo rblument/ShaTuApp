@@ -12,15 +12,17 @@
  */
 package edu.regis.shatu.view;
 
-import edu.regis.shatu.model.StepCompletion;
-import edu.regis.shatu.model.aol.NewExampleRequest;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+
+import edu.regis.shatu.model.StepCompletion;
+import edu.regis.shatu.model.aol.NewExampleRequest;
 
 /**
  *

@@ -12,11 +12,12 @@
  */
 package edu.regis.shatu.model;
 
-import edu.regis.shatu.model.aol.ProblemType;
+import java.util.ArrayList;
+
 import edu.regis.shatu.model.aol.Problem;
+import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.TaskKind;
 import edu.regis.shatu.model.aol.TaskState;
-import java.util.ArrayList;
 
 /**
  * A multi-minute activity that can be skipped or interchanged with other tasks,

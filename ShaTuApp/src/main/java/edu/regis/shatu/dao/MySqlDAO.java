@@ -12,13 +12,14 @@
  */
 package edu.regis.shatu.dao;
 
-import edu.regis.shatu.err.MissingPropertyException;
-import edu.regis.shatu.util.ResourceMgr;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import edu.regis.shatu.err.MissingPropertyException;
+import edu.regis.shatu.util.ResourceMgr;
 
 /**
  * A root Data Access Object that provides some utility operations and ensures

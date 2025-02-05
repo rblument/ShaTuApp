@@ -12,12 +12,14 @@
  */
 package edu.regis.shatu.view;
 
+import java.awt.GridBagConstraints;
+
+import javax.swing.JButton;
+
 import edu.regis.shatu.model.Account;
 import edu.regis.shatu.model.LessonSession;
 import edu.regis.shatu.model.Student;
 import edu.regis.shatu.model.TutoringSession;
-import java.awt.GridBagConstraints;
-import javax.swing.JButton;
 
 /**
  *

@@ -12,17 +12,19 @@
  */
 package edu.regis.shatu.view;
 
-import edu.regis.shatu.model.Account;
-import edu.regis.shatu.model.LessonSession;
-import edu.regis.shatu.model.TutoringSession;
 import java.awt.CardLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
+
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+
+import edu.regis.shatu.model.Account;
+import edu.regis.shatu.model.LessonSession;
+import edu.regis.shatu.model.TutoringSession;
 
 /**
  * The first window displayed to a student user, which contains a splash panel 

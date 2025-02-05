@@ -12,11 +12,10 @@
  */
 package edu.regis.shatu.view.act;
 
-import edu.regis.shatu.view.SplashFrame;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import static javax.swing.Action.MNEMONIC_KEY;
-import static javax.swing.Action.SHORT_DESCRIPTION;
+
+import edu.regis.shatu.view.SplashFrame;
 
 /**
  * An MVC controller handling a user GUI gesture requesting to create a 

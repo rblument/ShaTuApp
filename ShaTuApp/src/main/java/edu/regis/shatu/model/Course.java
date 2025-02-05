@@ -12,8 +12,9 @@
  */
 package edu.regis.shatu.model;
 
-import edu.regis.shatu.err.ObjNotFoundException;
 import java.util.ArrayList;
+
+import edu.regis.shatu.err.ObjNotFoundException;
 
 /**
  * A course that may be taught by the ShaTu tutor.

@@ -12,7 +12,6 @@
  */
 package edu.regis.shatu.util;
 
-import edu.regis.shatu.err.MissingPropertyException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,6 +20,8 @@ import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import edu.regis.shatu.err.MissingPropertyException;
 
 /**
  * A Decorator wrapping the application's properties and resource bundle.

@@ -12,8 +12,9 @@
  */
 package edu.regis.shatu.model.aol;
 
-import edu.regis.shatu.model.StepCompletion;
 import java.util.LinkedList;
+
+import edu.regis.shatu.model.StepCompletion;
 
 /**
  * To provide appropriate hints to the student, we need to keep track of 

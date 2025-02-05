@@ -12,6 +12,17 @@
  */
 package edu.regis.shatu.view;
 
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.event.ActionListener;
+
+import javax.swing.Action;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+
 import edu.regis.shatu.model.TutoringSession;
 import edu.regis.shatu.model.aol.PendingStep;
 import edu.regis.shatu.model.aol.PendingTask;
@@ -19,15 +30,6 @@ import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.view.act.HintAction;
 import edu.regis.shatu.view.act.NewExampleAction;
 import edu.regis.shatu.view.act.StepCompletionAction;
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.event.ActionListener;
-import javax.swing.Action;
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
 
 
 /**

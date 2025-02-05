@@ -12,8 +12,18 @@
  */
 package edu.regis.shatu.svc;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.math.BigInteger;
+import java.util.GregorianCalendar;
+import java.util.Map;
+import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
 import edu.regis.shatu.err.IllegalArgException;
 import edu.regis.shatu.err.NonRecoverableException;
 import edu.regis.shatu.err.ObjNotFoundException;
@@ -23,9 +33,9 @@ import edu.regis.shatu.model.BitShiftStep;
 import edu.regis.shatu.model.ChoiceFunctionStep;
 import edu.regis.shatu.model.CompressRoundStep;
 import edu.regis.shatu.model.Course;
+import edu.regis.shatu.model.EncodeAsciiStep;
 import edu.regis.shatu.model.Hint;
 import edu.regis.shatu.model.InitVarStep;
-import edu.regis.shatu.model.EncodeAsciiStep;
 import edu.regis.shatu.model.KnowledgeComponent;
 import edu.regis.shatu.model.KnowledgeComponentKind;
 import edu.regis.shatu.model.MajorityStep;
@@ -44,23 +54,15 @@ import edu.regis.shatu.model.aol.Assessment;
 import edu.regis.shatu.model.aol.AssessmentLevel;
 import edu.regis.shatu.model.aol.BitOpExample;
 import edu.regis.shatu.model.aol.BitOpStep;
-import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.PendingStep;
 import edu.regis.shatu.model.aol.PendingTask;
+import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.RotateStep;
 import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.model.aol.StudentModel;
 import edu.regis.shatu.model.aol.TaskKind;
 import edu.regis.shatu.model.aol.Timeout;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.math.BigInteger;
-import java.util.GregorianCalendar;
-import java.util.Map;
-import java.util.Random;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The ShaTu tutor, which implements the tutoring service.

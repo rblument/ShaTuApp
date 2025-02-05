@@ -13,19 +13,21 @@
  */
 package edu.regis.shatu.view;
 
-import edu.regis.shatu.model.CompressRoundStep;
-import edu.regis.shatu.model.Step;
-import edu.regis.shatu.model.StepCompletion;
-import edu.regis.shatu.model.aol.ProblemType;
-import edu.regis.shatu.model.aol.NewExampleRequest;
-import edu.regis.shatu.view.act.NewExampleAction;
-import edu.regis.shatu.view.act.StepCompletionAction;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
+
 import javax.swing.JButton;
+
+import edu.regis.shatu.model.CompressRoundStep;
+import edu.regis.shatu.model.Step;
+import edu.regis.shatu.model.StepCompletion;
+import edu.regis.shatu.model.aol.NewExampleRequest;
+import edu.regis.shatu.model.aol.ProblemType;
+import edu.regis.shatu.view.act.NewExampleAction;
+import edu.regis.shatu.view.act.StepCompletionAction;
 
 /**
  * Displays a single round of the SHA-256 compression algorithm.

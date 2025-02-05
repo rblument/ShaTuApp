@@ -12,10 +12,11 @@
  */
 package edu.regis.shatu.view;
 
-import edu.regis.shatu.view.act.SaveSessionAction;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+
+import edu.regis.shatu.view.act.SaveSessionAction;
 
 /**
  * Menu bar used in the MainFrame.

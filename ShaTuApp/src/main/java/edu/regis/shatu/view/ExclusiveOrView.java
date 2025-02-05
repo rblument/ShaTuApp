@@ -12,19 +12,6 @@
  */
 package edu.regis.shatu.view;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
-import edu.regis.shatu.model.Step;
-import edu.regis.shatu.model.StepCompletion;
-import edu.regis.shatu.model.aol.BitOpExample;
-import edu.regis.shatu.model.aol.BitOpStep;
-import edu.regis.shatu.model.aol.ProblemType;
-import edu.regis.shatu.model.aol.NewExampleRequest;
-import edu.regis.shatu.model.aol.StepSubType;
-import edu.regis.shatu.view.act.HintAction;
-import edu.regis.shatu.view.act.NewExampleAction;
-import edu.regis.shatu.view.act.StepCompletionAction;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -34,6 +21,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.Random;
+
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -42,6 +30,21 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
+
+import edu.regis.shatu.model.Step;
+import edu.regis.shatu.model.StepCompletion;
+import edu.regis.shatu.model.aol.BitOpExample;
+import edu.regis.shatu.model.aol.BitOpStep;
+import edu.regis.shatu.model.aol.NewExampleRequest;
+import edu.regis.shatu.model.aol.ProblemType;
+import edu.regis.shatu.model.aol.StepSubType;
+import edu.regis.shatu.view.act.HintAction;
+import edu.regis.shatu.view.act.NewExampleAction;
+import edu.regis.shatu.view.act.StepCompletionAction;
 
 /**
  * ExclusiveOrView class represents a GUI view for performing Exclusive OR (XOR)
