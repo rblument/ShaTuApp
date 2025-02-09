@@ -55,7 +55,7 @@ public class Pad0View extends UserRequestView implements ActionListener {
     private JTextPane descriptionTextPane;
     private JLabel questionLabel, instructionsLabel, messageLengthLabel;
     private JTextField messageLengthField;
-    private JTextArea responseArea;
+    private JTextArea responseTextArea;
     private JTextArea feedbackArea;
     private JButton checkButton, nextButton, hintButton;
     private boolean checkHintEnabled = false;
@@ -147,7 +147,7 @@ public class Pad0View extends UserRequestView implements ActionListener {
      */
     public void submitAnswer() {
         
-        if (this.responseArea.getText().equals("")) {
+        if (this.responseTextArea.getText().equals("")) {
             this.feedbackArea.setText("Please provide an answer");
         }
         else {
@@ -237,10 +237,10 @@ public class Pad0View extends UserRequestView implements ActionListener {
      * Initializes the response area and its scroll pane
      */
     private void setupResponseArea() {
-        responseArea = new JTextArea(3, 20);
-        responseArea.setLineWrap(true); // Enable line wrapping
-        responseArea.setWrapStyleWord(true); // Wrap lines at word boundaries
-        responseScrollPane = new JScrollPane(responseArea);
+        responseTextArea = new JTextArea(3, 20);
+        responseTextArea.setLineWrap(true); // Enable line wrapping
+        responseTextArea.setWrapStyleWord(true); // Wrap lines at word boundaries
+        responseScrollPane = new JScrollPane(responseTextArea);
         responseScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED); // Enable vertical scrolling
     }
 
@@ -392,7 +392,7 @@ public class Pad0View extends UserRequestView implements ActionListener {
         
         // Clear any existing feedback and response from the previous question.
         feedbackArea.setText("");
-        responseArea.setText("");
+        responseTextArea.setText("");
         
         if (type == step.getSubType()) { // prevents data assignment issues if subtype is for a different class.
             
@@ -401,6 +401,7 @@ public class Pad0View extends UserRequestView implements ActionListener {
             if (this.question == null) { // A example hasnt been created yet
                 questionLabel.setText("Please click new example button to get started");
                 checkButton.setEnabled(false);
+                responseTextArea.setEnabled(false);
                 hintButton.setEnabled(false);
             }
         
@@ -409,6 +410,7 @@ public class Pad0View extends UserRequestView implements ActionListener {
                         + "needed to pad the following string so it is "
                         + "the proper length (448 bits): %s", question));
                 checkButton.setEnabled(true);
+                responseTextArea.setEnabled(true);
                 hintButton.setEnabled(true);
             }
         }
@@ -416,6 +418,7 @@ public class Pad0View extends UserRequestView implements ActionListener {
         else { // Subtype differs, need to create a new example to correctly set it.
                 questionLabel.setText("Please click new example button to get started");
                 checkButton.setEnabled(false);
+                responseTextArea.setEnabled(false);
                 hintButton.setEnabled(false);
         }
         
@@ -469,7 +472,7 @@ public class Pad0View extends UserRequestView implements ActionListener {
         
         Pad0Step completedPadZeroStep = gson.fromJson(currentStep.getData(), Pad0Step.class); // Assigns the class with the data assigned while creating the example.
         
-        String userResponse = this.responseArea.getText().replaceAll("\\s", ""); // Gets the users answer and removes spaces
+        String userResponse = this.responseTextArea.getText().replaceAll("\\s", ""); // Gets the users answer and removes spaces
         
         completedPadZeroStep.setUserAnswer(userResponse);
         
