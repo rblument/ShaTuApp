@@ -59,7 +59,7 @@ public class AddTwoBitView extends UserRequestView implements KeyListener {
     private String result = "";
 
     private TutoringSessionView view;
-    private JTextField answerField;
+    private JTextField responseTextArea;
     private JLabel instructionLabel;
     private JLabel stringLabel1;
     private JLabel stringLabel2;
@@ -88,10 +88,20 @@ public class AddTwoBitView extends UserRequestView implements KeyListener {
         stringLabel1 = new JLabel("binary number1 : ");
         stringLabel2 = new JLabel("binary number2 : ");
         stringLabel3 = new JLabel("Hit New Example to get set of binary numbers");
-        stringLabel4 = new JLabel();  //only for testing that view is communicating with server
+        stringLabel4 = new JLabel(); // only for testing that view is communicating with server
 
-        answerField = new JTextField(10);
-        answerField.addKeyListener(this);
+        responseTextArea = new JTextField(10);
+        responseTextArea.addKeyListener(this);
+
+        // Create and initialize the checkButton
+        checkButton = new JButton(StepCompletionAction.instance());
+        checkButton.addActionListener(this);
+
+        hintButton = new JButton(HintAction.instance());
+        hintButton.addActionListener(this);
+
+        nextButton = new JButton(NewExampleAction.instance());
+        nextButton.addActionListener(this);
     }
 
     /**
@@ -126,9 +136,22 @@ public class AddTwoBitView extends UserRequestView implements KeyListener {
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
 
-        // Add answerField centered below binaryNumberTwoLabel
-        addc(answerField, 0, 4, 1, 1, 1.0, 0.0,
+        // Add responseTextArea centered below binaryNumberTwoLabel
+        addc(responseTextArea, 0, 4, 1, 1, 1.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                5, 5, 5, 5);
+
+        // Add checkButton centered below responseTextArea
+        addc(checkButton, 0, 5, 1, 1, 0.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                5, 5, 5, 5);
+
+        addc(hintButton, 0, 6, 1, 1, 0.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                5, 5, 5, 5);
+
+        addc(nextButton, 0, 7, 1, 1, 0.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
     }
 
@@ -187,11 +210,11 @@ public class AddTwoBitView extends UserRequestView implements KeyListener {
      */
     @Override
     public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_ENTER && answerField.getText().equals("")) {
+        if (e.getKeyCode() == KeyEvent.VK_ENTER && responseTextArea.getText().equals("")) {
             JOptionPane.showMessageDialog(this, "Please provide an answer");
         } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
             checkButton.doClick();
-        } 
+        }
     }
 
     /**
@@ -208,8 +231,8 @@ public class AddTwoBitView extends UserRequestView implements KeyListener {
      */
     private void verifyAnswer() {
         String correctAnswer = calculateModulo(binary1, binary2);
-        // Get the text from the answerField when the checkButton is clicked
-        String userAnswer = answerField.getText();
+        // Get the text from the responseTextArea when the checkButton is clicked
+        String userAnswer = responseTextArea.getText();
 
         if (userAnswer.equals(correctAnswer)) {
             JOptionPane.showMessageDialog(this, "Correct");
@@ -222,7 +245,7 @@ public class AddTwoBitView extends UserRequestView implements KeyListener {
      * Handles the action for the Next Question button.
      */
     private void onNextQuestion() {
-        //JOptionPane.showMessageDialog(this, "Next Question");
+        // JOptionPane.showMessageDialog(this, "Next Question");
     }
 
     /**
@@ -236,7 +259,7 @@ public class AddTwoBitView extends UserRequestView implements KeyListener {
      * Handles the action for the Check button.
      */
     private void onCheckButton() {
-        if (answerField.getText().equals("")) {
+        if (responseTextArea.getText().equals("")) {
             JOptionPane.showMessageDialog(this, "Please provide an answer");
         }
     }
@@ -274,7 +297,7 @@ public class AddTwoBitView extends UserRequestView implements KeyListener {
 
         BitOpStep example = gson.fromJson(currentStep.getData(), BitOpStep.class);
 
-        String userResponse = answerField.getText().replaceAll("\\s", "");
+        String userResponse = responseTextArea.getText().replaceAll("\\s", "");
 
         example.getExample().setResult(userResponse);
 
@@ -296,9 +319,10 @@ public class AddTwoBitView extends UserRequestView implements KeyListener {
         checkButton = view.getCheckButton();
         nextButton = view.getNewExampleButton();
 
-        // If check and hint buttons are disabled, reset listenerers and apply those used by this view
+        // If check and hint buttons are disabled, reset listenerers and apply those
+        // used by this view
         if (!checkHintEnabled) {
-            view.resetButtonListeners(); // Clear any listeners applied from other views          
+            view.resetButtonListeners(); // Clear any listeners applied from other views
         }
 
         if (model != null) {
@@ -319,10 +343,12 @@ public class AddTwoBitView extends UserRequestView implements KeyListener {
                     binary2 = example.getExample().getOperand2();
                     result = calculateModulo(binary1, binary2);
                     checkButton.setEnabled(true);
+                    responseTextArea.setEnabled(true);
                     hintButton.setEnabled(true);
                 } catch (NullPointerException e) {
                     System.out.println("Example is empty.");
                     checkButton.setEnabled(false);
+                    responseTextArea.setEnabled(false);
                     hintButton.setEnabled(false);
                 }
 

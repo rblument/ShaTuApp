@@ -327,9 +327,11 @@ public class ShiftRightView extends UserRequestView implements KeyListener {
             if (operand == null || operand.isEmpty()) {
                 operand = "Please click New Example";
                 checkButton.setEnabled(false);
+                responseTextArea.setEnabled(false);
                 hintButton.setEnabled(false);
             } else {
                 checkButton.setEnabled(true);
+                responseTextArea.setEnabled(true);
                 hintButton.setEnabled(true);
             }
             shiftLength = example.getShiftLength();

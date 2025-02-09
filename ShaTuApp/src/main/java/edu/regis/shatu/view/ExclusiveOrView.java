@@ -517,6 +517,7 @@ public class ExclusiveOrView extends UserRequestView implements KeyListener {
                     stringYLabel.setText("y: " + stringY);
 
                     checkButton.setEnabled(true);
+                    responseTextArea.setEnabled(true);
                     hintButton.setEnabled(true);
                 } catch (JsonSyntaxException | NullPointerException e) {
                     stringX = "Please click";
@@ -526,6 +527,7 @@ public class ExclusiveOrView extends UserRequestView implements KeyListener {
                     stringYLabel.setText("y: " + stringY);
 
                     checkButton.setEnabled(false);
+                    responseTextArea.setEnabled(false);
                     hintButton.setEnabled(false);
 
                     System.err.println("Error updating view: " + e.getMessage());
