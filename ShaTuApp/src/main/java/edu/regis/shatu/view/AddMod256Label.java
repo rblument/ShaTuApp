@@ -117,6 +117,9 @@ public class AddMod256Label extends JLabel implements MouseListener {
         if (!isSelected) {
             select();
         }
+        else if (isSelected) {
+            deselect();
+        }
         
     }
 
