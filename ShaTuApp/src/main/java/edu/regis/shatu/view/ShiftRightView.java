@@ -37,7 +37,7 @@ import java.awt.event.KeyListener;
  *
  * @author rickb, Chandon Hamel
  */
-public class ShiftRightView extends UserRequestView implements ActionListener, KeyListener {
+public class ShiftRightView extends UserRequestView implements KeyListener {
     private TutoringSessionView view;
     private String operand;
     private int shiftLength;
@@ -47,7 +47,7 @@ public class ShiftRightView extends UserRequestView implements ActionListener, K
     private JTextArea descTextArea, feedbackTextArea, responseTextArea;
     private JScrollPane responsePane;
     private GPanel questionPanel, descriptionPanel, feedbackPanel, qrPanel;
-    private JPanel buttonPanel, radioButtonPanel;
+    private JPanel radioButtonPanel;
     private JButton checkButton, nextButton, hintButton;
     private boolean checkHintEnabled = false;
     private ButtonGroup problemSizeGroup;
@@ -64,21 +64,6 @@ public class ShiftRightView extends UserRequestView implements ActionListener, K
         initializeLayout();
     }
 
-    /**
-     * Handles the actionPerformed event for buttons in the view.
-     *
-     * @param event The ActionEvent that occurred.
-     */
-    @Override
-    public void actionPerformed(ActionEvent event) {
-        if (event.getSource() == hintButton) {
-            onNextHint();
-        } else if (event.getSource() == checkButton) {
-            onCheckButton();
-        } else if (event.getSource() == nextButton) {
-            checkHintEnabled = true;
-        }
-    }
     
     /**
      * Handles the action for the Hint button.
@@ -107,7 +92,6 @@ public class ShiftRightView extends UserRequestView implements ActionListener, K
         setUpQuestionArea();
         setUpResponseArea();
         setUpFeedbackArea();
-        //setUpButtons();
         setUpDescriptionPanel();
         setUpQRPanel();
     }
@@ -280,26 +264,6 @@ public class ShiftRightView extends UserRequestView implements ActionListener, K
     }
     
     /**
-     * Sets up the Check, Next, and Hint buttons and their action listeners
-     */
-    private void setUpButtons() {
-        checkButton = new JButton(StepCompletionAction.instance());
-        checkButton.addActionListener(this);
-
-        hintButton = new JButton(HintAction.instance());
-        hintButton.addActionListener(this);
-
-        nextButton = new JButton(NewExampleAction.instance());
-        nextButton.addActionListener(this);
-
-        buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        buttonPanel.add(checkButton);
-        buttonPanel.add(nextButton);
-        buttonPanel.add(hintButton);
-        
-    }
-    
-    /**
      * Creates a GPanel containing the response and feedback JScrollPanes and
      * the button panel.
      */
@@ -328,13 +292,10 @@ public class ShiftRightView extends UserRequestView implements ActionListener, K
         hintButton = view.getHintButton();
         checkButton = view.getCheckButton();
         nextButton = view.getNewExampleButton();
-        
+
         // If check and hint buttons are disabled, reset listenerers and apply those used by this view
         if(!checkHintEnabled) {
-            view.resetButtonListeners(); // Clear any listeners applied from other views          
-            hintButton.addActionListener(this);           
-            checkButton.addActionListener(this);            
-            nextButton.addActionListener(this);
+            view.resetButtonListeners(); // Clear any listeners applied from other views
         }
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();

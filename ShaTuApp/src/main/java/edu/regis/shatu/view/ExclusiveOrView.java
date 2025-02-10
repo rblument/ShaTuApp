@@ -51,7 +51,7 @@ import javax.swing.JTextArea;
  *
  * @author rickb
  */
-public class ExclusiveOrView extends UserRequestView implements ActionListener, KeyListener {
+public class ExclusiveOrView extends UserRequestView implements KeyListener {
 
     private TutoringSessionView view;
     private String stringX, stringY;
@@ -59,7 +59,7 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
     private JTextArea descTextArea, feedbackTextArea, responseTextArea;
     private JScrollPane feedbackPane, responsePane;
     private GPanel questionPanel, descriptionPanel, qrPanel;
-    private JPanel buttonPanel, radioButtonPanel;
+    private JPanel  radioButtonPanel;
     private JButton checkButton, hintButton, newExampleButton;
     private boolean checkHintEnabled = false;
     private ButtonGroup problemSizeGroup;
@@ -88,7 +88,6 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
         setUpQuestionArea();
         setUpResponseArea();
         setUpFeedbackArea();
-        setUpButtons();
         setUpDescriptionPanel();
         setUpQRPanel();
     }
@@ -262,25 +261,6 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
     }
 
     /**
-     * Sets up the Check, Next, and Hint buttons and their action listeners
-     */
-    private void setUpButtons() {
-        checkButton = new JButton(StepCompletionAction.instance());
-        checkButton.addActionListener(this);
-
-        hintButton = new JButton(HintAction.instance());
-        hintButton.addActionListener(this);
-
-        newExampleButton = new JButton(NewExampleAction.instance());
-        newExampleButton.addActionListener(this);
-
-        buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        buttonPanel.add(checkButton);
-        buttonPanel.add(hintButton);
-        buttonPanel.add(newExampleButton);
-    }
-
-    /**
      * Creates a GPanel containing the response and feedback JScrollPanes and
      * the button panel.
      */
@@ -293,10 +273,6 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
 
         qrPanel.addc(feedbackPane, 0, 1, 1, 1, 1.0, 1.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
-                5, 5, 5, 5);
-
-        qrPanel.addc(buttonPanel, 0, 2, 1, 1, 1.0, 1.0,
-                GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
     }
 
@@ -448,21 +424,6 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
         return paddedBinary.toString();
     }
 
-    /**
-     * Handles the actionPerformed event for buttons in the view.
-     *
-     * @param event The ActionEvent that occurred.
-     */
-    @Override
-    public void actionPerformed(ActionEvent event) {
-        if (event.getSource() == checkButton) {
-            onCheckButton();
-        } else if (event.getSource() == hintButton) {
-            onNextHint();
-        } else if (event.getSource() == newExampleButton) {
-            checkHintEnabled = true;
-        }
-    }
 
     /**
      * Handles the keyTyped event for the view.
@@ -533,9 +494,6 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
         // If check and hint buttons are disabled, reset listenerers and apply those used by this view
         if (!checkHintEnabled) {
             view.resetButtonListeners(); // Clear any listeners applied from other views          
-            hintButton.addActionListener(this);
-            checkButton.addActionListener(this);
-            newExampleButton.addActionListener(this);
         }
 
         if (model != null) {

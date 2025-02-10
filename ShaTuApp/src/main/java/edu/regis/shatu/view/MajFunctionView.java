@@ -49,7 +49,7 @@ import javax.swing.table.DefaultTableCellRenderer;
  *
  * @author rickb, mpowanga
  */
-public class MajFunctionView extends UserRequestView implements ActionListener, KeyListener {
+public class MajFunctionView extends UserRequestView implements KeyListener {
 
     private TutoringSessionView view;
     private String stringX, stringY, stringZ;
@@ -57,7 +57,7 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
     private JTextArea descTextArea, responseTextArea;
     private JScrollPane responsePane, majTruthTablePane;
     private GPanel truthTablePanel, questionPanel, descriptionPanel, qrPanel;
-    private JPanel buttonPanel, radioButtonPanel;
+    private JPanel radioButtonPanel;
     private JTable majTruthTable;
     private JButton checkButton, nextButton, hintButton;
     private boolean checkHintEnabled = false;
@@ -127,7 +127,6 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
         setUpRadioButtons();
         setUpQuestionArea();
         setUpResponseArea();
-        setUpButtons();
         setUpTruthTable();
         setUpDescriptionPanel();
         setUpQRPanel();
@@ -296,27 +295,7 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
         responsePane.setPreferredSize(new Dimension(800, 200));
     }
 
-    /**
-     * Sets up the Check, New Example, and Hint buttons and their action
-     * listeners
-     */
-    private void setUpButtons() {
-
-        checkButton = new JButton(StepCompletionAction.instance());
-        checkButton.addActionListener(this);
-
-        hintButton = new JButton(HintAction.instance());
-        hintButton.addActionListener(this);
-
-        nextButton = new JButton(NewExampleAction.instance());
-        nextButton.addActionListener(this);
-
-        buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        buttonPanel.add(checkButton);
-        buttonPanel.add(nextButton);
-        buttonPanel.add(hintButton);
-    }
-
+    
     /**
      * Creates a GPanel containing the response JScrollPanes and the button
      * panel.
@@ -326,10 +305,6 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
 
         qrPanel.addc(responsePane, 0, 0, 1, 1, 1.0, 1.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
-                5, 5, 5, 5);
-
-        qrPanel.addc(buttonPanel, 0, 2, 1, 1, 1.0, 1.0,
-                GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
     }
 
@@ -394,20 +369,6 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
 
     }
 
-    /**
-     * Handles the actionPerformed event for buttons in the view.
-     *
-     * @param event The ActionEvent that occurred.
-     */
-    @Override
-    public void actionPerformed(ActionEvent event) {
-        if (event.getSource() == hintButton) {
-            onNextHint();
-        } else if (event.getSource() == nextButton) {
-            checkHintEnabled = true;
-            onNextQuestion();
-        }
-    }
 
     @Override
     public void keyTyped(KeyEvent e) {
@@ -623,9 +584,6 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
         // If check and hint buttons are disabled, reset listenerers and apply those used by this view
         if (!checkHintEnabled) {
             view.resetButtonListeners(); // Clear any listeners applied from other views          
-            hintButton.addActionListener(this);
-            checkButton.addActionListener(this);
-            nextButton.addActionListener(this);
         }
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
