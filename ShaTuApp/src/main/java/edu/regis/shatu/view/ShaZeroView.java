@@ -35,7 +35,7 @@ import edu.regis.shatu.model.aol.RotateStep;
  *
  * @author rickb
  */
-public class ShaZeroView extends UserRequestView implements ActionListener, KeyListener {
+public class ShaZeroView extends UserRequestView implements KeyListener {
     private TutoringSessionView view;
     
     /**
@@ -47,9 +47,7 @@ public class ShaZeroView extends UserRequestView implements ActionListener, KeyL
     private String answer;
     private JLabel exampleInputLabel;
     private JTextField answerField;
-    private JButton checkButton;
-    private JButton hintButton;
-    private JButton nextButton;
+    private JButton checkButton, hintButton, nextButton;
     private boolean checkHintEnabled = false;
     
     /**
@@ -59,19 +57,7 @@ public class ShaZeroView extends UserRequestView implements ActionListener, KeyL
         initializeComponents();
         initializeLayout();
     }
-
-    @Override
-    public void actionPerformed(ActionEvent event) {
-        if (event.getSource() == checkButton) {
-            onCheckButton();
-        } else if (event.getSource() == hintButton) {
-            onNextHint();
-        } else if (event.getSource() == nextButton) {
-            checkHintEnabled = true;
-            onNextQuestion();
-        }
-    }
-
+    
     /**
      * Create the child GUI components appearing in this frame.
      */
@@ -81,16 +67,6 @@ public class ShaZeroView extends UserRequestView implements ActionListener, KeyL
 
         answerField = new JTextField(10);
         answerField.addKeyListener(this);
-
-        // Create and initialize the checkButton
-        checkButton = new JButton("Check");
-        checkButton.addActionListener(this); // Add an action listener for the check button
-        
-        hintButton = new JButton("Hint");
-        hintButton.addActionListener(this); // Add an action listener for the check button
-        
-        nextButton = new JButton("Next Question");
-        nextButton.addActionListener(this);
     }
 
     /**
@@ -108,15 +84,6 @@ public class ShaZeroView extends UserRequestView implements ActionListener, KeyL
         // Add answerField to the layout, centered
         addc(answerField, 0, 1, 1, 1, 1.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-                5, 5, 5, 5);
-        addc(checkButton, 0, 2, 2, 1, 0.0, 0.0,
-                GridBagConstraints.CENTER, GridBagConstraints.NONE,
-                5, 5, 5, 5);
-        addc(hintButton, 0, 3, 2, 1, 0.0, 0.0,
-                GridBagConstraints.CENTER, GridBagConstraints.NONE,
-                5, 5, 5, 5);
-        addc(nextButton, 0, 7, 1,1,0.0,0.0,
-                GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
     }
     /**
@@ -240,9 +207,7 @@ public class ShaZeroView extends UserRequestView implements ActionListener, KeyL
         // If check and hint buttons are disabled, reset listenerers and apply those used by this view
         if(!checkHintEnabled) {
             view.resetButtonListeners(); // Clear any listeners applied from other views          
-            hintButton.addActionListener(this);           
-            checkButton.addActionListener(this);            
-            nextButton.addActionListener(this);
+
         }
         
         if (model != null) {
