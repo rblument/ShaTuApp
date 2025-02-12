@@ -83,7 +83,12 @@ public enum KnowledgeComponentKind {
      * Define the corresponding database id for this knowledge component.
      */
      MAJORITY_FUNCTION("Majority Function", 200),
-     
+
+    /**
+     * Define the corresponding databse ID for the Sigma0 component
+     */
+    SHAR_ZERO("SHA Sum 0 Function", 230),
+
     /**
      * Define the corresponding database id for this knowledge component.
      */

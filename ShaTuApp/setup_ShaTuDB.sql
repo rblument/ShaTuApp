@@ -405,7 +405,16 @@ INSERT INTO KnowledgeComponent
 VALUES
 (220, 1, 'Add bit strings', 
  'Demonstrate the ability to add two bit strings together.',
- 'Application', 0, 'Other', '0', 'Knowledge Component'); 
+ 'Application', 0, 'Other', '0', 'Knowledge Component');
+
+INSERT INTO KnowledgeComponent
+(Id, CourseId, Title,
+ Description,
+ BloomLevel, IsDomainFocus, Pedagogy, ExercisingLocations, Granularity)
+VALUES
+    (230, 1, 'SHA Sum 0 Function',
+     'Use the Sigma0 function.',
+     'Application', 0, 'Other', '0', 'Knowledge Component');
 
 
 INSERT INTO ExercisingLocation

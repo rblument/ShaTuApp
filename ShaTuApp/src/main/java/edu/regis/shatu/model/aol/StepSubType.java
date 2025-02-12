@@ -76,6 +76,8 @@ public enum StepSubType {
     MAJORITY_FUNCTION("Majority Function", StepSelection.MAJ_FUNCTION),
     
     CHOICE_FUNCTION("Choice Function", StepSelection.CHOICE_FUNCTION),
+
+    SHA_ZERO("SHA Sum 0 Function", StepSelection.SHA_ZERO),
     
     STEP_COMPLETION_REPLY("Step Completion Reply", null),
     
