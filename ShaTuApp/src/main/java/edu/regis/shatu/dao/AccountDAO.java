@@ -58,7 +58,7 @@ public class AccountDAO extends MySqlDAO implements AccountSvc {
                     throw new IllegalArgException("User exists " + userId);
                 }
 
-                String[] keyCol = {"Id"};
+                String[] keyCol = { "Id" };
                 stmt = conn.prepareStatement(sql, keyCol);
 
                 stmt.setString(1, userId);
@@ -210,7 +210,7 @@ public class AccountDAO extends MySqlDAO implements AccountSvc {
             stmt.setString(1, userId);
 
             ResultSet rs = stmt.executeQuery();
-            
+
             if (rs.next()) {
                 Account account = new Account(userId);
 
@@ -237,8 +237,8 @@ public class AccountDAO extends MySqlDAO implements AccountSvc {
      * Utility that returns whether the given user (id) exists in the database.
      *
      * @param userId the account user id format name@university.edu
-     * @param conn an existing connection to the database, which is not closed
-     * by this method.
+     * @param conn   an existing connection to the database, which is not closed
+     *               by this method.
      * @return true, if the user id exists in the database, otherwise false
      * @throws NonRecoverableException (see ex.getCause().getErrorCode())
      */

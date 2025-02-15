@@ -87,8 +87,7 @@ public class ShaTuTutor implements TutorSvc {
      * Handler for logging non-exception messages from this class versus thrown
      * exception, which are logged by the exception.
      */
-    private static final Logger LOGGER
-            = Logger.getLogger(ShaTuTutor.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(ShaTuTutor.class.getName());
 
     /**
      * The current tutoring session, which contains information on the current
@@ -120,7 +119,7 @@ public class ShaTuTutor implements TutorSvc {
         // the client request (e.g., ":SignIn" invokes "signIn(...)").
         Logger.getLogger(ShaTuTutor.class.getName()).log(Level.INFO, request.getRequestType().getRequestName());
 
-        // Efficiently produce "signIn" from ":SignIn", for example.         
+        // Efficiently produce "signIn" from ":SignIn", for example.
         char c[] = request.getRequestType().getRequestName().toCharArray();
         c[1] = Character.toLowerCase(c[1]);
 
@@ -131,7 +130,7 @@ public class ShaTuTutor implements TutorSvc {
 
         String methodName = new String(m);
 
-        // Most methods require verifying the given security token with the 
+        // Most methods require verifying the given security token with the
         // one current known in the DB for the given user.
         switch (methodName) {
             case "completedStep":
@@ -146,21 +145,20 @@ public class ShaTuTutor implements TutorSvc {
 
                         Account account = ServiceFactory.findAccountSvc().retrieve(userId);
                         student = new Student(account);
-                        
+
                         try {
                             StudentModelSvc stuModSvc = ServiceFactory.findStudentModelSvc();
                             studentModel = stuModSvc.retrieve(userId);
                             student.setStudentModel(studentModel);
-                    
+
                         } catch (ObjNotFoundException ex) {
                             TutorReply reply = new TutorReply(":ERR");
-                            reply.setData("Student model not found for: " + userId );
+                            reply.setData("Student model not found for: " + userId);
                             return reply;
                         }
-    
-                        
+
                         session = ServiceFactory.findSessionSvc().retrieve(student);
-        
+
                     } else {
                         TutorReply reply = new TutorReply(":ERR");
                         reply.setData("Illegal Security Token");
@@ -181,14 +179,16 @@ public class ShaTuTutor implements TutorSvc {
                 Logger.getLogger(ShaTuTutor.class.getName()).log(Level.INFO, "No token verification required");
         }
 
-        // Security token has been verified or not required (e.g., signIn, createAccount).
+        // Security token has been verified or not required (e.g., signIn,
+        // createAccount).
         try {
             Method method = getClass().getMethod(methodName, String.class);
 
             return (TutorReply) method.invoke(this, request.getData());
 
         } catch (NoSuchMethodException ex) {
-            return createError("Tutor received an unknown request type: " + request.getRequestType().getRequestName(), ex);
+            return createError("Tutor received an unknown request type: " + request.getRequestType().getRequestName(),
+                    ex);
         } catch (SecurityException ex) {
             return createError("ShaTuTutor_ERR_2", ex);
         } catch (IllegalAccessException ex) {
@@ -208,7 +208,7 @@ public class ShaTuTutor implements TutorSvc {
      * @param jsonAcct a JSon encoded Account object
      * @throws NonRecoverableException perhaps see getCause().getErrorCode().
      * @return a TutorReply if successful the status is "Created", otherwise the
-     * status is ":ERR".
+     *         status is ":ERR".
      */
     public TutorReply createAccount(String jsonAcct) throws NonRecoverableException {
         Account acct = gson.fromJson(jsonAcct, Account.class);
@@ -244,7 +244,7 @@ public class ShaTuTutor implements TutorSvc {
      *
      * @param jsonAcct a JSon encoded Account object
      * @return a TutorReply if successful the status is "Created", otherwise the
-     * status is ":ERR".
+     *         status is ":ERR".
      * @throws edu.regis.shatu.err.NonRecoverableException
      */
     public TutorReply verifyUser(String jsonAcct) throws NonRecoverableException {
@@ -286,7 +286,7 @@ public class ShaTuTutor implements TutorSvc {
      *
      * @param jsonAcct a JSon encoded Account object
      * @return a TutorReply if successful the status is "Created", otherwise the
-     * status is ":ERR".
+     *         status is ":ERR".
      * @throws edu.regis.shatu.err.NonRecoverableException
      */
     public TutorReply resetPassword(String jsonAcct) throws NonRecoverableException {
@@ -308,7 +308,7 @@ public class ShaTuTutor implements TutorSvc {
             // Should never get here since we tested whether the account exists
             return new TutorReply("IllegalUserId");
         } catch (IllegalArgException ex) {
-            // ToDo: More specific err information returned 
+            // ToDo: More specific err information returned
             return new TutorReply("IllegalArg");
         }
     }
@@ -320,7 +320,7 @@ public class ShaTuTutor implements TutorSvc {
      *
      * @param jsonUser a JSon encoded User object
      * @return a TutorReply, if successful, the status is "Authenticated" with
-     * data being a JSon encoded TutoringSession object.
+     *         data being a JSon encoded TutoringSession object.
      */
     public TutorReply signIn(String jsonUser) {
         System.out.println("Received sign in: " + jsonUser);
@@ -332,15 +332,15 @@ public class ShaTuTutor implements TutorSvc {
             if (dbAcct.getPassword().equals(requestAcct.getPassword())) {
                 student = new Student(dbAcct);
                 String userId = dbAcct.getUserId();
-                
+
                 try {
                     StudentModelSvc stuModSvc = ServiceFactory.findStudentModelSvc();
                     studentModel = stuModSvc.retrieve(userId);
                     student.setStudentModel(studentModel);
-                    
+
                 } catch (ObjNotFoundException ex) {
                     TutorReply reply = new TutorReply(":ERR");
-                    reply.setData("Student model not found in sign in for: " + userId );
+                    reply.setData("Student model not found in sign in for: " + userId);
                     return reply;
                 }
 
@@ -370,7 +370,7 @@ public class ShaTuTutor implements TutorSvc {
         System.out.println("get task method");
 
         Task task = new Task();
-        int[] taskOrder = {102, 103, 104, 105, 106, 107, 108, 109, 101, 110, 111, 100, 112};
+        int[] taskOrder = { 102, 103, 104, 105, 106, 107, 108, 109, 101, 110, 111, 100, 112 };
         int currentTask = 102;
 
         for (int id : taskOrder) {
@@ -435,7 +435,7 @@ public class ShaTuTutor implements TutorSvc {
      *
      * @param jsonObj
      * @return a TutorReply, if successful, the status is "Hint" with data being
-     * a displayable hint text string.
+     *         a displayable hint text string.
      */
     public TutorReply requestHint(String jsonObj) {
         System.out.println("requestHint");
@@ -651,9 +651,17 @@ public class ShaTuTutor implements TutorSvc {
      * @return
      */
     public TutorReply completeEncodeStep(StepCompletion completion) {
-        EncodeAsciiStep completedEncodeAsciiStep = gson.fromJson(completion.getData(), EncodeAsciiStep.class); // EncodeAsciiStep that was created in the stepCompletion function in the EncodeAsciiView
+        EncodeAsciiStep completedEncodeAsciiStep = gson.fromJson(completion.getData(), EncodeAsciiStep.class); // EncodeAsciiStep
+                                                                                                               // that
+                                                                                                               // was
+                                                                                                               // created
+                                                                                                               // in the
+                                                                                                               // stepCompletion
+                                                                                                               // function
+                                                                                                               // in the
+                                                                                                               // EncodeAsciiView
 
-        String userAnswer = completedEncodeAsciiStep.getUserAnswer(); // What the user submitted as the answer. 
+        String userAnswer = completedEncodeAsciiStep.getUserAnswer(); // What the user submitted as the answer.
         String correctAnswer = completedEncodeAsciiStep.getResult();
 
         System.out.println("Correct Answer: " + correctAnswer); // Error checking
@@ -707,7 +715,7 @@ public class ShaTuTutor implements TutorSvc {
 
         Step step = new Step(1, 0, StepSubType.STEP_COMPLETION_REPLY);
 
-        // ToDo: fix timeouts  
+        // ToDo: fix timeouts
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);
         step.setData(gson.toJson(stepReply));
@@ -744,9 +752,13 @@ public class ShaTuTutor implements TutorSvc {
      */
     public TutorReply completeAddOneStep(StepCompletion completion) {
 
-        AddOneStep completedAddOneStep = gson.fromJson(completion.getData(), AddOneStep.class); // AddOneStep that was created in the stepCompletion function in the AddOneView
+        AddOneStep completedAddOneStep = gson.fromJson(completion.getData(), AddOneStep.class); // AddOneStep that was
+                                                                                                // created in the
+                                                                                                // stepCompletion
+                                                                                                // function in the
+                                                                                                // AddOneView
 
-        String userAnswer = completedAddOneStep.getUserAnswer(); // What the user submitted as the answer. 
+        String userAnswer = completedAddOneStep.getUserAnswer(); // What the user submitted as the answer.
         String correctAnswer = completedAddOneStep.getResult();
 
         System.out.println("Correct Answer: " + correctAnswer); // Error checking
@@ -1127,7 +1139,8 @@ public class ShaTuTutor implements TutorSvc {
         // Create StepCompletionReply
         StepCompletionReply stepReply = new StepCompletionReply();
         stepReply.setIsCorrect(allCorrect);
-        stepReply.setCorrectAnswer(correctAnswers.toString().replaceAll("[{}]", "").replaceAll("@\\w{2}=|,", "").trim());
+        stepReply
+                .setCorrectAnswer(correctAnswers.toString().replaceAll("[{}]", "").replaceAll("@\\w{2}=|,", "").trim());
 
         stepReply.setResponse(userAnswers.toString().replaceAll("[{}]", "").replaceAll("@\\w{2}=|,", "").trim());
 
@@ -1357,7 +1370,7 @@ public class ShaTuTutor implements TutorSvc {
         String operand2 = example.getExample().getOperand2();
         String result = example.getExample().getResult();
 
-        int m = 8; //this will be changed
+        int m = 8; // this will be changed
 
         String expectedResult = xorBitsFunction(operand1, operand2);
 
@@ -1450,7 +1463,7 @@ public class ShaTuTutor implements TutorSvc {
         String operand2 = example.getExample().getOperand2();
         String result = example.getExample().getResult();
 
-        int m = 8; //this will be changed
+        int m = 8; // this will be changed
 
         String expectedResult = addBitsFunction(operand1, operand2, m);
 
@@ -1724,7 +1737,7 @@ public class ShaTuTutor implements TutorSvc {
      * @return TutorReply
      */
     public TutorReply newExample(String json) {
-        //gson = new GsonBuilder().setPrettyPrinting().create();
+        // gson = new GsonBuilder().setPrettyPrinting().create();
 
         NewExampleRequest request = gson.fromJson(json, NewExampleRequest.class);
 
@@ -1787,12 +1800,12 @@ public class ShaTuTutor implements TutorSvc {
         tSession.setStartDate(new GregorianCalendar());
         tSession.setCourse(course.getDigest());
         tSession.setUnit(course.currentUnit().getDigest());
-        
+
         Task task = getFirstTask(course);
         PendingTask pendingTask = new PendingTask(task);
-        pendingTask.setCurrentStep(new PendingStep(task.getCurrentStep()));   
+        pendingTask.setCurrentStep(new PendingStep(task.getCurrentStep()));
         tSession.addTask(pendingTask);
-   
+
         // Generate the security token for this tutoring session.
         Random rnd = new Random();
         String clearToken = "Session" + account.getUserId() + Integer.toString(rnd.nextInt());
@@ -1839,10 +1852,10 @@ public class ShaTuTutor implements TutorSvc {
      * Verify that the user with the given id has a session with the given
      * session id.
      *
-     * @param userId String "user@regis.edu"
+     * @param userId    String "user@regis.edu"
      * @param sessionId String identifying a previously generated session id.
      * @return the current TutoringSession associated with the given user id and
-     * session id
+     *         session id
      */
     private boolean verifySession(String userId, String sessionId)
             throws ObjNotFoundException, NonRecoverableException {
@@ -1895,27 +1908,35 @@ public class ShaTuTutor implements TutorSvc {
      * Handles client requests for a new ASCII encode example.
      *
      * @return a TutorReply whose data contains a JSon EncodeAsciiExample
-     * object.
+     *         object.
      */
     private TutorReply newAsciiEncodeExample(TutoringSession session, String jsonData) {
         System.out.println("Start tutor newEncodeAsciiexample"); // Error checking
 
-        EncodeAsciiStep newEncodeAscii = gson.fromJson(jsonData, EncodeAsciiStep.class); // This is the EncodeAsciiStep created in the newExample function from the EncodeAsciiView.
+        EncodeAsciiStep newEncodeAscii = gson.fromJson(jsonData, EncodeAsciiStep.class); // This is the EncodeAsciiStep
+                                                                                         // created in the newExample
+                                                                                         // function from the
+                                                                                         // EncodeAsciiView.
 
         if (newEncodeAscii.getQuestion().isEmpty() || newEncodeAscii.getQuestion() == null) {
 
             System.out.println("Question was empty"); // Error checking
 
-            int messageLength = newEncodeAscii.getMessageLength(); // Set in the newExample function from the EncodeAsciiView, represents the String length that will be generated for the question.
+            int messageLength = newEncodeAscii.getMessageLength(); // Set in the newExample function from the
+                                                                   // EncodeAsciiView, represents the String length that
+                                                                   // will be generated for the question.
 
             String newQuestion = generateRandomString(messageLength); // Generates a random string to convert to binary
 
             newEncodeAscii.setQuestion(newQuestion);
 
-            newEncodeAscii.setResult(toBinaryFunction(newQuestion)); // Generates the binary version of the question, which is now the answer
+            newEncodeAscii.setResult(toBinaryFunction(newQuestion)); // Generates the binary version of the question,
+                                                                     // which is now the answer
 
         } else {
-            newEncodeAscii.setResult(toBinaryFunction(newEncodeAscii.getQuestion())); // Generates the binary version of the question, which is now the answer
+            newEncodeAscii.setResult(toBinaryFunction(newEncodeAscii.getQuestion())); // Generates the binary version of
+                                                                                      // the question, which is now the
+                                                                                      // answer
         }
 
         System.out.println(newEncodeAscii.getResult()); // Error checking
@@ -1970,15 +1991,19 @@ public class ShaTuTutor implements TutorSvc {
 
         System.out.println("Start tutor newaddonebitexample"); // Error checking
 
-        AddOneStep newAddOneBit = gson.fromJson(jsonData, AddOneStep.class); // This is the AddOneStep created in the newExample function from the AddOneView.
+        AddOneStep newAddOneBit = gson.fromJson(jsonData, AddOneStep.class); // This is the AddOneStep created in the
+                                                                             // newExample function from the AddOneView.
 
-        int messageLength = newAddOneBit.getMessageLength(); // Set in the newExample function from the AddOneView, represents the String length that will be generated for the question.
+        int messageLength = newAddOneBit.getMessageLength(); // Set in the newExample function from the AddOneView,
+                                                             // represents the String length that will be generated for
+                                                             // the question.
 
         String question = generateRandomString(messageLength); // Generates a random string to convert to binary
 
         newAddOneBit.setQuestion(question);
 
-        newAddOneBit.setResult(addOneFunction(question)); // Generates the binary version of the question, which is now the answer
+        newAddOneBit.setResult(addOneFunction(question)); // Generates the binary version of the question, which is now
+                                                          // the answer
 
         System.out.println(newAddOneBit.getResult()); // Error checking
 
@@ -2038,7 +2063,9 @@ public class ShaTuTutor implements TutorSvc {
 
         subStep.setQuestion(question);
 
-        subStep.setResult(Integer.toString(calculateZerosNeededForPadding(messageLength))); // Calculates the number of zeros needed to pad the message correctly
+        subStep.setResult(Integer.toString(calculateZerosNeededForPadding(messageLength))); // Calculates the number of
+                                                                                            // zeros needed to pad the
+                                                                                            // message correctly
 
         System.out.println(subStep.getResult()); // Error checking
 
@@ -2099,7 +2126,9 @@ public class ShaTuTutor implements TutorSvc {
 
         subStep.setQuestion(question);
 
-        subStep.setResult(Integer.toBinaryString(messageLength * 8)); // Calculates the number of bits that the message length represents then converts that int to a binary string. (8 bits per char)
+        subStep.setResult(Integer.toBinaryString(messageLength * 8)); // Calculates the number of bits that the message
+                                                                      // length represents then converts that int to a
+                                                                      // binary string. (8 bits per char)
 
         System.out.println(subStep.getResult()); // Error checking
 
@@ -2393,7 +2422,7 @@ public class ShaTuTutor implements TutorSvc {
         int knowledgeCompId = KnowledgeComponentKind.fromString("Shift Bits").dbId();
         System.out.println("knowledCompId: " + knowledgeCompId);
         Assessment assessment = studentModel.findAssessment(knowledgeCompId);
-        
+
         assessment.incrementExposures();
 
         try {
@@ -2450,7 +2479,7 @@ public class ShaTuTutor implements TutorSvc {
 
         BitOpStep subStep = new BitOpStep();
         subStep.setExample(example);
-        //ToDo: multistep should be determined by the student model.
+        // ToDo: multistep should be determined by the student model.
         subStep.setMultiStep(rnd.nextBoolean());
 
         Step step = new Step(1, 0, StepSubType.XOR_BITS);
@@ -2504,7 +2533,7 @@ public class ShaTuTutor implements TutorSvc {
      * Intermediate: 110010110:406 </br>
      * Result: 10010110:150 (e.g., 406 % 256)
      *
-     * @param session the current tutoring session.
+     * @param session  the current tutoring session.
      * @param jsonData a BitOpExample encoded object
      * @return a TutorReply
      */
@@ -2549,7 +2578,7 @@ public class ShaTuTutor implements TutorSvc {
 
         BitOpStep subStep = new BitOpStep();
         subStep.setExample(example);
-        //ToDo: multistep should be determined by the student model.
+        // ToDo: multistep should be determined by the student model.
         subStep.setMultiStep(rnd.nextBoolean());
 
         Step step = new Step(1, 0, StepSubType.ADD_BITS);
@@ -2720,11 +2749,11 @@ public class ShaTuTutor implements TutorSvc {
     /**
      * Performs a bit shift (left or right) on a binary string operand.
      *
-     * @param operand The binary string to be shifted.
+     * @param operand     The binary string to be shifted.
      * @param shiftLength The number of positions to shift the bits.
-     * @param bitLength The length of the resulting binary string.
-     * @param shiftRight If true, performs a right shift; if false, performs a
-     * left shift.
+     * @param bitLength   The length of the resulting binary string.
+     * @param shiftRight  If true, performs a right shift; if false, performs a
+     *                    left shift.
      * @return The binary string result after shifting.
      */
     private String bitShiftFunction(String operand, int shiftLength, boolean shiftRight, int bitLength) {
@@ -2751,7 +2780,7 @@ public class ShaTuTutor implements TutorSvc {
      *
      * @param operand1 The binary string for operand 1.
      * @param operand2 The binary string for operand 2.
-     * @param m The int for calculating the modulo
+     * @param m        The int for calculating the modulo
      * @return The binary string result after adding two bits
      */
     private String addBitsFunction(String operand1, String operand2, int m) {
@@ -2904,27 +2933,30 @@ public class ShaTuTutor implements TutorSvc {
      * the binary translation back as a String.
      *
      * @param question - String value representing the randomly generated
-     * question that needs to be translated into binary form.
+     *                 question that needs to be translated into binary form.
      *
      * @return - String binary representation of the question.
      */
-//    private String addOneFunction(String question) {
-//        String answer; // Will contain the binary answer that is returned
-//        
-//        char stringArray[] = question.toCharArray(); // Splits the string into characters
-//        
-//        StringBuilder binary = new StringBuilder(); // Ease of altering the string.
-//
-//        for (int i = 0; i < stringArray.length; i++) { // Visit each character, turn it into binary form, then add it to binary variable.
-//            String binaryChar = String.format("%8s", Integer.toBinaryString(stringArray[i])).replaceAll(" ", "0");
-//            
-//            binary.append(binaryChar).append(" ");
-//        }
-//        
-//        answer = binary + "1";
-//
-//        return answer;
-//    }
+    // private String addOneFunction(String question) {
+    // String answer; // Will contain the binary answer that is returned
+    //
+    // char stringArray[] = question.toCharArray(); // Splits the string into
+    // characters
+    //
+    // StringBuilder binary = new StringBuilder(); // Ease of altering the string.
+    //
+    // for (int i = 0; i < stringArray.length; i++) { // Visit each character, turn
+    // it into binary form, then add it to binary variable.
+    // String binaryChar = String.format("%8s",
+    // Integer.toBinaryString(stringArray[i])).replaceAll(" ", "0");
+    //
+    // binary.append(binaryChar).append(" ");
+    // }
+    //
+    // answer = binary + "1";
+    //
+    // return answer;
+    // }
     /**
      * This function is called from the newPadZeroStep method and will calculate
      * the zeros needed for the SHA256 message. The variables are written
@@ -3047,8 +3079,8 @@ public class ShaTuTutor implements TutorSvc {
      * the given message, and optional originating exception.
      *
      * @param errMsg a displayable error message
-     * @param ex the original exception, if any, that caused the error,
-     * otherwise null.
+     * @param ex     the original exception, if any, that caused the error,
+     *               otherwise null.
      * @return a TutorReply with an ":ERR" status
      */
     private TutorReply createError(String errMsg, Exception ex) {
@@ -3669,7 +3701,8 @@ public class ShaTuTutor implements TutorSvc {
 
         Hint hintOne = new Hint();
         hintOne.setId(0);
-        hintOne.setText("The majority function returns the bit value that appears most frequently among the three inputs");
+        hintOne.setText(
+                "The majority function returns the bit value that appears most frequently among the three inputs");
 
         Step step = completion.getStep();
         step.addHint(hintOne);
@@ -3716,7 +3749,8 @@ public class ShaTuTutor implements TutorSvc {
 
         Hint hintOne = new Hint();
         hintOne.setId(0);
-        hintOne.setText("The choice function selects bits from one input or another based on the value of the first input");
+        hintOne.setText(
+                "The choice function selects bits from one input or another based on the value of the first input");
 
         Step step = completion.getStep();
         step.addHint(hintOne);
