@@ -18,6 +18,7 @@ import edu.regis.shatu.model.Student;
 import edu.regis.shatu.model.StudentModelFieldKind;
 import edu.regis.shatu.model.aol.Assessment;
 import edu.regis.shatu.model.aol.StudentModel;
+import java.util.List;
 
 /**
  * Specifies the API for {@link StudentModel} life-cycle maintenance 
@@ -66,6 +67,19 @@ public interface StudentModelSvc {
      */
     void updateAssessment(StudentModel model, Assessment assessment, StudentModelFieldKind field)
             throws NonRecoverableException;
+    
+    /**
+    * Retrieve a list of unfinished lessons for a student in a specific learning mode.
+    * 
+    * @param userId the unique identifier for the student.
+    * @param learningCategory the category of learning (e.g., "Teach Me", "Practice", "Quiz Me").
+    * @return a list of strings representing unfinished lesson names.
+    * @throws ObjNotFoundException if the student record is not found.
+    * @throws NonRecoverableException if a database error occurs.
+    */
+   List<String> retrieveIncompleteLessons(String userId, String learningCategory) 
+           throws ObjNotFoundException, NonRecoverableException;
+
     
     /**
      * Delete the session from the database for the given student user id.

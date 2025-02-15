@@ -33,6 +33,9 @@ import edu.regis.shatu.model.aol.StudentModel;
 import edu.regis.shatu.svc.CourseSvc;
 import edu.regis.shatu.svc.ServiceFactory;
 import edu.regis.shatu.svc.StudentModelSvc;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A Data Access Object implementing {@link StudentModelSvc } behaviors.
@@ -251,6 +254,93 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
             close(stmt);
         }
     }
+    
+   /**
+    * Retrieves a list of unfinished lessons for a student in a specific learning category.
+    * 
+    * The category is inferred from `AssessmentLevel`:
+    * - "Not Started" → Teach Me
+    * - "In Progress" → Practice
+    * - "Completed", "Very Low", "Low", "Medium", "High", "Very High" → Quiz Me
+    *
+    * If a lesson is not yet completed in a **previous category**, it will indicate that.
+    *
+    * @param userId The unique identifier of the student.
+    * @param learningCategory The learning category ("Teach Me", "Practice", "Quiz Me").
+    * @return A list of unfinished lesson names, formatted accordingly.
+    * @throws ObjNotFoundException If the student record is not found.
+    * @throws NonRecoverableException If a database error occurs.
+    */
+   @Override
+   public List<String> retrieveIncompleteLessons(String userId, String learningCategory) 
+           throws ObjNotFoundException, NonRecoverableException {
+
+       List<String> lessons = new ArrayList<>();
+
+       // SQL Query: Retrieve all lessons and their assessment levels
+       final String sql = """
+           SELECT kc.Title, a.AssessmentLevel
+           FROM Assessment a
+           JOIN KnowledgeComponent kc ON a.KnowledgeComponentId = kc.Id
+           WHERE a.UserId = ?
+       """;
+
+       try (Connection conn = DriverManager.getConnection(URL);
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+           stmt.setString(1, userId);
+           try (ResultSet rs = stmt.executeQuery()) {
+               while (rs.next()) {
+                   String lessonTitle = rs.getString("Title");
+                   String assessmentLevel = rs.getString("AssessmentLevel");
+
+                   // Determine category based on AssessmentLevel
+                   switch (AssessmentLevel.fromString(assessmentLevel)) {
+                       case NOT_STARTED:
+                           if (learningCategory.equalsIgnoreCase("Teach Me")) {
+                               lessons.add(lessonTitle);
+                           } else {
+                               // If user is in "Practice" or "Quiz Me" but hasn't done Teach Me
+                               lessons.add(lessonTitle + " (Complete in Teach Me first)");
+                           }
+                           break;
+                       case IN_PROGRESS:
+                           if (learningCategory.equalsIgnoreCase("Practice")) {
+                               lessons.add(lessonTitle);
+                           } else {
+                               // If user is in "Quiz Me" but hasn't completed Practice
+                               lessons.add(lessonTitle + " (Complete in Practice first)");
+                           }
+                           break;
+                       case COMPLETED:
+                       case VERY_LOW:
+                       case LOW:
+                       case MEDIUM:
+                       case HIGH:
+                       case VERY_HIGH:
+                           if (learningCategory.equalsIgnoreCase("Quiz Me")) {
+                               lessons.add(lessonTitle);
+                           }
+                           break;
+                       default:
+                           break;
+                   }
+               }
+           }
+       } catch (SQLException e) {
+           throw new NonRecoverableException("Error retrieving incomplete lessons: " + e, e);
+       }
+
+       // If no lessons are found, return a single message to indicate completion
+       if (lessons.isEmpty()) {
+           lessons.add("All lessons completed!");
+       }
+
+       return lessons;
+   }
+
+
+
 
     /**
      * Retrive
