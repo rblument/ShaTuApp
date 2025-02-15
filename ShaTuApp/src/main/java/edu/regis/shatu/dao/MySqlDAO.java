@@ -32,22 +32,27 @@ public abstract class MySqlDAO {
      * The host where MySQL resides (see /resources/ShaTu.Properties).
      */
     public static final String DB_HOST_PROP = "edu.regis.shatu.DB_HOST";
-    
+
+    /**
+     * The host where MySQL resides (see /resources/ShaTu.Properties).
+     */
+    public static final String DB_PORT_PROP = "edu.regis.shatu.DB_PORT";
+
     /**
      * The name of the ShaTu database (see /resources/ShaTu.Properties).
      */
     public static final String DB_NAME_PROP = "edu.regis.shatu.DB_NAME";
-    
+
     /**
      * The DB user used by ShaTu to login (see /resources/ShaTu.Properties).
      */
     public static final String DB_USER_PROP = "edu.regis.shatu.DB_USER";
-    
+
     /**
      * The password used by ShaTu to login into the DB.
      */
     public static final String DB_PASS_PROP = "edu.regis.shatu.DB_PASS";
-    
+
     /**
      * Fully qualified name of the MySql JDBC driver class.
      */
@@ -70,32 +75,29 @@ public abstract class MySqlDAO {
      * If it hasn't already been loaded, explicitly load the MySql driver.
      */
     public MySqlDAO() {
-	if (!IS_LOADED) {
-	    try {
+        if (!IS_LOADED) {
+            try {
                 ResourceMgr rscr = ResourceMgr.instance();
-                
+
                 String dbHost = rscr.getProp(DB_HOST_PROP);
+                String dbPort = rscr.getProp(DB_PORT_PROP);
                 String dbName = rscr.getProp(DB_NAME_PROP);
                 String dbUser = rscr.getProp(DB_USER_PROP);
                 String dbPass = rscr.getProp(DB_PASS_PROP);
-                
-                URL = "jdbc:mysql://" + dbHost + "/" + dbName + "?user=" +
-                        dbUser + "&password=" + dbPass;
-                
-		Class.forName(DRIVER).newInstance(); // Old School
 
-		IS_LOADED = true;
+                URL = String.format("jdbc:mysql://%s:%d/%s?user=%s&password=%s", dbHost, dbPort, dbName, dbUser,
+                        dbPass);
 
-	    } catch (MissingPropertyException e) {
+                Class.forName(DRIVER); // Old School
+
+                IS_LOADED = true;
+
+            } catch (MissingPropertyException e) {
                 LOGGER.log(Level.INFO, "Missing DB property: {0}", e.toString());
             } catch (ClassNotFoundException e) {
-		LOGGER.log(Level.SEVERE, "MySqlDao-ERR-1: Illegal driver class name {0}", e.toString());
-	    } catch (InstantiationException e) {
-		LOGGER.log(Level.SEVERE, "MySqlDao-ERR-2: Illegal instance {0}", e.toString());
-	    } catch (IllegalAccessException e) {
-		LOGGER.log(Level.SEVERE, "MySqlDao-ERR-3: No create driver permission {0}", e.toString());
-	    }
-	}
+                LOGGER.log(Level.SEVERE, "MySqlDao-ERR-1: Illegal driver class name {0}", e.toString());
+            }
+        }
     }
 
     /**
@@ -106,64 +108,67 @@ public abstract class MySqlDAO {
      * @param stmt An JDBC Statement that will be closed.
      */
     protected void close(Connection conn, Statement stmt) {
-	if (stmt != null) {
-	    try {
-		stmt.close();
-	    } catch (Exception e){
-		LOGGER.log(Level.INFO, "MySqlDao-ERR-4: stmt.close() {0}", e.toString());
-	    }
-	}
+        if (stmt != null) {
+            try {
+                stmt.close();
+            } catch (Exception e) {
+                LOGGER.log(Level.INFO, "MySqlDao-ERR-4: stmt.close() {0}", e.toString());
+            }
+        }
 
-	if (conn != null) {
-	    try {
-		conn.close();
-	    } catch (Exception e){
-		LOGGER.log(Level.INFO, "MySqlDao-ERR-5: close() {0}", e.toString());
-	    }
-	}
+        if (conn != null) {
+            try {
+                conn.close();
+            } catch (Exception e) {
+                LOGGER.log(Level.INFO, "MySqlDao-ERR-5: close() {0}", e.toString());
+            }
+        }
     }
 
     /**
      * If the given connection is open, close it, but log any errors that occur
      * in attempting to close the connection.
+     * 
      * @param conn
      */
     protected void close(Connection conn) {
-	if (conn != null) {
-	    try {
-		conn.setAutoCommit(true);    // Convenience
-		conn.close();
-	    } catch (Exception e){
-		LOGGER.log(Level.INFO, "MySqlDao-ERR-6: close() {0}", e.toString());
-	    }
-	}
+        if (conn != null) {
+            try {
+                conn.setAutoCommit(true); // Convenience
+                conn.close();
+            } catch (Exception e) {
+                LOGGER.log(Level.INFO, "MySqlDao-ERR-6: close() {0}", e.toString());
+            }
+        }
     }
 
     /**
      * If the given statement is open, close it, but log any errors that occur
      * in attempting to close the connection.
+     * 
      * @param stmt
      */
     protected void close(Statement stmt) {
-	if (stmt != null) {
-	    try {
-		stmt.close();
-	    } catch (Exception e){
-		LOGGER.log(Level.INFO, "MySqlDao-ERR-7: close() {0}", e.toString());
-	    }
-	}
+        if (stmt != null) {
+            try {
+                stmt.close();
+            } catch (Exception e) {
+                LOGGER.log(Level.INFO, "MySqlDao-ERR-7: close() {0}", e.toString());
+            }
+        }
     }
 
     /**
      * Rollback any statements made in the current transaction associated
      * with the given connection.
+     * 
      * @param conn
      */
     protected void rollback(Connection conn) {
-	try {
-	    conn.rollback();
-	} catch (SQLException e) {
-	    LOGGER.log(Level.SEVERE, "MySqlDao-ERR-8: rollback {0}", e.toString());
-	}
+        try {
+            conn.rollback();
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "MySqlDao-ERR-8: rollback {0}", e.toString());
+        }
     }
 }
