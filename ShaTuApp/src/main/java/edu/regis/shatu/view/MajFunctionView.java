@@ -656,12 +656,14 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
                 stringZLabel.setText("z: New Example");
                 hintButton.setEnabled(false);
                 checkButton.setEnabled(false);
+                responseTextArea.setEnabled(false);
             } else {
                 stringXLabel.setText("x: " + example.getOperandA());
                 stringYLabel.setText("y: " + example.getOperandB());
                 stringZLabel.setText("z: " + example.getOperandC());
                 hintButton.setEnabled(true);
                 checkButton.setEnabled(true);
+                responseTextArea.setEnabled(true);
             }
         }
     }
