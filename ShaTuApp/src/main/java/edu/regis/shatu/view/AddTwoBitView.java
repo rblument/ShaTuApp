@@ -90,18 +90,9 @@ public class AddTwoBitView extends UserRequestView implements KeyListener {
         stringLabel3 = new JLabel("Hit New Example to get set of binary numbers");
         stringLabel4 = new JLabel(); // only for testing that view is communicating with server
 
-        responseTextArea = new JTextField(10);
-        responseTextArea.addKeyListener(this);
-
-        // Create and initialize the checkButton
-        checkButton = new JButton(StepCompletionAction.instance());
-        checkButton.addActionListener(this);
-
-        hintButton = new JButton(HintAction.instance());
-        hintButton.addActionListener(this);
-
-        nextButton = new JButton(NewExampleAction.instance());
-        nextButton.addActionListener(this);
+        responseTextArea = new JTextField();
+        // answerField = new JTextField(10);
+        // answerField.addKeyListener(this);
     }
 
     /**

@@ -43,7 +43,7 @@ import edu.regis.shatu.model.aol.ProblemType;
  *
  * @author rickb
  */
-public class ShaOneView extends UserRequestView implements KeyListener {
+public class ShaOneView extends UserRequestView { // implements KeyListener
     private TutoringSessionView view;
 
     /**
@@ -56,11 +56,9 @@ public class ShaOneView extends UserRequestView implements KeyListener {
     private JLabel exampleInputLabel;
     private JLabel problem;
     private JTextField answerField;
-    private JButton checkButton; // Add the check button
-    private JButton hintButton;
+
     private JButton nextQuestionButton;
-    private JRadioButton shortProblem;
-    private JRadioButton longProblem;
+
     private boolean checkHintEnabled = false;
 
     /**
@@ -78,20 +76,13 @@ public class ShaOneView extends UserRequestView implements KeyListener {
         exampleInputLabel = new JLabel("Given an 𝑛 bit binary number, output the value of the SHA Σ₁ function");
         problem = new JLabel("Default Problem Text");
         answerField = new JTextField(10);
-        answerField.addKeyListener(this);
-
-        // Create and initialize the checkButton
-        checkButton = new JButton("Check");
-        checkButton.addActionListener(this);
-
-        hintButton = new JButton("Hint");
-        hintButton.addActionListener(this); // Add an action listener for the check button
+        // answerField.addKeyListener(this);
 
         nextQuestionButton = new JButton("Next Question");
-        nextQuestionButton.addActionListener(this);
+        // nextQuestionButton.addActionListener(this);
 
-        shortProblem = new JRadioButton("16-bit");
-        shortProblem.setSelected(true);
+        // shortProblem = new JRadioButton("16-bit");
+        // shortProblem.setSelected(true);
 
         longProblem = new JRadioButton("32-bit");
     }
@@ -149,22 +140,21 @@ public class ShaOneView extends UserRequestView implements KeyListener {
         return Integer.toBinaryString(result);
     }
 
-    @Override
-    public void keyTyped(KeyEvent e) {
-    }
+    /*
+     * @Override
+     * public void keyPressed(KeyEvent e) {
+     * if (e.getKeyCode() == KeyEvent.VK_ENTER && answerField.getText().equals(""))
+     * {
+     * JOptionPane.showMessageDialog(this, "Please provide an answer");
+     * } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+     * view.checkButton.doClick();
+     * }
+     * }
+     */
 
-    @Override
-    public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_ENTER && answerField.getText().equals("")) {
-            JOptionPane.showMessageDialog(this, "Please provide an answer");
-        } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-            checkButton.doClick();
-        }
-    }
-
-    @Override
-    public void keyReleased(KeyEvent e) {
-    }
+    // @Override
+    // public void keyReleased(KeyEvent e) {
+    // }
 
     /**
      * Verifies the user's answer by comparing it with the correct result of the
@@ -215,8 +205,8 @@ public class ShaOneView extends UserRequestView implements KeyListener {
      */
     protected void updateView() {
         view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
-        hintButton = view.getHintButton();
-        checkButton = view.getCheckButton();
+        // hintButton = view.getHintButton();
+        // checkButton = view.getCheckButton();
         nextQuestionButton = view.getNewExampleButton();
 
         // If check and hint buttons are disabled, reset listenerers and apply those
