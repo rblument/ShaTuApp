@@ -27,7 +27,10 @@ import javax.swing.JProgressBar;
 import javax.swing.border.BevelBorder;
 
 import edu.regis.shatu.model.TutoringSession;
+import edu.regis.shatu.svc.ServiceFactory;
+import edu.regis.shatu.svc.StudentModelSvc;
 import edu.regis.shatu.util.CustomProgressBar;
+import java.util.List;
 
 /**
  * The dashboard screen to be displayed upon user sign in. Enables user to
@@ -89,6 +92,17 @@ public class DashboardPanel extends javax.swing.JPanel {
         practiceProgressBar1 = new CustomProgressBar();
         teachMeProgressBar1 = new CustomProgressBar();
         quizMeProgressBar1 = new CustomProgressBar();
+        
+        // Attach tooltips to show incomplete lessons on hover
+        teachMeProgressBar1.setToolTipText(getIncompleteLessons("Teach Me"));
+        teachMeButton1.setToolTipText(getIncompleteLessons("Teach Me"));
+
+        practiceProgressBar1.setToolTipText(getIncompleteLessons("Practice"));
+        practiceButton1.setToolTipText(getIncompleteLessons("Practice"));
+
+        quizMeProgressBar1.setToolTipText(getIncompleteLessons("Quiz Me"));
+        quizeMeButton1.setToolTipText(getIncompleteLessons("Quiz Me"));
+
 
         logOutButton.setText("Log Out");
         logOutButton.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
@@ -157,7 +171,7 @@ public class DashboardPanel extends javax.swing.JPanel {
         quizMeProgressBar1.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED, Color.white, Color.white, Color.white, Color.white));
         quizMeProgressBar1.setString("");
         quizMeProgressBar1.setStringPainted(true);
-       
+        
     }
     
     private void layoutComponents() {
@@ -229,6 +243,31 @@ public class DashboardPanel extends javax.swing.JPanel {
     private void logOutButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logOutButtonActionPerformed
         // TODO add your handling code here:
     }
+
+    /**
+    * Retrieves the list of incomplete lessons for the given category.
+    *
+    * @param category The category (Teach Me, Practice, Quiz Me).
+    * @return A formatted string of incomplete lessons.
+    */
+   private String getIncompleteLessons(String category) {
+        try {
+            String userId = model.getStudent().getAccount().getUserId();
+            StudentModelSvc studentModelService = ServiceFactory.findStudentModelSvc();
+
+            List<String> incompleteLessons = studentModelService.retrieveIncompleteLessons(userId, category);
+
+            if (incompleteLessons.isEmpty()) {
+                return "No lessons remaining in " + category + "!";
+            } else {
+                return "<html>" + category + " To Do:<br>" + String.join("<br>", incompleteLessons) + "</html>";
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Error loading lessons: " + e.getMessage();
+        }
+    }
+
 
 
 
