@@ -47,7 +47,7 @@ import edu.regis.shatu.view.act.StepCompletionAction;
  * @author rickb
  * @author Amanda Roskelley
  */
-public class AddTwoBitView extends UserRequestView implements ActionListener, KeyListener {
+public class AddTwoBitView extends UserRequestView implements KeyListener {
 
     /**
      * The modulo value for addition of binary numbers.
@@ -80,23 +80,6 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
     }
 
     /**
-     * Handles action events for components.
-     *
-     * @param event The ActionEvent to be handled.
-     */
-    @Override
-    public void actionPerformed(ActionEvent event) {
-        if (event.getSource() == checkButton) {
-            onCheckButton();
-        } else if (event.getSource() == hintButton) {
-            onNextHint();
-        } else if (event.getSource() == nextButton) {
-            checkHintEnabled = true;
-            onNextQuestion();
-        }
-    }
-
-    /**
      * Creates child GUI components for the view.
      */
     private void initializeComponents() {
@@ -107,18 +90,8 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
         stringLabel3 = new JLabel("Hit New Example to get set of binary numbers");
         stringLabel4 = new JLabel();  //only for testing that view is communicating with server
 
-        responseTextArea = new JTextField(10);
-        responseTextArea.addKeyListener(this);
-
-        // Create and initialize the checkButton
-        checkButton = new JButton(StepCompletionAction.instance());
-        checkButton.addActionListener(this);
-
-        hintButton = new JButton(HintAction.instance());
-        hintButton.addActionListener(this);
-
-        nextButton = new JButton(NewExampleAction.instance());
-        nextButton.addActionListener(this);
+        answerField = new JTextField(10);
+        answerField.addKeyListener(this);
     }
 
     /**
@@ -156,19 +129,6 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
         // Add responseTextArea centered below binaryNumberTwoLabel
         addc(responseTextArea, 0, 4, 1, 1, 1.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-                5, 5, 5, 5);
-
-        // Add checkButton centered below responseTextArea
-        addc(checkButton, 0, 5, 1, 1, 0.0, 0.0,
-                GridBagConstraints.CENTER, GridBagConstraints.NONE,
-                5, 5, 5, 5);
-
-        addc(hintButton, 0, 6, 1, 1, 0.0, 0.0,
-                GridBagConstraints.CENTER, GridBagConstraints.NONE,
-                5, 5, 5, 5);
-
-        addc(nextButton, 0, 7, 1, 1, 0.0, 0.0,
-                GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
     }
 
@@ -231,7 +191,7 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
             JOptionPane.showMessageDialog(this, "Please provide an answer");
         } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
             checkButton.doClick();
-        }
+        } 
     }
 
     /**
@@ -339,9 +299,6 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
         // If check and hint buttons are disabled, reset listenerers and apply those used by this view
         if (!checkHintEnabled) {
             view.resetButtonListeners(); // Clear any listeners applied from other views          
-            hintButton.addActionListener(this);
-            checkButton.addActionListener(this);
-            nextButton.addActionListener(this);
         }
 
         if (model != null) {

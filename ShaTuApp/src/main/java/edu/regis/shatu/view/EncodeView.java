@@ -47,7 +47,7 @@ import edu.regis.shatu.view.act.StepCompletionAction;
  *
  * @author rickb
  */
-public class EncodeView extends UserRequestView implements ActionListener {
+public class EncodeView extends UserRequestView {
 
     private TutoringSessionView view;
     private JTextPane descriptionTextPane;
@@ -72,22 +72,6 @@ public class EncodeView extends UserRequestView implements ActionListener {
         initializeLayout();
     }
 
-    /**
-     * Responds to actions performed in the view, specifically button presses,
-     * and delegates to appropriate methods for handling.
-     *
-     * @param event the event that triggered the action listener
-     */
-    @Override
-    public void actionPerformed(ActionEvent event) {
-        if (event.getSource() == checkButton) {
-            submitAnswer();
-        } else if (event.getSource() == nextButton) {
-            prepareNextQuestion();
-        } else if (event.getSource() == hintButton) {
-            requestHint();
-        }
-    }
 
     /**
      * Initializes all GUI components, setting up their properties and
@@ -100,7 +84,6 @@ public class EncodeView extends UserRequestView implements ActionListener {
         setupMessageInputFields();
         setupResponseArea();
         setupFeedbackArea();
-        setupButtons();
         setupAsciiTable();
     }
 
@@ -110,7 +93,6 @@ public class EncodeView extends UserRequestView implements ActionListener {
      */
     private void initializeLayout() {
 
-        JPanel buttonPanel = createButtonPanel();
         JPanel messageLengthPanel = createMessageLengthPanel();
 
         // Add components to the layout
@@ -132,9 +114,6 @@ public class EncodeView extends UserRequestView implements ActionListener {
         addc(feedbackScrollPane, 0, 5, 1, 1,
                 1.0, 1.0, GridBagConstraints.CENTER,
                 GridBagConstraints.BOTH, 5, 5, 5, 5);
-        addc(buttonPanel, 0, 6, 1, 1,
-                1.0, 1.0, GridBagConstraints.CENTER,
-                GridBagConstraints.NONE, 10, 0, 0, 0);
     }
 
     /**
@@ -162,10 +141,7 @@ public class EncodeView extends UserRequestView implements ActionListener {
     private void prepareNextQuestion() {
         // Do nothing, tutor should be handling things, but leaving incase a use
         // could be found later in development
-        checkHintEnabled = true;
-        hintButton.setEnabled(true);
-        checkButton.setEnabled(true);
-        responseTextArea.setEnabled(true);
+
         updateView();
     }
 
@@ -252,35 +228,7 @@ public class EncodeView extends UserRequestView implements ActionListener {
         feedbackScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED); // Enable vertical scrolling
     }
 
-    /**
-     * Initializes the submit, next, and hint buttons and sets up action
-     * listeners
-     */
-    private void setupButtons() {
-        checkButton = new JButton(StepCompletionAction.instance());
-        checkButton.addActionListener(this);
 
-        hintButton = new JButton(HintAction.instance()); // Needs to be adjusted once tutor can handle hints
-        hintButton.addActionListener(this);
-
-        nextButton = new JButton(NewExampleAction.instance());
-        nextButton.addActionListener(this);
-
-    }
-
-    /**
-     * Creates and returns a JPanel containing the action buttons with a
-     * FlowLayout
-     *
-     * @return JPanel containing the action buttons
-     */
-    private JPanel createButtonPanel() {
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        buttonPanel.add(checkButton);
-        buttonPanel.add(nextButton);
-        buttonPanel.add(hintButton);
-        return buttonPanel;
-    }
 
     /**
      * Initializes the components for inputting the message length and custom
@@ -377,18 +325,16 @@ public class EncodeView extends UserRequestView implements ActionListener {
             MainFrame mainFrame = MainFrame.instance();
             if (mainFrame != null) {
                 view = SplashFrame.instance().getTutoringSessionView(); // Initialize view once SplashFrame is ready
-
+                
             } else {
                 System.err.println("SplashFrame.instance() is null. Cannot initialize 'view'.");
                 return; // Exit updateView if the view cannot be initialized
             }
         }
-
+        
         if (this.model == null) { // Currently in development, Encode Ascii starts first when loaded, which model can be null initially.
             questionLabel.setText("Please click new example button to get started");
-            checkButton.setEnabled(false);
-            responseTextArea.setEnabled(false);
-            hintButton.setEnabled(false);
+
         } else {
 
             /*
@@ -447,23 +393,6 @@ public class EncodeView extends UserRequestView implements ActionListener {
                     this.revalidate();
                     this.repaint();
                 }
-            }
-
-            // Reset button listeners using the initialized view
-            if (view != null) {
-                view.resetButtonListeners();
-                nextButton = view.getNewExampleButton();
-                hintButton = view.getHintButton();
-                checkButton = view.getCheckButton();
-                hintButton.addActionListener(this);
-                checkButton.addActionListener(this);
-                nextButton.addActionListener(this);
-            }
-
-            if (checkHintEnabled) {
-                checkButton.setEnabled(true);
-                responseTextArea.setEnabled(true);
-                hintButton.setEnabled(true);
             }
         }
         // Other update logic here

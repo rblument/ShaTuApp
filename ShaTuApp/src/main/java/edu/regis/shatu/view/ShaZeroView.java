@@ -37,7 +37,7 @@ import edu.regis.shatu.view.act.StepCompletionAction;
  *
  * @author rickb
  */
-public class ShaZeroView extends UserRequestView implements ActionListener, KeyListener {
+public class ShaZeroView extends UserRequestView implements KeyListener {
 
     /**
      * View for the Sigma0 tutoring session
@@ -67,17 +67,9 @@ public class ShaZeroView extends UserRequestView implements ActionListener, KeyL
      * Deprecated
      */
     private JTextField answerField;
-    /**
-     * The buttons used for checking the user's answer, asking for a hint, and creating the next problem to solve
-     */
+
     private JButton checkButton, hintButton, nextButton;
-    /**
-     * The panel in which the buttons lie in
-     */
-    private JPanel buttonPanel;
-    /**
-     * Determines if check hint is enabled
-     */
+
     private boolean checkHintEnabled = false;
     /**
      * The area in which the Sigma0 function is described
@@ -132,7 +124,6 @@ public class ShaZeroView extends UserRequestView implements ActionListener, KeyL
         initializeLayout();
     }
 
-    //region Client methods that handle Client-Server Communication
     /**
      * Sends a request to the server for a new example problem
      *
@@ -144,12 +135,9 @@ public class ShaZeroView extends UserRequestView implements ActionListener, KeyL
 
         ex.setExampleType(ProblemType.SHA_ZERO);
 
-        ShaZeroStep newStep = new ShaZeroStep();
-        newStep.setBitLength(problemSize);
+        answerField = new JTextField(10);
+        answerField.addKeyListener(this);
 
-        ex.setData(gson.toJson(newStep));
-
-        return ex;
     }
 
     /**
@@ -161,12 +149,36 @@ public class ShaZeroView extends UserRequestView implements ActionListener, KeyL
     public StepCompletion stepCompletion() {
         Step currentStep = model.currentTask().currentStep().getStep();
 
+        // Add exampleInputLabel centered
+        addc(exampleInputLabel, 0, 0, 2, 1, 0.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                5, 5, 5, 5);
+        // Add answerField to the layout, centered
+        addc(answerField, 0, 1, 1, 1, 1.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                5, 5, 5, 5);
+    }
+    /**
+     * Performs rotation (ROR or ROL) on the given input string for the 
+     * specified number of positions.
+     *
+     * @param input     The input string to rotate.
+     * @param positions The number of positions for the rotation.
+     * @return The rotated string.
+     */
+    
+    protected String rotateString(String input, int positions, RotateStep.Direction direction) {
+        if (input == null || input.isEmpty()) {
+            return input;
+
+  /*
         ShaZeroStep example = gson.fromJson(currentStep.getData(), ShaZeroStep.class);
 
         if(example == null)
         {
             JOptionPane.showMessageDialog(this, "Please press New Example to generate a question");
             return null;
+*/
         }
 
         String userResponse = responseTextArea.getText().replaceAll("\\s", "");
@@ -452,9 +464,7 @@ public class ShaZeroView extends UserRequestView implements ActionListener, KeyL
         // If check and hint buttons are disabled, reset listenerers and apply those used by this view
         if(!checkHintEnabled) {
             view.resetButtonListeners(); // Clear any listeners applied from other views          
-            hintButton.addActionListener(this);           
-            checkButton.addActionListener(this);            
-            nextButton.addActionListener(this);
+
         }
         
         if (model != null) {
