@@ -12,33 +12,34 @@
  */
 package edu.regis.shatu.dao;
 
-import static edu.regis.shatu.dao.MySqlDAO.URL;
-import edu.regis.shatu.err.InconsistentDBException;
-import edu.regis.shatu.err.NonRecoverableException;
-import edu.regis.shatu.err.ObjNotFoundException;
-import edu.regis.shatu.model.Course;
-import edu.regis.shatu.model.Hint;
-import edu.regis.shatu.model.Step;
-import edu.regis.shatu.model.TaskSelectionKind;
-import edu.regis.shatu.model.aol.StepSubType;
-import edu.regis.shatu.model.Task;
-import edu.regis.shatu.model.aol.Timeout;
-import edu.regis.shatu.model.Unit;
-import edu.regis.shatu.model.BloomLevel;
-import edu.regis.shatu.model.CourseDigest;
-import edu.regis.shatu.model.ExercisingLocation;
-import edu.regis.shatu.model.KnowledgeComponent;
-import edu.regis.shatu.model.UnitDigest;
-import edu.regis.shatu.model.aol.OutcomeGranularity;
-import edu.regis.shatu.model.aol.ProblemType;
-import edu.regis.shatu.model.aol.TaskKind;
-import edu.regis.shatu.svc.CourseSvc;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+
+import edu.regis.shatu.err.InconsistentDBException;
+import edu.regis.shatu.err.NonRecoverableException;
+import edu.regis.shatu.err.ObjNotFoundException;
+import edu.regis.shatu.err.ShaTuException;
+import edu.regis.shatu.model.BloomLevel;
+import edu.regis.shatu.model.Course;
+import edu.regis.shatu.model.CourseDigest;
+import edu.regis.shatu.model.ExercisingLocation;
+import edu.regis.shatu.model.Hint;
+import edu.regis.shatu.model.KnowledgeComponent;
+import edu.regis.shatu.model.Step;
+import edu.regis.shatu.model.Task;
+import edu.regis.shatu.model.TaskSelectionKind;
+import edu.regis.shatu.model.Unit;
+import edu.regis.shatu.model.UnitDigest;
+import edu.regis.shatu.model.aol.OutcomeGranularity;
+import edu.regis.shatu.model.aol.ProblemType;
+import edu.regis.shatu.model.aol.StepSubType;
+import edu.regis.shatu.model.aol.TaskKind;
+import edu.regis.shatu.model.aol.Timeout;
+import edu.regis.shatu.svc.CourseSvc;
 
 
 /**

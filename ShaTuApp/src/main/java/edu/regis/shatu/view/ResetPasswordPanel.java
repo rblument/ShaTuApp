@@ -12,9 +12,6 @@
  */
 package edu.regis.shatu.view;
 
-import edu.regis.shatu.model.Account;
-import edu.regis.shatu.view.act.BackToLogin;
-import edu.regis.shatu.view.act.ResetPasswordAction;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -26,6 +23,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
+
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -35,6 +33,10 @@ import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
+
+import edu.regis.shatu.model.Account;
+import edu.regis.shatu.view.act.BackToLogin;
+import edu.regis.shatu.view.act.ResetPasswordAction;
 
 /**
  * Forgot Password screen that allows the user to reset their password.

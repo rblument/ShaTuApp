@@ -12,18 +12,19 @@
  */
 package edu.regis.shatu.view.act;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+
+import javax.swing.JOptionPane;
+
 import com.google.gson.Gson;
+
 import edu.regis.shatu.model.Account;
 import edu.regis.shatu.svc.ClientRequest;
 import edu.regis.shatu.svc.ServerRequestType;
 import edu.regis.shatu.svc.SvcFacade;
 import edu.regis.shatu.svc.TutorReply;
 import edu.regis.shatu.view.SplashFrame;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import static javax.swing.Action.MNEMONIC_KEY;
-import static javax.swing.Action.SHORT_DESCRIPTION;
-import javax.swing.JOptionPane;
 
 /**
  * An MVC controller handling a user GUI gesture requesting to verify the user, 

@@ -12,15 +12,16 @@
  */
 package edu.regis.shatu.dao;
 
-import edu.regis.shatu.err.IllegalArgException;
-import edu.regis.shatu.err.NonRecoverableException;
-import edu.regis.shatu.err.ObjNotFoundException;
-import edu.regis.shatu.model.Account;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
+import edu.regis.shatu.err.IllegalArgException;
+import edu.regis.shatu.err.NonRecoverableException;
+import edu.regis.shatu.err.ObjNotFoundException;
+import edu.regis.shatu.model.Account;
 import edu.regis.shatu.svc.AccountSvc;
 
 /**

@@ -13,17 +13,31 @@
 package edu.regis.shatu.model;
 
 /**
- *
+ * Stores created question, correct answer, student's answer and length of 
+ * randomly generated message used for testing students knowledge.  Provides 
+ * getter and setter methods to access class fields.
  * @author rickb
  */
 public class Pad0Step {
     
+    /**
+     * Length of random message created to test user knowledge of the Pad 0 Step.
+     */
     private int messageLength;
     
+    /**
+     * Current question for student to answer.
+     */
     private String question;
     
+    /**
+     * Correct answer to the presented question.  Checked against userAnswer
+     */
     private String correctAnswer;
     
+    /**
+     * Answer given by the student.  Checked against correctAnswer
+     */
     private String userAnswer;
     
     /**

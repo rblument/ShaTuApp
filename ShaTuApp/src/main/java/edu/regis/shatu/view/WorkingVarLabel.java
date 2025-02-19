@@ -16,6 +16,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
@@ -107,6 +108,9 @@ public class WorkingVarLabel extends JLabel implements MouseListener {
     public void mouseClicked(MouseEvent evt) {
         if (!isSelected) {
             select();
+        }
+        else if (isSelected) {
+            deselect();
         }
     }
 

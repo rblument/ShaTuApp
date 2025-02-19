@@ -12,9 +12,10 @@
  */
 package edu.regis.shatu.model;
 
+import java.util.ArrayList;
+
 import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.model.aol.Timeout;
-import java.util.ArrayList;
 
 /**
  * A user interface gesture/event performed by a student, as part of a Task.

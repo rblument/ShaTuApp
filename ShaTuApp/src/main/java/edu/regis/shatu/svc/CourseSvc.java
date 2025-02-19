@@ -12,13 +12,14 @@
  */
 package edu.regis.shatu.svc;
 
+import java.sql.Connection;
+
 import edu.regis.shatu.err.NonRecoverableException;
 import edu.regis.shatu.err.ObjNotFoundException;
 import edu.regis.shatu.model.Course;
 import edu.regis.shatu.model.CourseDigest;
 import edu.regis.shatu.model.Task;
 import edu.regis.shatu.model.UnitDigest;
-import java.sql.Connection;
 
 /**
  * Specifies the API for Course life-cycle maintenance (database persistence).

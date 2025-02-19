@@ -12,19 +12,15 @@
  */
 package edu.regis.shatu.view;
 
-import edu.regis.shatu.model.TutoringSession;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+
 import javax.swing.JFrame;
-import edu.regis.shatu.view.act.BackToLogin;
 import javax.swing.Timer;
-import java.awt.event.AWTEventListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
-import java.awt.AWTEvent;
-import javax.swing.JOptionPane;
+
+import edu.regis.shatu.model.TutoringSession;
 
 
 

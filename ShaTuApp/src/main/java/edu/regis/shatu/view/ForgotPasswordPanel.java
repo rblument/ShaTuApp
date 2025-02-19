@@ -12,11 +12,7 @@
  */
 package edu.regis.shatu.view;
 
-import edu.regis.shatu.model.Account;
-import edu.regis.shatu.view.act.BackToLogin;
-import edu.regis.shatu.view.act.CheckSecurityQuestAction;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -27,6 +23,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -38,6 +35,10 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
+
+import edu.regis.shatu.model.Account;
+import edu.regis.shatu.view.act.BackToLogin;
+import edu.regis.shatu.view.act.CheckSecurityQuestAction;
 
 /**
  * Forgot Password screen that allows the user to reset their password.

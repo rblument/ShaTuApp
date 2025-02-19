@@ -12,29 +12,32 @@
  */
 package edu.regis.shatu.view;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import edu.regis.shatu.model.Step;
-import edu.regis.shatu.model.StepCompletion;
-import edu.regis.shatu.model.aol.ProblemType;
-import edu.regis.shatu.model.aol.NewExampleRequest;
-import edu.regis.shatu.model.aol.PendingTask;
-import edu.regis.shatu.model.aol.RotateStep;
-import edu.regis.shatu.model.aol.StepSubType;
-import edu.regis.shatu.view.act.NewExampleAction;
-import edu.regis.shatu.view.act.HintAction;
-import edu.regis.shatu.view.act.StepCompletionAction;
 import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JTextField;
-import javax.swing.ButtonGroup;
 import javax.swing.JRadioButton;
+import javax.swing.JTextField;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import edu.regis.shatu.model.Step;
+import edu.regis.shatu.model.StepCompletion;
+import edu.regis.shatu.model.aol.NewExampleRequest;
+import edu.regis.shatu.model.aol.PendingTask;
+import edu.regis.shatu.model.aol.ProblemType;
+import edu.regis.shatu.model.aol.RotateStep;
+import edu.regis.shatu.model.aol.StepSubType;
+import edu.regis.shatu.view.act.HintAction;
+import edu.regis.shatu.view.act.NewExampleAction;
+import edu.regis.shatu.view.act.StepCompletionAction;
 
 /**
  * RotateView class represents the GUI view for rotating strings using ROTR

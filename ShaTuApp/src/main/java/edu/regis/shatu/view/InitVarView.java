@@ -12,19 +12,12 @@
  */
 package edu.regis.shatu.view;
 
-import edu.regis.shatu.model.InitVarStep;
-import edu.regis.shatu.model.Step;
-import edu.regis.shatu.model.StepCompletion;
-import edu.regis.shatu.model.aol.ProblemType;
-import edu.regis.shatu.model.aol.NewExampleRequest;
-import edu.regis.shatu.view.act.NewExampleAction;
-import edu.regis.shatu.view.act.StepCompletionAction;
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Map;
+
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -32,6 +25,20 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
+import java.awt.Dimension;
+import java.awt.Font;
+
+
+import edu.regis.shatu.model.InitVarStep;
+import edu.regis.shatu.model.Step;
+import edu.regis.shatu.model.StepCompletion;
+import edu.regis.shatu.model.aol.NewExampleRequest;
+import edu.regis.shatu.model.aol.ProblemType;
+import edu.regis.shatu.view.act.NewExampleAction;
+import edu.regis.shatu.view.act.StepCompletionAction;
 
 /**
  *
@@ -46,6 +53,7 @@ public class InitVarView extends UserRequestView implements ActionListener {
     private JTextArea feedbackTextArea;
     private short hintCount;
     private boolean answersVisible, hintsVisible;
+    private JLabel[] answerLabels = new JLabel[8];  // Holds correct answer labels
 
     public InitVarView() { 
         initializeComponents();
@@ -72,83 +80,102 @@ public class InitVarView extends UserRequestView implements ActionListener {
     }
 
     private void initializeComponents() {
-        initVarStep = new InitVarStep();
-        hintCount = 1;
-        answersVisible = false;
-        hintsVisible = false;
+    initVarStep = new InitVarStep();
+    hintCount = 1;
+    answersVisible = false;
+    hintsVisible = false;
 
-        h0 = new JTextField(20);
-        h0.setName("@H0");
-        h1 = new JTextField(20);
-        h1.setName("@H1");
-        h2 = new JTextField(20);
-        h2.setName("@H2");
-        h3 = new JTextField(20);
-        h3.setName("@H3");
-        h4 = new JTextField(20);
-        h4.setName("@H4");
-        h5 = new JTextField(20);
-        h5.setName("@H5");
-        h6 = new JTextField(20);
-        h6.setName("@H6");
-        h7 = new JTextField(20);
-        h7.setName("@H7");
-        
-        feedbackTextArea = new JTextArea(3, 20);
-        feedbackTextArea.setEditable(false);
-        feedbackTextArea.setLineWrap(true);
-        feedbackTextArea.setWrapStyleWord(true);
-        feedbackTextArea.setBackground(null);
-        
-        showButton = new JButton("Show Answer");
-        showButton.addActionListener(e -> showAnswer());
-        hintButton = new JButton("Hint");
-        checkButton = new JButton(StepCompletionAction.instance());
-        checkButton.setText("Check");
+    Dimension textFieldSize = new Dimension(200, 30); // Adjust width and height
+
+    h0 = new JTextField(20); h0.setName("@H0"); h0.setPreferredSize(textFieldSize);
+    h1 = new JTextField(20); h1.setName("@H1"); h1.setPreferredSize(textFieldSize);
+    h2 = new JTextField(20); h2.setName("@H2"); h2.setPreferredSize(textFieldSize);
+    h3 = new JTextField(20); h3.setName("@H3"); h3.setPreferredSize(textFieldSize);
+    h4 = new JTextField(20); h4.setName("@H4"); h4.setPreferredSize(textFieldSize);
+    h5 = new JTextField(20); h5.setName("@H5"); h5.setPreferredSize(textFieldSize);
+    h6 = new JTextField(20); h6.setName("@H6"); h6.setPreferredSize(textFieldSize);
+    h7 = new JTextField(20); h7.setName("@H7"); h7.setPreferredSize(textFieldSize);
+
+    // Initialize answer labels
+    for (int i = 0; i < 8; i++) {
+        answerLabels[i] = new JLabel(""); // Empty initially
+        answerLabels[i].setFont(new Font("SansSerif", Font.BOLD, 12));
+        answerLabels[i].setForeground(Color.BLUE);
+    }
+
+    feedbackTextArea = new JTextArea(3, 20);
+    feedbackTextArea.setEditable(false);
+    feedbackTextArea.setLineWrap(true);
+    feedbackTextArea.setWrapStyleWord(true);
+    feedbackTextArea.setBackground(null);
+
+    showButton = new JButton("Show Answer");
+    showButton.addActionListener(e -> showAnswer());
+    hintButton = new JButton("Hint");
+    checkButton = new JButton(StepCompletionAction.instance());
+    checkButton.setText("Check");
     }
 
     private void initializeLayout() {
-        String description = ("<html>In SHA-256, the algorithm begins with a set of "
-                + "initial hash values, which are specifically chosen constants.<br>"
-                + "These constants are derived from the first 32 bits of the "
-                + "fractional parts of the square roots of the first 8 prime numbers.<br>"
-                + "They serve as the starting points for the hash computation and "
-                + "ensure that the algorithm starts from a random-like state.<br>"
-                + "<br>Please enter the inital hash values in hexadecimal for H0 to H7 Below:<br>"
-                + "(Incorrect answers are in red, and turn green when correct.)<br></html>");
-        JLabel infoLabel = new JLabel(description);
-        addc(infoLabel, 0, 0, 2, 1, 0.0, 0.0, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, 5, 5, 5, 0);
+    setLayout(new GridBagLayout());
+    GridBagConstraints gbc = new GridBagConstraints();
 
-        createLabelForField("H0: ", h0, 1);
-        createLabelForField("H1: ", h1, 2);
-        createLabelForField("H2: ", h2, 3);
-        createLabelForField("H3: ", h3, 4);
-        createLabelForField("H4: ", h4, 5);
-        createLabelForField("H5: ", h5, 6);
-        createLabelForField("H6: ", h6, 7);
-        createLabelForField("H7: ", h7, 8);
+    // Use JLabel with HTML to ensure proper paragraph formatting
+    JLabel infoLabel = new JLabel("<html><div style='width: 500px;'>"
+            + "<p>In SHA-256, the algorithm begins with a set of initial hash values, "
+            + "which are specifically chosen constants. These constants are derived from the "
+            + "first 32 bits of the fractional parts of the square roots of the first 8 prime numbers. "
+            + "They serve as the starting points for the hash computation and ensure that the "
+            + "algorithm starts from a random-like state.</p><p>"
+            + "Please enter the initial hash values in hexadecimal for H0 to H7 below:<br>"
+            + "(Incorrect answers are in red, and turn green when correct.)</p></div></html>");
 
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
-        //buttonPanel.add(checkButton);
-        //buttonPanel.add(hintButton);
-        buttonPanel.add(showButton);
+    infoLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
 
-        //hintButton.addActionListener(this);
-        //checkButton.addActionListener(this);
+    gbc.gridx = 0;
+    gbc.gridy = 0;
+    gbc.gridwidth = 3; // Make it span multiple columns for better readability
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    gbc.insets = new Insets(10, 10, 10, 10);
+    add(infoLabel, gbc);
 
-        GridBagConstraints gbc = new GridBagConstraints();
+    // Labels, input fields, and answer labels
+    gbc.gridwidth = 1;
+    gbc.anchor = GridBagConstraints.WEST;
+
+    JTextField[] inputFields = {h0, h1, h2, h3, h4, h5, h6, h7};
+    String[] labels = {"H0:", "H1:", "H2:", "H3:", "H4:", "H5:", "H6:", "H7:"};
+
+    for (int i = 0; i < 8; i++) {
+        gbc.gridy = i + 1;
+
+        // Column 1: Label (e.g., "H0:")
         gbc.gridx = 0;
-        gbc.gridy = 9;
-        gbc.gridwidth = 2;
-        gbc.anchor = GridBagConstraints.WEST;
-        add(buttonPanel, gbc);
-        
-        gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = 10;
-        gbc.gridwidth = 2;
-        gbc.anchor = GridBagConstraints.WEST;
-        add(feedbackTextArea, gbc);
+        JLabel label = new JLabel(labels[i]);
+        label.setFont(new Font("SansSerif", Font.BOLD, 14));
+        add(label, gbc);
+
+        // Column 2: Input Field
+        gbc.gridx = 1;
+        inputFields[i].setPreferredSize(new Dimension(150, 25));
+        add(inputFields[i], gbc);
+
+        // Column 3: Answer Label (Initially Hidden)
+        gbc.gridx = 2;
+        answerLabels[i] = new JLabel(""); // Empty initially
+        answerLabels[i].setFont(new Font("SansSerif", Font.BOLD, 12));
+        answerLabels[i].setForeground(Color.BLUE);
+        add(answerLabels[i], gbc);
+    }
+
+    // Show Answer Button
+    gbc.gridx = 0;
+    gbc.gridy = 10;
+    gbc.gridwidth = 3;
+    gbc.anchor = GridBagConstraints.CENTER;
+    JButton showButton = new JButton("Show Answer");
+    showButton.addActionListener(e -> showAnswer());
+    add(showButton, gbc);
     }
 
     /**
@@ -158,20 +185,26 @@ public class InitVarView extends UserRequestView implements ActionListener {
      * @param gridY The position on the y-axis to place the label and text field.
      */
     private void createLabelForField(String labelText, JTextField textField, int gridY) {
-        JLabel label = new JLabel(labelText);
-        label.setLabelFor(textField);
-        textField.setOpaque(true);
+    JLabel label = new JLabel(labelText);  // Ensure label is separate from the text field
+    label.setFont(new Font("SansSerif", Font.BOLD, 12));  // Make it bold for visibility
 
-        JPanel rowPanel = new JPanel(new FlowLayout(5, 5, 0));
-        rowPanel.add(label);
-        rowPanel.add(textField);
+    textField.setPreferredSize(new Dimension(250, 30));  // Set proper size
+    textField.setFont(new Font("SansSerif", Font.PLAIN, 14)); // Ensure the font is readable
+    textField.setHorizontalAlignment(JTextField.LEFT); // Align text to the left
 
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = gridY;
-        gbc.gridwidth = 2;
-        gbc.anchor = GridBagConstraints.WEST;
-        add(rowPanel, gbc);
+    GridBagConstraints gbc = new GridBagConstraints();
+    
+    // Label on the left
+    gbc.gridx = 0;
+    gbc.gridy = gridY;
+    gbc.anchor = GridBagConstraints.WEST; // Align left
+    gbc.insets = new Insets(5, 5, 5, 10); // Add spacing
+    add(label, gbc);
+
+    // Text field on the right
+    gbc.gridx = 1;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    add(textField, gbc);
     }
 
     /**
@@ -284,16 +317,24 @@ public class InitVarView extends UserRequestView implements ActionListener {
      * Displays answers next to their corresponding variable and text field.
      */
     private void showAnswer() {
-        removeHints();
-        if (answersVisible) {
-            removeExistingAnswerLabels();
-            answersVisible = false;
-        } else {
-            addAnswerLabels();
-            answersVisible = true;
+    removeHints(); // Ensure hints don't interfere
+
+    if (answersVisible) {
+        // Hide answers
+        for (int i = 0; i < 8; i++) {
+            answerLabels[i].setText(""); // Clear answer labels
         }
-        revalidate();
-        repaint();
+        answersVisible = false;
+    } else {
+        // Show correct answers next to input fields
+        for (int i = 0; i < 8; i++) {
+            answerLabels[i].setText("Correct: " + initVarStep.getAnswer("@H" + i));
+        }
+        answersVisible = true;
+    }
+
+    revalidate();
+    repaint();
     }
     
     /**

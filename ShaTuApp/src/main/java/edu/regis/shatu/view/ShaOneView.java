@@ -10,14 +10,27 @@
  */
 package edu.regis.shatu.view;
 
-import edu.regis.shatu.model.StepCompletion;
-import edu.regis.shatu.model.aol.NewExampleRequest;
-import javax.swing.*;
-import java.awt.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JTextField;
+import javax.swing.JRadioButton;
+
+import edu.regis.shatu.model.StepCompletion;
+import edu.regis.shatu.model.aol.NewExampleRequest;
+import javax.swing.JRadioButton;
+import edu.regis.shatu.model.aol.ShaOneViewStep;
+import edu.regis.shatu.model.Step;
+import edu.regis.shatu.model.aol.ProblemType;
 
 /**
  * ShaOne class represents the GUI view for performing the SHA Σ₁ function, involving a right shift operation.
@@ -39,8 +52,11 @@ public class ShaOneView extends UserRequestView implements KeyListener {
 
     private String answer;
     private JLabel exampleInputLabel;
+    private JLabel problem;
     private JTextField answerField;
+
     private JButton checkButton, hintButton, nextQuestionButton;
+
     private boolean checkHintEnabled = false;
 
     /**
@@ -56,9 +72,25 @@ public class ShaOneView extends UserRequestView implements KeyListener {
      */
     private void initializeComponents() {
         exampleInputLabel = new JLabel("Given an 𝑛 bit binary number, output the value of the SHA Σ₁ function");
-
+        problem = new JLabel("Default Problem Text");
         answerField = new JTextField(10);
         answerField.addKeyListener(this);
+
+        // Create and initialize the checkButton
+        checkButton = new JButton("Check");
+        checkButton.addActionListener(this);
+        
+        hintButton = new JButton("Hint");
+        hintButton.addActionListener(this); // Add an action listener for the check button
+        
+        nextQuestionButton = new JButton("Next Question");
+        nextQuestionButton.addActionListener(this);
+        
+      //  shortProblem = new JRadioButton("16-bit");
+     //   shortProblem.setSelected(true);
+
+       // longProblem = new JRadioButton("32-bit");
+
     }
 
     /**
@@ -69,13 +101,33 @@ public class ShaOneView extends UserRequestView implements KeyListener {
         centerConstraints.anchor = GridBagConstraints.CENTER;
         centerConstraints.insets = new Insets(5, 5, 5, 5);
         // Add exampleInputLabel centered
-        addc(exampleInputLabel, 0, 0, 2, 1, 0.0, 0.0,
+        addc(exampleInputLabel, 0, 0, 1, 1, 0.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                5, 5, 5, 5);
+        addc(problem, 0, 1, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
         // Add answerField to the layout, centered
-        addc(answerField, 0, 1, 1, 1, 1.0, 0.0,
+        addc(answerField, 0, 4, 1, 1, 1.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 5, 5, 5, 5);
+/*
+        addc(checkButton, 0, 5, 1, 1, 0.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                5, 5, 5, 5);
+        addc(hintButton, 0, 6, 1, 1, 0.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                5, 5, 5, 5);
+        addc(nextQuestionButton, 0, 7, 1, 1, 0.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                5, 5, 5, 5);
+                addc(shortProblem, 0, 6, 1, 1, 0.0, 0.0,
+                GridBagConstraints.WEST, GridBagConstraints.NONE,
+                5, 5, 5, 5);
+        addc(longProblem, 0, 7, 1, 1, 0.0, 0.0,
+                GridBagConstraints.WEST, GridBagConstraints.NONE,
+                5, 5, 5, 5);
+*/
     }
 
     /**
@@ -177,13 +229,40 @@ public class ShaOneView extends UserRequestView implements KeyListener {
         }
     }
 
+       /**
+     * Create and return the server request this view makes when a user selects
+     * that they want to practice a new Sha One View example.
+     *
+     * @return
+     */
     @Override
     public NewExampleRequest newRequest() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+        NewExampleRequest ex = new NewExampleRequest();
+
+        ex.setExampleType(ProblemType.SHA_ONE);
+
+        ShaOneViewStep newStep = new ShaOneViewStep();
+
+        ex.setData(gson.toJson(newStep));
+
+        return ex;
     }
+
 
     @Override
     public StepCompletion stepCompletion() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        Step currentStep = model.currentTask().currentStep().getStep();
+
+        ShaOneViewStep example = gson.fromJson(currentStep.getData(), ShaOneViewStep.class);
+
+        String userResponse = answerField.getText().replaceAll("\\s", "");
+
+        example.setUserResponse(userResponse);
+
+        StepCompletion step = new StepCompletion(currentStep, gson.toJson(example));
+        step.setStep(currentStep);
+        return step;
     }
 }

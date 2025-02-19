@@ -12,32 +12,35 @@
  */
 package edu.regis.shatu.view;
 
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.JTextPane;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
+import edu.regis.shatu.model.EncodeAsciiStep;
 import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
-import edu.regis.shatu.model.EncodeAsciiStep;
-import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.NewExampleRequest;
+import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.view.act.HintAction;
 import edu.regis.shatu.view.act.NewExampleAction;
 import edu.regis.shatu.view.act.StepCompletionAction;
-import java.awt.GridBagConstraints;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JTextPane;
-import javax.swing.JTextArea;
-import javax.swing.JTable;
-import javax.swing.JScrollPane;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.DefaultTableCellRenderer;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
 
 /**
  * A view that requests the student to add a single '1' bit to the byte prompt.
@@ -50,7 +53,7 @@ public class EncodeView extends UserRequestView {
     private JTextPane descriptionTextPane;
     private JLabel questionLabel, instructionsLabel, messageLengthLabel, setQuestionLabel;
     private JTextField messageLengthField, setQuestionField;
-    private JTextArea responseArea;
+    private JTextArea responseTextArea;
     private JTextArea feedbackArea;
     private JButton checkButton, nextButton, hintButton;
     private boolean checkHintEnabled = false;
@@ -121,7 +124,7 @@ public class EncodeView extends UserRequestView {
      */
     public void submitAnswer() {
 
-        if (this.responseArea.getText().equals("")) {
+        if (this.responseTextArea.getText().equals("")) {
             this.feedbackArea.setText("Please provide an answer");
         } else {
             // Nothing, maybe needed later in development, tutor should be handling things though.
@@ -138,9 +141,7 @@ public class EncodeView extends UserRequestView {
     private void prepareNextQuestion() {
         // Do nothing, tutor should be handling things, but leaving incase a use
         // could be found later in development
-        //checkHintEnabled = true;
-        //hintButton.setEnabled(true);
-        //checkButton.setEnabled(true);
+
         updateView();
     }
 
@@ -207,10 +208,10 @@ public class EncodeView extends UserRequestView {
      * Initializes the response area and its scroll pane
      */
     private void setupResponseArea() {
-        responseArea = new JTextArea(3, 20);
-        responseArea.setLineWrap(true); // Enable line wrapping
-        responseArea.setWrapStyleWord(true); // Wrap lines at word boundaries
-        responseScrollPane = new JScrollPane(responseArea);
+        responseTextArea = new JTextArea(3, 20);
+        responseTextArea.setLineWrap(true); // Enable line wrapping
+        responseTextArea.setWrapStyleWord(true); // Wrap lines at word boundaries
+        responseScrollPane = new JScrollPane(responseTextArea);
         responseScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED); // Enable vertical scrolling
     }
 
@@ -333,6 +334,7 @@ public class EncodeView extends UserRequestView {
         
         if (this.model == null) { // Currently in development, Encode Ascii starts first when loaded, which model can be null initially.
             questionLabel.setText("Please click new example button to get started");
+
         } else {
 
             /*
@@ -358,7 +360,7 @@ public class EncodeView extends UserRequestView {
 
                 // Clear any existing feedback and response from the previous question.
                 feedbackArea.setText("");
-                responseArea.setText("");
+                responseTextArea.setText("");
 
                 if ((step.getSubType() == type)) { // Subtype was correct
                     System.out.println("If branch was taken, subtype was a encode ascii"); // Error checking.
@@ -368,11 +370,13 @@ public class EncodeView extends UserRequestView {
                     if (this.question == null) { // new example hasnt been created yet
                         questionLabel.setText("Please click new example button to get started");
                         checkButton.setEnabled(false);
+                        responseTextArea.setEnabled(false);
                         hintButton.setEnabled(false);
                     } else { // example has been created.
                         questionLabel.setText(String.format("Convert the following "
                                 + "string to binary: %s", question));
                         checkButton.setEnabled(true);
+                        responseTextArea.setEnabled(true);
                         hintButton.setEnabled(true);
                     }
                 } else { // subtype didnt match, new example needs to be created.
@@ -380,6 +384,7 @@ public class EncodeView extends UserRequestView {
 
                     questionLabel.setText("Please click new example button to get started");
                     checkButton.setEnabled(false);
+                    responseTextArea.setEnabled(false);
                     hintButton.setEnabled(false);
                 }
 
@@ -441,7 +446,7 @@ public class EncodeView extends UserRequestView {
 
         EncodeAsciiStep completedEncodeAsciiStep = gson.fromJson(currentStep.getData(), EncodeAsciiStep.class); // Class object created from the new example.
 
-        String userResponse = this.responseArea.getText().replaceAll(" ", ""); // Get the user's answer.
+        String userResponse = this.responseTextArea.getText().replaceAll(" ", ""); // Get the user's answer.
 
         completedEncodeAsciiStep.setUserAnswer(userResponse); // User answer in the response area
 

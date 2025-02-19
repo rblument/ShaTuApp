@@ -12,10 +12,6 @@
  */
 package edu.regis.shatu.view;
 
-import edu.regis.shatu.model.Account;
-import edu.regis.shatu.view.act.CreateAcctAction;
-import edu.regis.shatu.view.act.SignInAction;
-import edu.regis.shatu.view.act.BackToLogin;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -28,6 +24,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -39,6 +36,11 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
+
+import edu.regis.shatu.model.Account;
+import edu.regis.shatu.view.act.BackToLogin;
+import edu.regis.shatu.view.act.CreateAcctAction;
+import edu.regis.shatu.view.act.SignInAction;
 
 /**
  * New user screen that also allows the student to create an IRBt account

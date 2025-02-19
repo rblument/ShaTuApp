@@ -14,6 +14,7 @@ package edu.regis.shatu.view;
 
 import java.awt.Color;
 import java.awt.GridBagConstraints;
+
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 

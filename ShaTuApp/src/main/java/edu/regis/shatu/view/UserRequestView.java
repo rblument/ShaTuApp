@@ -12,14 +12,16 @@
  */
 package edu.regis.shatu.view;
 
+import java.util.Random;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
 import edu.regis.shatu.model.LessonSession;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.TutoringSession;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.PendingTask;
-import java.util.Random;
 
 /**
  * A abstract view that supports various user gestures that results in a request 
