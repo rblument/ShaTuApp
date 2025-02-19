@@ -93,6 +93,7 @@ public class CompressionCanvasView extends UserRequestView {
     private VariableLabel temp1Label;
     private VariableLabel temp2Label;
     private JButton continueButton = new JButton(StepCompletionAction.instance());
+    private CounterLabel counter;
 
     public CompressionCanvasView() {
         setLayout(null);
@@ -349,6 +350,8 @@ public class CompressionCanvasView extends UserRequestView {
         temp1Label = new VariableLabel("T\u2081");
         temp2Label = new VariableLabel("T\u2082");
         
+        counter = new CounterLabel("Round: ");
+        
         temp1Label.setFont(new Font("", Font.PLAIN, 16));
         temp2Label.setFont(new Font("", Font.PLAIN, 16));
         
@@ -362,7 +365,8 @@ public class CompressionCanvasView extends UserRequestView {
         Color white = new Color(255,255,255);
         setBackground(white);
         Point p;
-        int x, y;
+        int x, y, countX, countY;
+        
         
         for (int i = 0; i < WORKING_VARS_LEN; i++) {
             x = LEFT_INDENT + (29 * i);
@@ -374,6 +378,7 @@ public class CompressionCanvasView extends UserRequestView {
             add(outWorkingVars[i]);
         }
 
+        
         // The Bit operations Ch, Simga1, Maj, and Sigma2 are located a few 
         // pixels to the right of the last working variable 'h', which is
         // inWorkingVars[7] and below the input working variables.
@@ -387,6 +392,7 @@ public class CompressionCanvasView extends UserRequestView {
         y += WorkingVarLabel.SIZE + 40;
         sigma1Label.setLocation(new Point(x, y));
         add(sigma1Label);
+        
         
         // Center the first modulo addtion label in the x axis with the center 
         // of the 'd' working variable, which is inworkingVars[3] and 
@@ -421,6 +427,7 @@ public class CompressionCanvasView extends UserRequestView {
         wLabel.setLocation(x, y);
         add(wLabel);
         
+        
         // K input location
         x = modAdditions[2].getLocation().x;
         y = modAdditions[2].getLocation().y;
@@ -428,6 +435,14 @@ public class CompressionCanvasView extends UserRequestView {
         y -= VariableLabel.HALF_SIZE;
         kLabel.setLocation(x, y);
         add(kLabel);
+        
+         //Add counter label to the right of W location
+        
+        countX = modAdditions[2].getLocation().x + CounterLabel.SIZE * 3;
+        countY = inWorkingVars[7].getLocation().y - CounterLabel.HALF_SIZE ;
+        
+        counter.setLocation(countX, countY);
+        add(counter);
         
         // Third mod addition has Sigma1 inputs and centered on it
         x = sigma1Label.getLocation().x + BitOpLabel.HALF_SIZE - AddMod256Label.HALF_SIZE + 150;
@@ -460,14 +475,18 @@ public class CompressionCanvasView extends UserRequestView {
         temp2Label.setLocation(x, y);
         add(temp2Label);
         
+        
         // Add continueButton to the bottom right corner
         int buttonWidth = 100;
         int buttonHeight = 30;
         int margin = 10;
         x = getWidth() - buttonWidth - margin;
         y = getHeight() - buttonHeight - margin;
+        
         continueButton.setBounds(x, y, buttonWidth, buttonHeight);
         add(continueButton);
+        
+        
     }
     
     @Override
