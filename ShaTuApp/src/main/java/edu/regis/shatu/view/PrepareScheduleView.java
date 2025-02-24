@@ -1,25 +1,26 @@
 /*
  * SHATU: SHA-256 Tutor
  * 
- *  (C) Johanna & Richard Blumenthal, All rights reserved
+ * (C) Johanna & Richard Blumenthal, All rights reserved
  * 
- *  Unauthorized use, duplication or distribution without the authors'
- *  permission is strictly prohibted.
+ * Unauthorized use, duplication, or distribution without the authors'
+ * permission is strictly prohibited.
  * 
- *  Unless required by applicable law or agreed to in writing, this
- *  software is distributed on an "AS IS" basis without warranties
- *  or conditions of any kind, either expressed or implied.
+ * Unless required by applicable law or agreed to in writing, this
+ * software is distributed on an "AS IS" basis without warranties
+ * or conditions of any kind, either expressed or implied.
  */
 package edu.regis.shatu.view;
 
-import java.awt.GridBagConstraints;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Random;
 
-import javax.swing.JButton;
-import javax.swing.JTextPane;
-
-import edu.regis.shatu.model.PrepScheduleStep;
 import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.NewExampleRequest;
@@ -28,154 +29,329 @@ import edu.regis.shatu.view.act.NewExampleAction;
 import edu.regis.shatu.view.act.StepCompletionAction;
 
 /**
- *
+ * This class represents the Prepare Schedule operation step in a multiple-choice format.
+ * Users must select the correct missing step from predefined choices.
+ * 
  * @author rickb
  */
 public class PrepareScheduleView extends UserRequestView implements ActionListener {
-    
+
     private TutoringSessionView view;
-    private JTextPane descriptionTextPane;
-    private JButton continueButton = new JButton(StepCompletionAction.instance());
-    
+    private JLabel titleLabel, stepLabel, feedbackLabel, previousStepsLabel;
+    private JRadioButton[] answerOptions;
+    private ButtonGroup answerGroup;
+    private JButton checkAnswerButton, hintButton, newExampleButton;
+    private int currentStep = 1;
+    private int correctAnswerIndex; // Stores the shuffled position of the correct answer
+
+    // Correct Steps (displayed in order)
+    private final String[] correctSteps = {
+        "The input message has been padded and divided into 512-bit chunks.",
+        "Each chunk is divided into 32-bit words (initially 16 words).",
+        "The words are expanded to 64 using shifts, rotations, and bitwise operations.",
+        "The expanded words are used in the compression phase."
+    };
+
     /**
      * Generates the prepare schedule view.
      */
     public PrepareScheduleView() {
         initializeComponents();
         initializeLayout();
-        continueButton.setText("Continue");
+        updatePreviousStepsDisplay();  // Ensure previous steps are cleared initially
+        loadStep();
+        revalidate();  // Forces UI refresh
+        repaint();  // Ensures the correct question is displayed
     }
-    
+
     /**
-     * Overridden method, can be used for buttons later in development.
-     * @param event 
+     * Handles button actions for checking answers, hints, and new examples.
      */
     @Override
     public void actionPerformed(ActionEvent event) {
-       if (event.getSource() == continueButton)
-           NewExampleAction.instance().actionPerformed(null);
-    }
- 
-    /**
-     * Create the child GUI components appearing in this frame.
-     */
-    private void initializeComponents() {
-        setupDescriptionSection();
-        continueButton.addActionListener(this);
-    }
-    
-    /**
-     * Adds views to the prepare schedule view, currently in development,
-     * a actual question and process for the student hasn't been decided/developed,
-     * only a description of the prepare schedule operation is displayed.
-     */
-    private void initializeLayout() {
-        addc(descriptionTextPane, 0, 0, 1, 1, 
-                1.0, 0.0, GridBagConstraints.CENTER, 
-                GridBagConstraints.HORIZONTAL, 5, 5, 5, 5);
-        addc(continueButton, 0, 6, 1, 1, 
-                1.0, 1.0, GridBagConstraints.CENTER, 
-                GridBagConstraints.NONE, 10, 0, 0, 0);
-    }
-    
-     /**
-     * Sets up the description section of the view, explaining the purpose of 
-     * the Prepare Schedule operation.
-     */
-    private void setupDescriptionSection() {
-        descriptionTextPane = new JTextPane();
-        descriptionTextPane.setContentType("text/html");
-        
-        // TEMPORARY UNTIL WE LOAD THE MODEL DATA DESCRIPTION
-        descriptionTextPane.setText(
-                    "<html>" +
-                    "<body>" +
-                    "<h2 style='text-align: center;'>Prepare Schedule Operation</h2>" +
-                    "<p>The Prepare Schedule operation (also known as the message schedule) "
-                            + "has a couple of steps you should know.  "
-                            + "This operation is too large to teach here, "
-                            + "but you should know the basic idea of what happens "
-                            + "before moving on to the compression phase of the "
-                            + "ShaTu256 algorithm (rotations, the choice function, etc.).  "
-                            + "The basics of the prepare schedule operation is as follows: "
-                            + "<br>1: Pad the input message and divide into 512 bit chunks. "
-                            + "<br>2: Break each chunk into 32 bit words (16 words initially). "
-                            + "<br>3: We need 64 words, so using the initial 16 words, "
-                            + "we will use various operations (too many and too complex to "
-                            + "explain here) to go from 16 to 63 words (starts at 0, not 1).  "
-                            + "The remaining words are a combination of the original 16 "
-                            + "words and some operations such as shifts, rotations, "
-                            + "and bitwise operations. <br>4: We will use these words in the "
-                            + "compression phase (the remaining operations) at the end we get "
-                            + "a unique and irreversible hash output.</p>" +
-                    "</body>" +
-                    "</html>"
-            );
-        
-        descriptionTextPane.setEditable(false);
-        descriptionTextPane.setBackground(null);
-        descriptionTextPane.setBorder(null);
-    }
-    
-    @Override
-    /**
-     * Updates the description, question, and hints from the model
-     * 
-     * TODO: THIS IS A PLACEHOLDER UNTIl WE HAVE HAVE THE MODEL CODE COMPLETED
-     */
-    protected void updateView() {
-        view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
-        view.resetButtonListeners(); // Clear any listeners applied from other views
-        
-        // Universal buttons (hint, check, new example) are not needed in this view.
-        view.getCheckButton().setEnabled(false);
-        view.getHintButton().setEnabled(false);
-        view.getNewExampleButton().setEnabled(false);
-        
-        if (model != null) {
-            // ****TO-DO*****
-            // Update the view's information from the model
-            // Debugging dynamic updates to the model can be done here.
-            System.out.println("PrepareScheduleView updateView called"); // Error checking
+        if (event.getSource() == checkAnswerButton) {
+            checkAnswer();
+        } else if (event.getSource() == hintButton) {
+            showHint();
+        } else if (event.getSource() == newExampleButton) {
+            loadNewExample();
         }
     }
 
     /**
-     * Overridden method for a newRequest that gets called when a New Example button
-     * is clicked, the tutor file will handle the rest and send it back here for 
-     * the view to utilize, currently not implemented for the prepare schedule view.
-     * @return 
+     * Initializes UI components.
      */
-    @Override
-    public NewExampleRequest newRequest() {
-        NewExampleRequest ex = new NewExampleRequest(); // Will be sent to the tutor.
-        
-        ex.setExampleType(ProblemType.PREPARE_SCHEDULE);
-        
-        PrepScheduleStep newPrepSchedule = new PrepScheduleStep();        
-                
-        ex.setData(gson.toJson(newPrepSchedule));
-        
-        return ex;
-    
+    private void initializeComponents() {
+        titleLabel = new JLabel("Please choose the correct option for each step.", SwingConstants.CENTER);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
+
+        previousStepsLabel = new JLabel("<html></html>"); // Displays previous steps
+        previousStepsLabel.setFont(new Font("Arial", Font.BOLD, 14));
+
+        stepLabel = new JLabel("");
+        stepLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+
+        answerOptions = new JRadioButton[3];
+        answerGroup = new ButtonGroup();
+        for (int i = 0; i < 3; i++) {
+            answerOptions[i] = new JRadioButton();
+            answerOptions[i].setFont(new Font("Arial", Font.PLAIN, 12));
+            answerGroup.add(answerOptions[i]);
+        }
+
+        checkAnswerButton = new JButton("Check Answer");
+        checkAnswerButton.addActionListener(this);
+
+        hintButton = new JButton("Hint");
+        hintButton.addActionListener(this);
+
+        newExampleButton = new JButton("New Example");
+        newExampleButton.addActionListener(this);
+
+        feedbackLabel = new JLabel(""); // To display hints and feedback
+        feedbackLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        feedbackLabel.setForeground(Color.BLUE); // System messages in blue
     }
 
     /**
-     * Overridden method for a stepCompletion that gets called when a Check button
-     * is clicked, the tutor file will handle the rest and send it back here for 
-     * the view to utilize, currently not implemented for the prepare schedule view.
-     * @return 
+     * Sets up the layout for the view.
+     */
+    private void initializeLayout() {
+        setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.CENTER;
+
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        add(titleLabel, gbc);
+
+        gbc.gridy++;
+        add(previousStepsLabel, gbc);
+
+        gbc.gridy++;
+        add(stepLabel, gbc);
+
+        gbc.gridwidth = 1;
+        gbc.gridy++;
+        
+        for (JRadioButton option : answerOptions) {
+            gbc.gridx = 0;
+            gbc.gridwidth = 2;  // Ensure buttons span properly
+            add(option, gbc);
+            gbc.gridy++;
+        }
+
+        gbc.gridwidth = 2;
+        add(feedbackLabel, gbc);
+        gbc.gridy++;
+
+        gbc.gridwidth = 1;
+        gbc.gridy++;
+        add(checkAnswerButton, gbc);
+
+        gbc.gridy++;
+        add(hintButton, gbc);
+
+        gbc.gridy++;
+        add(newExampleButton, gbc);
+    }
+
+
+    /**
+     * Loads the correct step question for the current step.
+     */
+    private void loadStep() {
+        feedbackLabel.setText("");
+
+        // More challenging step questions
+        String[] stepQuestions = {
+            "Which process ensures the input message conforms to the required block size in SHA-256?",
+            "What transformation is applied to each 512-bit block before processing?",
+            "What technique does SHA-256 use to extend a small set of words into a larger sequence?",
+            "How is the expanded word sequence utilized in the hashing process?"
+        };
+
+        // Ensure the first question always appears correctly
+        if (currentStep == 1) {
+            stepLabel.setText("<html><u>Step 1: " + stepQuestions[0] + "</u></html>");
+        } else {
+            stepLabel.setText("<html><u>Step " + currentStep + ": " + stepQuestions[currentStep - 1] + "</u></html>");
+        }
+
+        // Answer choices with correct answers always in the first position before shuffling
+        String[][] answerChoices = {
+            { "Padding is added to ensure the message is a multiple of 512 bits.",   // Correct answer
+            "SHA-256 automatically adjusts message length without padding.",
+            "Each message is divided into arbitrary-sized chunks before hashing." },
+            { "The block is split into 32-bit segments for further manipulation.",   // Correct answer
+            "A checksum is computed and attached to each block.",
+            "Each chunk remains unaltered until the final hashing step." },
+            { "A series of bitwise operations and shifts increase the number of words.",  // Correct answer
+            "Additional words are appended from external sources.",
+            "Words are kept constant, ensuring stability in the process." },
+            { "The transformed sequence helps derive intermediate hash values.",   // Correct answer
+            "The expanded words are discarded after processing.",
+            "Only a subset of the expanded words contributes to the hash output." }
+        };
+
+        // Store correct answer before shuffling
+        String correctAnswer = answerChoices[currentStep - 1][0];
+
+        // Shuffle answer choices to randomize positions
+        List<String> shuffledAnswers = new ArrayList<>();
+        for (String answer : answerChoices[currentStep - 1]) {
+            shuffledAnswers.add(answer);
+        }
+        Collections.shuffle(shuffledAnswers, new Random()); // Shuffle the answers
+
+        // Find the new position of the correct answer
+        correctAnswerIndex = shuffledAnswers.indexOf(correctAnswer);
+
+        // Assign shuffled answer choices to the radio buttons
+        for (int i = 0; i < answerOptions.length; i++) {
+            answerOptions[i].setText(shuffledAnswers.get(i));
+        }
+
+        // Ensure UI refresh
+        revalidate();
+        repaint();
+    }
+
+
+
+
+
+
+
+    /**
+     * Checks if the selected answer is correct.
+     */
+    private void checkAnswer() {
+        if (answerOptions[correctAnswerIndex].isSelected()) {
+            feedbackLabel.setText("Correct! Please choose New Example.");
+        } else {
+            feedbackLabel.setText("Incorrect. Try again.");
+        }
+    }
+
+
+    /**
+     * Displays a tailored hint based on the selected answer.
+     */
+    private void showHint() {
+        int selectedIndex = -1; // Default: No selection
+
+        // Find the index of the selected radio button
+        for (int i = 0; i < answerOptions.length; i++) {
+            if (answerOptions[i].isSelected()) {
+                selectedIndex = i;
+                break;
+            }
+        }
+
+        if (selectedIndex == -1) {
+            feedbackLabel.setText("Please select an answer before requesting a hint.");
+            return;
+        }
+
+        if (selectedIndex == correctAnswerIndex) {
+            feedbackLabel.setText("You should check your answer.");
+            return;
+        }
+
+        // Tailored hints based on incorrect selection
+        String[][] hintMessages = {
+            { "Consider how SHA-256 processes blocks before hashing.", 
+            "Think about why padding is necessary in a cryptographic hash function.", 
+            "Does SHA-256 allow arbitrary block sizes, or does it standardize them?" },
+
+            { "What is the purpose of dividing blocks into smaller segments?", 
+            "Does adding a checksum affect the internal structure of SHA-256?", 
+            "Why do cryptographic algorithms transform data before applying functions?" },
+
+            { "Consider how SHA-256 generates new words during expansion.", 
+            "Does SHA-256 add external words, or does it derive them from existing ones?", 
+            "Why would an algorithm need to keep word length constant?" },
+
+            { "How does SHA-256 use transformed words in its compression phase?", 
+            "Does discarding words make sense in a secure hashing process?", 
+            "Would limiting the words used affect the final hash?" }
+        };
+
+        // Assign a specific hint for the wrong choice selected
+        feedbackLabel.setText(hintMessages[currentStep - 1][selectedIndex]);
+    }
+
+
+    /**
+     * Loads the next example or resets the steps.
+     */
+    private void loadNewExample() {
+        if (answerOptions[0].isSelected() || feedbackLabel.getText().contains("Correct")) {
+            if (currentStep < 4) {
+                currentStep++;
+                updatePreviousStepsDisplay();
+                loadStep();
+            } else {
+                currentStep = 1;
+                previousStepsLabel.setText("<html></html>");
+                loadStep();
+            }
+            feedbackLabel.setText(""); // Clear feedback message
+        } else {
+            feedbackLabel.setText("You must select the correct answer before proceeding.");
+        }
+    }
+
+    /**
+     * Updates the display of previous steps above the question.
+     */
+    private void updatePreviousStepsDisplay() {
+        StringBuilder sb = new StringBuilder("<html>");
+        for (int i = 0; i < currentStep - 1; i++) {
+            sb.append("<b>Step ").append(i + 1).append(":</b> ").append(correctSteps[i]).append("<br>");
+        }
+        sb.append("</html>");
+        previousStepsLabel.setText(sb.toString());
+    }
+
+    /**
+     * **Override the abstract stepCompletion() method from UserRequestView.**
      */
     @Override
     public StepCompletion stepCompletion() {
-        Step currentStep = model.currentTask().currentStep().getStep();
-        
-        PrepScheduleStep completedStep = gson.fromJson(currentStep.getData(), PrepScheduleStep.class);
-                
-        StepCompletion step = new StepCompletion(currentStep, gson.toJson(completedStep));
-        
-        step.setStep(currentStep); // Will be sent to the tutor.
-        
-        return step;
+        Step currentStepObj = model.currentTask().currentStep().getStep();
+        return new StepCompletion(currentStepObj, gson.toJson(correctSteps[this.currentStep - 1]));
+    }
+
+    /**
+     * **Override the abstract updateView() method from UserRequestView.**
+     */
+    @Override
+    protected void updateView() {
+        view = SplashFrame.instance().getTutoringSessionView();
+        view.resetButtonListeners();
+
+        // Only update label if the step is greater than 1 to prevent overriding first question
+        if (currentStep > 1) {
+            stepLabel.setText("<html><u>Step " + currentStep + ": " + correctSteps[currentStep - 1] + "</u></html>");
+        }
+
+        feedbackLabel.setText("");
+        updatePreviousStepsDisplay();
+    }
+
+    /**
+     * **Override the abstract newRequest() method from UserRequestView.**
+     */
+    @Override
+    public NewExampleRequest newRequest() {
+        NewExampleRequest ex = new NewExampleRequest();
+        ex.setExampleType(ProblemType.PREPARE_SCHEDULE);
+        ex.setData(gson.toJson(correctSteps));
+        return ex;
     }
 }
