@@ -10,6 +10,11 @@
  *  software is distributed on an "AS IS" basis without warranties
  *  or conditions of any kind, either expressed or implied.
  */
+
+ /*
+ * Corrected misspelling per SHAT-218 John Hennessey 23 Feb 2025
+ */
+
 package edu.regis.shatu.view.act;
 
 import java.awt.event.ActionEvent;
@@ -228,7 +233,7 @@ public class StepCompletionAction extends ShaTuGuiAction {
                                     }
                                 }
                                 else {
-                                    String prompt = "Congratulations, the anser you submitted is correct. " + "Keep up the good work to complete this task!";
+                                    String prompt = "Congratulations, the answer you submitted is correct. " + "Keep up the good work to complete this task!";
                                     String[] options = {selection3};
                                     JOptionPane.showOptionDialog(MainFrame.instance(),
                                             prompt, "Tutor Reply", 0, 3, null, options, options[0]);
