@@ -325,10 +325,6 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
         nextButton = new JButton(NewExampleAction.instance());
         nextButton.addActionListener(this);
 
-        buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        buttonPanel.add(checkButton);
-        buttonPanel.add(nextButton);
-        buttonPanel.add(hintButton);
     }
 
     /**
@@ -337,14 +333,10 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
      */
     private void setUpQRPanel() { //Rename function (frPanel?)
         qrPanel = new GPanel();
-
+        responsePane.setPreferredSize(new Dimension(300, 20));
         qrPanel.addc(responsePane, 0, 0, 1, 1, 1.0, 1.0,
-                GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
-                5, 5, 5, 5);
-
-        qrPanel.addc(buttonPanel, 0, 2, 1, 1, 1.0, 1.0,
-                GridBagConstraints.CENTER, GridBagConstraints.NONE,
-                5, 5, 5, 5);
+             GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+             0, 0, 0, 0);
     }
 
     /**

@@ -266,7 +266,7 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
 
     /**
      * Sets up the Check, Next, and Hint buttons and their action listeners
-     */
+     */ 
     private void setUpButtons() {
         checkButton = new JButton(StepCompletionAction.instance());
         checkButton.addActionListener(this);
@@ -275,12 +275,7 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
         hintButton.addActionListener(this);
 
         newExampleButton = new JButton(NewExampleAction.instance());
-        newExampleButton.addActionListener(this);
-
-        buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        buttonPanel.add(checkButton);
-        buttonPanel.add(hintButton);
-        buttonPanel.add(newExampleButton);
+        newExampleButton.addActionListener(this);   
     }
 
     /**
@@ -289,18 +284,15 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
      */
     private void setUpQRPanel() {
         qrPanel = new GPanel();
-
-        qrPanel.addc(responsePane, 0, 0, 1, 1, 1.0, 1.0,
-                GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
-                5, 5, 5, 5);
-
+        
+        qrPanel.setMinimumSize(new Dimension(500, 100));
         qrPanel.addc(feedbackPane, 0, 1, 1, 1, 1.0, 1.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
-                5, 5, 5, 5);
+                0, 0, 0, 0);
+        qrPanel.addc(responsePane, 0, 0, 1, 1, 1.0, 1.0,
+             GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+             0, 0, 0, 0);
 
-        qrPanel.addc(buttonPanel, 0, 2, 1, 1, 1.0, 1.0,
-                GridBagConstraints.CENTER, GridBagConstraints.NONE,
-                5, 5, 5, 5);
     }
 
     /**
@@ -533,6 +525,9 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
         checkButton = view.getCheckButton();
         newExampleButton = view.getNewExampleButton();
 
+        responseTextArea.setText("");
+        feedbackTextArea.setText("");
+        
         // If check and hint buttons are disabled, reset listenerers and apply those used by this view
         if (!checkHintEnabled) {
             view.resetButtonListeners(); // Clear any listeners applied from other views          

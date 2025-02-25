@@ -231,15 +231,6 @@ public class RotateView extends UserRequestView implements ActionListener, KeyLi
         addc(answerField, 2, 2, 2, 1, 0.2, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 5, 5, 5, 5);
-        addc(checkButton, 2, 3, 2, 1, 0.2, 0.0,
-                GridBagConstraints.CENTER, GridBagConstraints.NONE,
-                5, 5, 5, 5);
-        addc(hintButton, 2, 4, 2, 1, 0.2, 0.0,
-                GridBagConstraints.CENTER, GridBagConstraints.NONE,
-                5, 5, 5, 5);
-        addc(nextButton, 1, 5, 2, 1, 0.0, 0.2,
-                GridBagConstraints.WEST, GridBagConstraints.NONE,
-                5, 5, 5, 5);
         addc(shortProblem, 0, 6, 1, 1, 0.0, 0.0,
                 GridBagConstraints.WEST, GridBagConstraints.NONE,
                 5, 5, 5, 5);

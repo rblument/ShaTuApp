@@ -120,7 +120,6 @@ public class ShiftRightView extends UserRequestView implements ActionListener, K
         setUpQuestionArea();
         setUpResponseArea();
         setUpFeedbackArea();
-        //setUpButtons();
         setUpDescriptionPanel();
         setUpQRPanel();
     }
@@ -293,26 +292,6 @@ public class ShiftRightView extends UserRequestView implements ActionListener, K
     }
     
     /**
-     * Sets up the Check, Next, and Hint buttons and their action listeners
-     */
-    private void setUpButtons() {
-        checkButton = new JButton(StepCompletionAction.instance());
-        checkButton.addActionListener(this);
-
-        hintButton = new JButton(HintAction.instance());
-        hintButton.addActionListener(this);
-
-        nextButton = new JButton(NewExampleAction.instance());
-        nextButton.addActionListener(this);
-
-        buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        buttonPanel.add(checkButton);
-        buttonPanel.add(nextButton);
-        buttonPanel.add(hintButton);
-        
-    }
-    
-    /**
      * Creates a GPanel containing the response and feedback JScrollPanes and
      * the button panel.
      */
@@ -326,10 +305,6 @@ public class ShiftRightView extends UserRequestView implements ActionListener, K
         qrPanel.addc(feedbackPanel, 0, 1, 1, 1, 1.0, 1.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
                 5, 5, 5, 5);
-
-        /*qrPanel.addc(buttonPanel, 0, 2, 1, 1, 1.0, 1.0,
-                GridBagConstraints.CENTER, GridBagConstraints.NONE,
-                5, 5, 5, 5);*/
     }
 
     /**
@@ -341,6 +316,9 @@ public class ShiftRightView extends UserRequestView implements ActionListener, K
         hintButton = view.getHintButton();
         checkButton = view.getCheckButton();
         nextButton = view.getNewExampleButton();
+        
+        responseTextArea.setText("");
+        feedbackTextArea.setText("");
         
         // If check and hint buttons are disabled, reset listenerers and apply those used by this view
         if(!checkHintEnabled) {

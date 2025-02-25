@@ -107,7 +107,6 @@ public class MessageLenView extends UserRequestView implements ActionListener {
      */
     private void initializeLayout() {
 
-        JPanel buttonPanel = createButtonPanel();
         JPanel messageLengthPanel = createMessageLengthPanel();
 
         // Add components to the layout
@@ -129,9 +128,6 @@ public class MessageLenView extends UserRequestView implements ActionListener {
         addc(feedbackScrollPane, 0, 5, 1, 1,
                 1.0, 1.0, GridBagConstraints.CENTER,
                 GridBagConstraints.BOTH, 5, 5, 5, 5);
-        addc(buttonPanel, 0, 6, 1, 1,
-                1.0, 1.0, GridBagConstraints.CENTER,
-                GridBagConstraints.NONE, 10, 0, 0, 0);
     }
 
     /**
@@ -259,19 +255,6 @@ public class MessageLenView extends UserRequestView implements ActionListener {
         nextButton.addActionListener(this);
     }
 
-    /**
-     * Creates and returns a JPanel containing the action buttons with a
-     * FlowLayout
-     *
-     * @return JPanel containing the action buttons
-     */
-    private JPanel createButtonPanel() {
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        buttonPanel.add(checkButton);
-        buttonPanel.add(nextButton);
-        buttonPanel.add(hintButton);
-        return buttonPanel;
-    }
 
     /**
      * Initializes the components for inputting the message length. This method

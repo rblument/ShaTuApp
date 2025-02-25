@@ -110,7 +110,6 @@ public class EncodeView extends UserRequestView implements ActionListener {
      */
     private void initializeLayout() {
 
-        JPanel buttonPanel = createButtonPanel();
         JPanel messageLengthPanel = createMessageLengthPanel();
 
         // Add components to the layout
@@ -132,9 +131,6 @@ public class EncodeView extends UserRequestView implements ActionListener {
         addc(feedbackScrollPane, 0, 5, 1, 1,
                 1.0, 1.0, GridBagConstraints.CENTER,
                 GridBagConstraints.BOTH, 5, 5, 5, 5);
-        addc(buttonPanel, 0, 6, 1, 1,
-                1.0, 1.0, GridBagConstraints.CENTER,
-                GridBagConstraints.NONE, 10, 0, 0, 0);
     }
 
     /**
@@ -268,20 +264,7 @@ public class EncodeView extends UserRequestView implements ActionListener {
 
     }
 
-    /**
-     * Creates and returns a JPanel containing the action buttons with a
-     * FlowLayout
-     *
-     * @return JPanel containing the action buttons
-     */
-    private JPanel createButtonPanel() {
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        buttonPanel.add(checkButton);
-        buttonPanel.add(nextButton);
-        buttonPanel.add(hintButton);
-        return buttonPanel;
-    }
-
+    
     /**
      * Initializes the components for inputting the message length and custom
      * questions. This method creates and configures two JLabel's and two
@@ -383,7 +366,7 @@ public class EncodeView extends UserRequestView implements ActionListener {
                 return; // Exit updateView if the view cannot be initialized
             }
         }
-
+        
         if (this.model == null) { // Currently in development, Encode Ascii starts first when loaded, which model can be null initially.
             questionLabel.setText("Please click new example button to get started");
             checkButton.setEnabled(false);
@@ -415,7 +398,7 @@ public class EncodeView extends UserRequestView implements ActionListener {
                 // Clear any existing feedback and response from the previous question.
                 feedbackArea.setText("");
                 responseTextArea.setText("");
-
+                
                 if ((step.getSubType() == type)) { // Subtype was correct
                     System.out.println("If branch was taken, subtype was a encode ascii"); // Error checking.
 

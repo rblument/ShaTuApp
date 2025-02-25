@@ -109,16 +109,6 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
 
         responseTextArea = new JTextField(10);
         responseTextArea.addKeyListener(this);
-
-        // Create and initialize the checkButton
-        checkButton = new JButton(StepCompletionAction.instance());
-        checkButton.addActionListener(this);
-
-        hintButton = new JButton(HintAction.instance());
-        hintButton.addActionListener(this);
-
-        nextButton = new JButton(NewExampleAction.instance());
-        nextButton.addActionListener(this);
     }
 
     /**
@@ -156,19 +146,6 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
         // Add responseTextArea centered below binaryNumberTwoLabel
         addc(responseTextArea, 0, 4, 1, 1, 1.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-                5, 5, 5, 5);
-
-        // Add checkButton centered below responseTextArea
-        addc(checkButton, 0, 5, 1, 1, 0.0, 0.0,
-                GridBagConstraints.CENTER, GridBagConstraints.NONE,
-                5, 5, 5, 5);
-
-        addc(hintButton, 0, 6, 1, 1, 0.0, 0.0,
-                GridBagConstraints.CENTER, GridBagConstraints.NONE,
-                5, 5, 5, 5);
-
-        addc(nextButton, 0, 7, 1, 1, 0.0, 0.0,
-                GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
     }
 
@@ -335,6 +312,8 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
         hintButton = view.getHintButton();
         checkButton = view.getCheckButton();
         nextButton = view.getNewExampleButton();
+        
+        responseTextArea.setText("");
 
         // If check and hint buttons are disabled, reset listenerers and apply those used by this view
         if (!checkHintEnabled) {

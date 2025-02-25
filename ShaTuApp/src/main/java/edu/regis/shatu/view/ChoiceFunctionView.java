@@ -315,6 +315,7 @@ public class ChoiceFunctionView extends UserRequestView implements ActionListene
     /**
      * Sets up the Check, Next, and Hint buttons and their action listeners
      */
+    
     private void setUpButtons() {
         checkButton = new JButton(StepCompletionAction.instance());
         checkButton.addActionListener(this);
@@ -324,11 +325,6 @@ public class ChoiceFunctionView extends UserRequestView implements ActionListene
 
         nextButton = new JButton(NewExampleAction.instance());
         nextButton.addActionListener(this);
-
-        buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        buttonPanel.add(checkButton);
-        buttonPanel.add(nextButton);
-        buttonPanel.add(hintButton);
     }
 
     /**
@@ -337,6 +333,7 @@ public class ChoiceFunctionView extends UserRequestView implements ActionListene
      */
     private void setUpQRPanel() {
         qrPanel = new GPanel();
+        qrPanel.setMinimumSize(new Dimension(500, 100));
 
         qrPanel.addc(responsePane, 0, 0, 1, 1, 1.0, 1.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
@@ -344,10 +341,6 @@ public class ChoiceFunctionView extends UserRequestView implements ActionListene
 
         qrPanel.addc(feedbackPane, 0, 1, 1, 1, 1.0, 1.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
-                5, 5, 5, 5);
-
-        qrPanel.addc(buttonPanel, 0, 2, 1, 1, 1.0, 1.0,
-                GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
     }
 
