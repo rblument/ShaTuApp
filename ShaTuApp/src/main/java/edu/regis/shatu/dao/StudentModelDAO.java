@@ -45,7 +45,7 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
      * Initialize this DAO via the parent constructor.
      */
     public StudentModelDAO() {
-        super();
+        super("StudentModel", "UserId");
     }
 
     @Override
@@ -64,11 +64,11 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
         try {
             conn = DriverManager.getConnection(URL);
             stmt1 = conn.prepareStatement(sql1);
-            
+
             stmt1.setString(1, userId);
             stmt1.setString(2, ScaffoldLevel.EXTREME.toString());
             stmt1.executeUpdate();
-            
+
             stmt2 = conn.prepareStatement(sql2, Statement.RETURN_GENERATED_KEYS);
 
             for (Assessment assessment : studentModel.getAssessments().values()) {
@@ -88,7 +88,7 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
                     assessment.setId(rs.getInt(1));
                 }
             }
-             
+
         } catch (SQLException e) {
             throw new NonRecoverableException("UserDAO-ERR-5" + e.toString(), e);
         } finally {
@@ -135,7 +135,8 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
 
     @Override
     public void update(StudentModel model) throws ObjNotFoundException, NonRecoverableException {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from
+                                                                       // nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
@@ -145,8 +146,6 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
         String sql = "";
 
         int assessmentId = assessment.getId();
-        String userId = model.getUserId();
-        int knowledgeComponentId = assessment.getOutcome().getId();
 
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -196,70 +195,15 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
         }
     }
 
-    @Override
-    public void delete(String userId) throws NonRecoverableException {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    @Override
-    public boolean exists(String userId) throws NonRecoverableException {
-        Connection conn = null;
-
-        try {
-            conn = DriverManager.getConnection(URL);
-            return exists(userId, conn);
-
-        } catch (SQLException e) {
-            throw new NonRecoverableException("UserDAO-ERR-3" + e.toString(), e);
-        } finally {
-            close(conn);
-        }
-    }
-
-    /**
-     * Utility that returns whether the student model exists for the given user
-     * id in the database.
-     *
-     * As all students are created with an associated student model, this should
-     * always return true.
-     *
-     * @param userId the user id of the student whose student model is being
-     * checked.
-     * @param conn an existing connection to the database, which is not closed
-     * by this method.
-     * @return true, if the student model for the given user id exists in the
-     * database, which should always be the case, otherwise false
-     * @throws NonRecoverableException (see ex.getCause().getErrorCode())
-     */
-    private boolean exists(String userId, Connection conn) throws NonRecoverableException {
-        final String sql = "SELECT UserId FROM StudentModel WHERE UserId = ?";
-
-        PreparedStatement stmt = null;
-
-        try {
-            stmt = conn.prepareStatement(sql);
-
-            stmt.setString(1, userId);
-
-            ResultSet rs = stmt.executeQuery();
-
-            return rs.next();
-
-        } catch (SQLException ex) {
-            throw new NonRecoverableException("StudentModelDAO-ERR-3" + ex.toString(), ex);
-        } finally {
-            close(stmt);
-        }
-    }
-
     /**
      * Retrive
+     * 
      * @param userId
      * @param conn
      * @return
      * @throws ObjNotFoundException
      * @throws SQLException
-     * @throws NonRecoverableException 
+     * @throws NonRecoverableException
      */
     private ArrayList<Assessment> retrieveAssessments(String userId, Connection conn)
             throws ObjNotFoundException, SQLException, NonRecoverableException {

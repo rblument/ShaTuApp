@@ -47,8 +47,8 @@ import edu.regis.shatu.svc.SessionSvc;
  */
 public class SessionDAO extends MySqlDAO implements SessionSvc {
 
-    SessionDAO() {
-        super();
+    public SessionDAO() {
+        super("TutoringSession", "Id");
     }
 
     /**
@@ -206,14 +206,6 @@ public class SessionDAO extends MySqlDAO implements SessionSvc {
     }
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void delete(String userId) throws NonRecoverableException {
-
-    }
-
-    /**
      * Utility that deletes the given a file.
      * 
      * @param file a File with an absolute path to delete.
@@ -221,36 +213,6 @@ public class SessionDAO extends MySqlDAO implements SessionSvc {
     private void delete(File file) {
         if (file.exists())
             file.delete();
-    }
-
-    /**
-     * Return whether the given user (id) exists in the database.
-     *
-     * @param userId
-     * @param conn   an existing connection to the database, which is not closed
-     *               by this method.
-     * @return true, if the user id exists in the database, otherwise false
-     * @throws NonRecoverableException (see ex.getCause().getErrorCode())
-     */
-    private boolean exists(String userId, Connection conn) throws NonRecoverableException {
-        final String sql = "SELECT Id FROM TutoringSession WHERE UserId = ?";
-
-        PreparedStatement stmt = null;
-
-        try {
-            stmt = conn.prepareStatement(sql);
-
-            stmt.setString(1, userId);
-
-            ResultSet rs = stmt.executeQuery();
-
-            return rs.next();
-
-        } catch (SQLException ex) {
-            throw new NonRecoverableException("SessionDAO-ERR-6" + ex.toString(), ex);
-        } finally {
-            close(stmt);
-        }
     }
 
     private void createPendingTasks(TutoringSession session, Connection conn)

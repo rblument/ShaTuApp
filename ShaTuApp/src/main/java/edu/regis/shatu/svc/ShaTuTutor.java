@@ -24,6 +24,7 @@ import java.util.logging.Logger;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import edu.regis.shatu.dao.AccountDAO;
 import edu.regis.shatu.err.IllegalArgException;
 import edu.regis.shatu.err.NonRecoverableException;
 import edu.regis.shatu.err.ObjNotFoundException;
@@ -215,25 +216,26 @@ public class ShaTuTutor implements TutorSvc {
 
         int courseId = DEFAULT_COURSE_ID; // Currently only one course
 
+        ServiceFactory.findAccountSvc().create(acct);
+
         try {
-            ServiceFactory.findAccountSvc().create(acct);
+            Course course = ServiceFactory.findCourseSvc().retrieve(courseId);
 
-            try {
-                Course course = ServiceFactory.findCourseSvc().retrieve(courseId);
+            student = createStudent(acct, course);
 
-                student = createStudent(acct, course);
+            createSession(student, course);
 
-                createSession(student, course);
+            return new TutorReply("Created");
 
-                return new TutorReply("Created");
-
-            } catch (ObjNotFoundException ex) {
-                return createError("Unknown course: " + courseId, null);
-            }
-
-        } catch (IllegalArgException ex) { // The account already exists
-            return new TutorReply("IllegalUserId");
+        } catch (ObjNotFoundException ex) {
+            return createError("Unknown course: " + courseId, null);
         }
+
+        // try {
+        // }
+        // catch (IllegalArgException ex) { // The account already exists
+        // return new TutorReply("IllegalUserId");
+        // }
     }
 
     /**
@@ -250,8 +252,8 @@ public class ShaTuTutor implements TutorSvc {
     public TutorReply verifyUser(String jsonAcct) throws NonRecoverableException {
         Account requestAcct = gson.fromJson(jsonAcct, Account.class);
 
-        AccountSvc acctSvc = ServiceFactory.findAccountSvc();
-        if (!acctSvc.exists(requestAcct.getUserId())) {
+        AccountDAO acctSvc = ServiceFactory.findAccountSvc();
+        if (!acctSvc.exists(acctSvc.primaryKey, requestAcct.getUserId())) {
             return new TutorReply("IllegalUserId");
         }
 
@@ -292,9 +294,9 @@ public class ShaTuTutor implements TutorSvc {
     public TutorReply resetPassword(String jsonAcct) throws NonRecoverableException {
         Account acct = gson.fromJson(jsonAcct, Account.class);
 
-        AccountSvc acctSvc = ServiceFactory.findAccountSvc();
+        AccountDAO acctSvc = ServiceFactory.findAccountSvc();
 
-        if (!acctSvc.exists(acct.getUserId())) {
+        if (!acctSvc.exists(acctSvc.primaryKey, acct.getUserId())) {
             return new TutorReply("IllegalUserId");
         }
 
@@ -307,10 +309,11 @@ public class ShaTuTutor implements TutorSvc {
         } catch (ObjNotFoundException ex) {
             // Should never get here since we tested whether the account exists
             return new TutorReply("IllegalUserId");
-        } catch (IllegalArgException ex) {
-            // ToDo: More specific err information returned
-            return new TutorReply("IllegalArg");
         }
+        // catch (IllegalArgException ex) {
+        // // ToDo: More specific err information returned
+        // return new TutorReply("IllegalArg");
+        // }
     }
 
     /**

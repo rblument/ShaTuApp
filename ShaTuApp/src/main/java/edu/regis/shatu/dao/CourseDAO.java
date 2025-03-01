@@ -52,7 +52,7 @@ public class CourseDAO extends MySqlDAO implements CourseSvc {
      * Instantiate this Course DAO with default values.
      */
     public CourseDAO() {
-        super();
+        super("Course", "Id");
     }
 
     /**

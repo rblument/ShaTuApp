@@ -17,8 +17,9 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
 
-import edu.regis.shatu.err.IllegalArgException;
+import edu.regis.shatu.dao.interfaces.CRUD;
 import edu.regis.shatu.err.NonRecoverableException;
 import edu.regis.shatu.err.ObjNotFoundException;
 import edu.regis.shatu.model.Account;
@@ -29,101 +30,68 @@ import edu.regis.shatu.svc.AccountSvc;
  *
  * @author rickb
  */
-public class AccountDAO extends MySqlDAO implements AccountSvc {
+public class AccountDAO extends MySqlDAO implements AccountSvc, CRUD<Account> {
+
+    public HashMap<String, Object> accountTypes = new HashMap<String, Object>();
 
     /**
      * Initialize this DAO via the parent constructor.
      */
     public AccountDAO() {
-        super();
+        super("Account", "UserId");
+        accountTypes.put("UserId", "");
+        accountTypes.put("Password", "");
+        accountTypes.put("FirstName", "");
+        accountTypes.put("LastName", "");
+        accountTypes.put("Question", 0);
+        accountTypes.put("Answer", "");
+        accountTypes.put("IsStudent", true);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void create(Account acct) throws IllegalArgException, NonRecoverableException {
+    public void create(Account acct) throws NonRecoverableException {
         final String sql = "INSERT INTO Account (UserId, Password, FirstName, LastName, Question, Answer, IsStudent) VALUES (?,?,?,?,?,?,?)";
 
-        if (acct.isStudent()) { // Can only create students, not admins.
-            Connection conn = null;
-            PreparedStatement stmt = null;
-
-            String userId = acct.getUserId();
-
-            try {
-                conn = DriverManager.getConnection(URL);
-
-                if (exists(userId, conn)) {
-                    throw new IllegalArgException("User exists " + userId);
-                }
-
-                String[] keyCol = { "Id" };
-                stmt = conn.prepareStatement(sql, keyCol);
-
-                stmt.setString(1, userId);
-                stmt.setString(2, acct.getPassword());
-                stmt.setString(3, acct.getFirstName());
-                stmt.setString(4, acct.getLastName());
-                stmt.setInt(5, acct.getSecurityQuestion());
-                stmt.setString(6, acct.getSecurityAnswer());
-                stmt.setBoolean(7, acct.isStudent());
-
-                stmt.executeUpdate();
-
-            } catch (SQLException e) {
-                throw new NonRecoverableException("AccountDAO-ERR-1", e);
-
-            } finally {
-                close(conn, stmt);
-            }
-        } else {
-            throw new IllegalArgException("AccountDAO-ERR-2 New accounts must be students.");
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void delete(String userId) throws NonRecoverableException {
-        final String sql = "DELETE FROM Account WHERE UserId = ?";
-
+        // if (acct.isStudent()) { // Can only create students, not admins.
         Connection conn = null;
         PreparedStatement stmt = null;
+
+        String userId = acct.getUserId();
 
         try {
             conn = DriverManager.getConnection(URL);
 
-            stmt = conn.prepareStatement(sql);
+            if (exists(userId, conn)) {
+                throw new SQLException("User already exists " + userId);
+            }
+
+            String[] keyCol = { "Id" };
+            stmt = conn.prepareStatement(sql, keyCol);
 
             stmt.setString(1, userId);
+            stmt.setString(2, acct.getPassword());
+            stmt.setString(3, acct.getFirstName());
+            stmt.setString(4, acct.getLastName());
+            stmt.setInt(5, acct.getSecurityQuestion());
+            stmt.setString(6, acct.getSecurityAnswer());
+            stmt.setBoolean(7, acct.isStudent());
 
             stmt.executeUpdate();
 
         } catch (SQLException e) {
-            throw new NonRecoverableException("AccountDAO-ERR-3" + e.toString(), e);
+            throw new NonRecoverableException("AccountDAO-ERR-1", e);
+
         } finally {
             close(conn, stmt);
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean exists(String userId) throws NonRecoverableException {
-        Connection conn = null;
-
-        try {
-            conn = DriverManager.getConnection(URL);
-            return exists(userId, conn);
-
-        } catch (SQLException e) {
-            throw new NonRecoverableException("AccountDAO-ERR-4" + e.toString(), e);
-        } finally {
-            close(conn);
-        }
+        // }
+        // else {
+        // throw new IllegalArgException("AccountDAO-ERR-2 New accounts must be
+        // students.");
+        // }
     }
 
     /**
@@ -149,7 +117,7 @@ public class AccountDAO extends MySqlDAO implements AccountSvc {
      * {@inheritDoc}
      */
     @Override
-    public void update(Account account) throws ObjNotFoundException, IllegalArgException, NonRecoverableException {
+    public void update(Account account) throws ObjNotFoundException, NonRecoverableException {
         final String sql = "UPDATE Account SET Password = ?, FirstName = ?, LastName = ?, SecurityQuestion = ?, SecurityAnswer = ? WHERE UserId = ?";
 
         Connection conn = null;
@@ -178,9 +146,11 @@ public class AccountDAO extends MySqlDAO implements AccountSvc {
                     throw new NonRecoverableException("AccountDAO-ERR-6 Account update failed");
                 }
 
-            } else {
-                throw new IllegalArgException("AccountDAO-ERR-7 Can only update a student account");
             }
+            // else {
+            // throw new IllegalArgException("AccountDAO-ERR-7 Can only update a student
+            // account");
+            // }
 
         } catch (SQLException e) {
             throw new NonRecoverableException("AccountDAO-ERR-8" + e.toString(), e);
@@ -228,36 +198,6 @@ public class AccountDAO extends MySqlDAO implements AccountSvc {
             }
         } catch (SQLException e) {
             throw new NonRecoverableException("AccountDAO-ERR-9" + e.toString(), e);
-        } finally {
-            close(stmt);
-        }
-    }
-
-    /**
-     * Utility that returns whether the given user (id) exists in the database.
-     *
-     * @param userId the account user id format name@university.edu
-     * @param conn   an existing connection to the database, which is not closed
-     *               by this method.
-     * @return true, if the user id exists in the database, otherwise false
-     * @throws NonRecoverableException (see ex.getCause().getErrorCode())
-     */
-    private boolean exists(String userId, Connection conn) throws NonRecoverableException {
-        final String sql = "SELECT UserId FROM Account WHERE UserId = ?";
-
-        PreparedStatement stmt = null;
-
-        try {
-            stmt = conn.prepareStatement(sql);
-
-            stmt.setString(1, userId);
-
-            ResultSet rs = stmt.executeQuery();
-
-            return rs.next();
-
-        } catch (SQLException ex) {
-            throw new NonRecoverableException("AccountDAO-ERR-10" + ex.toString(), ex);
         } finally {
             close(stmt);
         }

@@ -13,12 +13,18 @@
 package edu.regis.shatu.dao;
 
 import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import edu.regis.shatu.err.MissingPropertyException;
+import edu.regis.shatu.err.NonRecoverableException;
+import edu.regis.shatu.err.ObjNotFoundException;
 import edu.regis.shatu.util.ResourceMgr;
 
 /**
@@ -58,6 +64,10 @@ public abstract class MySqlDAO {
      */
     public static String DRIVER = "com.mysql.cj.jdbc.Driver";
 
+    public String table;
+
+    public String primaryKey;
+
     /*
      * The URL used to obtain a JDBC connection.
      */
@@ -74,7 +84,9 @@ public abstract class MySqlDAO {
     /**
      * If it hasn't already been loaded, explicitly load the MySql driver.
      */
-    public MySqlDAO() {
+    public MySqlDAO(String table, String primaryKey) {
+        this.table = table;
+        this.primaryKey = primaryKey;
         if (!IS_LOADED) {
             try {
                 ResourceMgr rscr = ResourceMgr.instance();
@@ -170,5 +182,85 @@ public abstract class MySqlDAO {
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "MySqlDao-ERR-8: rollback {0}", e.toString());
         }
+    }
+
+    /**
+     * Deletes records from the DB on column value match
+     * 
+     * @param column the column to search on
+     * @param key    the value to match
+     * @throws NonRecoverableException
+     */
+    public void delete(String column, Object key) throws NonRecoverableException {
+        String stmt = String.format("DELETE FROM %s WHERE %s = ?", this.table, column);
+
+        Connection conn;
+        PreparedStatement prepstmt = null;
+        try {
+            conn = DriverManager.getConnection(URL);
+            prepstmt = conn.prepareStatement(stmt);
+
+            prepstmt = sqlTypeCoerce(key, prepstmt);
+
+            prepstmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new NonRecoverableException(this.table + "-DAO-ERR-3" + e.toString(), e);
+        } finally {
+            close(prepstmt);
+        }
+    }
+
+    /**
+     * Checks if an entry in the Database exists.
+     * 
+     * @param column the column to search on
+     * @param key    the value to match
+     * @return boolean
+     * @throws ObjNotFoundException
+     * @throws NonRecoverableException
+     */
+    public boolean exists(String column, Object key) throws NonRecoverableException {
+        String stmt = String.format("SELECT %s FROM %s WHERE %s = ?", this.primaryKey, this.table, column);
+
+        Connection conn;
+        PreparedStatement prepstmt = null;
+        try {
+            conn = DriverManager.getConnection(URL);
+            prepstmt = conn.prepareStatement(stmt);
+
+            prepstmt = sqlTypeCoerce(key, prepstmt);
+
+            ResultSet result = prepstmt.executeQuery();
+
+            return result.next();
+
+        } catch (SQLException e) {
+            throw new NonRecoverableException(this.table + "-DAO-ERR-10" + e.toString(), e);
+        } finally {
+            close(prepstmt);
+        }
+    }
+
+    /**
+     * A not so great way to coerce the various types of columns.
+     * only supports one param for now.
+     * 
+     * @param obj  the object to coerce
+     * @param stmt the statement to coerce it into
+     * @return PreparedStatment
+     * @throws SQLException
+     */
+    static PreparedStatement sqlTypeCoerce(Object obj, PreparedStatement stmt) throws SQLException {
+        if (obj instanceof String) {
+            stmt.setString(1, obj.toString());
+        } else if (obj instanceof Integer) {
+            stmt.setInt(1, (Integer) obj);
+        } else if (obj instanceof Boolean) {
+            stmt.setBoolean(1, (Boolean) obj);
+        } else if (obj instanceof Timestamp) {
+            stmt.setTimestamp(1, (Timestamp) obj);
+        }
+
+        return stmt;
     }
 }
