@@ -17,15 +17,10 @@ import edu.regis.shatu.err.ObjNotFoundException;
 import edu.regis.shatu.model.Student;
 import edu.regis.shatu.model.StudentModelFieldKind;
 import edu.regis.shatu.model.aol.Assessment;
+import edu.regis.shatu.model.aol.AssessmentLevel;
 import edu.regis.shatu.model.aol.StudentModel;
 import java.util.List;
 
-/**
- * Specifies the API for {@link StudentModel} life-cycle maintenance 
- * (CRUD persistence).
- * 
- * @author rickb
- */
 public interface StudentModelSvc {
     /**
      * Insert the given StudentModel into the DB.
@@ -77,9 +72,11 @@ public interface StudentModelSvc {
     * @throws ObjNotFoundException if the student record is not found.
     * @throws NonRecoverableException if a database error occurs.
     */
-   List<String> retrieveIncompleteLessons(String userId, String learningCategory) 
+    List<String> retrieveIncompleteLessons(String userId, String learningCategory) 
            throws ObjNotFoundException, NonRecoverableException;
-
+    
+    // Retrieves all lesson titles for the student, excluding lessons with IDs 0, 10, and 20.
+    List<String> retrieveAllLessons(String userId) throws NonRecoverableException;
     
     /**
      * Delete the session from the database for the given student user id.
@@ -98,7 +95,8 @@ public interface StudentModelSvc {
      * @throws NonRecoverableException (see getCause().getErrorCode()).
      */
     boolean exists(String userId) throws NonRecoverableException;
+    
+    // Retrieves the assessment level for a specific lesson.
+    AssessmentLevel retrieveAssessmentLevel(String userId, String lesson)
+            throws ObjNotFoundException, NonRecoverableException;
 }
-
-
-
