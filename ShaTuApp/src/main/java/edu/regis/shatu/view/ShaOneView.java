@@ -31,6 +31,13 @@ import javax.swing.JRadioButton;
 import edu.regis.shatu.model.aol.ShaOneViewStep;
 import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.aol.ProblemType;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import javax.swing.ButtonGroup;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 
 /**
  * ShaOne class represents the GUI view for performing the SHA Σ₁ function, involving a right shift operation.
@@ -41,7 +48,7 @@ import edu.regis.shatu.model.aol.ProblemType;
  *
  * @author rickb
  */
-public class ShaOneView extends UserRequestView { //implements KeyListener 
+public class ShaOneView extends UserRequestView implements KeyListener { //implements KeyListener 
     private TutoringSessionView view;
     
     /**
@@ -54,11 +61,77 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
     private JLabel exampleInputLabel;
     private JLabel problem;
     private JTextField answerField;
-
     private JButton nextQuestionButton;
-
     private boolean checkHintEnabled = false;
 
+    /**
+     * Label describing the A operand for the function
+     */
+    private JLabel operandALabel;
+    /**
+     * The name of the current Tutoring Session View, i.e: Sigma0
+     */
+    private JLabel viewNameLabel;
+    /**
+     * Label describing the size of the problem to select
+     */
+    private JLabel problemSizeLabel;
+    /**
+     * Label describing instructions to the user
+     */
+    private JLabel instructionLabel;
+    /**
+     * The actual value of operand A
+     */
+    private String operandAValue;
+    /**
+     * Deprecated
+     */
+
+    /**
+     * The area in which the Sigma0 function is described
+     */
+    private JTextArea descTextArea;
+    /**
+     * The panel where the description lies in
+     */
+    private GPanel descriptionPanel;
+    /**
+     * Radio Button selectors which the user uses to select the size of the problem
+     */
+    private JRadioButton fourRadioButton, eightRadioButton, sixteenRadioButton, thirtytwoRadioButton;
+    /**
+     * The button group in which the radio buttons are grouped in
+     */
+    private ButtonGroup problemSizeGroup;
+    /**
+     * The panel in which the radio buttons lie
+     */
+    private JPanel radioButtonPanel;
+    /**
+     * The actual size of the problem that the user selects
+     */
+    private int problemSize;
+    /**
+     * The panel in which the question lies in
+     */
+    private GPanel questionPanel;
+    /**
+     * The label that describes to the user where they can enter their answer
+     */
+    private JLabel answerLabel;
+    /**
+     * The text area where the user can enter their answer
+     */
+    private JTextArea responseTextArea;
+    /**
+     * The scrollable pane in which the response text area lies in
+     */
+    private JScrollPane responsePane;
+    /**
+     * The panel that contains the question and answer components
+     */
+    private GPanel qrPanel;
     /**
      * Initialize this view including creating and laying out its child components.
      */
@@ -67,62 +140,269 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
         initializeLayout();
     }
     
+       /**
+     * Create and return the server request this view makes when a user selects
+     * that they want to practice a new Sha One View example.
+     *
+     * @return
+     */
+    @Override
+    public NewExampleRequest newRequest() {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+        NewExampleRequest ex = new NewExampleRequest();
+
+        ex.setExampleType(ProblemType.SHA_ONE);
+
+        ShaOneViewStep newStep = new ShaOneViewStep();
+
+        ex.setData(gson.toJson(newStep));
+
+        return ex;
+    }
+    @Override
+    public StepCompletion stepCompletion() {
+        Step currentStep = model.currentTask().currentStep().getStep();
+
+        ShaOneViewStep example = gson.fromJson(currentStep.getData(), ShaOneViewStep.class);
+
+        String userResponse = answerField.getText().replaceAll("\\s", "");
+
+        example.setUserResponse(userResponse);
+
+        StepCompletion step = new StepCompletion(currentStep, gson.toJson(example));
+        step.setStep(currentStep);
+        return step;
+    }
+    
+        @Override
+    public void keyTyped(KeyEvent e) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+    
+        /**
+     * Handles key pressed events
+     *
+     * @param e the event to be processed
+     */
+    @Override
+    public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_ENTER && answerField.getText().equals("")) {
+            JOptionPane.showMessageDialog(this, "Please provide an answer");
+        } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+            //checkButton.doClick();
+        }
+    }
+    
+       /**
+     * Handles key released events
+     *
+     * @param e the event to be processed
+     */
+    @Override
+    public void keyReleased(KeyEvent e) {
+    }
+        /**
+     * Displays a message dialog indicating the start of the next question.
+     */
+    private void onNextQuestion() {
+        JOptionPane.showMessageDialog(this, "Next Question");
+    }
+
+    /**
+     * Displays a message dialog indicating the provision of a hint.
+     */
+    private void onNextHint() {
+        JOptionPane.showMessageDialog(this, "Hint");
+    }
+
+    /**
+     * Handles the click event of the check button, verifying the user's answer.
+     */
+    private void onCheckButton() {
+        if (answerField.getText().equals("")) {
+            JOptionPane.showMessageDialog(this, "Please provide an answer");
+        } else {
+            verifyAnswer();
+        }
+    }
+    
+    /**
+     * Sets the main View title and description of the function
+     */
+    private void setupDescription()
+    {
+        viewNameLabel = new JLabel("The Σ₁ Function");
+        viewNameLabel.setFont(new Font("", Font.BOLD, 20));
+
+        descTextArea = new JTextArea();
+        descTextArea.setEditable(false);
+        descTextArea.setLineWrap(true);
+        descTextArea.setWrapStyleWord(true);
+        descTextArea.setOpaque(false);
+        descTextArea.append("""
+                            The Σ₁ function takes a single 32-bit word operand, A, and outputs a single 32-bit word.""");
+    }
+
+    /**
+     * Creates the description panel
+     */
+    private void setUpDescriptionPanel() {
+        descriptionPanel = new GPanel();
+
+        descriptionPanel.addc(viewNameLabel, 0, 0, 1, 1, 0.0, 0.0,
+                GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
+                5, 5, 5, 5);
+
+        descriptionPanel.addc(descTextArea, 0, 1, 3, 1, 1.0, 1.0,
+                GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
+                5, 5, 5, 5);
+
+        descriptionPanel.addc(questionPanel, 0, 2, 1, 1, 0.0, 0.0,
+                GridBagConstraints.SOUTHWEST, GridBagConstraints.NONE,
+                5, 5, 5, 5);
+    }
+
+    /**
+     * Sets up the radio buttons and action listener
+     */
+    private void setUpRadioButtons() {
+        fourRadioButton = new JRadioButton("4 bits");
+        eightRadioButton = new JRadioButton("8 bits");
+        sixteenRadioButton = new JRadioButton("16 bits");
+        thirtytwoRadioButton = new JRadioButton("32 bits");
+
+        ActionListener selection = e -> {
+            JRadioButton source = (JRadioButton) e.getSource();
+            updateProblemSize(source);
+        };
+
+        fourRadioButton.addActionListener(selection);
+        eightRadioButton.addActionListener(selection);
+        sixteenRadioButton.addActionListener(selection);
+        thirtytwoRadioButton.addActionListener(selection);
+
+        problemSizeGroup = new ButtonGroup();
+        problemSizeGroup.add(fourRadioButton);
+        problemSizeGroup.add(eightRadioButton);
+        problemSizeGroup.add(sixteenRadioButton);
+        problemSizeGroup.add(thirtytwoRadioButton);
+
+        fourRadioButton.setSelected(true); //Set default radio button to true
+
+        radioButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        radioButtonPanel.add(fourRadioButton);
+        radioButtonPanel.add(eightRadioButton);
+        radioButtonPanel.add(sixteenRadioButton);
+        radioButtonPanel.add(thirtytwoRadioButton);
+    }
+
+    /**
+     * Initializes the question components and adds them to the question panel.
+     */
+    private void setUpQuestionArea() {
+        problemSize = 4;
+        operandAValue = "";
+
+        operandALabel = new JLabel("Operand A: " + operandAValue);
+
+        problemSizeLabel = new JLabel("Select Problem Size:");
+        instructionLabel = new JLabel("Solve the Σ₀ function using operand A given below:");
+
+        questionPanel = new GPanel();
+
+        questionPanel.addc(problemSizeLabel, 0, 0, 1, 1, 0.0, 0.0,
+                GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
+                5, 5, 5, 5);
+        questionPanel.addc(radioButtonPanel, 0, 1, 1, 1, 0.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                5, 5, 5, 5);
+        questionPanel.addc(instructionLabel, 0, 2, 1, 1, 0.0, 0.0,
+                GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
+                5, 5, 5, 5);
+        questionPanel.addc(operandALabel, 0, 3, 1, 1, 0.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                5, 5, 5, 5);
+    }
+
+    /**
+     * Initializes the response area
+     */
+    private void setUpResponseArea() {
+        answerLabel = new JLabel("Enter your answer below:");
+        responseTextArea = new JTextArea(3, 20);
+        responseTextArea.setLineWrap(true);
+        responseTextArea.setWrapStyleWord(true);
+
+        responsePane = new JScrollPane(responseTextArea);
+        responsePane.setPreferredSize(new Dimension(800, 200));
+    }
+    
+        private void setUpQRPanel() {
+        qrPanel = new GPanel();
+
+        qrPanel.addc(responsePane, 0, 4, 4, 4, 1.0, 0,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                5, 5, 5, 5);
+
+     //   qrPanel.addc(buttonPanel, 0, 2, 1, 1, 1.0, 1.0,
+     //           GridBagConstraints.CENTER, GridBagConstraints.NONE,
+      //          5, 5, 5, 5);
+    }
+    
     /**
      * Create the child GUI components appearing in this frame.
      */
     private void initializeComponents() {
-        exampleInputLabel = new JLabel("Given an 𝑛 bit binary number, output the value of the SHA Σ₁ function");
-        problem = new JLabel("Default Problem Text");
-        answerField = new JTextField(10);
-        //answerField.addKeyListener(this);
-        
-        nextQuestionButton = new JButton("Next Question");
-        //nextQuestionButton.addActionListener(this);
-        
-      //  shortProblem = new JRadioButton("16-bit");
-     //   shortProblem.setSelected(true);
-
-       // longProblem = new JRadioButton("32-bit");
-
+        setupDescription();
+        setUpRadioButtons();
+        setUpQuestionArea();
+        setUpResponseArea();
+        setUpDescriptionPanel();
+        setUpQRPanel();
     }
 
     /**
      * Layout the child components in this view.
      */
     private void initializeLayout() {
-        GridBagConstraints centerConstraints = new GridBagConstraints();
-        centerConstraints.anchor = GridBagConstraints.CENTER;
-        centerConstraints.insets = new Insets(5, 5, 5, 5);
-        // Add exampleInputLabel centered
-        addc(exampleInputLabel, 0, 0, 1, 1, 0.0, 0.0,
-                GridBagConstraints.CENTER, GridBagConstraints.NONE,
-                5, 5, 5, 5);
-        addc(problem, 0, 1, 1, 1, 0.0, 0.0,
-                GridBagConstraints.CENTER, GridBagConstraints.NONE,
-                5, 5, 5, 5);
-        // Add answerField to the layout, centered
-        addc(answerField, 0, 4, 1, 1, 1.0, 0.0,
-                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-                5, 5, 5, 5);
-/*
-        addc(checkButton, 0, 5, 1, 1, 0.0, 0.0,
-                GridBagConstraints.CENTER, GridBagConstraints.NONE,
-                5, 5, 5, 5);
-        addc(hintButton, 0, 6, 1, 1, 0.0, 0.0,
-                GridBagConstraints.CENTER, GridBagConstraints.NONE,
-                5, 5, 5, 5);
-        addc(nextQuestionButton, 0, 7, 1, 1, 0.0, 0.0,
-                GridBagConstraints.CENTER, GridBagConstraints.NONE,
-                5, 5, 5, 5);
-                addc(shortProblem, 0, 6, 1, 1, 0.0, 0.0,
-                GridBagConstraints.WEST, GridBagConstraints.NONE,
-                5, 5, 5, 5);
-        addc(longProblem, 0, 7, 1, 1, 0.0, 0.0,
-                GridBagConstraints.WEST, GridBagConstraints.NONE,
-                5, 5, 5, 5);
-*/
-    }
 
+        addc(descriptionPanel, 0, 0, 1, 1, 1.0, 0.0,
+                GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
+                5, 5, 5, 5);
+
+        addc(answerLabel, 0, 1, 1, 1, 1.0, 0.0,
+                GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
+                5, 5, 5, 5);
+        
+        addc(qrPanel, 0, 2, 3, 1, 1.0, 1.0,
+                GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
+                5, 5, 5, 5);
+    }
+    @Override
+    /**
+     * Updates the description, question, and hints from the model
+     * 
+     * TODO: THIS IS A PLACEHOLDER UNTIl WE HAVE HAVE THE MODEL CODE COMPLETED
+     */
+    protected void updateView() {
+        view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
+        //hintButton = view.getHintButton();
+        //checkButton = view.getCheckButton();
+        nextQuestionButton = view.getNewExampleButton();
+        
+        // If check and hint buttons are disabled, reset listenerers and apply those used by this view
+        if(!checkHintEnabled) {
+            view.resetButtonListeners(); // Clear any listeners applied from other views          
+        }
+        
+        if (model != null) {
+            // ****TO-DO*****
+            // Update the view's information from the model
+            // Debugging dynamic updates to the model can be done here.
+            System.out.println("ShaOneView");
+        }
+    }
     /**
      * Performs a right shift operation on a binary number for the specified number of places.
      *
@@ -172,90 +452,26 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
         }
     }
     
-    /**
-     * Displays a message dialog indicating the start of the next question.
-     */
-    private void onNextQuestion() {
-        JOptionPane.showMessageDialog(this, "Next Question");
-    }
 
-    /**
-     * Displays a message dialog indicating the provision of a hint.
-     */
-    private void onNextHint() {
-        JOptionPane.showMessageDialog(this, "Hint");
-    }
-
-    /**
-     * Handles the click event of the check button, verifying the user's answer.
-     */
-    private void onCheckButton() {
-        if (answerField.getText().equals("")) {
-            JOptionPane.showMessageDialog(this, "Please provide an answer");
-        } else {
-            verifyAnswer();
-        }
-    }
     
-    @Override
+
+
     /**
-     * Updates the description, question, and hints from the model
-     * 
-     * TODO: THIS IS A PLACEHOLDER UNTIl WE HAVE HAVE THE MODEL CODE COMPLETED
-     */
-    protected void updateView() {
-        view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
-        //hintButton = view.getHintButton();
-        //checkButton = view.getCheckButton();
-        nextQuestionButton = view.getNewExampleButton();
-        
-        // If check and hint buttons are disabled, reset listenerers and apply those used by this view
-        if(!checkHintEnabled) {
-            view.resetButtonListeners(); // Clear any listeners applied from other views          
-        }
-        
-        if (model != null) {
-            // ****TO-DO*****
-            // Update the view's information from the model
-            // Debugging dynamic updates to the model can be done here.
-            System.out.println("ShaOneView");
-        }
-    }
-
-       /**
-     * Create and return the server request this view makes when a user selects
-     * that they want to practice a new Sha One View example.
+     * Updates the size of the problem to display.
      *
-     * @return
+     * @param source The radio button that triggered the even.
      */
-    @Override
-    public NewExampleRequest newRequest() {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-
-        NewExampleRequest ex = new NewExampleRequest();
-
-        ex.setExampleType(ProblemType.SHA_ONE);
-
-        ShaOneViewStep newStep = new ShaOneViewStep();
-
-        ex.setData(gson.toJson(newStep));
-
-        return ex;
+    private void updateProblemSize(JRadioButton source) {
+        if (source == fourRadioButton) {
+            problemSize = 4;
+        } else if (source == eightRadioButton) {
+            problemSize = 8;
+        } else if (source == sixteenRadioButton) {
+            problemSize = 16;
+        } else if (source == thirtytwoRadioButton) {
+            problemSize = 32;
+        }
     }
 
 
-    @Override
-    public StepCompletion stepCompletion() {
-        Step currentStep = model.currentTask().currentStep().getStep();
-
-        ShaOneViewStep example = gson.fromJson(currentStep.getData(), ShaOneViewStep.class);
-
-        String userResponse = answerField.getText().replaceAll("\\s", "");
-
-        example.setUserResponse(userResponse);
-
-        StepCompletion step = new StepCompletion(currentStep, gson.toJson(example));
-        step.setStep(currentStep);
-        return step;
-    }
 }
