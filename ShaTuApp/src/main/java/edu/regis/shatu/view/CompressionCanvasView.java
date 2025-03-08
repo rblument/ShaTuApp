@@ -18,6 +18,7 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 
@@ -28,6 +29,7 @@ import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.view.act.NewExampleAction;
 import edu.regis.shatu.view.act.StepCompletionAction;
+import javax.swing.JOptionPane;
 
 /**
  * Displays a single round of the SHA-256 compression algorithm.
@@ -36,7 +38,7 @@ import edu.regis.shatu.view.act.StepCompletionAction;
  *
  * @author rickb
  */
-public class CompressionCanvasView extends UserRequestView {
+public class CompressionCanvasView extends UserRequestView implements ActionListener {
     
     /**
      * Required for access to the current view.
@@ -92,15 +94,23 @@ public class CompressionCanvasView extends UserRequestView {
     private VariableLabel kLabel;
     private VariableLabel temp1Label;
     private VariableLabel temp2Label;
-    private JButton continueButton = new JButton(StepCompletionAction.instance());
-    private CounterLabel counter;
+    //to be removed once linked in with the tutor view
+    //private JButton continueButton = new JButton(StepCompletionAction.instance());
+    private JButton nextRoundButton = new JButton();
+    //for debugging will reset to private and use setter in model
+    public CounterLabel counter;
+    private int count = 0;
+    //private CompressRoundStep compressModel;
 
     public CompressionCanvasView() {
         setLayout(null);
+        //compressModel = new CompressRoundStep();
 
         initializeComponents();
         layoutComponents();
-        continueButton.setText("Continue");
+        //continueButton.setText("Continue");
+        nextRoundButton.setText("Next Round");
+        
     }
 
     /**
@@ -355,10 +365,12 @@ public class CompressionCanvasView extends UserRequestView {
         temp1Label.setFont(new Font("", Font.PLAIN, 16));
         temp2Label.setFont(new Font("", Font.PLAIN, 16));
         
-        continueButton.addActionListener((ActionEvent e) ->
-        {
-            NewExampleAction.instance().actionPerformed(null);
-        });
+        //to be removed once linked with tutor view for new example
+        //continueButton.addActionListener((ActionEvent e) ->
+        //{
+           // NewExampleAction.instance().actionPerformed(null);
+        //});
+        nextRoundButton.addActionListener(this);
     }
 
     private void layoutComponents() {
@@ -483,8 +495,8 @@ public class CompressionCanvasView extends UserRequestView {
         x = getWidth() - buttonWidth - margin;
         y = getHeight() - buttonHeight - margin;
         
-        continueButton.setBounds(x, y, buttonWidth, buttonHeight);
-        add(continueButton);
+        nextRoundButton.setBounds(x, y, buttonWidth, buttonHeight);
+        add(nextRoundButton);
         
         
     }
@@ -495,7 +507,7 @@ public class CompressionCanvasView extends UserRequestView {
         int buttonWidth = 100;
         int buttonHeight = 30;
         int margin = 10;
-        continueButton.setBounds(getWidth() - buttonWidth - margin, getHeight() - buttonHeight - margin, buttonWidth, buttonHeight);
+        nextRoundButton.setBounds(getWidth() - buttonWidth - margin, getHeight() - buttonHeight - margin, buttonWidth, buttonHeight);
     }
 
     /**
@@ -530,6 +542,24 @@ public class CompressionCanvasView extends UserRequestView {
 
         g.drawLine(x1, y1, x2, y2);
         g.drawPolygon(xpoints, ypoints, 3); // Rickb
+    }
+    
+    //public CounterLabel getCounter() {
+    //       return counter; 
+    //}
+    
+     @Override
+    public void actionPerformed(ActionEvent event) {
+       if (event.getSource() == nextRoundButton){
+           counter.setText("Round: " + count);
+           count++;
+           if (count > 64){
+               JOptionPane.showMessageDialog(null, "Compression of message block complete.  "
+                       + "Press new example to see another message block compression.", 
+                       "Compression round complete", HEIGHT);
+               count = 0;
+           }
+       }
     }
 
     @Override
@@ -578,4 +608,8 @@ public class CompressionCanvasView extends UserRequestView {
         
         return step;
     }
+    
+    
+
 }
+

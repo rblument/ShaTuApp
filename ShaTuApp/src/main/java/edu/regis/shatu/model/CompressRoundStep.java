@@ -11,6 +11,7 @@
  *  or conditions of any kind, either expressed or implied.
  */
 package edu.regis.shatu.model;
+import edu.regis.shatu.view.CompressionCanvasView;
 
 /**
  *
@@ -19,4 +20,10 @@ package edu.regis.shatu.model;
 public class CompressRoundStep
 {
     
+    
+    //public void changeText(int i) {
+       // CCview.getCounter().setText("Round: " + i);
+    //}
+
+   
 }
