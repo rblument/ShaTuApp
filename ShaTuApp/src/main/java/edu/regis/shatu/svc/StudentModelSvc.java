@@ -17,8 +17,10 @@ import edu.regis.shatu.err.ObjNotFoundException;
 import edu.regis.shatu.model.Student;
 import edu.regis.shatu.model.StudentModelFieldKind;
 import edu.regis.shatu.model.aol.Assessment;
+import edu.regis.shatu.model.aol.AssessmentLevel;
 import edu.regis.shatu.model.aol.StudentModel;
 import java.util.List;
+
 
 /**
  * Specifies the API for {@link StudentModel} life-cycle maintenance
