@@ -10,6 +10,9 @@
  *  software is distributed on an "AS IS" basis without warranties
  *  or conditions of any kind, either expressed or implied.
  */
+/*
+ * Set responseTextArea to disabled at initialization per SHAT-225 John hennessey 23 Feb 2025
+ */
 package edu.regis.shatu.view;
 
 import java.awt.FlowLayout;
@@ -205,6 +208,8 @@ public class MessageLenView extends UserRequestView {
         responseTextArea = new JTextArea(3, 20);
         responseTextArea.setLineWrap(true); // Enable line wrapping
         responseTextArea.setWrapStyleWord(true); // Wrap lines at word boundaries
+        responseTextArea.setEnabled(false);  // Text area disabled at initialization 
+
         responseScrollPane = new JScrollPane(responseTextArea);
         responseScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED); // Enable vertical scrolling
     }
@@ -221,7 +226,7 @@ public class MessageLenView extends UserRequestView {
         feedbackScrollPane = new JScrollPane(feedbackArea);
         feedbackScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED); // Enable vertical scrolling
     }
-    
+
     /**
      * Initializes the components for inputting the message length. This method
      * creates and configures a JLabel and a JTextField where users can specify

@@ -276,7 +276,7 @@ public class TutoringSessionView extends GPanel {
     public JButton getHintButton() {
         return hintButton;
     }
-
+    
     /**
      * A class called by dashboardButton to return to dashboard.
      */

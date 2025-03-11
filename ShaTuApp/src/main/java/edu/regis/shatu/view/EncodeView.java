@@ -141,10 +141,6 @@ public class EncodeView extends UserRequestView {
     private void prepareNextQuestion() {
         // Do nothing, tutor should be handling things, but leaving incase a use
         // could be found later in development
-        checkHintEnabled = true;
-        hintButton.setEnabled(true);
-        checkButton.setEnabled(true);
-        responseTextArea.setEnabled(true);
         updateView();
     }
 
@@ -213,9 +209,10 @@ public class EncodeView extends UserRequestView {
         responseTextArea = new JTextArea(3, 20);
         responseTextArea.setLineWrap(true); // Enable line wrapping
         responseTextArea.setWrapStyleWord(true); // Wrap lines at word boundaries
+
+        responseTextArea.setEnabled(false);  // Text area disabled at initialization 
         responseScrollPane = new JScrollPane(responseTextArea);
-        responseScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED); // Enable vertical
-                                                                                                 // scrolling
+        responseScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED); // Enable vertical scrolling
     }
 
     /**
@@ -228,8 +225,7 @@ public class EncodeView extends UserRequestView {
         feedbackArea.setLineWrap(true); // Enable line wrapping
         feedbackArea.setWrapStyleWord(true); // Wrap lines at word boundaries
         feedbackScrollPane = new JScrollPane(feedbackArea);
-        feedbackScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED); // Enable vertical
-                                                                                                 // scrolling
+        feedbackScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED); // Enable vertical scrolling
     }
 
     /**
@@ -328,19 +324,16 @@ public class EncodeView extends UserRequestView {
             MainFrame mainFrame = MainFrame.instance();
             if (mainFrame != null) {
                 view = SplashFrame.instance().getTutoringSessionView(); // Initialize view once SplashFrame is ready
-
+                                
             } else {
                 System.err.println("SplashFrame.instance() is null. Cannot initialize 'view'.");
                 return; // Exit updateView if the view cannot be initialized
             }
         }
 
-        if (this.model == null) { // Currently in development, Encode Ascii starts first when loaded, which model
-                                  // can be null initially.
+        if (this.model == null) { // Currently in development, Encode Ascii starts first when loaded, which model can be null initially.
             questionLabel.setText("Please click new example button to get started");
-            checkButton.setEnabled(false);
-            responseTextArea.setEnabled(false);
-            hintButton.setEnabled(false);
+
         } else {
 
             /*
@@ -381,6 +374,7 @@ public class EncodeView extends UserRequestView {
                     if (this.question == null) { // new example hasnt been created yet
                         questionLabel.setText("Please click new example button to get started");
                         checkButton.setEnabled(false);
+
                         responseTextArea.setEnabled(false);
                         hintButton.setEnabled(false);
                     } else { // example has been created.
@@ -406,22 +400,6 @@ public class EncodeView extends UserRequestView {
                 }
             }
 
-            // Reset button listeners using the initialized view
-            if (view != null) {
-                view.resetButtonListeners();
-                nextButton = view.getNewExampleButton();
-                hintButton = view.getHintButton();
-                checkButton = view.getCheckButton();
-                hintButton.addActionListener(this);
-                checkButton.addActionListener(this);
-                nextButton.addActionListener(this);
-            }
-
-            if (checkHintEnabled) {
-                checkButton.setEnabled(true);
-                responseTextArea.setEnabled(true);
-                hintButton.setEnabled(true);
-            }
         }
         // Other update logic here
         System.out.println("UpdateView logic continues...");

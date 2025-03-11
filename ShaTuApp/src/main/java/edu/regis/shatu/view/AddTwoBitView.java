@@ -10,6 +10,10 @@
  *  software is distributed on an "AS IS" basis without warranties
  *  or conditions of any kind, either expressed or implied.
  */
+
+ /*
+ * Set responseTextArea to disabled at initialization per SHAT-225 John hennessey 23 Feb 2025
+ */
 package edu.regis.shatu.view;
 
 import java.awt.GridBagConstraints;
@@ -88,11 +92,12 @@ public class AddTwoBitView extends UserRequestView implements KeyListener {
         stringLabel1 = new JLabel("binary number1 : ");
         stringLabel2 = new JLabel("binary number2 : ");
         stringLabel3 = new JLabel("Hit New Example to get set of binary numbers");
+
         stringLabel4 = new JLabel(); // only for testing that view is communicating with server
 
-        responseTextArea = new JTextField();
-        // answerField = new JTextField(10);
-        // answerField.addKeyListener(this);
+        responseTextArea = new JTextField(10);
+        responseTextArea.addKeyListener(this);
+
     }
 
     /**
@@ -132,6 +137,7 @@ public class AddTwoBitView extends UserRequestView implements KeyListener {
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 5, 5, 5, 5);
 
+
         // Add checkButton centered below responseTextArea
         addc(checkButton, 0, 5, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
@@ -144,6 +150,9 @@ public class AddTwoBitView extends UserRequestView implements KeyListener {
         addc(nextButton, 0, 7, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
+
+        responseTextArea.setEnabled(false);  // Text area disabled at initialization 
+
     }
 
     /**
@@ -205,7 +214,7 @@ public class AddTwoBitView extends UserRequestView implements KeyListener {
             JOptionPane.showMessageDialog(this, "Please provide an answer");
         } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
             checkButton.doClick();
-        }
+        } 
     }
 
     /**
@@ -309,6 +318,8 @@ public class AddTwoBitView extends UserRequestView implements KeyListener {
         hintButton = view.getHintButton();
         checkButton = view.getCheckButton();
         nextButton = view.getNewExampleButton();
+        
+        responseTextArea.setText("");
 
         // If check and hint buttons are disabled, reset listenerers and apply those
         // used by this view

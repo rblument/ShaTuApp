@@ -43,7 +43,8 @@ import edu.regis.shatu.model.aol.ProblemType;
  *
  * @author rickb
  */
-public class ShaOneView extends UserRequestView { // implements KeyListener
+
+public class ShaOneView extends UserRequestView { //implements KeyListener 
     private TutoringSessionView view;
 
     /**
@@ -76,15 +77,16 @@ public class ShaOneView extends UserRequestView { // implements KeyListener
         exampleInputLabel = new JLabel("Given an 𝑛 bit binary number, output the value of the SHA Σ₁ function");
         problem = new JLabel("Default Problem Text");
         answerField = new JTextField(10);
-        // answerField.addKeyListener(this);
 
+        //answerField.addKeyListener(this);
+        
         nextQuestionButton = new JButton("Next Question");
-        // nextQuestionButton.addActionListener(this);
+        //nextQuestionButton.addActionListener(this);
+        
+      //  shortProblem = new JRadioButton("16-bit");
+     //   shortProblem.setSelected(true);
 
-        // shortProblem = new JRadioButton("16-bit");
-        // shortProblem.setSelected(true);
-
-        longProblem = new JRadioButton("32-bit");
+       // longProblem = new JRadioButton("32-bit");
     }
 
     /**
@@ -105,6 +107,7 @@ public class ShaOneView extends UserRequestView { // implements KeyListener
         addc(answerField, 0, 4, 1, 1, 1.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 5, 5, 5, 5);
+
         addc(checkButton, 0, 5, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
@@ -114,6 +117,7 @@ public class ShaOneView extends UserRequestView { // implements KeyListener
         addc(nextQuestionButton, 0, 7, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
+
         addc(shortProblem, 0, 6, 1, 1, 0.0, 0.0,
                 GridBagConstraints.WEST, GridBagConstraints.NONE,
                 5, 5, 5, 5);
@@ -141,20 +145,19 @@ public class ShaOneView extends UserRequestView { // implements KeyListener
     }
 
     /*
-     * @Override
-     * public void keyPressed(KeyEvent e) {
-     * if (e.getKeyCode() == KeyEvent.VK_ENTER && answerField.getText().equals(""))
-     * {
-     * JOptionPane.showMessageDialog(this, "Please provide an answer");
-     * } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-     * view.checkButton.doClick();
-     * }
-     * }
-     */
+    @Override
+    public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_ENTER && answerField.getText().equals("")) {
+            JOptionPane.showMessageDialog(this, "Please provide an answer");
+        } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+            view.checkButton.doClick();
+        }
+    }
+    */
 
-    // @Override
-    // public void keyReleased(KeyEvent e) {
-    // }
+   // @Override
+   // public void keyReleased(KeyEvent e) {
+   // }
 
     /**
      * Verifies the user's answer by comparing it with the correct result of the
@@ -205,14 +208,14 @@ public class ShaOneView extends UserRequestView { // implements KeyListener
      */
     protected void updateView() {
         view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
-        // hintButton = view.getHintButton();
-        // checkButton = view.getCheckButton();
-        nextQuestionButton = view.getNewExampleButton();
 
-        // If check and hint buttons are disabled, reset listenerers and apply those
-        // used by this view
-        if (!checkHintEnabled) {
-            view.resetButtonListeners(); // Clear any listeners applied from other views
+        //hintButton = view.getHintButton();
+        //checkButton = view.getCheckButton();
+        nextQuestionButton = view.getNewExampleButton();
+        
+        // If check and hint buttons are disabled, reset listenerers and apply those used by this view
+        if(!checkHintEnabled) {
+            view.resetButtonListeners(); // Clear any listeners applied from other views          
         }
 
         if (model != null) {
@@ -223,7 +226,8 @@ public class ShaOneView extends UserRequestView { // implements KeyListener
         }
     }
 
-    /**
+
+     /**
      * Create and return the server request this view makes when a user selects
      * that they want to practice a new Sha One View example.
      *
@@ -243,6 +247,7 @@ public class ShaOneView extends UserRequestView { // implements KeyListener
 
         return ex;
     }
+
 
     @Override
     public StepCompletion stepCompletion() {
