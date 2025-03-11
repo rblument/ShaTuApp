@@ -267,19 +267,6 @@ public class ExclusiveOrView extends UserRequestView implements KeyListener {
         feedbackPane.setPreferredSize(new Dimension(800, 200));
     }
 
-    /**
-     * Sets up the Check, Next, and Hint buttons and their action listeners
-     */ 
-    private void setUpButtons() {
-        checkButton = new JButton(StepCompletionAction.instance());
-        checkButton.addActionListener(this);
-
-        hintButton = new JButton(HintAction.instance());
-        hintButton.addActionListener(this);
-
-        newExampleButton = new JButton(NewExampleAction.instance());
-        newExampleButton.addActionListener(this);   
-    }
 
     /**
      * Creates a GPanel containing the response and feedback JScrollPanes and

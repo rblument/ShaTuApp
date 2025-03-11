@@ -344,7 +344,7 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
 
         qrPanel.addc(feedbackPane, 0, 1, 1, 1, 1.0, 1.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
-                5, 5, 5, 5);
+                5, 5, 5, 5);   
     }
  
     /**

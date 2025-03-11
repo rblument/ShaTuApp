@@ -72,7 +72,6 @@ public class EncodeView extends UserRequestView {
         initializeLayout();
     }
 
-
     /**
      * Initializes all GUI components, setting up their properties and
      * configurations.
@@ -127,7 +126,8 @@ public class EncodeView extends UserRequestView {
         if (this.responseTextArea.getText().equals("")) {
             this.feedbackArea.setText("Please provide an answer");
         } else {
-            // Nothing, maybe needed later in development, tutor should be handling things though.
+            // Nothing, maybe needed later in development, tutor should be handling things
+            // though.
 
         }
     }
@@ -141,7 +141,6 @@ public class EncodeView extends UserRequestView {
     private void prepareNextQuestion() {
         // Do nothing, tutor should be handling things, but leaving incase a use
         // could be found later in development
-
         updateView();
     }
 
@@ -177,19 +176,18 @@ public class EncodeView extends UserRequestView {
         // TEMPORARY UNTIL WE LOAD THE MODEL DATA DESCRIPTION
         descriptionTextPane.setText(
                 "<html>"
-                + "<body>"
-                + "<h2>ENCODE ASCII</h2>"
-                + "<p>This is the first operation of the pre-processing phase of the SHA256 algorithm.  "
-                + "During this operation, you will convert a string of characters to binary.  "
-                + "As this is the first operation, your given the ability to set your own question, "
-                + "or to choose a question (message) length and then let a question randomly be generated. "
-                + "<br>1: Set your own question or set the message length. <br>2: Click the New Example button. "
-                + "<br>3: Convert the question to binary, click the hint button to see a conversion table if needed. "
-                + "<br>Note: If you type anything into the set question field and click the New Example button, "
-                + "your question will always be what you typed in that field. Ensure that field is empty to create a random question.</p>"
-                + "</body>"
-                + "</html>"
-        );
+                        + "<body>"
+                        + "<h2>ENCODE ASCII</h2>"
+                        + "<p>This is the first operation of the pre-processing phase of the SHA256 algorithm.  "
+                        + "During this operation, you will convert a string of characters to binary.  "
+                        + "As this is the first operation, your given the ability to set your own question, "
+                        + "or to choose a question (message) length and then let a question randomly be generated. "
+                        + "<br>1: Set your own question or set the message length. <br>2: Click the New Example button. "
+                        + "<br>3: Convert the question to binary, click the hint button to see a conversion table if needed. "
+                        + "<br>Note: If you type anything into the set question field and click the New Example button, "
+                        + "your question will always be what you typed in that field. Ensure that field is empty to create a random question.</p>"
+                        + "</body>"
+                        + "</html>");
 
         descriptionTextPane.setEditable(false);
         descriptionTextPane.setBackground(null);
@@ -211,6 +209,7 @@ public class EncodeView extends UserRequestView {
         responseTextArea = new JTextArea(3, 20);
         responseTextArea.setLineWrap(true); // Enable line wrapping
         responseTextArea.setWrapStyleWord(true); // Wrap lines at word boundaries
+
         responseTextArea.setEnabled(false);  // Text area disabled at initialization 
         responseScrollPane = new JScrollPane(responseTextArea);
         responseScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED); // Enable vertical scrolling
@@ -237,7 +236,7 @@ public class EncodeView extends UserRequestView {
      */
     private void setupMessageInputFields() {
         messageLengthLabel = new JLabel("Choose A Message Length:");
-        messageLengthField = new JTextField("1", 5);  // Default length 1, adjust size as needed
+        messageLengthField = new JTextField("1", 5); // Default length 1, adjust size as needed
         messageLengthField.setHorizontalAlignment(JTextField.CENTER);
 
         setQuestionLabel = new JLabel("Or Set Your Own Question:");
@@ -250,7 +249,7 @@ public class EncodeView extends UserRequestView {
      * custom question.
      *
      * @return A JPanel containing components for message length input, custom
-     * questions, arranged vertically.
+     *         questions, arranged vertically.
      */
     private JPanel createMessageLengthPanel() {
         JPanel inputPanel = new JPanel();
@@ -277,7 +276,7 @@ public class EncodeView extends UserRequestView {
      * Initializes the ASCII table and its scroll pane
      */
     private void setupAsciiTable() {
-        DefaultTableModel tableModel = new DefaultTableModel(new Object[]{"Decimal", "Binary", "Symbol"}, 0);
+        DefaultTableModel tableModel = new DefaultTableModel(new Object[] { "Decimal", "Binary", "Symbol" }, 0);
         fillAsciiTable(tableModel); // Method to fill table data
         asciiTable = new JTable(tableModel);
         configureAsciiTable(); // Method to configure table appearance
@@ -293,10 +292,11 @@ public class EncodeView extends UserRequestView {
      */
     private void fillAsciiTable(DefaultTableModel tableModel) {
         for (char i = 32; i < 127; i++) {
-            tableModel.addRow(new Object[]{
-                Integer.toString(i), // Decimal representation
-                String.format("%8s", Integer.toBinaryString(i)).replaceAll(" ", "0"), // Binary representation
-                i == 32 ? "<SPACE>" : String.valueOf(i) // Symbol representation, with special handling for the space character
+            tableModel.addRow(new Object[] {
+                    Integer.toString(i), // Decimal representation
+                    String.format("%8s", Integer.toBinaryString(i)).replaceAll(" ", "0"), // Binary representation
+                    i == 32 ? "<SPACE>" : String.valueOf(i) // Symbol representation, with special handling for the
+                                                            // space character
             });
         }
     }
@@ -330,16 +330,16 @@ public class EncodeView extends UserRequestView {
                 return; // Exit updateView if the view cannot be initialized
             }
         }
-        
+
         if (this.model == null) { // Currently in development, Encode Ascii starts first when loaded, which model can be null initially.
             questionLabel.setText("Please click new example button to get started");
 
         } else {
 
             /*
-            When switching between steps, the current step will be the previous enum
-            that a example was created for.  If that enums related stepobject has
-            similar variables, their may be a conflict causing a error.
+             * When switching between steps, the current step will be the previous enum
+             * that a example was created for. If that enums related stepobject has
+             * similar variables, their may be a conflict causing a error.
              */
             StepSubType type = StepSubType.ENCODE_ASCII;
 
@@ -347,7 +347,8 @@ public class EncodeView extends UserRequestView {
 
             Gson gson = new GsonBuilder().setPrettyPrinting().create(); // May not be needed here.
 
-            Step step = model.currentTask().getCurrentStep().getStep(); // Will be the last subtype a example was created for or empty
+            Step step = model.currentTask().getCurrentStep().getStep(); // Will be the last subtype a example was
+                                                                        // created for or empty
 
             System.out.println("Encode Ascii substep from current step: " + step.getSubType()); // Error checking
             System.out.println("Encode Ascii type: " + type); // Error checking
@@ -355,12 +356,16 @@ public class EncodeView extends UserRequestView {
             // ToDo: Do we need to handle ENCODE_HEX, ENCODE_BINARY?
             if (step.getSubType() == StepSubType.ENCODE_ASCII) {
 
-                EncodeAsciiStep newEncodeAscii = gson.fromJson(step.getData(), EncodeAsciiStep.class); // Takes data to the class object created from the new example.
+                EncodeAsciiStep newEncodeAscii = gson.fromJson(step.getData(), EncodeAsciiStep.class); // Takes data to
+                                                                                                       // the class
+                                                                                                       // object created
+                                                                                                       // from the new
+                                                                                                       // example.
 
                 // Clear any existing feedback and response from the previous question.
                 feedbackArea.setText("");
                 responseTextArea.setText("");
-                
+
                 if ((step.getSubType() == type)) { // Subtype was correct
                     System.out.println("If branch was taken, subtype was a encode ascii"); // Error checking.
 
@@ -369,7 +374,7 @@ public class EncodeView extends UserRequestView {
                     if (this.question == null) { // new example hasnt been created yet
                         questionLabel.setText("Please click new example button to get started");
                         checkButton.setEnabled(false);
-                        System.out.println("responseTextArea Disabled");
+
                         responseTextArea.setEnabled(false);
                         hintButton.setEnabled(false);
                     } else { // example has been created.
@@ -394,6 +399,7 @@ public class EncodeView extends UserRequestView {
                     this.repaint();
                 }
             }
+
         }
         // Other update logic here
         System.out.println("UpdateView logic continues...");
@@ -419,7 +425,10 @@ public class EncodeView extends UserRequestView {
 
         if (setQuestionField.getText().isEmpty()) { // User wants a random question
 
-            encodeAsciiStep.setMessageLength(Integer.parseInt(messageLengthField.getText().trim())); // Number of characters the question needs to be   
+            encodeAsciiStep.setMessageLength(Integer.parseInt(messageLengthField.getText().trim())); // Number of
+                                                                                                     // characters the
+                                                                                                     // question needs
+                                                                                                     // to be
         } else { // User set their own question
             encodeAsciiStep.setQuestion(setQuestionField.getText().strip());
         }
@@ -444,7 +453,13 @@ public class EncodeView extends UserRequestView {
 
         Step currentStep = model.currentTask().currentStep().getStep(); // step created from the new example.
 
-        EncodeAsciiStep completedEncodeAsciiStep = gson.fromJson(currentStep.getData(), EncodeAsciiStep.class); // Class object created from the new example.
+        EncodeAsciiStep completedEncodeAsciiStep = gson.fromJson(currentStep.getData(), EncodeAsciiStep.class); // Class
+                                                                                                                // object
+                                                                                                                // created
+                                                                                                                // from
+                                                                                                                // the
+                                                                                                                // new
+                                                                                                                // example.
 
         String userResponse = this.responseTextArea.getText().replaceAll(" ", ""); // Get the user's answer.
 

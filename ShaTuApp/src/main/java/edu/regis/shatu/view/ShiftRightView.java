@@ -305,9 +305,11 @@ public class ShiftRightView extends UserRequestView implements KeyListener {
         hintButton = view.getHintButton();
         checkButton = view.getCheckButton();
         nextButton = view.getNewExampleButton();
+
         
         responseTextArea.setText("");
         feedbackTextArea.setText("");
+
 
         // If check and hint buttons are disabled, reset listenerers and apply those used by this view
         if(!checkHintEnabled) {

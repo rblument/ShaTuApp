@@ -33,35 +33,35 @@ public class ServiceFactory {
      * 
      * @return AccountSvc
      */
-    public static AccountSvc findAccountSvc() {
+    public static AccountDAO findAccountSvc() {
         return new AccountDAO();
     }
-    
+
     /**
      * Return a reference to the course service.
      * 
      * @return CourseSvc
      */
-    public static CourseSvc findCourseSvc() {
+    public static CourseDAO findCourseSvc() {
         return new CourseDAO();
     }
-    
+
     /**
      * Return a reference to the session service.
      * 
      * @return SessionSvc
      */
-    public static SessionSvc findSessionSvc() {
+    public static SessionDAO findSessionSvc() {
         return new SessionDAO();
     }
-    
+
     /**
      * Return a reference to the student model service.
      * 
      * @return StudentModelSvc
      */
-    
-    public static StudentModelSvc findStudentModelSvc() {
+
+    public static StudentModelDAO findStudentModelSvc() {
         return new StudentModelDAO();
     }
 }

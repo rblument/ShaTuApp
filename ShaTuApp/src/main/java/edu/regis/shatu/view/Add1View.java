@@ -237,7 +237,7 @@ public class Add1View extends UserRequestView {
         responseTextArea = new JTextArea(3, 20);
         responseTextArea.setLineWrap(true); // Enable line wrapping
         responseTextArea.setWrapStyleWord(true); // Wrap lines at word boundaries
-         responseTextArea.setEnabled(false);  // Text area disabled at initialization 
+        responseTextArea.setEnabled(false);  // Text area disabled at initialization 
         responseScrollPane = new JScrollPane(responseTextArea);
         responseScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED); // Enable vertical scrolling
     }
@@ -255,6 +255,7 @@ public class Add1View extends UserRequestView {
         feedbackScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED); // Enable vertical scrolling
     }
 
+
     /**
      * Initializes the submit, next, and hint buttons and sets up action
      * listeners
@@ -271,6 +272,7 @@ public class Add1View extends UserRequestView {
         nextButton.addActionListener(this);
 
     }
+
 
     /**
      * Initializes the components for inputting the message length. This method
@@ -394,14 +396,12 @@ public class Add1View extends UserRequestView {
                 if (this.question == null) { // new example hasnt been created yet
                     questionLabel.setText("Please click new example button to get started");
                     checkButton.setEnabled(false);
-                    System.out.println("responseTextArea set disabled...");
                     responseTextArea.setEnabled(false);
                     hintButton.setEnabled(false);
                 } else { // example has been created.
                     questionLabel.setText(String.format("Convert the following "
                             + "string to binary and append a 1 bit to it: %s", question));
                     checkButton.setEnabled(true);
-                    System.out.println("Buttons enabled...");
                     responseTextArea.setEnabled(true);
                     hintButton.setEnabled(true);
                 }

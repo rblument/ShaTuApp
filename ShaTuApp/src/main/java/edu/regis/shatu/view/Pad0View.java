@@ -221,6 +221,7 @@ public class Pad0View extends UserRequestView {
         responseTextArea = new JTextArea(3, 20);
         responseTextArea.setLineWrap(true); // Enable line wrapping
         responseTextArea.setWrapStyleWord(true); // Wrap lines at word boundaries
+
         responseTextArea.setEnabled(false);  // Text area disabled at initialization 
         
         responseScrollPane = new JScrollPane(responseTextArea);
@@ -239,22 +240,6 @@ public class Pad0View extends UserRequestView {
         feedbackScrollPane = new JScrollPane(feedbackArea);
         feedbackScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED); // Enable vertical scrolling
     }
-    
-
-    /**
-     * Initializes the submit, next, and hint buttons and sets up action listeners
-     */
-    private void setupButtons() {
-        checkButton = new JButton(StepCompletionAction.instance());
-        checkButton.addActionListener(this);
-
-        hintButton = new JButton(HintAction.instance()); // Needs to be adjusted once the tutor can handle hints.
-        hintButton.addActionListener(this);
-
-        nextButton = new JButton(NewExampleAction.instance());
-        nextButton.addActionListener(this);
-    }
-
     
     /**
      * Initializes the components for inputting the message length. This method creates and configures

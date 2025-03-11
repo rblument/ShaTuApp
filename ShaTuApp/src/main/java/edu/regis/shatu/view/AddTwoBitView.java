@@ -92,10 +92,12 @@ public class AddTwoBitView extends UserRequestView implements KeyListener {
         stringLabel1 = new JLabel("binary number1 : ");
         stringLabel2 = new JLabel("binary number2 : ");
         stringLabel3 = new JLabel("Hit New Example to get set of binary numbers");
-        stringLabel4 = new JLabel();  //only for testing that view is communicating with server
+
+        stringLabel4 = new JLabel(); // only for testing that view is communicating with server
 
         responseTextArea = new JTextField(10);
         responseTextArea.addKeyListener(this);
+
     }
 
     /**
@@ -134,7 +136,23 @@ public class AddTwoBitView extends UserRequestView implements KeyListener {
         addc(responseTextArea, 0, 4, 1, 1, 1.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 5, 5, 5, 5);
+
+
+        // Add checkButton centered below responseTextArea
+        addc(checkButton, 0, 5, 1, 1, 0.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                5, 5, 5, 5);
+
+        addc(hintButton, 0, 6, 1, 1, 0.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                5, 5, 5, 5);
+
+        addc(nextButton, 0, 7, 1, 1, 0.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                5, 5, 5, 5);
+
         responseTextArea.setEnabled(false);  // Text area disabled at initialization 
+
     }
 
     /**
@@ -227,7 +245,7 @@ public class AddTwoBitView extends UserRequestView implements KeyListener {
      * Handles the action for the Next Question button.
      */
     private void onNextQuestion() {
-        //JOptionPane.showMessageDialog(this, "Next Question");
+        // JOptionPane.showMessageDialog(this, "Next Question");
     }
 
     /**
@@ -303,9 +321,10 @@ public class AddTwoBitView extends UserRequestView implements KeyListener {
         
         responseTextArea.setText("");
 
-        // If check and hint buttons are disabled, reset listenerers and apply those used by this view
+        // If check and hint buttons are disabled, reset listenerers and apply those
+        // used by this view
         if (!checkHintEnabled) {
-            view.resetButtonListeners(); // Clear any listeners applied from other views          
+            view.resetButtonListeners(); // Clear any listeners applied from other views
         }
 
         if (model != null) {
