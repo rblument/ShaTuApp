@@ -51,7 +51,7 @@ import edu.regis.shatu.view.act.StepCompletionAction;
  *
  * @author rickb
  */
-public class ChoiceFunctionView extends UserRequestView implements ActionListener, KeyListener {
+public class ChoiceFunctionView extends UserRequestView implements KeyListener {
 
     private TutoringSessionView view;
     private String stringX, stringY, stringZ;
@@ -59,9 +59,9 @@ public class ChoiceFunctionView extends UserRequestView implements ActionListene
     private JTextArea descTextArea, feedbackTextArea, responseTextArea;
     private JScrollPane feedbackPane, responsePane, chTruthTablePane;
     private GPanel truthTablePanel, questionPanel, descriptionPanel, qrPanel;
-    private JPanel buttonPanel, radioButtonPanel;
+    private JPanel radioButtonPanel;
     private JTable chTruthTable;
-    private JButton checkButton, nextButton, hintButton, truthTableToggleButton;
+    private JButton checkButton, newExButton, hintButton, truthTableToggleButton;
     private boolean checkHintEnabled = false;
     private ButtonGroup problemSizeGroup;
     private JRadioButton fourRadioButton, eightRadioButton, sixteenRadioButton,
@@ -129,7 +129,6 @@ public class ChoiceFunctionView extends UserRequestView implements ActionListene
         setUpQuestionArea();
         setUpResponseArea();
         setUpFeedbackArea();
-        setUpButtons();
         setUpTruthTable();
         setUpDescriptionPanel();
         setUpQRPanel();
@@ -343,7 +342,7 @@ public class ChoiceFunctionView extends UserRequestView implements ActionListene
                 GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
                 5, 5, 5, 5);
     }
-
+ 
     /**
      * Sets up the truth table associated with the Choice Function.
      */
@@ -434,23 +433,7 @@ public class ChoiceFunctionView extends UserRequestView implements ActionListene
         chTruthTable.getColumnModel().getColumn(5).setPreferredWidth(100);
     }
 
-    /**
-     * Handles the actionPerformed event for buttons in the view.
-     *
-     * @param event The ActionEvent that occurred.
-     */
-    @Override
-    public void actionPerformed(ActionEvent event) {
-        if (event.getSource() == checkButton) {
-            onCheckButton();
-        } else if (event.getSource() == hintButton) {
-            onNextHint();
-        } else if (event.getSource() == nextButton) {
-            checkHintEnabled = true;
-            onNextQuestion();
-        }
-    }
-
+    
     /**
      * Handles the keyTyped event for the view.
      *
@@ -543,16 +526,13 @@ public class ChoiceFunctionView extends UserRequestView implements ActionListene
         view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
         hintButton = view.getHintButton();
         checkButton = view.getCheckButton();
-        nextButton = view.getNewExampleButton();
+        newExButton = view.getNewExampleButton();
 
         // If check and hint buttons are disabled, reset listenerers and apply those used by this view
         if (!checkHintEnabled) {
-            view.resetButtonListeners(); // Clear any listeners applied from other views          
-            hintButton.addActionListener(this);
-            checkButton.addActionListener(this);
-            nextButton.addActionListener(this);
+            view.resetButtonListeners(); // Clear any listeners applied from other views            
         }
-
+        
         System.out.println("Choice function update view called."); // Error checking
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();

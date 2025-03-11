@@ -41,7 +41,7 @@ import edu.regis.shatu.model.aol.ProblemType;
  *
  * @author rickb
  */
-public class ShaOneView extends UserRequestView implements ActionListener, KeyListener {
+public class ShaOneView extends UserRequestView { //implements KeyListener 
     private TutoringSessionView view;
     
     /**
@@ -54,11 +54,9 @@ public class ShaOneView extends UserRequestView implements ActionListener, KeyLi
     private JLabel exampleInputLabel;
     private JLabel problem;
     private JTextField answerField;
-    private JButton checkButton; // Add the check button
-    private JButton hintButton;
+
     private JButton nextQuestionButton;
-    private JRadioButton shortProblem;
-    private JRadioButton longProblem;
+
     private boolean checkHintEnabled = false;
 
     /**
@@ -68,19 +66,7 @@ public class ShaOneView extends UserRequestView implements ActionListener, KeyLi
         initializeComponents();
         initializeLayout();
     }
-
-    @Override
-    public void actionPerformed(ActionEvent event) {
-        if (event.getSource() == checkButton) {
-            onCheckButton();
-        } else if (event.getSource() == hintButton) {
-            onNextHint();
-        } else if (event.getSource() == nextQuestionButton) {
-            checkHintEnabled = true;
-            onNextQuestion();
-        }
-    }
-
+    
     /**
      * Create the child GUI components appearing in this frame.
      */
@@ -88,22 +74,16 @@ public class ShaOneView extends UserRequestView implements ActionListener, KeyLi
         exampleInputLabel = new JLabel("Given an 𝑛 bit binary number, output the value of the SHA Σ₁ function");
         problem = new JLabel("Default Problem Text");
         answerField = new JTextField(10);
-        answerField.addKeyListener(this);
-
-        // Create and initialize the checkButton
-        checkButton = new JButton("Check");
-        checkButton.addActionListener(this);
-        
-        hintButton = new JButton("Hint");
-        hintButton.addActionListener(this); // Add an action listener for the check button
+        //answerField.addKeyListener(this);
         
         nextQuestionButton = new JButton("Next Question");
-        nextQuestionButton.addActionListener(this);
+        //nextQuestionButton.addActionListener(this);
         
-        shortProblem = new JRadioButton("16-bit");
-        shortProblem.setSelected(true);
+      //  shortProblem = new JRadioButton("16-bit");
+     //   shortProblem.setSelected(true);
 
-        longProblem = new JRadioButton("32-bit");
+       // longProblem = new JRadioButton("32-bit");
+
     }
 
     /**
@@ -124,6 +104,7 @@ public class ShaOneView extends UserRequestView implements ActionListener, KeyLi
         addc(answerField, 0, 4, 1, 1, 1.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 5, 5, 5, 5);
+/*
         addc(checkButton, 0, 5, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
@@ -139,6 +120,7 @@ public class ShaOneView extends UserRequestView implements ActionListener, KeyLi
         addc(longProblem, 0, 7, 1, 1, 0.0, 0.0,
                 GridBagConstraints.WEST, GridBagConstraints.NONE,
                 5, 5, 5, 5);
+*/
     }
 
     /**
@@ -158,22 +140,22 @@ public class ShaOneView extends UserRequestView implements ActionListener, KeyLi
         return Integer.toBinaryString(result);
     }
     
-    @Override
-    public void keyTyped(KeyEvent e) {
-    }
 
+
+    /*
     @Override
     public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_ENTER && answerField.getText().equals("")) {
             JOptionPane.showMessageDialog(this, "Please provide an answer");
         } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-            checkButton.doClick();
+            view.checkButton.doClick();
         }
     }
+    */
 
-    @Override
-    public void keyReleased(KeyEvent e) {
-    }
+   // @Override
+   // public void keyReleased(KeyEvent e) {
+   // }
 
     /**
      * Verifies the user's answer by comparing it with the correct result of the right shift operation.
@@ -223,16 +205,13 @@ public class ShaOneView extends UserRequestView implements ActionListener, KeyLi
      */
     protected void updateView() {
         view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
-        hintButton = view.getHintButton();
-        checkButton = view.getCheckButton();
+        //hintButton = view.getHintButton();
+        //checkButton = view.getCheckButton();
         nextQuestionButton = view.getNewExampleButton();
         
         // If check and hint buttons are disabled, reset listenerers and apply those used by this view
         if(!checkHintEnabled) {
             view.resetButtonListeners(); // Clear any listeners applied from other views          
-            hintButton.addActionListener(this);           
-            checkButton.addActionListener(this);            
-            nextQuestionButton.addActionListener(this);
         }
         
         if (model != null) {

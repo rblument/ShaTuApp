@@ -50,7 +50,7 @@ import edu.regis.shatu.view.act.StepCompletionAction;
  *
  * @author rickb
  */
-public class RotateView extends UserRequestView implements ActionListener, KeyListener {
+public class RotateView extends UserRequestView implements KeyListener {
 
     TutoringSessionView view;
     private String problemString;
@@ -58,9 +58,7 @@ public class RotateView extends UserRequestView implements ActionListener, KeyLi
     private JLabel prompt;
     private JLabel problem;
     private JTextField answerField;
-    private JButton checkButton;
-    private JButton hintButton;
-    private JButton nextButton;
+    private JButton checkButton, hintButton, nextButton;
     private boolean checkHintEnabled = false;
     private JRadioButton shortProblem;
     private JRadioButton longProblem;
@@ -139,15 +137,6 @@ public class RotateView extends UserRequestView implements ActionListener, KeyLi
         answerField = new JTextField(10);
         answerField.addKeyListener(this);
         answerField.setHorizontalAlignment(JTextField.CENTER);
-
-        checkButton = new JButton(StepCompletionAction.instance());
-        checkButton.addActionListener(this);
-
-        hintButton = new JButton(HintAction.instance());
-        hintButton.addActionListener(this);
-
-        nextButton = new JButton(NewExampleAction.instance());
-        nextButton.setToolTipText("Generate New Example Problem");
 
         shortProblem = new JRadioButton("16-bit");
         shortProblem.setSelected(true);
@@ -246,19 +235,6 @@ public class RotateView extends UserRequestView implements ActionListener, KeyLi
     }
 
     @Override
-    public void actionPerformed(ActionEvent event) {
-        if (event.getSource() == checkButton) {
-            if (this.answerField.getText().equals("")) {
-                JOptionPane.showMessageDialog(this, "Please provide an answer");
-            }
-        } else if (event.getSource() == hintButton) {
-            JOptionPane.showMessageDialog(this, "Hint");
-        } else if (event.getSource() == nextButton) {
-            checkHintEnabled = true;
-        }
-    }
-
-    @Override
     public void keyTyped(KeyEvent e) {
     }
 
@@ -266,8 +242,6 @@ public class RotateView extends UserRequestView implements ActionListener, KeyLi
     public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_ENTER && answerField.getText().equals("")) {
             JOptionPane.showMessageDialog(this, "Please provide an answer");
-        } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-            actionPerformed(new ActionEvent(checkButton, ActionEvent.ACTION_PERFORMED, ""));
         }
     }
 
@@ -288,9 +262,6 @@ public class RotateView extends UserRequestView implements ActionListener, KeyLi
         // If check and hint buttons are disabled, reset listenerers and apply those used by this view
         if (!checkHintEnabled) {
             view.resetButtonListeners(); // Clear any listeners applied from other views          
-            hintButton.addActionListener(this);
-            checkButton.addActionListener(this);
-            nextButton.addActionListener(this);
         }
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();

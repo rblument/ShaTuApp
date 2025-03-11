@@ -63,7 +63,7 @@ import edu.regis.shatu.view.act.StepCompletionAction;
  *
  * @author rickb, mpowanga
  */
-public class MajFunctionView extends UserRequestView implements ActionListener, KeyListener {
+public class MajFunctionView extends UserRequestView implements KeyListener {
 
     private TutoringSessionView view;
     private String stringX, stringY, stringZ;
@@ -71,7 +71,7 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
     private JTextArea descTextArea, responseTextArea;
     private JScrollPane responsePane, majTruthTablePane;
     private GPanel truthTablePanel, questionPanel, descriptionPanel, qrPanel;
-    private JPanel buttonPanel, radioButtonPanel;
+    private JPanel radioButtonPanel;
     private JTable majTruthTable;
     private JButton checkButton, nextButton, hintButton;
     private boolean checkHintEnabled = false;
@@ -141,7 +141,6 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
         setUpRadioButtons();
         setUpQuestionArea();
         setUpResponseArea();
-        setUpButtons();
         setUpTruthTable();
         setUpDescriptionPanel();
         setUpQRPanel();
@@ -335,6 +334,7 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
         qrPanel = new GPanel();
         responsePane.setPreferredSize(new Dimension(300, 20));
         qrPanel.addc(responsePane, 0, 0, 1, 1, 1.0, 1.0,
+
              GridBagConstraints.CENTER, GridBagConstraints.BOTH,
              0, 0, 0, 0);
     }
@@ -400,20 +400,6 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
 
     }
 
-    /**
-     * Handles the actionPerformed event for buttons in the view.
-     *
-     * @param event The ActionEvent that occurred.
-     */
-    @Override
-    public void actionPerformed(ActionEvent event) {
-        if (event.getSource() == hintButton) {
-            onNextHint();
-        } else if (event.getSource() == nextButton) {
-            checkHintEnabled = true;
-            onNextQuestion();
-        }
-    }
 
     @Override
     public void keyTyped(KeyEvent e) {
@@ -629,9 +615,6 @@ public class MajFunctionView extends UserRequestView implements ActionListener, 
         // If check and hint buttons are disabled, reset listenerers and apply those used by this view
         if (!checkHintEnabled) {
             view.resetButtonListeners(); // Clear any listeners applied from other views          
-            hintButton.addActionListener(this);
-            checkButton.addActionListener(this);
-            nextButton.addActionListener(this);
         }
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();

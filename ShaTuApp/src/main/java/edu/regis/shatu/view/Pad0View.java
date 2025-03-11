@@ -49,7 +49,7 @@ import edu.regis.shatu.view.act.StepCompletionAction;
  * 
  * @author rickb
  */
-public class Pad0View extends UserRequestView implements ActionListener {
+public class Pad0View extends UserRequestView {
     
     private TutoringSessionView view;
     private JTextPane descriptionTextPane;
@@ -73,25 +73,8 @@ public class Pad0View extends UserRequestView implements ActionListener {
         initializeLayout();
     }
     
-    /**
-     * Responds to actions performed in the view, specifically button presses,
-     * and delegates to appropriate methods for handling.
-     * 
-     * @param event the event that triggered the action listener
-     */
-    @Override
-    public void actionPerformed(ActionEvent event) {
-        if (event.getSource() == checkButton) {
-            submitAnswer();           
-        } else if (event.getSource() == nextButton) {
-            checkHintEnabled = true;
-            prepareNextQuestion();
-        } else if (event.getSource() == hintButton) {
-            requestHint();
-        }
-    }
     
-
+    
     /**
      * Initializes all GUI components, setting up their properties and configurations.
      */
@@ -102,7 +85,6 @@ public class Pad0View extends UserRequestView implements ActionListener {
         setupMessageLengthInput();
         setupResponseArea();
         setupFeedbackArea();
-        setupButtons();
         setupAsciiTable();
     }
     
@@ -253,6 +235,7 @@ public class Pad0View extends UserRequestView implements ActionListener {
         feedbackScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED); // Enable vertical scrolling
     }
     
+
     /**
      * Initializes the submit, next, and hint buttons and sets up action listeners
      */
@@ -354,9 +337,6 @@ public class Pad0View extends UserRequestView implements ActionListener {
         // If check and hint buttons are disabled, reset listenerers and apply those used by this view
         if(!checkHintEnabled) {
             view.resetButtonListeners(); // Clear any listeners applied from other views          
-            hintButton.addActionListener(this);           
-            checkButton.addActionListener(this);            
-            nextButton.addActionListener(this);
         }
         /*
         When switching between steps, the current step will be the previous enum

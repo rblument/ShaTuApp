@@ -37,7 +37,7 @@ import edu.regis.shatu.view.act.StepCompletionAction;
  *
  * @author rickb
  */
-public class ShaZeroView extends UserRequestView implements ActionListener, KeyListener {
+public class ShaZeroView extends UserRequestView implements KeyListener {
 
     /**
      * View for the Sigma0 tutoring session
@@ -67,17 +67,7 @@ public class ShaZeroView extends UserRequestView implements ActionListener, KeyL
      * Deprecated
      */
     private JTextField answerField;
-    /**
-     * The buttons used for checking the user's answer, asking for a hint, and creating the next problem to solve
-     */
-    private JButton checkButton, hintButton, nextButton;
-    /**
-     * The panel in which the buttons lie in
-     */
-    private JPanel buttonPanel;
-    /**
-     * Determines if check hint is enabled
-     */
+
     private boolean checkHintEnabled = false;
     /**
      * The area in which the Sigma0 function is described
@@ -132,7 +122,6 @@ public class ShaZeroView extends UserRequestView implements ActionListener, KeyL
         initializeLayout();
     }
 
-    //region Client methods that handle Client-Server Communication
     /**
      * Sends a request to the server for a new example problem
      *
@@ -144,10 +133,8 @@ public class ShaZeroView extends UserRequestView implements ActionListener, KeyL
 
         ex.setExampleType(ProblemType.SHA_ZERO);
 
-        ShaZeroStep newStep = new ShaZeroStep();
-        newStep.setBitLength(problemSize);
-
-        ex.setData(gson.toJson(newStep));
+        answerField = new JTextField(10);
+        answerField.addKeyListener(this);
 
         return ex;
     }
@@ -163,10 +150,51 @@ public class ShaZeroView extends UserRequestView implements ActionListener, KeyL
 
         ShaZeroStep example = gson.fromJson(currentStep.getData(), ShaZeroStep.class);
 
-        if(example == null)
-        {
+        if(example == null) {
             JOptionPane.showMessageDialog(this, "Please press New Example to generate a question");
             return null;
+
+        }
+
+        String userResponse = responseTextArea.getText().replaceAll("\\s", "");
+
+        example.setResult(userResponse);
+
+        StepCompletion step = new StepCompletion(currentStep, gson.toJson(example));
+
+        step.setStep(currentStep);
+        
+        // Add exampleInputLabel centered
+      //  addc(exampleInputLabel, 0, 0, 2, 1, 0.0, 0.0,
+       //         GridBagConstraints.CENTER, GridBagConstraints.NONE,
+      //          5, 5, 5, 5);
+        // Add answerField to the layout, centered
+       // addc(answerField, 0, 1, 1, 1, 1.0, 0.0,
+       //         GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+       //         5, 5, 5, 5);
+       
+       return step;
+    }
+    /**
+     * Performs rotation (ROR or ROL) on the given input string for the 
+     * specified number of positions.
+     *
+     * @param input     The input string to rotate.
+     * @param positions The number of positions for the rotation.
+     * @return The rotated string.
+     */
+    /*
+    protected String rotateString(String input, int positions, RotateStep.Direction direction) {
+        if (input == null || input.isEmpty()) {
+            return input;
+
+  
+        ShaZeroStep example = gson.fromJson(currentStep.getData(), ShaZeroStep.class);
+
+        if(example == null {
+            JOptionPane.showMessageDialog(this, "Please press New Example to generate a question");
+            return null;
+
         }
 
         String userResponse = responseTextArea.getText().replaceAll("\\s", "");
@@ -179,7 +207,7 @@ public class ShaZeroView extends UserRequestView implements ActionListener, KeyL
 
         return step;
     }
-    //endregion
+    */
 
     //region Event Handler section
     /**
@@ -187,17 +215,17 @@ public class ShaZeroView extends UserRequestView implements ActionListener, KeyL
      *
      * @param event the event to be processed
      */
-    @Override
-    public void actionPerformed(ActionEvent event) {
-        if (event.getSource() == checkButton) {
-            onCheckButton();
-        } else if (event.getSource() == hintButton) {
-            onNextHint();
-        } else if (event.getSource() == nextButton) {
-            checkHintEnabled = true;
-            onNextQuestion();
-        }
-    }
+  //  @Override
+  //  public void actionPerformed(ActionEvent event) {
+       // if (event.getSource() == checkButton) {
+          //  onCheckButton();
+       // } else if (event.getSource() == hintButton) {
+       //     onNextHint();
+       // } else if (event.getSource() == nextButton) {
+       //     checkHintEnabled = true;
+       //     onNextQuestion();
+       // }
+   // }
 
     /**
      * Handles key type events
@@ -219,7 +247,7 @@ public class ShaZeroView extends UserRequestView implements ActionListener, KeyL
         if (e.getKeyCode() == KeyEvent.VK_ENTER && answerField.getText().equals("")) {
             JOptionPane.showMessageDialog(this, "Please provide an answer");
         } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-            checkButton.doClick();
+            //checkButton.doClick();
         }
     }
 
@@ -381,9 +409,9 @@ public class ShaZeroView extends UserRequestView implements ActionListener, KeyL
                 GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
                 5, 5, 5, 5);
 
-        qrPanel.addc(buttonPanel, 0, 2, 1, 1, 1.0, 1.0,
-                GridBagConstraints.CENTER, GridBagConstraints.NONE,
-                5, 5, 5, 5);
+     //   qrPanel.addc(buttonPanel, 0, 2, 1, 1, 1.0, 1.0,
+     //           GridBagConstraints.CENTER, GridBagConstraints.NONE,
+      //          5, 5, 5, 5);
     }
 
     /**
@@ -405,7 +433,7 @@ public class ShaZeroView extends UserRequestView implements ActionListener, KeyL
      * listeners
      */
     private void setUpButtons() {
-
+/*
         checkButton = new JButton(StepCompletionAction.instance());
         checkButton.addActionListener(this);
 
@@ -419,6 +447,7 @@ public class ShaZeroView extends UserRequestView implements ActionListener, KeyL
         buttonPanel.add(checkButton);
         buttonPanel.add(nextButton);
         buttonPanel.add(hintButton);
+        */
     }
 
     /**
@@ -445,16 +474,12 @@ public class ShaZeroView extends UserRequestView implements ActionListener, KeyL
      */
     protected void updateView() {
         view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
-        hintButton = view.getHintButton();
-        checkButton = view.getCheckButton();
-        nextButton = view.getNewExampleButton();
+
         
         // If check and hint buttons are disabled, reset listenerers and apply those used by this view
         if(!checkHintEnabled) {
             view.resetButtonListeners(); // Clear any listeners applied from other views          
-            hintButton.addActionListener(this);           
-            checkButton.addActionListener(this);            
-            nextButton.addActionListener(this);
+
         }
         
         if (model != null) {

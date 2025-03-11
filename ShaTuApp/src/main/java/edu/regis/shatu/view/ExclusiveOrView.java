@@ -54,7 +54,7 @@ import edu.regis.shatu.view.act.StepCompletionAction;
  *
  * @author rickb
  */
-public class ExclusiveOrView extends UserRequestView implements ActionListener, KeyListener {
+public class ExclusiveOrView extends UserRequestView implements KeyListener {
 
     private TutoringSessionView view;
     private String stringX, stringY;
@@ -62,7 +62,7 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
     private JTextArea descTextArea, feedbackTextArea, responseTextArea;
     private JScrollPane feedbackPane, responsePane;
     private GPanel questionPanel, descriptionPanel, qrPanel;
-    private JPanel buttonPanel, radioButtonPanel;
+    private JPanel  radioButtonPanel;
     private JButton checkButton, hintButton, newExampleButton;
     private boolean checkHintEnabled = false;
     private ButtonGroup problemSizeGroup;
@@ -91,7 +91,6 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
         setUpQuestionArea();
         setUpResponseArea();
         setUpFeedbackArea();
-        setUpButtons();
         setUpDescriptionPanel();
         setUpQRPanel();
     }
@@ -292,7 +291,6 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
         qrPanel.addc(responsePane, 0, 0, 1, 1, 1.0, 1.0,
              GridBagConstraints.CENTER, GridBagConstraints.BOTH,
              0, 0, 0, 0);
-
     }
 
     /**
@@ -443,21 +441,6 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
         return paddedBinary.toString();
     }
 
-    /**
-     * Handles the actionPerformed event for buttons in the view.
-     *
-     * @param event The ActionEvent that occurred.
-     */
-    @Override
-    public void actionPerformed(ActionEvent event) {
-        if (event.getSource() == checkButton) {
-            onCheckButton();
-        } else if (event.getSource() == hintButton) {
-            onNextHint();
-        } else if (event.getSource() == newExampleButton) {
-            checkHintEnabled = true;
-        }
-    }
 
     /**
      * Handles the keyTyped event for the view.
@@ -531,9 +514,6 @@ public class ExclusiveOrView extends UserRequestView implements ActionListener, 
         // If check and hint buttons are disabled, reset listenerers and apply those used by this view
         if (!checkHintEnabled) {
             view.resetButtonListeners(); // Clear any listeners applied from other views          
-            hintButton.addActionListener(this);
-            checkButton.addActionListener(this);
-            newExampleButton.addActionListener(this);
         }
 
         if (model != null) {

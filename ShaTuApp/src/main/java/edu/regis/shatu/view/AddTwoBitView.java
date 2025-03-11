@@ -47,7 +47,7 @@ import edu.regis.shatu.view.act.StepCompletionAction;
  * @author rickb
  * @author Amanda Roskelley
  */
-public class AddTwoBitView extends UserRequestView implements ActionListener, KeyListener {
+public class AddTwoBitView extends UserRequestView implements KeyListener {
 
     /**
      * The modulo value for addition of binary numbers.
@@ -77,23 +77,6 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
     public AddTwoBitView() {
         initializeComponents();
         initializeLayout();
-    }
-
-    /**
-     * Handles action events for components.
-     *
-     * @param event The ActionEvent to be handled.
-     */
-    @Override
-    public void actionPerformed(ActionEvent event) {
-        if (event.getSource() == checkButton) {
-            onCheckButton();
-        } else if (event.getSource() == hintButton) {
-            onNextHint();
-        } else if (event.getSource() == nextButton) {
-            checkHintEnabled = true;
-            onNextQuestion();
-        }
     }
 
     /**
@@ -208,7 +191,7 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
             JOptionPane.showMessageDialog(this, "Please provide an answer");
         } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
             checkButton.doClick();
-        }
+        } 
     }
 
     /**
@@ -318,9 +301,6 @@ public class AddTwoBitView extends UserRequestView implements ActionListener, Ke
         // If check and hint buttons are disabled, reset listenerers and apply those used by this view
         if (!checkHintEnabled) {
             view.resetButtonListeners(); // Clear any listeners applied from other views          
-            hintButton.addActionListener(this);
-            checkButton.addActionListener(this);
-            nextButton.addActionListener(this);
         }
 
         if (model != null) {

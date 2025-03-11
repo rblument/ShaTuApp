@@ -48,7 +48,7 @@ import edu.regis.shatu.view.act.StepCompletionAction;
  *
  * @author rickb
  */
-public class Add1View extends UserRequestView implements ActionListener {
+public class Add1View extends UserRequestView {
 
     private TutoringSessionView view;
     private JTextPane descriptionTextPane;
@@ -78,7 +78,7 @@ public class Add1View extends UserRequestView implements ActionListener {
      * and delegates to appropriate methods for handling.
      *
      * @param event the event that triggered the action listener
-     */
+     *
     @Override
     public void actionPerformed(ActionEvent event) {
         if (event.getSource() == checkButton) {
@@ -90,7 +90,8 @@ public class Add1View extends UserRequestView implements ActionListener {
             requestHint();
         }
     }
-
+    */
+    
     /**
      * Initializes all GUI components, setting up their properties and
      * configurations.
@@ -102,7 +103,6 @@ public class Add1View extends UserRequestView implements ActionListener {
         setupMessageLengthInput();
         setupResponseArea();
         setupFeedbackArea();
-        setupButtons();
         setupAsciiTable();
     }
 
@@ -133,7 +133,6 @@ public class Add1View extends UserRequestView implements ActionListener {
         addc(feedbackScrollPane, 0, 5, 1, 1,
                 1.0, 1.0, GridBagConstraints.CENTER,
                 GridBagConstraints.BOTH, 5, 5, 5, 5);
-
     }
 
     /**
@@ -268,7 +267,6 @@ public class Add1View extends UserRequestView implements ActionListener {
 
     }
 
-
     /**
      * Initializes the components for inputting the message length. This method
      * creates and configures a JLabel and a JTextField where users can specify
@@ -359,9 +357,6 @@ public class Add1View extends UserRequestView implements ActionListener {
         // If check and hint buttons are disabled, reset listenerers and apply those used by this view
         if (!checkHintEnabled) {
             view.resetButtonListeners(); // Clear any listeners applied from other views          
-            hintButton.addActionListener(this);
-            checkButton.addActionListener(this);
-            nextButton.addActionListener(this);
         }
 
         /*
