@@ -12,263 +12,441 @@
  */
 package edu.regis.shatu.view;
 
+import edu.regis.shatu.model.TutoringSession;
+import edu.regis.shatu.model.aol.AssessmentLevel;
+import edu.regis.shatu.svc.ServiceFactory;
+import edu.regis.shatu.svc.StudentModelSvc;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
-
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
-import javax.swing.border.BevelBorder;
-
-import edu.regis.shatu.model.TutoringSession;
-import edu.regis.shatu.svc.ServiceFactory;
-import edu.regis.shatu.svc.StudentModelSvc;
-import edu.regis.shatu.util.CustomProgressBar;
-import java.util.List;
+import javax.swing.JScrollPane;
+import javax.swing.SwingConstants;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 
 /**
  * The dashboard screen to be displayed upon user sign in. Enables user to
  * select a mode from the tutor (teach me, practice, quiz me) Tracks user's
- * progress for each mode.
+ * progress for each mode and learning objective.
  *
- * @author Ryley MacLagan, Rickb
+ * @author Ryley MacLagan, Rickb, Cameron Brucher
  */
-public class DashboardPanel extends javax.swing.JPanel {
+public class DashboardPanel extends JPanel {
 
     private TutoringSession model; // Reference to current tutoringSession
     private static boolean welcome = false;
- 
+    
     private JButton logOutButton;
-    private JButton practiceButton1;
-    private JProgressBar practiceProgressBar1;
-    private JProgressBar quizMeProgressBar1;
-    private JButton quizeMeButton1;
     private JButton settingsButton;
-    private JButton teachMeButton1;
-    private JProgressBar teachMeProgressBar1;
+    private JButton teachMeButton;
+    private JButton practiceButton;
+    private JButton quizMeButton;
     private JLabel welcomeLabel;
+    
+    // Panels to hold progress bars for each study mode (will be added to scroll panes)
+    private JPanel teachMePanel;
+    private JPanel practicePanel;
+    private JPanel quizMePanel;
+    
+    // Maps for individual progress bars by lesson name
+    private HashMap<String, JProgressBar> teachMeProgressBars;
+    private HashMap<String, JProgressBar> practiceProgressBars;
+    private HashMap<String, JProgressBar> quizMeProgressBars;
+    
+    // List of all lesson titles from the DB (excluding IDs 0, 10, 20)
+    private List<String> allLessons = new ArrayList<>();
+    
+    // Database URL (used by service/DAO layer)
+    private static final String URL = "jdbc:mysql://localhost:3306/shatudb?serverTimezone=UTC";
 
+    /**
+     * Creates a new DashboardPanel and initializes components.
+     *
+     * @param tutoringSession the current tutoring session.
+     */
     public DashboardPanel(TutoringSession tutoringSession) {
-        model = tutoringSession;
-
+        this.model = tutoringSession;
+        
         if (welcome == false) {
             welcome = true;
-            System.out.println("DashboardPanel initialized for user: "
-                    + tutoringSession.getStudent().getAccount().getFirstName());
-            String welcomeMessage = "Welcome, "
-                    + tutoringSession.getStudent().getAccount().getFirstName() + "! "
-                    + "Your session has successfully started.";
-            JOptionPane.showMessageDialog(
-                    null,
-                    welcomeMessage,
-                    "Welcome",
-                    JOptionPane.INFORMATION_MESSAGE
-            );
+            String welcomeMessage = "Welcome, " 
+                    + tutoringSession.getStudent().getAccount().getFirstName() + "! Your session has successfully started.";
+            JOptionPane.showMessageDialog(null, welcomeMessage, "Welcome", JOptionPane.INFORMATION_MESSAGE);
         }
-
+        
+        // Load lessons and set up UI components
+        loadAllLessons();
         initializeComponents();
         layoutComponents();
     }
     
+    /**
+     * Updates the tutoring session model.
+     *
+     * @param model the new tutoring session model.
+     */
     public void setModel(TutoringSession model) {
         this.model = model;
     }
-
+    
+    /**
+     * Initializes all UI components.
+     */
     private void initializeComponents() {
-        GridBagConstraints gridBagConstraints;
-
-        logOutButton = new JButton();
-        settingsButton = new JButton();
+        // Header components
+        logOutButton = new JButton("Log Out");
+        settingsButton = new JButton("Settings");
         welcomeLabel = new JLabel();
-        teachMeButton1 = new JButton();
-        practiceButton1 = new JButton();
-        quizeMeButton1 = new JButton();
-        practiceProgressBar1 = new CustomProgressBar();
-        teachMeProgressBar1 = new CustomProgressBar();
-        quizMeProgressBar1 = new CustomProgressBar();
-        
-        // Attach tooltips to show incomplete lessons on hover
-        teachMeProgressBar1.setToolTipText(getIncompleteLessons("Teach Me"));
-        teachMeButton1.setToolTipText(getIncompleteLessons("Teach Me"));
-
-        practiceProgressBar1.setToolTipText(getIncompleteLessons("Practice"));
-        practiceButton1.setToolTipText(getIncompleteLessons("Practice"));
-
-        quizMeProgressBar1.setToolTipText(getIncompleteLessons("Quiz Me"));
-        quizeMeButton1.setToolTipText(getIncompleteLessons("Quiz Me"));
-
-
-        logOutButton.setText("Log Out");
-        logOutButton.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        logOutButton.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                logOutButtonMouseClicked(evt);
-            }
-        });
-        logOutButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                logOutButtonActionPerformed(evt);
-            }
-        });   
-
-        settingsButton.setText("Settings");
-        settingsButton.setVerticalAlignment(javax.swing.SwingConstants.TOP);
-
-        welcomeLabel.setBackground(new java.awt.Color(0, 43, 73));
+        welcomeLabel.setBackground(new Color(0, 43, 73));
         welcomeLabel.setOpaque(true);
-        welcomeLabel.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        welcomeLabel.setForeground(new java.awt.Color(241, 196, 0));
-        welcomeLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        welcomeLabel.setLabelFor(this);
-        welcomeLabel.setText("Welcome!");
-        welcomeLabel.setToolTipText("");
-        welcomeLabel.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        welcomeLabel.setText("Welcome, " + model.getStudent().getAccount().getFirstName() + "!");
-
-        teachMeButton1.setText("Teach Me");
-        teachMeButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                teachMeButton1ActionPerformed(evt);
-            }
-        });
-      
-        practiceButton1.setText("Practice");
-        practiceButton1.setActionCommand("practice");
-        practiceButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                practiceButton1ActionPerformed(evt);
-            }
-        });
-       
-        quizeMeButton1.setText("Quiz Me");
-      
-        practiceProgressBar1.setBackground(new java.awt.Color(0, 43, 73));
-        practiceProgressBar1.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        practiceProgressBar1.setForeground(new java.awt.Color(241, 196, 0, 235));
-        practiceProgressBar1.setOrientation(1);
-        practiceProgressBar1.setValue(50);
-        practiceProgressBar1.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED, Color.white, Color.white, Color.white, Color.white));
-        practiceProgressBar1.setString("");
-        practiceProgressBar1.setStringPainted(true);
-       
-        teachMeProgressBar1.setBackground(new java.awt.Color(0, 43, 73));
-        teachMeProgressBar1.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        teachMeProgressBar1.setForeground(new java.awt.Color(241, 196, 0, 235));
-        teachMeProgressBar1.setOrientation(1);
-        teachMeProgressBar1.setValue(100);
-        teachMeProgressBar1.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED, Color.white, Color.white, Color.white, Color.white));
-       
-        quizMeProgressBar1.setBackground(new java.awt.Color(0, 43, 73));
-        quizMeProgressBar1.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        quizMeProgressBar1.setForeground(new java.awt.Color(241, 196, 0, 235));
-        quizMeProgressBar1.setOrientation(1);
-        quizMeProgressBar1.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED, Color.white, Color.white, Color.white, Color.white));
-        quizMeProgressBar1.setString("");
-        quizMeProgressBar1.setStringPainted(true);
+        welcomeLabel.setFont(new Font("Segoe UI", Font.PLAIN, 18));
+        welcomeLabel.setForeground(new Color(241, 196, 0));
+        welcomeLabel.setHorizontalAlignment(SwingConstants.CENTER);
         
+        // Study mode buttons
+        teachMeButton = new JButton("Teach Me");
+        practiceButton = new JButton("Practice");
+        quizMeButton = new JButton("Quiz Me");
+        
+        // Set button actions
+        logOutButton.addActionListener(evt -> logOut());
+        settingsButton.setVerticalAlignment(SwingConstants.TOP);
+        teachMeButton.addActionListener(evt -> SplashFrame.instance().selectLessonScreen());
+        practiceButton.addActionListener(evt -> SplashFrame.instance().selectPracticeScreen());
+        quizMeButton.addActionListener(evt -> 
+            JOptionPane.showMessageDialog(this, "Quiz Me not yet implemented!", "Info", JOptionPane.INFORMATION_MESSAGE)
+        );
+        
+        // Initialize progress bar maps and panels
+        teachMeProgressBars = new HashMap<>();
+        practiceProgressBars = new HashMap<>();
+        quizMeProgressBars = new HashMap<>();
+        teachMePanel = new JPanel(new GridBagLayout());
+        practicePanel = new JPanel(new GridBagLayout());
+        quizMePanel = new JPanel(new GridBagLayout());
     }
     
+    /**
+     * Lays out all UI components on the panel.
+     */
     private void layoutComponents() {
-        setCursor(new Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-        setMaximumSize(new Dimension(32767, 32767));
-        setMinimumSize(new Dimension(0, 0));
+        setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
         setPreferredSize(new Dimension(986, 480));
         setLayout(new BorderLayout());
         
-        
-        JPanel headerPanel = new JPanel();
-        headerPanel.setLayout(new BorderLayout());
-        headerPanel.add(logOutButton, BorderLayout.LINE_END);
-        
+        // Header panel
+        JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.add(settingsButton, BorderLayout.LINE_START);
-        
-        headerPanel.add(welcomeLabel, java.awt.BorderLayout.CENTER);
-
+        welcomeLabel.setText("Welcome, " + model.getStudent().getAccount().getFirstName() + "!");
+        headerPanel.add(welcomeLabel, BorderLayout.CENTER);
+        headerPanel.add(logOutButton, BorderLayout.LINE_END);
         add(headerPanel, BorderLayout.NORTH);
         
-        GPanel contentPanel = new GPanel();
-       
-        contentPanel.setBackground(new java.awt.Color(0, 43, 73));
-        contentPanel.setAlignmentX(1.0F);
-        contentPanel.setCursor(new java.awt.Cursor(Cursor.DEFAULT_CURSOR));
-   
-              //gridBagConstraints.ipadx = 121;
-        //gridBagConstraints.ipady = 65; 
-       contentPanel.addc(teachMeProgressBar1, 0,0, 1,1, 1.0,1.0, 
-                         GridBagConstraints.NORTH,GridBagConstraints.BOTH,
-	                  20,5,0,0);
-       
-        contentPanel.addc(practiceProgressBar1, 1,0, 1,1, 1.0,1.0, 
-                          GridBagConstraints.NORTH,GridBagConstraints.BOTH,
-	                  20,20,0,0);
+        // Content panel
+        JPanel contentPanel = new JPanel(new GridBagLayout());
+        contentPanel.setBackground(new Color(0, 43, 73));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.anchor = GridBagConstraints.NORTH;
+        gbc.weightx = 1.0;
+        gbc.weighty = 1.0;
         
-        contentPanel.addc(quizMeProgressBar1, 2,0, 1,1, 1.0,1.0, 
-                          GridBagConstraints.NORTH,GridBagConstraints.BOTH,
-	                  20,20,0,5);
+        // Category panels with scroll panes
+        JPanel teachMeCategoryPanel = createCategoryPanel("Teach Me");
+        JScrollPane teachMeScroll = new JScrollPane(teachMeCategoryPanel);
+        teachMeScroll.setPreferredSize(new Dimension(350, 300));
+        gbc.gridy = 0;
+        gbc.gridx = 0;
+        contentPanel.add(teachMeScroll, gbc);
         
-        contentPanel.addc(teachMeButton1, 0,1, 1,1, 0.0,0.0,
-	                  GridBagConstraints.CENTER,  GridBagConstraints.HORIZONTAL,
-	                  10,5,0,0);	
-
-        contentPanel.addc(practiceButton1, 1,1, 1,1, 0.0, 0.0,
-                          GridBagConstraints.SOUTH,GridBagConstraints.HORIZONTAL,
-	                  10,20,0,0);	
+        JPanel practiceCategoryPanel = createCategoryPanel("Practice");
+        JScrollPane practiceScroll = new JScrollPane(practiceCategoryPanel);
+        practiceScroll.setPreferredSize(new Dimension(350, 300));
+        gbc.gridx = 1;
+        contentPanel.add(practiceScroll, gbc);
         
-        contentPanel.addc(quizeMeButton1, 2,1, 1,1, 0.0,0.0, 
-                          GridBagConstraints.SOUTH,GridBagConstraints.HORIZONTAL,
-	                  10,20,0,5);        
+        JPanel quizMeCategoryPanel = createCategoryPanel("Quiz Me");
+        JScrollPane quizMeScroll = new JScrollPane(quizMeCategoryPanel);
+        quizMeScroll.setPreferredSize(new Dimension(350, 300));
+        gbc.gridx = 2;
+        contentPanel.add(quizMeScroll, gbc);
         
-        add(contentPanel, java.awt.BorderLayout.CENTER);
-       
+        // Add study mode buttons below the panels
+        gbc.gridy = 1;
+        gbc.weighty = 0.0;
+        gbc.weightx = 0.0;
+        gbc.gridx = 0;
+        contentPanel.add(teachMeButton, gbc);
+        gbc.gridx = 1;
+        contentPanel.add(practiceButton, gbc);
+        gbc.gridx = 2;
+        contentPanel.add(quizMeButton, gbc);
+        
+        add(contentPanel, BorderLayout.CENTER);
     }
-
-    private void practiceButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_practiceButton1ActionPerformed
-        SplashFrame.instance().selectPracticeScreen();
-    }
-
-    private void logOutButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_logOutButtonMouseClicked
-        SplashFrame.instance().logout();
-    }
-
-    private void teachMeButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_teachMeButton1ActionPerformed
-        SplashFrame.instance().selectLessonScreen();
-    }
-
-    private void logOutButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logOutButtonActionPerformed
-        // TODO add your handling code here:
-    }
-
+    
     /**
-    * Retrieves the list of incomplete lessons for the given category.
-    *
-    * @param category The category (Teach Me, Practice, Quiz Me).
-    * @return A formatted string of incomplete lessons.
-    */
-   private String getIncompleteLessons(String category) {
+     * Loads lesson titles from the service layer (excludes lessons with IDs 0, 10, 20).
+     */
+    private void loadAllLessons() {
         try {
             String userId = model.getStudent().getAccount().getUserId();
             StudentModelSvc studentModelService = ServiceFactory.findStudentModelSvc();
-
-            List<String> incompleteLessons = studentModelService.retrieveIncompleteLessons(userId, category);
-
-            if (incompleteLessons.isEmpty()) {
-                return "No lessons remaining in " + category + "!";
-            } else {
-                return "<html>" + category + " To Do:<br>" + String.join("<br>", incompleteLessons) + "</html>";
-            }
+            allLessons = studentModelService.retrieveAllLessons(userId);
         } catch (Exception e) {
-            e.printStackTrace();
-            return "Error loading lessons: " + e.getMessage();
+            JOptionPane.showMessageDialog(this, "Error loading lessons: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            allLessons = new ArrayList<>();
         }
     }
-
-
-
-
+    
+    /**
+     * Shortens a lesson title to a maximum of 20 characters.
+     *
+     * @param lesson the original lesson title.
+     * @return the shortened lesson title.
+     */
+    private String truncateLessonTitle(String lesson) {
+        if (lesson.length() <= 23) {
+            return lesson;
+        }
+        int lastSpace = lesson.lastIndexOf(" ", 20);
+        if (lastSpace == -1) {
+            return lesson.substring(0, 20) + "...";
+        } else {
+            return lesson.substring(0, lastSpace) + "...";
+        }
+    }
+    
+    /**
+     * Converts an AssessmentLevel to progress percentages for [Teach Me, Practice, Quiz Me].
+     *
+     * Mapping:
+     *   NOT_STARTED: [0, 0, 0]
+     *   VERY_LOW:    [50, 0, 0]
+     *   LOW:         [100, 0, 0]
+     *   MEDIUM:      [100, 50, 0]
+     *   HIGH:        [100, 100, 0]
+     *   VERY_HIGH:   [100, 100, 50]
+     *   COMPLETED:   [100, 100, 100]
+     *
+     * @param level the assessment level.
+     * @return an array with progress percentages.
+     */
+    private int[] mapAssessmentToProgress(AssessmentLevel level) {
+        switch (level) {
+            case NOT_STARTED: return new int[]{0, 0, 0};
+            case VERY_LOW:    return new int[]{50, 0, 0};
+            case LOW:         return new int[]{100, 0, 0};
+            case MEDIUM:      return new int[]{100, 50, 0};
+            case HIGH:        return new int[]{100, 100, 0};
+            case VERY_HIGH:   return new int[]{100, 100, 50};
+            case COMPLETED:   return new int[]{100, 100, 100};
+            default:          return new int[]{0, 0, 0};
+        }
+    }
+    
+    /**
+     * Gets the progress percentage for a lesson in a given study mode.
+     *
+     * @param studyMode the study mode (e.g., "Teach Me").
+     * @param lesson the lesson name.
+     * @return the progress percentage.
+     */
+    private int getProgressForLesson(String studyMode, String lesson) {
+        try {
+            String userId = model.getStudent().getAccount().getUserId();
+            StudentModelSvc studentModelService = ServiceFactory.findStudentModelSvc();
+            AssessmentLevel level = studentModelService.retrieveAssessmentLevel(userId, lesson);
+            int[] progress = mapAssessmentToProgress(level);
+            if ("Teach Me".equalsIgnoreCase(studyMode)) {
+                return progress[0];
+            } else if ("Practice".equalsIgnoreCase(studyMode)) {
+                return progress[1];
+            } else if ("Quiz Me".equalsIgnoreCase(studyMode)) {
+                return progress[2];
+            }
+        } catch(Exception e) {
+            // Handle error silently
+        }
+        return 0;
+    }
+    
+    /**
+     * Creates a panel for a study mode category.
+     *
+     * The panel shows an overall progress bar and sections for lessons that are Not Started,
+     * In Progress, and Completed.
+     *
+     * @param category the study mode category.
+     * @return the category panel.
+     */
+    private JPanel createCategoryPanel(String category) {
+        List<String> notStarted = new ArrayList<>();
+        List<String> inProgress = new ArrayList<>();
+        List<String> completed = new ArrayList<>();
+        
+        for (String lesson : allLessons) {
+            int progress = getProgressForLesson(category, lesson);
+            if (progress == 0) {
+                notStarted.add(lesson);
+            } else if (progress == 50) {
+                inProgress.add(lesson);
+            } else if (progress == 100) {
+                completed.add(lesson);
+            }
+        }
+        
+        if (notStarted.isEmpty()) { notStarted.add("None"); }
+        if (inProgress.isEmpty()) { inProgress.add("None"); }
+        if (completed.isEmpty()) { completed.add("None"); }
+        
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBackground(new Color(241, 196, 0)); // Yellow background
+        panel.setBorder(new CompoundBorder(new LineBorder(Color.BLACK), new EmptyBorder(5, 5, 5, 5)));
+        
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(1, 1, 1, 1);
+        gbc.anchor = GridBagConstraints.NORTH;
+        gbc.weightx = 1.0;
+        gbc.weighty = 0.0;
+        
+        // Category header
+        JLabel header = new JLabel(category + " Progress");
+        header.setForeground(Color.BLACK);
+        header.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        panel.add(header, gbc);
+        
+        // Overall progress bar (average progress)
+        int sum = 0;
+        for (String lesson : allLessons) {
+            sum += getProgressForLesson(category, lesson);
+        }
+        int overall = allLessons.isEmpty() ? 0 : sum / allLessons.size();
+        JProgressBar overallBar = new JProgressBar(0, 100);
+        overallBar.setValue(overall);
+        overallBar.setStringPainted(true);
+        overallBar.setPreferredSize(new Dimension(70, 35));
+        overallBar.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        overallBar.setForeground(new Color(0, 43, 73));
+        overallBar.setBackground(Color.WHITE);
+        overallBar.setString(overall + "%");
+        gbc.gridy = 1;
+        gbc.gridx = 0;
+        gbc.gridwidth = 2;
+        panel.add(overallBar, gbc);
+        
+        gbc.gridwidth = 1;
+        int row = 2;
+        row = addSection(panel, row, "Not Started:", notStarted, "Teach Me", category);
+        row = addSection(panel, row, "In Progress:", inProgress, "Practice", category);
+        row = addSection(panel, row, "Completed:", completed, "Quiz Me", category);
+        
+        // Filler to push content to the top
+        gbc.gridy = ++row;
+        gbc.gridx = 0;
+        gbc.gridwidth = 2;
+        gbc.weighty = 1.0;
+        JPanel filler = new JPanel();
+        filler.setBackground(new Color(241, 196, 0));
+        panel.add(filler, gbc);
+        
+        panel.revalidate();
+        panel.repaint();
+        return panel;
+    }
+    
+    /**
+     * Adds a section (Not Started, In Progress, or Completed) to the category panel.
+     *
+     * For each lesson, it adds a label (with a shortened title) and a progress bar.
+     *
+     * @param panel the parent panel.
+     * @param startRow the starting row index.
+     * @param sectionName the section title.
+     * @param lessons the list of lessons in this section.
+     * @param expectedCategory the study mode for fetching progress.
+     * @param studyMode the current study mode.
+     * @return the next row index.
+     */
+    private int addSection(JPanel panel, int startRow, String sectionName,
+                           List<String> lessons, String expectedCategory, String studyMode) {
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(1, 1, 1, 1);
+        gbc.anchor = GridBagConstraints.NORTH;
+        gbc.weightx = 1.0;
+        gbc.weighty = 0.0;
+        
+        int row = startRow;
+        // Section header label
+        JLabel secLabel = new JLabel(sectionName);
+        secLabel.setForeground(Color.BLACK);
+        secLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        gbc.gridx = 0;
+        gbc.gridy = row++;
+        gbc.gridwidth = 2;
+        panel.add(secLabel, gbc);
+        gbc.gridwidth = 1;
+        
+        // Add each lesson with its progress bar
+        for (String lesson : lessons) {
+            gbc.gridx = 0;
+            gbc.gridy = row;
+            String displayLesson = truncateLessonTitle(lesson);
+            JLabel lessonLabel = new JLabel(displayLesson);
+            lessonLabel.setFont(new Font("Segoe UI", Font.PLAIN, 18));
+            lessonLabel.setForeground(Color.BLACK);
+            lessonLabel.setBorder(new EmptyBorder(0, 5, 0, 5));
+            panel.add(lessonLabel, gbc);
+            
+            if (!"None".equals(lesson)) {
+                gbc.gridx = 1;
+                JProgressBar bar = new JProgressBar(0, 100);
+                int progress = getProgressForLesson(studyMode, lesson);
+                bar.setValue(progress);
+                bar.setStringPainted(true);
+                bar.setPreferredSize(new Dimension(35, 25));
+                bar.setFont(new Font("Segoe UI", Font.BOLD, 16));
+                bar.setForeground(new Color(0, 43, 73));
+                bar.setBackground(Color.WHITE);
+                bar.setString(progress + "%");
+                panel.add(bar, gbc);
+            }
+            row++;
+        }
+        
+        return row;
+    }
+    
+    /**
+     * Logs out the current user.
+     */
+    private void logOut() {
+        SplashFrame.instance().logout();
+    }
 }

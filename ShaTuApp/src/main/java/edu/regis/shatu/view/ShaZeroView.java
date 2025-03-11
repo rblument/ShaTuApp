@@ -29,16 +29,17 @@ import edu.regis.shatu.view.act.NewExampleAction;
 import edu.regis.shatu.view.act.StepCompletionAction;
 
 /**
- * ShaZero class represents the GUI view for performing the SHA Σ₀ function, involving rotation and right shift operations.
+ * ShaZero class represents the GUI view for performing the SHA Σ₀ function,
+ * involving rotation and right shift operations.
  * It extends GPanel and implements ActionListener and KeyListener interfaces.
  * <p>
- * The class provides a user interface for performing rotations and right shifts on binary numbers and checking the results.
+ * The class provides a user interface for performing rotations and right shifts
+ * on binary numbers and checking the results.
  * Inline comments have been added for better understanding of the code.
  *
  * @author rickb
  */
 public class ShaZeroView extends UserRequestView implements KeyListener {
-
     /**
      * View for the Sigma0 tutoring session
      */
@@ -165,6 +166,8 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
         step.setStep(currentStep);
         
         // Add exampleInputLabel centered
+
+
       //  addc(exampleInputLabel, 0, 0, 2, 1, 0.0, 0.0,
        //         GridBagConstraints.CENTER, GridBagConstraints.NONE,
       //          5, 5, 5, 5);
@@ -174,9 +177,10 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
        //         5, 5, 5, 5);
        
        return step;
+
     }
     /**
-     * Performs rotation (ROR or ROL) on the given input string for the 
+     * Performs rotation (ROR or ROL) on the given input string for the
      * specified number of positions.
      *
      * @param input     The input string to rotate.
@@ -184,32 +188,36 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
      * @return The rotated string.
      */
     /*
-    protected String rotateString(String input, int positions, RotateStep.Direction direction) {
-        if (input == null || input.isEmpty()) {
-            return input;
+     * protected String rotateString(String input, int positions,
+     * RotateStep.Direction direction) {
+     * if (input == null || input.isEmpty()) {
+     * return input;
+     * 
+     * 
+     * ShaZeroStep example = gson.fromJson(currentStep.getData(),
+     * ShaZeroStep.class);
+     * 
+     * if(example == null {
+     * JOptionPane.showMessageDialog(this,
+     * "Please press New Example to generate a question");
+     * return null;
+     * 
+     * }
+     * 
+     * String userResponse = responseTextArea.getText().replaceAll("\\s", "");
+     * 
+     * example.setResult(userResponse);
+     * 
+     * StepCompletion step = new StepCompletion(currentStep, gson.toJson(example));
+     * 
+     * step.setStep(currentStep);
+     * 
+     * return step;
+     * }
+     */
 
-  
-        ShaZeroStep example = gson.fromJson(currentStep.getData(), ShaZeroStep.class);
 
-        if(example == null {
-            JOptionPane.showMessageDialog(this, "Please press New Example to generate a question");
-            return null;
 
-        }
-
-        String userResponse = responseTextArea.getText().replaceAll("\\s", "");
-
-        example.setResult(userResponse);
-
-        StepCompletion step = new StepCompletion(currentStep, gson.toJson(example));
-
-        step.setStep(currentStep);
-
-        return step;
-    }
-    */
-
-    //region Event Handler section
     /**
      * Handles events that the user preforms on the UI
      *
@@ -226,6 +234,7 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
        //     onNextQuestion();
        // }
    // }
+
 
     /**
      * Handles key type events
@@ -247,7 +256,9 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
         if (e.getKeyCode() == KeyEvent.VK_ENTER && answerField.getText().equals("")) {
             JOptionPane.showMessageDialog(this, "Please provide an answer");
         } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+
             //checkButton.doClick();
+
         }
     }
 
@@ -281,17 +292,26 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
         if (answerField.getText().equals("")) {
             JOptionPane.showMessageDialog(this, "Please provide an answer");
         } else {
-            //verifyAnswer();
+
+            // verifyAnswer();
         }
     }
-    //endregion
 
-    //region UI Component Setup
     /**
      * Sets the main View title and description of the function
      */
-    private void setupDescription()
-    {
+    private void setupDescription() {
+
+            //verifyAnswer();
+
+    }
+
+
+    /**
+     * Sets the main View title and description of the function
+     */
+    private void setupDescription()   {
+
         viewNameLabel = new JLabel("The 𝛴₀ Function");
         viewNameLabel.setFont(new Font("", Font.BOLD, 20));
 
@@ -301,7 +321,7 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
         descTextArea.setWrapStyleWord(true);
         descTextArea.setOpaque(false);
         descTextArea.append("""
-                            The 𝛴₀ function takes a single 32-bit word operand, A, and outputs a single 32-bit word.""");
+                The 𝛴₀ function takes a single 32-bit word operand, A, and outputs a single 32-bit word.""");
     }
 
     /**
@@ -348,7 +368,8 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
         problemSizeGroup.add(sixteenRadioButton);
         problemSizeGroup.add(thirtytwoRadioButton);
 
-        fourRadioButton.setSelected(true); //Set default radio button to true
+        fourRadioButton.setSelected(true); // Set default radio button to true
+
 
         radioButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         radioButtonPanel.add(fourRadioButton);
@@ -408,10 +429,6 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
         qrPanel.addc(responsePane, 0, 0, 1, 1, 1.0, 1.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
                 5, 5, 5, 5);
-
-     //   qrPanel.addc(buttonPanel, 0, 2, 1, 1, 1.0, 1.0,
-     //           GridBagConstraints.CENTER, GridBagConstraints.NONE,
-      //          5, 5, 5, 5);
     }
 
     /**
@@ -433,6 +450,7 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
      * listeners
      */
     private void setUpButtons() {
+
 /*
         checkButton = new JButton(StepCompletionAction.instance());
         checkButton.addActionListener(this);
@@ -448,6 +466,7 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
         buttonPanel.add(nextButton);
         buttonPanel.add(hintButton);
         */
+
     }
 
     /**
@@ -466,7 +485,7 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
                 GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
                 5, 5, 5, 5);
     }
-    //endregion
+
 
     @Override
     /**
@@ -481,17 +500,15 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
             view.resetButtonListeners(); // Clear any listeners applied from other views          
 
         }
-        
+
         if (model != null) {
 
             Step step = model.currentTask().getCurrentStep().getStep();
 
-            if(step != null)
-            {
+            if (step != null) {
                 ShaZeroStep example = gson.fromJson(step.getData(), ShaZeroStep.class);
 
-                if(example != null)
-                {
+                if (example != null) {
                     operandAValue = example.getOperandA();
                     operandALabel.setText("Operand A: " + operandAValue);
                 }

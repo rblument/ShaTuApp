@@ -10,6 +10,10 @@
  *  software is distributed on an "AS IS" basis without warranties
  *  or conditions of any kind, either expressed or implied.
  */
+
+ /*
+ * Set responseTextArea to disabled at initialization per SHAT-225 John hennessey 23 Feb 2025
+ */
 package edu.regis.shatu.view;
 
 import java.awt.Dimension;
@@ -233,6 +237,7 @@ public class Add1View extends UserRequestView {
         responseTextArea = new JTextArea(3, 20);
         responseTextArea.setLineWrap(true); // Enable line wrapping
         responseTextArea.setWrapStyleWord(true); // Wrap lines at word boundaries
+        responseTextArea.setEnabled(false);  // Text area disabled at initialization 
         responseScrollPane = new JScrollPane(responseTextArea);
         responseScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED); // Enable vertical scrolling
     }
@@ -250,7 +255,25 @@ public class Add1View extends UserRequestView {
         feedbackScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED); // Enable vertical scrolling
     }
 
-    
+
+    /**
+     * Initializes the submit, next, and hint buttons and sets up action
+     * listeners
+     *
+     */
+    private void setupButtons() {
+        checkButton = new JButton(StepCompletionAction.instance());
+        checkButton.addActionListener(this);
+
+        hintButton = new JButton(HintAction.instance()); // Needs to be adjusted once tutor can handle hints
+        hintButton.addActionListener(this);
+
+        nextButton = new JButton(NewExampleAction.instance());
+        nextButton.addActionListener(this);
+
+    }
+
+
     /**
      * Initializes the components for inputting the message length. This method
      * creates and configures a JLabel and a JTextField where users can specify

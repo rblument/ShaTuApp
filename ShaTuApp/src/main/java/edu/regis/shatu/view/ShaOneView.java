@@ -40,17 +40,19 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 /**
- * ShaOne class represents the GUI view for performing the SHA Σ₁ function, involving a right shift operation.
+ * ShaOne class represents the GUI view for performing the SHA Σ₁ function,
+ * involving a right shift operation.
  * It extends GPanel and implements ActionListener and KeyListener interfaces.
  * <p>
- * The class provides a user interface for performing right shifts on binary numbers and checking the results.
+ * The class provides a user interface for performing right shifts on binary
+ * numbers and checking the results.
  * Inline comments have been added for better understanding of the code.
  *
  * @author rickb
  */
-public class ShaOneView extends UserRequestView implements KeyListener { //implements KeyListener 
+public class ShaOneView extends UserRequestView { //implements KeyListener 
     private TutoringSessionView view;
-    
+
     /**
      * The number of places to perform the right shift operation.
      */
@@ -139,27 +141,82 @@ public class ShaOneView extends UserRequestView implements KeyListener { //imple
         initializeComponents();
         initializeLayout();
     }
-    
-       /**
-     * Create and return the server request this view makes when a user selects
-     * that they want to practice a new Sha One View example.
-     *
-     * @return
+
+
+    /**
+     * Create the child GUI components appearing in this frame.
      */
-    @Override
-    public NewExampleRequest newRequest() {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    private void initializeComponents() {
+        exampleInputLabel = new JLabel("Given an 𝑛 bit binary number, output the value of the SHA Σ₁ function");
+        problem = new JLabel("Default Problem Text");
+        answerField = new JTextField(10);
 
-        NewExampleRequest ex = new NewExampleRequest();
+        //answerField.addKeyListener(this);
+        
+        nextQuestionButton = new JButton("Next Question");
+        //nextQuestionButton.addActionListener(this);
+        
+      //  shortProblem = new JRadioButton("16-bit");
+     //   shortProblem.setSelected(true);
 
-        ex.setExampleType(ProblemType.SHA_ONE);
+       // longProblem = new JRadioButton("32-bit");
+    }
 
-        ShaOneViewStep newStep = new ShaOneViewStep();
+    /**
+     * Layout the child components in this view.
+     */
+    private void initializeLayout() {
+        GridBagConstraints centerConstraints = new GridBagConstraints();
+        centerConstraints.anchor = GridBagConstraints.CENTER;
+        centerConstraints.insets = new Insets(5, 5, 5, 5);
+        // Add exampleInputLabel centered
+        addc(exampleInputLabel, 0, 0, 1, 1, 0.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                5, 5, 5, 5);
+        addc(problem, 0, 1, 1, 1, 0.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                5, 5, 5, 5);
+        // Add answerField to the layout, centered
+        addc(answerField, 0, 4, 1, 1, 1.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                5, 5, 5, 5);
 
-        ex.setData(gson.toJson(newStep));
+        addc(checkButton, 0, 5, 1, 1, 0.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                5, 5, 5, 5);
+        addc(hintButton, 0, 6, 1, 1, 0.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                5, 5, 5, 5);
+        addc(nextQuestionButton, 0, 7, 1, 1, 0.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                5, 5, 5, 5);
+
+        addc(shortProblem, 0, 6, 1, 1, 0.0, 0.0,
+                GridBagConstraints.WEST, GridBagConstraints.NONE,
+                5, 5, 5, 5);
+        addc(longProblem, 0, 7, 1, 1, 0.0, 0.0,
+                GridBagConstraints.WEST, GridBagConstraints.NONE,
+                5, 5, 5, 5);
+    }
+
+    /**
+     * Performs a right shift operation on a binary number for the specified number
+     * of places.
+     *
+     * @param x      The input binary number.
+     * @param places The number of places for the right shift.
+     * @return The binary result after the right shift operation.
+     */
+    public String shiftRightString(int x, int places) {
+        // Perform the right shift operation
+        int result = x >> places;
+        // Print the original and shifted binary numbers
+        System.out.println("Original Binary: " + Integer.toBinaryString(x));
+        System.out.println("Shifted Binary:  " + Integer.toBinaryString(result));
 
         return ex;
     }
+
     @Override
     public StepCompletion stepCompletion() {
         Step currentStep = model.currentTask().currentStep().getStep();
@@ -193,16 +250,17 @@ public class ShaOneView extends UserRequestView implements KeyListener { //imple
             //checkButton.doClick();
         }
     }
-    
-       /**
-     * Handles key released events
-     *
-     * @param e the event to be processed
+
+
+    /**
+     * Verifies the user's answer by comparing it with the correct result of the
+     * right shift operation.
      */
     @Override
-    public void keyReleased(KeyEvent e) {
-    }
-        /**
+   / public void keyReleased(KeyEvent e) {
+  /  }
+
+    /**
      * Displays a message dialog indicating the start of the next question.
      */
     private void onNextQuestion() {
@@ -226,6 +284,7 @@ public class ShaOneView extends UserRequestView implements KeyListener { //imple
             verifyAnswer();
         }
     }
+
     
     /**
      * Sets the main View title and description of the function
@@ -379,6 +438,7 @@ public class ShaOneView extends UserRequestView implements KeyListener { //imple
                 GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
                 5, 5, 5, 5);
     }
+
     @Override
     /**
      * Updates the description, question, and hints from the model
@@ -387,6 +447,7 @@ public class ShaOneView extends UserRequestView implements KeyListener { //imple
      */
     protected void updateView() {
         view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
+
         //hintButton = view.getHintButton();
         //checkButton = view.getCheckButton();
         nextQuestionButton = view.getNewExampleButton();
@@ -395,7 +456,7 @@ public class ShaOneView extends UserRequestView implements KeyListener { //imple
         if(!checkHintEnabled) {
             view.resetButtonListeners(); // Clear any listeners applied from other views          
         }
-        
+
         if (model != null) {
             // ****TO-DO*****
             // Update the view's information from the model
@@ -403,8 +464,11 @@ public class ShaOneView extends UserRequestView implements KeyListener { //imple
             System.out.println("ShaOneView");
         }
     }
-    /**
-     * Performs a right shift operation on a binary number for the specified number of places.
+
+
+     /**
+     * Create and return the server request this view makes when a user selects
+     * that they want to practice a new Sha One View example.
      *
      * @param x      The input binary number.
      * @param places The number of places for the right shift.
