@@ -211,6 +211,7 @@ public class EncodeView extends UserRequestView {
         responseTextArea = new JTextArea(3, 20);
         responseTextArea.setLineWrap(true); // Enable line wrapping
         responseTextArea.setWrapStyleWord(true); // Wrap lines at word boundaries
+        responseTextArea.setEnabled(false);  // Text area disabled at initialization 
         responseScrollPane = new JScrollPane(responseTextArea);
         responseScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED); // Enable vertical scrolling
     }
@@ -323,7 +324,7 @@ public class EncodeView extends UserRequestView {
             MainFrame mainFrame = MainFrame.instance();
             if (mainFrame != null) {
                 view = SplashFrame.instance().getTutoringSessionView(); // Initialize view once SplashFrame is ready
-                
+                                
             } else {
                 System.err.println("SplashFrame.instance() is null. Cannot initialize 'view'.");
                 return; // Exit updateView if the view cannot be initialized
@@ -368,6 +369,7 @@ public class EncodeView extends UserRequestView {
                     if (this.question == null) { // new example hasnt been created yet
                         questionLabel.setText("Please click new example button to get started");
                         checkButton.setEnabled(false);
+                        System.out.println("responseTextArea Disabled");
                         responseTextArea.setEnabled(false);
                         hintButton.setEnabled(false);
                     } else { // example has been created.

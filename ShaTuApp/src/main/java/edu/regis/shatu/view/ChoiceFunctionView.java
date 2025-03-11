@@ -10,6 +10,9 @@
  *  software is distributed on an "AS IS" basis without warranties
  *  or conditions of any kind, either expressed or implied.
  */
+ /*
+ * set responseTextArea enabled/disabled per SHAT-225 John Hennessey 23 Feb 2025
+ */
 package edu.regis.shatu.view;
 
 import java.awt.Dimension;
@@ -292,6 +295,7 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
         responseTextArea = new JTextArea(3, 20);
         responseTextArea.setLineWrap(true);
         responseTextArea.setWrapStyleWord(true);
+        responseTextArea.setEnabled(false);  // Text area disabled at initialization 
 
         responsePane = new JScrollPane(responseTextArea);
         responsePane.setPreferredSize(new Dimension(800, 200));
@@ -549,12 +553,14 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
                 stringYLabel.setText("y: click");
                 stringZLabel.setText("z: New Example");
                 hintButton.setEnabled(false);
+                responseTextArea.setEnabled(false);
                 checkButton.setEnabled(false);
             } else {
                 stringXLabel.setText("x: " + example.getOperand1());
                 stringYLabel.setText("y: " + example.getOperand2());
                 stringZLabel.setText("z: " + example.getOperand3());
                 hintButton.setEnabled(true);
+                responseTextArea.setEnabled(true);
                 checkButton.setEnabled(true);
             }
         }

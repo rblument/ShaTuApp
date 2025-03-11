@@ -10,6 +10,9 @@
  *  software is distributed on an "AS IS" basis without warranties
  *  or conditions of any kind, either expressed or implied.
  */
+/*
+ * Set responseTextArea to disabled at initialization per SHAT-225 John hennessey 23 Feb 2025
+ */
 package edu.regis.shatu.view;
 
 import java.awt.Dimension;
@@ -244,6 +247,7 @@ public class ExclusiveOrView extends UserRequestView implements KeyListener {
         responseTextArea = new JTextArea(3, 20);
         responseTextArea.setLineWrap(true);
         responseTextArea.setWrapStyleWord(true);
+        responseTextArea.setEnabled(false);  // Text area disabled at initialization 
 
         responsePane = new JScrollPane(responseTextArea);
         responsePane.setPreferredSize(new Dimension(800, 200));

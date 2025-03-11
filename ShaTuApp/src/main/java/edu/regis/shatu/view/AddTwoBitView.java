@@ -10,6 +10,10 @@
  *  software is distributed on an "AS IS" basis without warranties
  *  or conditions of any kind, either expressed or implied.
  */
+
+ /*
+ * Set responseTextArea to disabled at initialization per SHAT-225 John hennessey 23 Feb 2025
+ */
 package edu.regis.shatu.view;
 
 import java.awt.GridBagConstraints;
@@ -130,6 +134,7 @@ public class AddTwoBitView extends UserRequestView implements KeyListener {
         addc(responseTextArea, 0, 4, 1, 1, 1.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 5, 5, 5, 5);
+        responseTextArea.setEnabled(false);  // Text area disabled at initialization 
     }
 
     /**
