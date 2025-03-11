@@ -37,7 +37,7 @@ import java.util.List;
 public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
 
     public StudentModelDAO() {
-        super();
+        super("StudentModel", "UserId");
     }
 
     /**
@@ -59,6 +59,7 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
         try {
             conn = DriverManager.getConnection(URL);
             stmt1 = conn.prepareStatement(sql1);
+
             stmt1.setString(1, userId);
             stmt1.setString(2, ScaffoldLevel.EXTREME.toString());
             stmt1.executeUpdate();
@@ -130,7 +131,8 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
      */
     @Override
     public void update(StudentModel model) throws ObjNotFoundException, NonRecoverableException {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from
+                                                                       // nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     /**
@@ -146,6 +148,7 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
             throws NonRecoverableException {
         String sql = "";
         int assessmentId = assessment.getId();
+
         Connection conn = null;
         PreparedStatement stmt = null;
         try {
@@ -186,64 +189,90 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
     }
 
     /**
-     * Deletes the student model for the given user id.
+     * Retrieves a list of unfinished lessons for a student in a specific learning
+     * category.
+     * 
+     * The category is inferred from `AssessmentLevel`:
+     * - "Not Started" → Teach Me
+     * - "In Progress" → Practice
+     * - "Completed", "Very Low", "Low", "Medium", "High", "Very High" → Quiz Me
      *
-     * @param userId the user id.
-     * @throws NonRecoverableException if an error occurs during deletion.
+     * If a lesson is not yet completed in a **previous category**, it will indicate
+     * that.
+     *
+     * @param userId           The unique identifier of the student.
+     * @param learningCategory The learning category ("Teach Me", "Practice", "Quiz
+     *                         Me").
+     * @return A list of unfinished lesson names, formatted accordingly.
+     * @throws ObjNotFoundException    If the student record is not found.
+     * @throws NonRecoverableException If a database error occurs.
      */
     @Override
-    public void delete(String userId) throws NonRecoverableException {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+    public List<String> retrieveIncompleteLessons(String userId, String learningCategory)
+            throws ObjNotFoundException, NonRecoverableException {
 
-    /**
-     * Checks if a student model exists for the given user id.
-     *
-     * @param userId the user id.
-     * @return true if the model exists, false otherwise.
-     * @throws NonRecoverableException if an error occurs during the check.
-     */
-    @Override
-    public boolean exists(String userId) throws NonRecoverableException {
-        Connection conn = null;
-        try {
-            conn = DriverManager.getConnection(URL);
-            return exists(userId, conn);
-        } catch (SQLException e) {
-            throw new NonRecoverableException("UserDAO-ERR-3" + e.toString(), e);
-        } finally {
-            close(conn);
-        }
-    }
+        List<String> lessons = new ArrayList<>();
 
-    /**
-     * Utility that returns whether the student model exists for the given user
-     * id in the database.
-     *
-     * As all students are created with an associated student model, this should
-     * always return true.
-     *
-     * @param userId the user id of the student whose student model is being
-     * checked.
-     * @param conn an existing connection to the database, which is not closed
-     * by this method.
-     * @return true, if the student model for the given user id exists in the
-     * database, which should always be the case, otherwise false
-     * @throws NonRecoverableException (see ex.getCause().getErrorCode())
-     */
-    private boolean exists(String userId, Connection conn) throws NonRecoverableException {
-        final String sql = "SELECT UserId FROM StudentModel WHERE UserId = ?";
-        PreparedStatement stmt = null;
-        try {
-            stmt = conn.prepareStatement(sql);
+        // SQL Query: Retrieve all lessons and their assessment levels
+        final String sql = """
+                    SELECT kc.Title, a.AssessmentLevel
+                    FROM Assessment a
+                    JOIN KnowledgeComponent kc ON a.KnowledgeComponentId = kc.Id
+                    WHERE a.UserId = ?
+                """;
+
+        try (Connection conn = DriverManager.getConnection(URL);
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setString(1, userId);
-            ResultSet rs = stmt.executeQuery();
-            return rs.next();
-        } catch (SQLException ex) {
-            throw new NonRecoverableException("StudentModelDAO-ERR-3" + ex.toString(), ex);
-        } finally {
-            close(stmt);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    String lessonTitle = rs.getString("Title");
+                    String assessmentLevel = rs.getString("AssessmentLevel");
+
+                    // Determine category based on AssessmentLevel
+                    switch (AssessmentLevel.fromString(assessmentLevel)) {
+                        case NOT_STARTED:
+                            if (learningCategory.equalsIgnoreCase("Teach Me")) {
+                                lessons.add(lessonTitle);
+                            } else {
+                                // If user is in "Practice" or "Quiz Me" but hasn't done Teach Me
+                                lessons.add(lessonTitle + " (Complete in Teach Me first)");
+                            }
+                            break;
+                        case IN_PROGRESS:
+                            if (learningCategory.equalsIgnoreCase("Practice")) {
+                                lessons.add(lessonTitle);
+                            } else {
+                                // If user is in "Quiz Me" but hasn't completed Practice
+                                lessons.add(lessonTitle + " (Complete in Practice first)");
+                            }
+                            break;
+                        case COMPLETED:
+                        case VERY_LOW:
+                        case LOW:
+                        case MEDIUM:
+                        case HIGH:
+                        case VERY_HIGH:
+                            if (learningCategory.equalsIgnoreCase("Quiz Me")) {
+                                lessons.add(lessonTitle);
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new NonRecoverableException("Error retrieving incomplete lessons: " + e, e);
         }
+
+        // If no lessons are found, return a single message to indicate completion
+        if (lessons.isEmpty()) {
+            lessons.add("All lessons completed!");
+        }
+
+        return lessons;
     }
 
     /**
@@ -385,12 +414,13 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
 
     /**
      * Retrive
+     * 
      * @param userId
      * @param conn
      * @return
      * @throws ObjNotFoundException
      * @throws SQLException
-     * @throws NonRecoverableException 
+     * @throws NonRecoverableException
      */
     private ArrayList<Assessment> retrieveAssessments(String userId, Connection conn)
             throws ObjNotFoundException, SQLException, NonRecoverableException {
