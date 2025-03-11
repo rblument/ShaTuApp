@@ -316,21 +316,6 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
     }
 
     /**
-     * Sets up the Check, Next, and Hint buttons and their action listeners
-     */
-    
-    private void setUpButtons() {
-        checkButton = new JButton(StepCompletionAction.instance());
-        checkButton.addActionListener(this);
-
-        hintButton = new JButton(HintAction.instance());
-        hintButton.addActionListener(this);
-
-        nextButton = new JButton(NewExampleAction.instance());
-        nextButton.addActionListener(this);
-    }
-
-    /**
      * Creates a GPanel containing the response and feedback JScrollPanes and
      * the button panel.
      */

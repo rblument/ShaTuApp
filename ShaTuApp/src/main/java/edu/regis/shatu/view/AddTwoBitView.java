@@ -137,20 +137,6 @@ public class AddTwoBitView extends UserRequestView implements KeyListener {
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 5, 5, 5, 5);
 
-
-        // Add checkButton centered below responseTextArea
-        addc(checkButton, 0, 5, 1, 1, 0.0, 0.0,
-                GridBagConstraints.CENTER, GridBagConstraints.NONE,
-                5, 5, 5, 5);
-
-        addc(hintButton, 0, 6, 1, 1, 0.0, 0.0,
-                GridBagConstraints.CENTER, GridBagConstraints.NONE,
-                5, 5, 5, 5);
-
-        addc(nextButton, 0, 7, 1, 1, 0.0, 0.0,
-                GridBagConstraints.CENTER, GridBagConstraints.NONE,
-                5, 5, 5, 5);
-
         responseTextArea.setEnabled(false);  // Text area disabled at initialization 
 
     }

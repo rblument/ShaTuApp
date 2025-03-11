@@ -97,8 +97,11 @@ public abstract class MySqlDAO {
                 String dbUser = rscr.getProp(DB_USER_PROP);
                 String dbPass = rscr.getProp(DB_PASS_PROP);
 
-                URL = String.format("jdbc:mysql://%s:%d/%s?user=%s&password=%s", dbHost, dbPort, dbName, dbUser,
+                URL = String.format("jdbc:mysql://%s:%s/%s?user=%s&password=%s", dbHost, dbPort, dbName, dbUser,
                         dbPass);
+                
+                // ToDo: Do we want to convert port to an int?
+                //URL = String.format("jdbc:mysql://%s:%d/%s?user=%s&password=%s", dbHost, dbPort, dbName, dbUser, dbPass);
 
                 Class.forName(DRIVER); // Old School
 
@@ -220,15 +223,30 @@ public abstract class MySqlDAO {
      * @throws NonRecoverableException
      */
     public boolean exists(String column, Object key) throws NonRecoverableException {
-        String stmt = String.format("SELECT %s FROM %s WHERE %s = ?", this.primaryKey, this.table, column);
-
+       // ToDo: Currently the original code didn't work. It passed in
+       // the connection as the key object, which isn't corret. This isn't
+       // required since the connection is obtained on line
+       // In order to generalize this appropriately for use in other DAOs
+       // beyond the demonstration in AccountDAO, we''l need to pass the key's 
+       // value, which is currently incorrectly passed with a name of column
+       // and the name of the key colum. For Account DAO, this would be somethign
+       // like exists("UserId", userId)
+       // and the signature of this method changed to:
+       // public boolean exists(String keyColumnName, Object keyColumnValue) ...
+       //
+       // then, the call to sqlTypeCoerce will need to be
+       //  prepstmt = sqlTypeCoerce(keyColumnValue)
+       
+       // String stmt = String.format("SELECT %s FROM %s WHERE %s = ?", this.primaryKey, this.table, column);
+        String stmt = String.format("SELECT %s FROM %s WHERE %s = ?", this.primaryKey, this.table, "UserId");
         Connection conn;
         PreparedStatement prepstmt = null;
         try {
             conn = DriverManager.getConnection(URL);
             prepstmt = conn.prepareStatement(stmt);
 
-            prepstmt = sqlTypeCoerce(key, prepstmt);
+           // prepstmt = sqlTypeCoerce(key, prepstmt);
+           prepstmt = sqlTypeCoerce(column, prepstmt);
 
             ResultSet result = prepstmt.executeQuery();
 
@@ -251,7 +269,9 @@ public abstract class MySqlDAO {
      * @throws SQLException
      */
     static PreparedStatement sqlTypeCoerce(Object obj, PreparedStatement stmt) throws SQLException {
+        System.out.println("Obj: " + obj);
         if (obj instanceof String) {
+            System.out.println("HERE");
             stmt.setString(1, obj.toString());
         } else if (obj instanceof Integer) {
             stmt.setInt(1, (Integer) obj);
