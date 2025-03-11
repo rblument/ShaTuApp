@@ -221,7 +221,22 @@ public class MessageLenView extends UserRequestView {
         feedbackScrollPane = new JScrollPane(feedbackArea);
         feedbackScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED); // Enable vertical scrolling
     }
-    
+
+    /**
+     * Initializes the submit, next, and hint buttons and sets up action
+     * listeners
+     */
+    private void setupButtons() {
+        checkButton = new JButton(StepCompletionAction.instance());
+        checkButton.addActionListener(this);
+
+        hintButton = new JButton(HintAction.instance()); // Needs to be adjusted once the tutor can handle hints.
+        hintButton.addActionListener(this);
+
+        nextButton = new JButton(NewExampleAction.instance());
+        nextButton.addActionListener(this);
+    }
+
     /**
      * Initializes the components for inputting the message length. This method
      * creates and configures a JLabel and a JTextField where users can specify

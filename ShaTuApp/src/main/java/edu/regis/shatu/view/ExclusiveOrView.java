@@ -264,19 +264,33 @@ public class ExclusiveOrView extends UserRequestView implements KeyListener {
     }
 
     /**
+     * Sets up the Check, Next, and Hint buttons and their action listeners
+     */ 
+    private void setUpButtons() {
+        checkButton = new JButton(StepCompletionAction.instance());
+        checkButton.addActionListener(this);
+
+        hintButton = new JButton(HintAction.instance());
+        hintButton.addActionListener(this);
+
+        newExampleButton = new JButton(NewExampleAction.instance());
+        newExampleButton.addActionListener(this);   
+    }
+
+    /**
      * Creates a GPanel containing the response and feedback JScrollPanes and
      * the button panel.
      */
     private void setUpQRPanel() {
         qrPanel = new GPanel();
-
-        qrPanel.addc(responsePane, 0, 0, 1, 1, 1.0, 1.0,
-                GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
-                5, 5, 5, 5);
-
+        
+        qrPanel.setMinimumSize(new Dimension(500, 100));
         qrPanel.addc(feedbackPane, 0, 1, 1, 1, 1.0, 1.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
-                5, 5, 5, 5);
+                0, 0, 0, 0);
+        qrPanel.addc(responsePane, 0, 0, 1, 1, 1.0, 1.0,
+             GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+             0, 0, 0, 0);
     }
 
     /**
@@ -494,6 +508,9 @@ public class ExclusiveOrView extends UserRequestView implements KeyListener {
         checkButton = view.getCheckButton();
         newExampleButton = view.getNewExampleButton();
 
+        responseTextArea.setText("");
+        feedbackTextArea.setText("");
+        
         // If check and hint buttons are disabled, reset listenerers and apply those used by this view
         if (!checkHintEnabled) {
             view.resetButtonListeners(); // Clear any listeners applied from other views          

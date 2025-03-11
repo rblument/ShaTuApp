@@ -290,10 +290,6 @@ public class ShiftRightView extends UserRequestView implements KeyListener {
         qrPanel.addc(feedbackPanel, 0, 1, 1, 1, 1.0, 1.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
                 5, 5, 5, 5);
-
-        /*qrPanel.addc(buttonPanel, 0, 2, 1, 1, 1.0, 1.0,
-                GridBagConstraints.CENTER, GridBagConstraints.NONE,
-                5, 5, 5, 5);*/
     }
 
     /**
@@ -305,6 +301,9 @@ public class ShiftRightView extends UserRequestView implements KeyListener {
         hintButton = view.getHintButton();
         checkButton = view.getCheckButton();
         nextButton = view.getNewExampleButton();
+        
+        responseTextArea.setText("");
+        feedbackTextArea.setText("");
 
         // If check and hint buttons are disabled, reset listenerers and apply those used by this view
         if(!checkHintEnabled) {

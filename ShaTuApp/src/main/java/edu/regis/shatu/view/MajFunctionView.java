@@ -309,17 +309,34 @@ public class MajFunctionView extends UserRequestView implements KeyListener {
         responsePane.setPreferredSize(new Dimension(800, 200));
     }
 
-    
+    /**
+     * Sets up the Check, New Example, and Hint buttons and their action
+     * listeners
+     */
+    private void setUpButtons() {
+
+        checkButton = new JButton(StepCompletionAction.instance());
+        checkButton.addActionListener(this);
+
+        hintButton = new JButton(HintAction.instance());
+        hintButton.addActionListener(this);
+
+        nextButton = new JButton(NewExampleAction.instance());
+        nextButton.addActionListener(this);
+
+    }
+
     /**
      * Creates a GPanel containing the response JScrollPanes and the button
      * panel.
      */
     private void setUpQRPanel() { //Rename function (frPanel?)
         qrPanel = new GPanel();
-
+        responsePane.setPreferredSize(new Dimension(300, 20));
         qrPanel.addc(responsePane, 0, 0, 1, 1, 1.0, 1.0,
-                GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
-                5, 5, 5, 5);
+
+             GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+             0, 0, 0, 0);
     }
 
     /**

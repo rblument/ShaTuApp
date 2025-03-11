@@ -228,8 +228,6 @@ public class EncodeView extends UserRequestView {
         feedbackScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED); // Enable vertical scrolling
     }
 
-
-
     /**
      * Initializes the components for inputting the message length and custom
      * questions. This method creates and configures two JLabel's and two
@@ -361,7 +359,7 @@ public class EncodeView extends UserRequestView {
                 // Clear any existing feedback and response from the previous question.
                 feedbackArea.setText("");
                 responseTextArea.setText("");
-
+                
                 if ((step.getSubType() == type)) { // Subtype was correct
                     System.out.println("If branch was taken, subtype was a encode ascii"); // Error checking.
 
