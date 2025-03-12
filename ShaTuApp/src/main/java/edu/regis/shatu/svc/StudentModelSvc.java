@@ -12,6 +12,7 @@
  */
 package edu.regis.shatu.svc;
 
+import edu.regis.shatu.err.IllegalArgException;
 import edu.regis.shatu.err.NonRecoverableException;
 import edu.regis.shatu.err.ObjNotFoundException;
 import edu.regis.shatu.model.Student;
@@ -37,7 +38,7 @@ public interface StudentModelSvc {
      * @throws IllegalArgException a student with the given user id already exists
      * @throws NonRecoverableException perhaps see getCause().getErrorCode()
      */
-    void create(Student student) throws IllegalArgException, NonRecoverableException;
+    void create(Student student) throws NonRecoverableException;
     
     /**
      * Return whether a student with the given user id exists. 
@@ -61,7 +62,7 @@ public interface StudentModelSvc {
      * @throws ObjNotFoundException no student with the give user id exists
      * @throws NonRecoverableException perhaps see getCause().getErrorCode()
      */
-    Student retrieve(String userId) throws ObjNotFoundException, NonRecoverableException;
+    StudentModel retrieve(String userId) throws ObjNotFoundException, NonRecoverableException;
     
     /**
      * Return the {@link StudentModel} for the given user id.
@@ -83,4 +84,39 @@ public interface StudentModelSvc {
      * @throws NonRecoverableException 
      */
     void delete(String userId) throws NonRecoverableException;
+    
+       /**
+     * Update the field of the assessment in the given student model.
+     * 
+     * @param model the student model to update.
+     * @param assessment the assessment to update.
+     * @param field the field to update, which might be ALL.
+     * @throws NonRecoverableException 
+     */
+    void updateAssessment(StudentModel model, Assessment assessment, StudentModelFieldKind field)
+            throws NonRecoverableException;
+    
+       /**
+    * Retrieve a list of unfinished lessons for a student in a specific learning mode.
+    * 
+    * @param userId the unique identifier for the student.
+    * @param learningCategory the category of learning (e.g., "Teach Me", "Practice", "Quiz Me").
+    * @return a list of strings representing unfinished lesson names.
+    * @throws ObjNotFoundException if the student record is not found.
+    * @throws NonRecoverableException if a database error occurs.
+    */
+   List<String> retrieveIncompleteLessons(String userId, String learningCategory) 
+           throws ObjNotFoundException, NonRecoverableException;
+   
+    /**
+     * Retrieves the assessment level for a given lesson.
+     *
+     * @param userId the user id.
+     * @param lesson the lesson title.
+     * @return the assessment level.
+     * @throws ObjNotFoundException if the assessment record is not found.
+     * @throws NonRecoverableException if an error occurs during retrieval.
+     */
+    AssessmentLevel retrieveAssessmentLevel(String userId, String lesson)
+            throws ObjNotFoundException, NonRecoverableException;
 }

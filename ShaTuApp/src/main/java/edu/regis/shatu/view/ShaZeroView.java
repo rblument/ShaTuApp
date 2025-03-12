@@ -300,16 +300,6 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
     /**
      * Sets the main View title and description of the function
      */
-    private void setupDescription() {
-
-            //verifyAnswer();
-
-    }
-
-
-    /**
-     * Sets the main View title and description of the function
-     */
     private void setupDescription()   {
 
         viewNameLabel = new JLabel("The 𝛴₀ Function");

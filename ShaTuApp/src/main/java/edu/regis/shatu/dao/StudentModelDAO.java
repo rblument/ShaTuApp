@@ -123,19 +123,6 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
     }
 
     /**
-     * Updates the student model.
-     *
-     * @param model the student model to update.
-     * @throws ObjNotFoundException if the model is not found.
-     * @throws NonRecoverableException if an error occurs during update.
-     */
-    @Override
-    public void update(StudentModel model) throws ObjNotFoundException, NonRecoverableException {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from
-                                                                       // nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    /**
      * Updates a specific field in an assessment.
      *
      * @param model the student model.
@@ -276,83 +263,13 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
     }
 
     /**
-    * Retrieves a list of unfinished lessons for a student in a specific learning category.
-     *
-    * The category is inferred from `AssessmentLevel`:
-    * - "Not Started" → Teach Me
-    * - "In Progress" → Practice
-    * - "Completed", "Very Low", "Low", "Medium", "High", "Very High" → Quiz Me
-    *
-    * If a lesson is not yet completed in a **previous category**, it will indicate that.
-    *
-    * @param userId The unique identifier of the student.
-    * @param learningCategory The learning category ("Teach Me", "Practice", "Quiz Me").
-    * @return A list of unfinished lesson names, formatted accordingly.
-    * @throws ObjNotFoundException If the student record is not found.
-    * @throws NonRecoverableException If a database error occurs.
-     */
-    @Override
-    public List<String> retrieveIncompleteLessons(String userId, String learningCategory)
-            throws ObjNotFoundException, NonRecoverableException {
-        List<String> lessons = new ArrayList<>();
-        final String sql = "SELECT kc.Title, a.AssessmentLevel " +
-                           "FROM Assessment a " +
-                           "JOIN KnowledgeComponent kc ON a.KnowledgeComponentId = kc.Id " +
-                           "WHERE a.UserId = ?";
-        try (Connection conn = DriverManager.getConnection(URL);
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, userId);
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    String lessonTitle = rs.getString("Title");
-                    String assessmentLevel = rs.getString("AssessmentLevel");
-                    switch (AssessmentLevel.fromString(assessmentLevel)) {
-                        case NOT_STARTED:
-                            if (learningCategory.equalsIgnoreCase("Teach Me")) {
-                                lessons.add(lessonTitle);
-                            } else {
-                                lessons.add(lessonTitle + " (Complete in Teach Me first)");
-                            }
-                            break;
-                        case IN_PROGRESS:
-                            if (learningCategory.equalsIgnoreCase("Practice")) {
-                                lessons.add(lessonTitle);
-                            } else {
-                                lessons.add(lessonTitle + " (Complete in Practice first)");
-                            }
-                            break;
-                        case COMPLETED:
-                        case VERY_LOW:
-                        case LOW:
-                        case MEDIUM:
-                        case HIGH:
-                        case VERY_HIGH:
-                            if (learningCategory.equalsIgnoreCase("Quiz Me")) {
-                                lessons.add(lessonTitle);
-                            }
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            }
-        } catch (SQLException e) {
-           throw new NonRecoverableException("Error retrieving incomplete lessons: " + e, e);
-        }
-        if (lessons.isEmpty()) {
-            lessons.add("All lessons completed!");
-        }
-        return lessons;
-    }
-
-    /**
      * Retrieves all lesson titles (excluding lessons with IDs 0, 10, and 20).
      *
      * @param userId the user id.
      * @return a list of all lesson titles.
      * @throws NonRecoverableException if an error occurs during retrieval.
      */
-    @Override
+    //@Override
     public List<String> retrieveAllLessons(String userId) throws NonRecoverableException {
         List<String> lessons = new ArrayList<>();
         final String sql = "SELECT kc.Title " +
@@ -447,5 +364,20 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
             assessments.add(assessment);
         }
         return assessments;
+    }
+
+    @Override
+    public boolean exists(String userId) throws NonRecoverableException {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public StudentModel findModelById(String userId) throws ObjNotFoundException, NonRecoverableException {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void delete(String userId) throws NonRecoverableException {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }

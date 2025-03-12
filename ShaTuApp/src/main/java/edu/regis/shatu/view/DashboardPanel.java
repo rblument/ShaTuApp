@@ -213,7 +213,7 @@ public class DashboardPanel extends JPanel {
         try {
             String userId = model.getStudent().getAccount().getUserId();
             StudentModelSvc studentModelService = ServiceFactory.findStudentModelSvc();
-            allLessons = studentModelService.retrieveAllLessons(userId);
+            //allLessons = studentModelService.retrieveAllLessons(userId);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Error loading lessons: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             allLessons = new ArrayList<>();
