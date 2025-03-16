@@ -94,6 +94,7 @@ public class SHA_256 {
     private final int[] w = new int[64];
     private final int[] h = new int[8];
     private final int[] temp = new int[8];
+    private int counter = 0;
  
     /**
      * Initialize this algorithm with an empty set of SHA-256 listeners.
@@ -260,9 +261,13 @@ public class SHA_256 {
     public byte[] hash(byte[] message) {
         // let H = H0
         System.arraycopy(H0, 0, h, 0, H0.length);
+        System.out.print("Hello World");
 
         // initialize all words
         int[] words = pad(message);
+        
+        if (!isSendCallbacks){
+            System.out.print("Hello World");
         
         // Not removed Due to Dr Rick's "signature here", same applies for rest of file
         // Rick
@@ -286,10 +291,86 @@ public class SHA_256 {
         
 
         // enumerate all blocks (each containing 16 words)
-        for (int i = 0, n = words.length / 16; i < n; ++i) {
 
-            // initialize w from the block's words
-            System.arraycopy(words, i * 16, w, 0, 16);
+            for (int i = 0, n = words.length / 16; i < n; ++i) {
+                enumerateMessageBlocks (i, words);
+                System.out.print("i: " + i);
+                
+                for (int t = 0; t < w.length; ++t) {
+                    compressionRound (t);
+                    System.out.print("t: " + t);
+                }
+                
+                nextMessageBlockHValue ();
+            }
+        }
+        
+ 
+        
+        
+        
+        
+        
+        
+//            // initialize w from the block's words
+//            System.arraycopy(words, i * 16, w, 0, 16);
+            
+// uncomment here for functionality
+
+            // Rick
+           // System.out.println("W before mod");
+            //for (int t = 0; t < W.length; t++)
+                //System.out.format("%d ", W[t]);
+            //    System.out.println("t" + t + ": " + padLeftZeros(Integer.toBinaryString(W[t]),32) + " ");
+           // System.out.println("");
+            // end rick
+            
+// temp copmment to test functionality of method            
+//            // Modify the zero-ed indexes at the end of the array using the following algorithm:
+//            for (int t = 16; t < w.length; ++t) {
+//                 w[t] = smallSig1(w[t - 2]) + w[t - 7] + smallSig0(w[t - 15]) + w[t - 16];
+//            }
+
+
+            // let TEMP = H
+//            System.arraycopy(h, 0, temp, 0, h.length);
+        
+
+//temp comment start
+            // operate on TEMP
+//            for (int t = 0; t < w.length; ++t) {
+                //     =  H                 E              E         F        G
+//                int t1 = temp[7] + bigSig1(temp[4]) + ch(temp[4], temp[5], temp[6]) + K[t] + w[t];
+                
+                //                  A             A         B       C
+//                int t2 = bigSig0(temp[0]) + maj(temp[0], temp[1], temp[2]);
+//temp comment ends here                
+                // Rick
+                // if (t == 0) {
+                //    System.out.println("Maj: " + padLeftZeros(Integer.toBinaryString(maj(TEMP[0], TEMP[1], TEMP[2])), 32));
+               // System.out.println("Sig0: " + padLeftZeros(Integer.toBinaryString(bigSig0(TEMP[0])), 32));
+                
+                // }
+                // end Rick
+//temp comment start
+//                System.arraycopy(temp, 0, temp, 1, temp.length - 1);
+//                // E
+//                temp[4] += t1;
+//                temp[0] = t1 + t2;
+//            }
+
+            // add values in TEMP to values in H
+//            for (int t = 0; t < h.length; ++t) {
+//                h[t] += temp[t];
+//            }
+//       }
+// temp comment end                
+        return toByteArray(h);
+    }
+    
+    public void enumerateMessageBlocks (int m, int[] words){
+        // initialize w from the block's words
+            System.arraycopy(words, m * 16, w, 0, 16);
             
             // Rick
            // System.out.println("W before mod");
@@ -304,14 +385,13 @@ public class SHA_256 {
             for (int t = 16; t < w.length; ++t) {
                  w[t] = smallSig1(w[t - 2]) + w[t - 7] + smallSig0(w[t - 15]) + w[t - 16];
             }
-
-            // let TEMP = H
+            
             System.arraycopy(h, 0, temp, 0, h.length);
 
-            // operate on TEMP
-            for (int t = 0; t < w.length; ++t) {
-                //     =  H                 E              E         F        G
-                int t1 = temp[7] + bigSig1(temp[4]) + ch(temp[4], temp[5], temp[6]) + K[t] + w[t];
+    }
+    public void compressionRound (int cr){
+        //     =  H                 E              E         F        G
+                int t1 = temp[7] + bigSig1(temp[4]) + ch(temp[4], temp[5], temp[6]) + K[cr] + w[cr];
                 
                 //                  A             A         B       C
                 int t2 = bigSig0(temp[0]) + maj(temp[0], temp[1], temp[2]);
@@ -328,14 +408,13 @@ public class SHA_256 {
                 // E
                 temp[4] += t1;
                 temp[0] = t1 + t2;
-            }
-
-            // add values in TEMP to values in H
-            for (int t = 0; t < h.length; ++t) {
-                h[t] += temp[t];
-            }
+    }
+    
+    public void nextMessageBlockHValue (){
+     // add values in TEMP to values in H
+        for (int t = 0; t < h.length; ++t) {
+            h[t] += temp[t];
         }
-        return toByteArray(h);
     }
 
     /**
