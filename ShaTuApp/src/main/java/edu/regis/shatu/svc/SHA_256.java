@@ -261,13 +261,31 @@ public class SHA_256 {
     public byte[] hash(byte[] message) {
         // let H = H0
         System.arraycopy(H0, 0, h, 0, H0.length);
-        System.out.print("Hello World");
 
         // initialize all words
         int[] words = pad(message);
         
-        if (!isSendCallbacks){
-            System.out.print("Hello World");
+        if (isSendCallbacks){
+            
+            // enumerate all blocks (each containing 16 words -- uses method)
+
+            for (int i = 0, n = words.length / 16; i < n; ++i) {
+                enumerateMessageBlocks (i, words);
+                
+        // use method to operate on temp and do compression rounds        
+                for (int t = 0; t < w.length; ++t) {
+                    compressionRound (t);
+                }
+         // add values in TEMP to values in H        
+                nextMessageBlockHValue ();
+            }
+        }
+        
+        return toByteArray(h);
+       
+    //All code in this function below this line was created by Rick and therefore not deleted.
+    //Hash needed to be turned into methods so that compression rounds could 
+    //be triggered individually to see values for each label in each round.
         
         // Not removed Due to Dr Rick's "signature here", same applies for rest of file
         // Rick
@@ -288,30 +306,7 @@ public class SHA_256 {
         System.out.println("");
         // End Rick
         */
-        
-
-        // enumerate all blocks (each containing 16 words)
-
-            for (int i = 0, n = words.length / 16; i < n; ++i) {
-                enumerateMessageBlocks (i, words);
-                System.out.print("i: " + i);
-                
-                for (int t = 0; t < w.length; ++t) {
-                    compressionRound (t);
-                    System.out.print("t: " + t);
-                }
-                
-                nextMessageBlockHValue ();
-            }
-        }
-        
- 
-        
-        
-        
-        
-        
-        
+     
 //            // initialize w from the block's words
 //            System.arraycopy(words, i * 16, w, 0, 16);
             
@@ -365,7 +360,7 @@ public class SHA_256 {
 //            }
 //       }
 // temp comment end                
-        return toByteArray(h);
+        
     }
     
     public void enumerateMessageBlocks (int m, int[] words){

@@ -97,8 +97,10 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
     //to be removed once linked in with the tutor view
     //private JButton continueButton = new JButton(StepCompletionAction.instance());
     private JButton nextRoundButton = new JButton();
+    private JButton newMessageButton = new JButton();
+    private JButton counterButton = new JButton();
     //for debugging will reset to private and use setter in model
-    public CounterLabel counter;
+    //public CounterLabel counter;
     private int count = 0;
     //private CompressRoundStep compressModel;
 
@@ -110,6 +112,10 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
         layoutComponents();
         //continueButton.setText("Continue");
         nextRoundButton.setText("Next Round");
+        newMessageButton.setText("New Message");
+        counterButton.setText("Compression Round: " + count);
+        
+        
         
     }
 
@@ -360,7 +366,7 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
         temp1Label = new VariableLabel("T\u2081");
         temp2Label = new VariableLabel("T\u2082");
         
-        counter = new CounterLabel("Round: ");
+        //counter = new CounterLabel("Round: ");
         
         temp1Label.setFont(new Font("", Font.PLAIN, 16));
         temp2Label.setFont(new Font("", Font.PLAIN, 16));
@@ -371,13 +377,15 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
            // NewExampleAction.instance().actionPerformed(null);
         //});
         nextRoundButton.addActionListener(this);
+        newMessageButton.addActionListener(this);
+        
     }
 
     private void layoutComponents() {
         Color white = new Color(255,255,255);
         setBackground(white);
         Point p;
-        int x, y, countX, countY;
+        int x, y, countX, countY, newMessageX, roundX, roundY;
         
         
         for (int i = 0; i < WORKING_VARS_LEN; i++) {
@@ -450,11 +458,11 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
         
          //Add counter label to the right of W location
         
-        countX = modAdditions[2].getLocation().x + CounterLabel.SIZE * 3;
-        countY = inWorkingVars[7].getLocation().y - CounterLabel.HALF_SIZE ;
+        //countX = modAdditions[2].getLocation().x + CounterLabel.SIZE * 3;
+        //countY = inWorkingVars[7].getLocation().y - CounterLabel.HALF_SIZE ;
         
-        counter.setLocation(countX, countY);
-        add(counter);
+        //counter.setLocation(countX, countY);
+        //add(counter);
         
         // Third mod addition has Sigma1 inputs and centered on it
         x = sigma1Label.getLocation().x + BitOpLabel.HALF_SIZE - AddMod256Label.HALF_SIZE + 150;
@@ -490,13 +498,23 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
         
         // Add continueButton to the bottom right corner
         int buttonWidth = 100;
+        int messageButtonWidth = 150;
+        int roundButtonWidth = 200;
         int buttonHeight = 30;
         int margin = 10;
         x = getWidth() - buttonWidth - margin;
         y = getHeight() - buttonHeight - margin;
+        newMessageX = getWidth() - (messageButtonWidth + buttonWidth) - margin;
+        roundX = getWidth() - roundButtonWidth - margin;
+        roundY = buttonHeight + margin;
+        //newMessageY = getHeight() - (buttonHeight) - margin;
         
         nextRoundButton.setBounds(x, y, buttonWidth, buttonHeight);
+        newMessageButton.setBounds(newMessageX, y, messageButtonWidth, buttonHeight);
+        counterButton.setBounds(roundX, roundY, roundButtonWidth, buttonHeight);
         add(nextRoundButton);
+        add(newMessageButton);
+        add(counterButton);
         
         
     }
@@ -505,9 +523,13 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
     public void doLayout() {
         super.doLayout();
         int buttonWidth = 100;
+        int messageButtonWidth = 150;
+        int roundButtonWidth = 200;
         int buttonHeight = 30;
         int margin = 10;
         nextRoundButton.setBounds(getWidth() - buttonWidth - margin, getHeight() - buttonHeight - margin, buttonWidth, buttonHeight);
+        newMessageButton.setBounds(getWidth() - (messageButtonWidth + buttonWidth) - margin, getHeight() - (buttonHeight) - margin, messageButtonWidth, buttonHeight);
+        counterButton.setBounds(getWidth() - roundButtonWidth - margin, buttonHeight + margin, roundButtonWidth, buttonHeight);
     }
 
     /**
@@ -550,8 +572,11 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
     
      @Override
     public void actionPerformed(ActionEvent event) {
-       if (event.getSource() == nextRoundButton){
-           counter.setText("Round: " + count);
+       if (event.getSource() == newMessageButton){
+           
+       }
+       else if (event.getSource() == nextRoundButton){
+           counterButton.setText("Compression Round: " + count);
            count++;
            if (count > 64){
                JOptionPane.showMessageDialog(null, "Compression of message block complete.  "

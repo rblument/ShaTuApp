@@ -19,11 +19,6 @@ import edu.regis.shatu.view.CompressionCanvasView;
  */
 public class CompressRoundStep
 {
-    
-    
-    //public void changeText(int i) {
-       // CCview.getCounter().setText("Round: " + i);
-    //}
 
    
 }
