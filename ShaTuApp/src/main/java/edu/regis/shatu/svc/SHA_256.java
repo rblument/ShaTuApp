@@ -96,7 +96,10 @@ public class SHA_256 {
     private final int[] w = new int[64];
     private final int[] h = new int[8];
     private final int[] temp = new int[8];
+    private final int[] inTemp = new int[8];
     private int counter = 0;
+    private int majority = 0;
+    private int choice = 0;
    
     
  
@@ -106,6 +109,7 @@ public class SHA_256 {
     private SHA_256() {
         listeners = new ArrayList<>();
     }
+
 
     public boolean isSendCallbacks() {
         return isSendCallbacks;
@@ -396,11 +400,16 @@ public class SHA_256 {
 
     }
     public void compressionRound (int cr){
-        //     =  H                 E              E         F        G
-                int t1 = temp[7] + bigSig1(temp[4]) + ch(temp[4], temp[5], temp[6]) + K[cr] + w[cr];
+        //     =  H              E        F        G
+                choice = ch(temp[4], temp[5], temp[6]);
+                                //A         B       C
+                majority = maj(temp[0], temp[1], temp[2]);
                 
-                //                  A             A         B       C
-                int t2 = bigSig0(temp[0]) + maj(temp[0], temp[1], temp[2]);
+        //                    E                 D
+                int t1 = temp[7] + bigSig1(temp[4]) + choice + K[cr] + w[cr];
+                
+                //                  A             
+                int t2 = bigSig0(temp[0]) + majority;
                 
                 // Rick
                 // if (t == 0) {
@@ -409,7 +418,7 @@ public class SHA_256 {
                 
                 // }
                 // end Rick
-
+                System.arraycopy(temp, 0, inTemp, 0, temp.length);
                 System.arraycopy(temp, 0, temp, 1, temp.length - 1);
                 // E
                 temp[4] += t1;
@@ -507,20 +516,24 @@ public class SHA_256 {
                 ^ (x >>> 10);
     }
     
-    public String getTempValue (int value){
+    
+    public String getTempOutValue (int value){
         return Integer.toBinaryString(temp[value]);
+    }
+    
+    public String getInTempValue (int value){
+        return Integer.toBinaryString(inTemp[value]);
     } 
+    
+    public String getChoice (){
+        return Integer.toBinaryString(choice);
+    } 
+    public String getMajority (){
+        return Integer.toBinaryString(majority);
+    }
     
     public int getTempLength (){
         return temp.length;
-    }
-    
-    public String getH0Value (int value){
-        return Integer.toBinaryString(H0[value]);
-    } 
-    
-    public int getH0Length (){
-        return H0.length;
     }
     
     // Rickb

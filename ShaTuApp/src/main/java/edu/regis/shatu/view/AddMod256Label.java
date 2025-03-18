@@ -112,10 +112,12 @@ public class AddMod256Label extends JLabel implements MouseListener {
         g.drawLine(0, HALF_SIZE, SIZE - 1, HALF_SIZE); // horizontal       
     }
 
+    //TO DO:  Add label click functionality to show value
     @Override
     public void mouseClicked(MouseEvent evt) {
         if (!isSelected) {
             select();
+            System.out.print("This is us");
         }
         else if (isSelected) {
             deselect();

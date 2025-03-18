@@ -12,14 +12,18 @@
  */
 package edu.regis.shatu.view;
 
+import edu.regis.shatu.svc.SHA_256;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import static java.awt.image.ImageObserver.HEIGHT;
 
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
@@ -94,7 +98,7 @@ public class WorkingVarLabel extends JLabel implements MouseListener {
     }
     
     public void select() {
-       // GuiController.instance().getStepSelectorView().displayStep(stepSelection);
+        //GuiController.instance().getStepSelectorView().displayStep(stepSelection);
         isSelected = true;
         setBackground(SELECTED_BACKGROUND);
     }
@@ -103,15 +107,64 @@ public class WorkingVarLabel extends JLabel implements MouseListener {
         isSelected = false;
         setBackground(NORMAL_BACKGROUND);
     }
+    
 
+    
     @Override
     public void mouseClicked(MouseEvent evt) {
-        if (!isSelected) {
+        String inText = getText();
+        String binInValue = null;
+        String binOutValue = null;
+        if (SwingUtilities.isRightMouseButton(evt)){
+            
+            switch(inText) {
+                case "a":
+                     binInValue = SHA_256.instance().getInTempValue(0);
+                     binOutValue = SHA_256.instance().getTempOutValue(0);
+                     break;
+                case "b":
+                    binInValue = SHA_256.instance().getInTempValue(1);
+                    binOutValue = SHA_256.instance().getTempOutValue(1);
+                     break;
+                case "c":
+                    binInValue = SHA_256.instance().getInTempValue(2);
+                    binOutValue = SHA_256.instance().getTempOutValue(2);
+                     break;
+                case "d":
+                    binInValue = SHA_256.instance().getInTempValue(3);
+                    binOutValue = SHA_256.instance().getTempOutValue(3);
+                     break;
+                case "e":
+                    binInValue = SHA_256.instance().getInTempValue(4);
+                    binOutValue = SHA_256.instance().getTempOutValue(4);
+                     break;
+                case "f":
+                    binInValue = SHA_256.instance().getInTempValue(5);
+                    binOutValue = SHA_256.instance().getTempOutValue(5);
+                     break;
+                case "g":
+                    binInValue = SHA_256.instance().getInTempValue(6);
+                    binOutValue = SHA_256.instance().getTempOutValue(6);
+                     break;
+                case "h":
+                    binInValue = SHA_256.instance().getInTempValue(7);
+                    binOutValue = SHA_256.instance().getTempOutValue(7);
+                     break;
+            }
+
+            JOptionPane.showMessageDialog(null, "Binary Value of a coming in: " + binInValue + "\n Binary value of a going out: " + binOutValue, 
+                    "Binary value", JOptionPane.WARNING_MESSAGE);
+            
+            if (!isSelected) {
             select();
-        }
-        else if (isSelected) {
+            }
+            
+            else if (isSelected) {
             deselect();
+            }
         }
+        
+        
     }
     
 

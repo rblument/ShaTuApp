@@ -103,9 +103,9 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
     private JButton counterButton = new JButton();
     //for debugging will reset to private and use setter in model
     //public CounterLabel counter;
-    private int count = 0;
     private SHA_256 hash;
     private String msg;
+    public int count = 0;
 
     public CompressionCanvasView() {
         setLayout(null);
@@ -350,6 +350,7 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
         for (int i = 0; i < modAdditions.length; i++) {
             modAdditions[i] = new AddMod256Label();
         }
+        
         int sigma = 931;
         sigma1Label = new BitOpLabel((char)sigma + "\u2081");
         sigma0Label = new BitOpLabel((char) sigma + "\u2080");
@@ -569,6 +570,9 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
         g.drawPolygon(xpoints, ypoints, 3); // Rickb
     }
     
+    public int getCount(){
+        return count;
+    }
     
      @Override
     public void actionPerformed(ActionEvent event) {

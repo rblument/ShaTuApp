@@ -12,6 +12,7 @@
  */
 package edu.regis.shatu.view;
 
+import edu.regis.shatu.svc.SHA_256;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.MouseEvent;
@@ -19,6 +20,7 @@ import java.awt.event.MouseListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
@@ -111,6 +113,48 @@ public class BitOpLabel extends JLabel implements MouseListener {
 
     @Override
     public void mouseClicked(MouseEvent evt) {
+        String labelText = getText();
+        System.out.print(getText());
+        
+        switch(labelText){
+            case ("Ch"):
+                JOptionPane.showMessageDialog(null, 
+                        "Three incoming values\n" +
+                        "\t e: " + SHA_256.instance().getInTempValue(4) +
+                        "\n\t f: " + SHA_256.instance().getInTempValue(5 )+ 
+                        "\n\t g: " + SHA_256.instance().getInTempValue(6) 
+                        + "\n\n One outgoing value based on Choice Function: " 
+                                + SHA_256.instance().getChoice(), 
+                    "Binary value", JOptionPane.WARNING_MESSAGE);
+                break;
+            case ("Maj"):
+                JOptionPane.showMessageDialog(null, 
+                        "Three incoming values\n" +
+                        "\t a: " + SHA_256.instance().getInTempValue(0) +
+                        "\n\t b: " + SHA_256.instance().getInTempValue(1)+ 
+                        "\n\t c: " + SHA_256.instance().getInTempValue(2) 
+                        + "\n\n One outgoing value based on Majority Function: " 
+                                + SHA_256.instance().getMajority(), 
+                    "Binary value", JOptionPane.WARNING_MESSAGE);
+                break;
+            case ("\u03A3\u2080"):
+                JOptionPane.showMessageDialog(null, 
+                        "Incoming value\n" +
+                        "\t a: " + SHA_256.instance().getInTempValue(0) +
+                        "\n\n One outgoing value based on SHA Sum 0 value Function: " 
+                                + SHA_256.instance().getBigSig0Val(), 
+                    "Binary value", JOptionPane.WARNING_MESSAGE);
+                break;
+            case ("\u03A3\u2081"):
+                JOptionPane.showMessageDialog(null, 
+                        "Incoming value\n" +
+                        "\t a: " + SHA_256.instance().getInTempValue(4) +
+                        "\n\n One outgoing value based on SHA Sum 1 value Function: " 
+                                + SHA_256.instance().getBigSig1Val(), 
+                    "Binary value", JOptionPane.WARNING_MESSAGE);
+                break;
+        }
+        
         if (!isSelected) {
             select();
         }
