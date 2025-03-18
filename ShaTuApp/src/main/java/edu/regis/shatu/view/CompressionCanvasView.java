@@ -29,6 +29,8 @@ import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.view.act.NewExampleAction;
 import edu.regis.shatu.view.act.StepCompletionAction;
+import edu.regis.shatu.svc.SHA_256;
+import java.nio.charset.Charset;
 import javax.swing.JOptionPane;
 
 /**
@@ -102,7 +104,8 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
     //for debugging will reset to private and use setter in model
     //public CounterLabel counter;
     private int count = 0;
-    //private CompressRoundStep compressModel;
+    private SHA_256 hash;
+    private String msg;
 
     public CompressionCanvasView() {
         setLayout(null);
@@ -566,24 +569,39 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
         g.drawPolygon(xpoints, ypoints, 3); // Rickb
     }
     
-    //public CounterLabel getCounter() {
-    //       return counter; 
-    //}
     
      @Override
     public void actionPerformed(ActionEvent event) {
+       
        if (event.getSource() == newMessageButton){
-           
+           msg = JOptionPane.showInputDialog(this, "Enter a message to hash");
+           count = 0;   
        }
        else if (event.getSource() == nextRoundButton){
+       
            counterButton.setText("Compression Round: " + count);
-           count++;
-           if (count > 64){
-               JOptionPane.showMessageDialog(null, "Compression of message block complete.  "
-                       + "Press new example to see another message block compression.", 
+           if (count == 0){
+            Charset charset = Charset.forName("ASCII");
+            byte[] asciiEncodeMsg = msg.getBytes(charset);
+            int [] words = SHA_256.instance().initializeMessage(asciiEncodeMsg);
+            
+            SHA_256.instance().enumerateMessageBlocks (count, words);
+            
+            SHA_256.instance().compressionRound (count);
+            count++;
+           }
+           
+           else if (count > 63){
+               JOptionPane.showMessageDialog(null, "Compression of  one message block complete.  "
+                       + "Press new message button to see another SHA_256 hash.", 
                        "Compression round complete", HEIGHT);
                count = 0;
            }
+           else{
+            SHA_256.instance().compressionRound (count);
+            count++; 
+           }
+           
        }
     }
 

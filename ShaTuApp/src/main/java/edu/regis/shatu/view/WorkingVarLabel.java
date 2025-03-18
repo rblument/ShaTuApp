@@ -113,6 +113,7 @@ public class WorkingVarLabel extends JLabel implements MouseListener {
             deselect();
         }
     }
+    
 
     @Override
     public void mousePressed(MouseEvent e) {

@@ -16,6 +16,8 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * An implementation of the SHA-256 algorithm.
@@ -95,6 +97,8 @@ public class SHA_256 {
     private final int[] h = new int[8];
     private final int[] temp = new int[8];
     private int counter = 0;
+   
+    
  
     /**
      * Initialize this algorithm with an empty set of SHA-256 listeners.
@@ -259,11 +263,9 @@ public class SHA_256 {
      * @return The hash's bytes.
      */
     public byte[] hash(byte[] message) {
-        // let H = H0
-        System.arraycopy(H0, 0, h, 0, H0.length);
+        
 
-        // initialize all words
-        int[] words = pad(message);
+        int [] words = initializeMessage(message);
         
         if (isSendCallbacks){
             
@@ -281,11 +283,19 @@ public class SHA_256 {
             }
         }
         
+        
+        
         return toByteArray(h);
        
     //All code in this function below this line was created by Rick and therefore not deleted.
     //Hash needed to be turned into methods so that compression rounds could 
     //be triggered individually to see values for each label in each round.
+    
+    // let H = H0
+//       System.arraycopy(H0, 0, h, 0, H0.length);
+
+        // initialize all words
+//       words = pad(message);
         
         // Not removed Due to Dr Rick's "signature here", same applies for rest of file
         // Rick
@@ -363,19 +373,20 @@ public class SHA_256 {
         
     }
     
+    public int [] initializeMessage(byte [] message){
+        //let H = H0
+        System.arraycopy(H0, 0, h, 0, H0.length);
+
+        // initialize all words
+        int initWords [] = pad(message);  
+        
+        return initWords;
+    } 
+    
     public void enumerateMessageBlocks (int m, int[] words){
         // initialize w from the block's words
             System.arraycopy(words, m * 16, w, 0, 16);
-            
-            // Rick
-           // System.out.println("W before mod");
-            //for (int t = 0; t < W.length; t++)
-                //System.out.format("%d ", W[t]);
-            //    System.out.println("t" + t + ": " + padLeftZeros(Integer.toBinaryString(W[t]),32) + " ");
-           // System.out.println("");
-            // end rick
-            
-            
+         
             // Modify the zero-ed indexes at the end of the array using the following algorithm:
             for (int t = 16; t < w.length; ++t) {
                  w[t] = smallSig1(w[t - 2]) + w[t - 7] + smallSig0(w[t - 15]) + w[t - 16];
@@ -496,6 +507,22 @@ public class SHA_256 {
                 ^ (x >>> 10);
     }
     
+    public String getTempValue (int value){
+        return Integer.toBinaryString(temp[value]);
+    } 
+    
+    public int getTempLength (){
+        return temp.length;
+    }
+    
+    public String getH0Value (int value){
+        return Integer.toBinaryString(H0[value]);
+    } 
+    
+    public int getH0Length (){
+        return H0.length;
+    }
+    
     // Rickb
     public  String padLeftZeros(String inputString, int length) {
     if (inputString.length() >= length) {
@@ -509,4 +536,5 @@ public class SHA_256 {
 
     return sb.toString();
     }
+    
 }

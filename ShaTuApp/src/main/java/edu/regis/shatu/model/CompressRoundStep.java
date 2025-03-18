@@ -12,6 +12,7 @@
  */
 package edu.regis.shatu.model;
 import edu.regis.shatu.view.CompressionCanvasView;
+import edu.regis.shatu.svc.SHA_256;
 
 /**
  *
@@ -19,6 +20,6 @@ import edu.regis.shatu.view.CompressionCanvasView;
  */
 public class CompressRoundStep
 {
-
-   
+     
+       
 }
