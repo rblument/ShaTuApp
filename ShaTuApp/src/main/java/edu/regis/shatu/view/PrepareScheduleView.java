@@ -34,7 +34,7 @@ import edu.regis.shatu.view.act.StepCompletionAction;
  * 
  * @author rickb
  */
-public class PrepareScheduleView extends UserRequestView implements ActionListener {
+public class PrepareScheduleView extends UserRequestView /*implements ActionListener*/ {
 
     private TutoringSessionView view;
     private JLabel titleLabel, stepLabel, feedbackLabel, previousStepsLabel;
@@ -66,7 +66,8 @@ public class PrepareScheduleView extends UserRequestView implements ActionListen
 
     /**
      * Handles button actions for checking answers, hints, and new examples.
-     */
+     *
+     * -------TO DO: DELETE ACTION HANDLER, HANDLED IN ShaTuTutor.java
     @Override
     public void actionPerformed(ActionEvent event) {
         if (event.getSource() == checkAnswerButton) {
@@ -77,6 +78,7 @@ public class PrepareScheduleView extends UserRequestView implements ActionListen
             loadNewExample();
         }
     }
+    * /
 
     /**
      * Initializes UI components.
@@ -98,7 +100,7 @@ public class PrepareScheduleView extends UserRequestView implements ActionListen
             answerOptions[i].setFont(new Font("Arial", Font.PLAIN, 12));
             answerGroup.add(answerOptions[i]);
         }
-
+        /* ---- TO DO: DELETE WHERE THE BUTTONS ARE CREATED
         checkAnswerButton = new JButton("Check Answer");
         checkAnswerButton.addActionListener(this);
 
@@ -108,6 +110,7 @@ public class PrepareScheduleView extends UserRequestView implements ActionListen
         newExampleButton = new JButton("New Example");
         newExampleButton.addActionListener(this);
 
+        */
         feedbackLabel = new JLabel(""); // To display hints and feedback
         feedbackLabel.setHorizontalAlignment(SwingConstants.CENTER);
         feedbackLabel.setForeground(Color.BLUE); // System messages in blue
@@ -147,7 +150,7 @@ public class PrepareScheduleView extends UserRequestView implements ActionListen
         gbc.gridwidth = 2;
         add(feedbackLabel, gbc);
         gbc.gridy++;
-
+        /* ------TO DO: REMOVE WHERE THE BUTTONS ARE ADDED TO THE VIEW
         gbc.gridwidth = 1;
         gbc.gridy++;
         add(checkAnswerButton, gbc);
@@ -157,6 +160,7 @@ public class PrepareScheduleView extends UserRequestView implements ActionListen
 
         gbc.gridy++;
         add(newExampleButton, gbc);
+        */
     }
 
 
@@ -219,16 +223,13 @@ public class PrepareScheduleView extends UserRequestView implements ActionListen
         revalidate();
         repaint();
     }
-
-
-
-
-
-
+    
 
     /**
      * Checks if the selected answer is correct.
-     */
+     * 
+     * -------TO DO: DELETE CHECK ANSWER FUNCTION, HANDLED IN ShaTuTutor.java
+     *
     private void checkAnswer() {
         if (answerOptions[correctAnswerIndex].isSelected()) {
             feedbackLabel.setText("Correct! Please choose New Example.");
@@ -236,11 +237,13 @@ public class PrepareScheduleView extends UserRequestView implements ActionListen
             feedbackLabel.setText("Incorrect. Try again.");
         }
     }
+    * /
 
 
     /**
      * Displays a tailored hint based on the selected answer.
-     */
+     * -------TO DO: DELETE SHOW HINT FUNCTION, HANDLED IN ShaTuTutor.java
+     *
     private void showHint() {
         int selectedIndex = -1; // Default: No selection
 
@@ -284,11 +287,13 @@ public class PrepareScheduleView extends UserRequestView implements ActionListen
         // Assign a specific hint for the wrong choice selected
         feedbackLabel.setText(hintMessages[currentStep - 1][selectedIndex]);
     }
+    * /
 
 
     /**
      * Loads the next example or resets the steps.
-     */
+     * -------TO DO: DELETE NEW EXAMPLE FUNCTION, HANDLED IN ShaTuTutor.java
+     *
     private void loadNewExample() {
         if (answerOptions[0].isSelected() || feedbackLabel.getText().contains("Correct")) {
             if (currentStep < 4) {
@@ -305,6 +310,7 @@ public class PrepareScheduleView extends UserRequestView implements ActionListen
             feedbackLabel.setText("You must select the correct answer before proceeding.");
         }
     }
+    * /
 
     /**
      * Updates the display of previous steps above the question.
