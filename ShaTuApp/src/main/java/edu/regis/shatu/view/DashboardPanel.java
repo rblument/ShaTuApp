@@ -131,7 +131,7 @@ public class DashboardPanel extends JPanel {
         // Set button actions
         logOutButton.addActionListener(evt -> logOut());
         settingsButton.setVerticalAlignment(SwingConstants.TOP);
-        teachMeButton.addActionListener(evt -> SplashFrame.instance().selectLessonScreen());
+        teachMeButton.addActionListener(evt -> SplashFrame.instance().selectPracticeScreen());
         practiceButton.addActionListener(evt -> SplashFrame.instance().selectPracticeScreen());
         quizMeButton.addActionListener(evt -> 
             JOptionPane.showMessageDialog(this, "Quiz Me not yet implemented!", "Info", JOptionPane.INFORMATION_MESSAGE)
