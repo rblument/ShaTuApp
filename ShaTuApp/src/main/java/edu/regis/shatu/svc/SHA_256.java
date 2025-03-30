@@ -32,6 +32,12 @@ public class SHA_256 {
      */
     private final static SHA_256 SINGLETON;
     
+    private SHA_256BreakPointWrapper breakpointWrapper;
+    
+public void setBreakPoint(SHA_256BreakPointWrapper wrapper) {
+    this.breakpointWrapper = wrapper;
+}
+    
     // Invoked when this class is loaded
     static {     
         SINGLETON = new SHA_256();
@@ -258,85 +264,73 @@ public class SHA_256 {
      * @return The hash's bytes.
      */
     public byte[] hash(byte[] message) {
-        // let H = H0
+        // ENCODE_ASCII breakpoint
+        if (breakpointWrapper != null &&
+            breakpointWrapper.shouldBreakHere(new SHA_256BreakPoint(SHA_256BreakPoint.SHA256Breakpoint.ENCODE_ASCII))) {
+            return null;
+        }
+
+        int[] words = pad(message);
+
+        // PAD_WITH_ZEROS breakpoint
+        if (breakpointWrapper != null &&
+            breakpointWrapper.shouldBreakHere(new SHA_256BreakPoint(SHA_256BreakPoint.SHA256Breakpoint.PAD_WITH_ZEROS))) {
+            return null;
+        }
+
         System.arraycopy(H0, 0, h, 0, H0.length);
 
-        // initialize all words
-        int[] words = pad(message);
-        
-        // Not removed Due to Dr Rick's "signature here", same applies for rest of file
-        // Rick
-        /*
-        System.out.println("Pad: " + words.length);
-        for (int i = 0; i < words.length; i++) {
-           // System.out.format("%s ", padLeftZeros(Integer.toBinaryString(words[i]),8));
-            byte[] bytes = ByteBuffer.allocate(4).putInt(words[i]).array();
-            for (byte b : bytes) {
-             byte[] byteArray = new byte[] {00, 00, 00, 00};
-             byteArray[3] = b;
-             int num = ByteBuffer.wrap(byteArray).getInt();
-             System.out.format("%s ", padLeftZeros(Integer.toBinaryString(num),8));
-            }  
-          
-            System.out.println("");
+        // INIT_HASH_VALUES breakpoint
+        if (breakpointWrapper != null &&
+            breakpointWrapper.shouldBreakHere(new SHA_256BreakPoint(SHA_256BreakPoint.SHA256Breakpoint.INIT_HASH_VALUES))) {
+            return null;
         }
-        System.out.println("");
-        // End Rick
-        */
-        
 
-        // enumerate all blocks (each containing 16 words)
         for (int i = 0, n = words.length / 16; i < n; ++i) {
-
-            // initialize w from the block's words
             System.arraycopy(words, i * 16, w, 0, 16);
-            
-            // Rick
-           // System.out.println("W before mod");
-            //for (int t = 0; t < W.length; t++)
-                //System.out.format("%d ", W[t]);
-            //    System.out.println("t" + t + ": " + padLeftZeros(Integer.toBinaryString(W[t]),32) + " ");
-           // System.out.println("");
-            // end rick
-            
-            
-            // Modify the zero-ed indexes at the end of the array using the following algorithm:
+
             for (int t = 16; t < w.length; ++t) {
-                 w[t] = smallSig1(w[t - 2]) + w[t - 7] + smallSig0(w[t - 15]) + w[t - 16];
+                w[t] = smallSig1(w[t - 2]) + w[t - 7] + smallSig0(w[t - 15]) + w[t - 16];
             }
 
-            // let TEMP = H
+            // SCHEDULE_EXPANSION breakpoint
+            if (breakpointWrapper != null &&
+                breakpointWrapper.shouldBreakHere(new SHA_256BreakPoint(SHA_256BreakPoint.SHA256Breakpoint.SCHEDULE_EXPANSION))) {
+                return null;
+            }
+
             System.arraycopy(h, 0, temp, 0, h.length);
 
-            // operate on TEMP
             for (int t = 0; t < w.length; ++t) {
-                //     =  H                 E              E         F        G
+                if (breakpointWrapper != null &&
+                    breakpointWrapper.shouldBreakHere(
+                        new SHA_256BreakPoint(SHA_256BreakPoint.SHA256Breakpoint.COMPRESS_ROUND), t)) {
+                    return null;
+                }
+
                 int t1 = temp[7] + bigSig1(temp[4]) + ch(temp[4], temp[5], temp[6]) + K[t] + w[t];
-                
-                //                  A             A         B       C
                 int t2 = bigSig0(temp[0]) + maj(temp[0], temp[1], temp[2]);
-                
-                // Rick
-                // if (t == 0) {
-                //    System.out.println("Maj: " + padLeftZeros(Integer.toBinaryString(maj(TEMP[0], TEMP[1], TEMP[2])), 32));
-               // System.out.println("Sig0: " + padLeftZeros(Integer.toBinaryString(bigSig0(TEMP[0])), 32));
-                
-                // }
-                // end Rick
 
                 System.arraycopy(temp, 0, temp, 1, temp.length - 1);
-                // E
                 temp[4] += t1;
                 temp[0] = t1 + t2;
             }
 
-            // add values in TEMP to values in H
             for (int t = 0; t < h.length; ++t) {
                 h[t] += temp[t];
             }
         }
-        return toByteArray(h);
+
+    // FINAL_HASH breakpoint
+    if (breakpointWrapper != null &&
+        breakpointWrapper.shouldBreakHere(new SHA_256BreakPoint(SHA_256BreakPoint.SHA256Breakpoint.FINAL_HASH))) {
+        return null;
     }
+
+    return toByteArray(h);
+}
+
+
 
     /**
      * <b>Internal method, no need to call.</b> Pads the given message to have a length
