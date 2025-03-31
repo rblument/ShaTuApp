@@ -348,7 +348,7 @@ public class EncodeView extends UserRequestView {
             Gson gson = new GsonBuilder().setPrettyPrinting().create(); // May not be needed here.
 
             Step step = model.currentTask().getCurrentStep().getStep(); // Will be the last subtype a example was
-                                                                        // created for or empty
+            // created for or empty
 
             System.out.println("Encode Ascii substep from current step: " + step.getSubType()); // Error checking
             System.out.println("Encode Ascii type: " + type); // Error checking
@@ -357,10 +357,10 @@ public class EncodeView extends UserRequestView {
             if (step.getSubType() == StepSubType.ENCODE_ASCII) {
 
                 EncodeAsciiStep newEncodeAscii = gson.fromJson(step.getData(), EncodeAsciiStep.class); // Takes data to
-                                                                                                       // the class
-                                                                                                       // object created
-                                                                                                       // from the new
-                                                                                                       // example.
+                // the class
+                // object created
+                // from the new
+                // example.
 
                 // Clear any existing feedback and response from the previous question.
                 feedbackArea.setText("");
@@ -401,8 +401,34 @@ public class EncodeView extends UserRequestView {
             }
 
         }
+
         // Other update logic here
         System.out.println("UpdateView logic continues...");
+    }
+
+    /**
+     * Defines each view classes' standard method for updating in the Practice View
+     */
+    @Override
+    protected void updatePracticeView() {
+
+
+    }
+
+    /**
+     * Defines each view classes' standard method for updating in the Teach Me View
+     */
+    @Override
+    protected void updateTeachView() {
+
+    }
+
+    /**
+     * Defines each view classes' standard method for updating in the Teach Me View
+     */
+    @Override
+    protected void updateQuizView() {
+
     }
 
     /**

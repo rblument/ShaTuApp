@@ -540,11 +540,26 @@ public class CompressionCanvasView extends UserRequestView {
      */
     protected void updateView() {
         view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
-        view.resetButtonListeners(); // Clear any listeners applied from other views
-        view.getCheckButton().setEnabled(false);
-        view.getHintButton().setEnabled(false);
-        view.getNewExampleButton().setEnabled(false);
-        
+
+        switch(view.getCurrentViewType())
+        {
+            case DO_ONE:
+                updatePracticeView();
+                break;
+
+            case SEE_ONE:
+                updateTeachView();
+                break;
+
+            case TEACH_ONE:
+                updateQuizView();
+                break;
+
+            default:
+                throw new UnsupportedOperationException("Unknown Update Operation for view type: "
+                        + view.getCurrentViewType());
+        }
+
         if (model != null) {
             // ****TO-DO*****
             // Update the view's information from the model
@@ -552,7 +567,34 @@ public class CompressionCanvasView extends UserRequestView {
             System.out.println("CompressionCanvasView");
         }
     }
-    
+
+    /**
+     * Defines each view classes' standard method for updating in the Practice View
+     */
+    @Override
+    protected void updatePracticeView() {
+        view.resetButtonListeners(); // Clear any listeners applied from other views
+        view.getCheckButton().setEnabled(false);
+        view.getHintButton().setEnabled(false);
+        view.getNewExampleButton().setEnabled(false);
+    }
+
+    /**
+     * Defines each view classes' standard method for updating in the Teach Me View
+     */
+    @Override
+    protected void updateTeachView() {
+
+    }
+
+    /**
+     * Defines each view classes' standard method for updating in the Teach Me View
+     */
+    @Override
+    protected void updateQuizView() {
+
+    }
+
     @Override
     public NewExampleRequest newRequest() {
         NewExampleRequest ex = new NewExampleRequest(); // Will be sent to the tutor.

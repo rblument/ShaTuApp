@@ -333,6 +333,33 @@ public class PrepareScheduleView extends UserRequestView implements ActionListen
     @Override
     protected void updateView() {
         view = SplashFrame.instance().getTutoringSessionView();
+
+        switch(view.getCurrentViewType())
+        {
+            case DO_ONE:
+                updatePracticeView();
+                break;
+
+            case SEE_ONE:
+                updateTeachView();
+                break;
+
+            case TEACH_ONE:
+                updateQuizView();
+                break;
+
+            default:
+                throw new UnsupportedOperationException("Unknown Update Operation for view type: "
+                        + view.getCurrentViewType());
+        }
+    }
+
+    /**
+     * Defines each view classes' standard method for updating in the Practice View
+     */
+    @Override
+    protected void updatePracticeView() {
+
         view.resetButtonListeners();
 
         // Only update label if the step is greater than 1 to prevent overriding first question
@@ -342,6 +369,22 @@ public class PrepareScheduleView extends UserRequestView implements ActionListen
 
         feedbackLabel.setText("");
         updatePreviousStepsDisplay();
+    }
+
+    /**
+     * Defines each view classes' standard method for updating in the Teach Me View
+     */
+    @Override
+    protected void updateTeachView() {
+
+    }
+
+    /**
+     * Defines each view classes' standard method for updating in the Teach Me View
+     */
+    @Override
+    protected void updateQuizView() {
+
     }
 
     /**
