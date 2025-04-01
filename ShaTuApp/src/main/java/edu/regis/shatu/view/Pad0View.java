@@ -320,13 +320,40 @@ public class Pad0View extends UserRequestView {
     @Override
     protected void updateView() {
         view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
+
+        switch(view.getCurrentViewType())
+        {
+            case DO_ONE:
+                updatePracticeView();
+                break;
+
+            case SEE_ONE:
+                updateTeachView();
+                break;
+
+            case TEACH_ONE:
+                updateQuizView();
+                break;
+
+            default:
+                throw new UnsupportedOperationException("Unknown Update Operation for view type: "
+                        + view.getCurrentViewType());
+        }
+    }
+
+    /**
+     * Defines each view classes' standard method for updating in the Practice View
+     */
+    @Override
+    protected void updatePracticeView() {
+
         hintButton = view.getHintButton();
         checkButton = view.getCheckButton();
         nextButton = view.getNewExampleButton();
-        
+
         // If check and hint buttons are disabled, reset listenerers and apply those used by this view
         if(!checkHintEnabled) {
-            view.resetButtonListeners(); // Clear any listeners applied from other views          
+            view.resetButtonListeners(); // Clear any listeners applied from other views
         }
         /*
         When switching between steps, the current step will be the previous enum
@@ -334,55 +361,71 @@ public class Pad0View extends UserRequestView {
         similar variables, their may be a conflict causing a error.
         */
         StepSubType type = StepSubType.PAD_ZEROS;
-        
+
         System.out.println("Pad Zero update display called"); // Error checking
-        
+
         Gson gson = new GsonBuilder().setPrettyPrinting().create(); // May not be needed here.
-        
+
         Step step = model.currentTask().getCurrentStep().getStep(); // will be the last step a example was created for.
-        
+
         System.out.println("Pad 0 View substep from current step: " + step.getSubType()); // Error checking.
-         if (step.getSubType() == StepSubType.PAD_ZEROS) {
-        Pad0Step newPadZeroObject = gson.fromJson(step.getData(), Pad0Step.class); // Issues can happen here if the class contains similar named variables
-        
-        // Clear any existing feedback and response from the previous question.
-        feedbackArea.setText("");
-        responseTextArea.setText("");
-        
-        if (type == step.getSubType()) { // prevents data assignment issues if subtype is for a different class.
-            
-            this.question = newPadZeroObject.getQuestion();
-        
-            if (this.question == null) { // A example hasnt been created yet
+        if (step.getSubType() == StepSubType.PAD_ZEROS) {
+            Pad0Step newPadZeroObject = gson.fromJson(step.getData(), Pad0Step.class); // Issues can happen here if the class contains similar named variables
+
+            // Clear any existing feedback and response from the previous question.
+            feedbackArea.setText("");
+            responseTextArea.setText("");
+
+            if (type == step.getSubType()) { // prevents data assignment issues if subtype is for a different class.
+
+                this.question = newPadZeroObject.getQuestion();
+
+                if (this.question == null) { // A example hasnt been created yet
+                    questionLabel.setText("Please click new example button to get started");
+                    checkButton.setEnabled(false);
+                    responseTextArea.setEnabled(false);
+                    hintButton.setEnabled(false);
+                }
+
+                else { // subtype matches and a example was already made
+                    questionLabel.setText(String.format("Calculate the number of zero's "
+                            + "needed to pad the following string so it is "
+                            + "the proper length (448 bits): %s", question));
+                    checkButton.setEnabled(true);
+                    responseTextArea.setEnabled(true);
+                    hintButton.setEnabled(true);
+                }
+            }
+
+            else { // Subtype differs, need to create a new example to correctly set it.
                 questionLabel.setText("Please click new example button to get started");
                 checkButton.setEnabled(false);
                 responseTextArea.setEnabled(false);
                 hintButton.setEnabled(false);
             }
-        
-            else { // subtype matches and a example was already made
-                questionLabel.setText(String.format("Calculate the number of zero's "
-                        + "needed to pad the following string so it is "
-                        + "the proper length (448 bits): %s", question));
-                checkButton.setEnabled(true);
-                responseTextArea.setEnabled(true);
-                hintButton.setEnabled(true);
+
+            if (this.wasHintRequested) { // Removes the ASCII table from the view if exists
+                this.remove(this.asciiTableScrollPane);
+                this.revalidate(); // Refreshes the view
+                this.repaint(); // Refreshes the view
             }
         }
-        
-        else { // Subtype differs, need to create a new example to correctly set it.
-                questionLabel.setText("Please click new example button to get started");
-                checkButton.setEnabled(false);
-                responseTextArea.setEnabled(false);
-                hintButton.setEnabled(false);
-        }
-        
-        if (this.wasHintRequested) { // Removes the ASCII table from the view if exists
-            this.remove(this.asciiTableScrollPane);
-            this.revalidate(); // Refreshes the view
-            this.repaint(); // Refreshes the view
-        }
-         }
+    }
+
+    /**
+     * Defines each view classes' standard method for updating in the Teach Me View
+     */
+    @Override
+    protected void updateTeachView() {
+
+    }
+
+    /**
+     * Defines each view classes' standard method for updating in the Teach Me View
+     */
+    @Override
+    protected void updateQuizView() {
+
     }
 
     /**

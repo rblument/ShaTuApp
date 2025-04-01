@@ -301,10 +301,37 @@ public class AddTwoBitView extends UserRequestView implements KeyListener {
     @Override
     protected void updateView() {
         view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
+
+        switch(view.getCurrentViewType())
+        {
+            case DO_ONE:
+                updatePracticeView();
+                break;
+
+            case SEE_ONE:
+                updateTeachView();
+                break;
+
+            case TEACH_ONE:
+                updateQuizView();
+                break;
+
+            default:
+                throw new UnsupportedOperationException("Unknown Update Operation for view type: "
+                        + view.getCurrentViewType());
+        }
+    }
+
+    /**
+     * Defines each view classes' standard method for updating in the Practice View
+     */
+    @Override
+    protected void updatePracticeView() {
+
         hintButton = view.getHintButton();
         checkButton = view.getCheckButton();
         nextButton = view.getNewExampleButton();
-        
+
         responseTextArea.setText("");
 
         // If check and hint buttons are disabled, reset listenerers and apply those
@@ -344,5 +371,21 @@ public class AddTwoBitView extends UserRequestView implements KeyListener {
                 stringLabel2.setText("binary number2: " + binary2);
             }
         }
+    }
+
+    /**
+     * Defines each view classes' standard method for updating in the Teach Me View
+     */
+    @Override
+    protected void updateTeachView() {
+
+    }
+
+    /**
+     * Defines each view classes' standard method for updating in the Teach Me View
+     */
+    @Override
+    protected void updateQuizView() {
+
     }
 }

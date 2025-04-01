@@ -67,6 +67,21 @@ public abstract class UserRequestView extends GPanel {
     protected abstract void updateView();
 
     /**
+     * Defines each view classes' standard method for updating in the Practice View
+     */
+    protected abstract void updatePracticeView();
+
+    /**
+     * Defines each view classes' standard method for updating in the Teach Me View
+     */
+    protected abstract void updateTeachView();
+
+    /**
+     * Defines each view classes' standard method for updating in the Teach Me View
+     */
+    protected abstract void updateQuizView();
+
+    /**
      * Create and return a new step completion request, which indicates the
      * student is asking the tutor to check their work.
      * 

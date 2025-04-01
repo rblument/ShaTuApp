@@ -363,13 +363,23 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
     protected void updateView() {
         view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
 
-        //hintButton = view.getHintButton();
-        //checkButton = view.getCheckButton();
-        nextQuestionButton = view.getNewExampleButton();
-        
-        // If check and hint buttons are disabled, reset listenerers and apply those used by this view
-        if(!checkHintEnabled) {
-            view.resetButtonListeners(); // Clear any listeners applied from other views          
+        switch(view.getCurrentViewType())
+        {
+            case DO_ONE:
+                updatePracticeView();
+                break;
+
+            case SEE_ONE:
+                updateTeachView();
+                break;
+
+            case TEACH_ONE:
+                updateQuizView();
+                break;
+
+            default:
+                throw new UnsupportedOperationException("Unknown Update Operation for view type: "
+                        + view.getCurrentViewType());
         }
 
         if (model != null) {
@@ -380,8 +390,40 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
         }
     }
 
+    /**
+     * Defines each view classes' standard method for updating in the Practice View
+     */
+    @Override
+    protected void updatePracticeView() {
 
-     /**
+        //hintButton = view.getHintButton();
+        //checkButton = view.getCheckButton();
+        nextQuestionButton = view.getNewExampleButton();
+
+        // If check and hint buttons are disabled, reset listenerers and apply those used by this view
+        if(!checkHintEnabled) {
+            view.resetButtonListeners(); // Clear any listeners applied from other views
+        }
+    }
+
+    /**
+     * Defines each view classes' standard method for updating in the Teach Me View
+     */
+    @Override
+    protected void updateTeachView() {
+
+    }
+
+    /**
+     * Defines each view classes' standard method for updating in the Teach Me View
+     */
+    @Override
+    protected void updateQuizView() {
+
+    }
+
+
+    /**
      * Create and return the server request this view makes when a user selects
      * that they want to practice a new Sha One View example.
      *
