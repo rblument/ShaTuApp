@@ -75,7 +75,7 @@ public class WorkingVarLabel extends JLabel implements MouseListener {
     /**
      * The view that is displayed when this label is selected.
      */
-    private StepSelection stepSelection;
+    private StepSelection stepSelection = StepSelection.INIT_VARS;
     
     private boolean isSelected;
 
@@ -99,6 +99,7 @@ public class WorkingVarLabel extends JLabel implements MouseListener {
     
     public void select() {
         //GuiController.instance().getStepSelectorView().displayStep(stepSelection);
+        SplashFrame.instance().getTutoringSessionView().displayStep(stepSelection);
         isSelected = true;
         setBackground(SELECTED_BACKGROUND);
     }
@@ -155,13 +156,9 @@ public class WorkingVarLabel extends JLabel implements MouseListener {
             JOptionPane.showMessageDialog(null, "Binary Value of a coming in: " + binInValue + "\n Binary value of a going out: " + binOutValue, 
                     "Binary value", JOptionPane.WARNING_MESSAGE);
             
-            if (!isSelected) {
+        }
+        else if (SwingUtilities.isLeftMouseButton(evt)){
             select();
-            }
-            
-            else if (isSelected) {
-            deselect();
-            }
         }
         
         

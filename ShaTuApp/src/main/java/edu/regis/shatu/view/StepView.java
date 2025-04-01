@@ -20,6 +20,8 @@ import javax.swing.JPanel;
 
 import edu.regis.shatu.err.IllegalArgException;
 import edu.regis.shatu.model.TutoringSession;
+import edu.regis.shatu.svc.SHA_256;
+import javax.swing.JOptionPane;
 
 /**
  * A view displaying a current task and step in the tutoring session, which
@@ -119,9 +121,22 @@ public class StepView extends JPanel {
             cl.show(this, name.toString());
 
             selectedPanel = name;
+            System.out.print(name);
 
             try {
                 getUserRequestView().setModel(model);
+                if (selectedPanel == StepSelection.COMPRESS) {
+                    JOptionPane.showMessageDialog(null, 
+                            "Press the new message button to enter a message to hash."
+                             + "\n Press the Next Round button to move through the "
+                             + "64 compression rounds one round at a time. \n"
+                             + "Left click a label to be taken to the lesson step"
+                             + "for that function. \n"
+                             + "Right click a label to view the incoming and out "
+                             + "going data."
+                            , 
+                        "Binary value", JOptionPane.WARNING_MESSAGE);
+                }
             } catch (IllegalArgException e) {
                 // If we get here, we're somehow displaying a view we don't know
                 // about, which is a clear coding error.

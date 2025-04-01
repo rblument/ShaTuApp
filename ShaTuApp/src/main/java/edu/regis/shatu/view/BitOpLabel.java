@@ -154,14 +154,25 @@ public class BitOpLabel extends JLabel implements MouseListener {
                                     + SHA_256.instance().getBigSig1Val(), 
                         "Binary value", JOptionPane.WARNING_MESSAGE);
                     break;
-            }
-        }
+            } //end case
+        } //end if
         
-        if (!isSelected) {
+        else if (SwingUtilities.isLeftMouseButton(evt)){
+            switch(labelText){
+                case ("Ch"):
+                    stepSelection = StepSelection.CHOICE_FUNCTION;
+                    break;
+                case ("Maj"):
+                    stepSelection = StepSelection.MAJ_FUNCTION;
+                    break;
+                case ("\u03A3\u2080"):
+                    stepSelection = StepSelection.SHA_ZERO;
+                    break;
+                case ("\u03A3\u2081"):
+                    stepSelection = StepSelection.SHA_ONE;
+                    break;
+            }
             select();
-        }
-        else if (isSelected) {
-            deselect();
         }
     }
 

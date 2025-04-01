@@ -146,6 +146,14 @@ public class VariableLabel extends JLabel implements MouseListener {
                 
             }
         }
+        else if (SwingUtilities.isLeftMouseButton(evt)){
+            switch(labelText){
+                case ("W\u209C"):
+                    stepSelection = StepSelection.PREPARE;
+                    break;
+            }
+            select();
+        }
     }
 
     @Override

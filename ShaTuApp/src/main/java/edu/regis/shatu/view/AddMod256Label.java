@@ -67,7 +67,7 @@ public class AddMod256Label extends JLabel implements MouseListener {
     /**
      * The view that is displayed when this label is selected.
      */
-    private StepSelection stepSelection;
+    private StepSelection stepSelection = StepSelection.ADD_TWO_BIT;
     
     private boolean isSelected;
 
@@ -177,6 +177,9 @@ public class AddMod256Label extends JLabel implements MouseListener {
                         "Binary value", JOptionPane.WARNING_MESSAGE); 
                     break; 
             }
+        }
+        else if (SwingUtilities.isLeftMouseButton(evt)){
+            select();
         }
     }
 

@@ -117,9 +117,7 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
         nextRoundButton.setText("Next Round");
         newMessageButton.setText("New Message");
         counterButton.setText("Compression Round: " + count);
-        
-        
-        
+      
     }
 
     /**
@@ -330,6 +328,7 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
         y2 = p.y;
         g.drawLine(x, y, x2, y);
         drawArrowLine(g, x2, y, x2, y2, 6, 6);
+        
     }
 
     /**
