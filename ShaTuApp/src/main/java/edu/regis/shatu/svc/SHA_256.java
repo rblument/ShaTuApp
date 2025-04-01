@@ -16,6 +16,8 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * An implementation of the SHA-256 algorithm.
@@ -94,6 +96,23 @@ public class SHA_256 {
     private final int[] w = new int[64];
     private final int[] h = new int[8];
     private final int[] temp = new int[8];
+    private final int[] inTemp = new int[8];
+    private int counter = 0;
+    private int majority = 0;
+    private int choice = 0;
+    private int bigSig0Val = 0;
+    private int bigSig1Val = 0;
+    private int Kt = 0;
+    private int Wt = 0;
+    private int t1 = 0;
+    private int t2 = 0;
+    private int mod2 = 0;
+    private int mod3 = 0;
+    
+    
+            
+   
+    
  
     /**
      * Initialize this algorithm with an empty set of SHA-256 listeners.
@@ -101,6 +120,7 @@ public class SHA_256 {
     private SHA_256() {
         listeners = new ArrayList<>();
     }
+
 
     public boolean isSendCallbacks() {
         return isSendCallbacks;
@@ -258,11 +278,39 @@ public class SHA_256 {
      * @return The hash's bytes.
      */
     public byte[] hash(byte[] message) {
-        // let H = H0
-        System.arraycopy(H0, 0, h, 0, H0.length);
+        
+
+        int [] words = initializeMessage(message);
+        
+        if (isSendCallbacks){
+            
+            // enumerate all blocks (each containing 16 words -- uses method)
+
+            for (int i = 0, n = words.length / 16; i < n; ++i) {
+                enumerateMessageBlocks (i, words);
+                
+        // use method to operate on temp and do compression rounds        
+                for (int t = 0; t < w.length; ++t) {
+                    compressionRound (t);
+                }
+         // add values in TEMP to values in H        
+                nextMessageBlockHValue ();
+            }
+        }
+        
+        
+        
+        return toByteArray(h);
+       
+    //All code in this function below this line was created by Rick and therefore not deleted.
+    //Hash needed to be turned into methods so that compression rounds could 
+    //be triggered individually to see values for each label in each round.
+    
+    // let H = H0
+//       System.arraycopy(H0, 0, h, 0, H0.length);
 
         // initialize all words
-        int[] words = pad(message);
+//       words = pad(message);
         
         // Not removed Due to Dr Rick's "signature here", same applies for rest of file
         // Rick
@@ -283,14 +331,12 @@ public class SHA_256 {
         System.out.println("");
         // End Rick
         */
-        
-
-        // enumerate all blocks (each containing 16 words)
-        for (int i = 0, n = words.length / 16; i < n; ++i) {
-
-            // initialize w from the block's words
-            System.arraycopy(words, i * 16, w, 0, 16);
+     
+//            // initialize w from the block's words
+//            System.arraycopy(words, i * 16, w, 0, 16);
             
+// uncomment here for functionality
+
             // Rick
            // System.out.println("W before mod");
             //for (int t = 0; t < W.length; t++)
@@ -299,22 +345,90 @@ public class SHA_256 {
            // System.out.println("");
             // end rick
             
-            
+// temp copmment to test functionality of method            
+//            // Modify the zero-ed indexes at the end of the array using the following algorithm:
+//            for (int t = 16; t < w.length; ++t) {
+//                 w[t] = smallSig1(w[t - 2]) + w[t - 7] + smallSig0(w[t - 15]) + w[t - 16];
+//            }
+
+
+            // let TEMP = H
+//            System.arraycopy(h, 0, temp, 0, h.length);
+        
+
+//temp comment start
+            // operate on TEMP
+//            for (int t = 0; t < w.length; ++t) {
+                //     =  H                 E              E         F        G
+//                int t1 = temp[7] + bigSig1(temp[4]) + ch(temp[4], temp[5], temp[6]) + K[t] + w[t];
+                
+                //                  A             A         B       C
+//                int t2 = bigSig0(temp[0]) + maj(temp[0], temp[1], temp[2]);
+//temp comment ends here                
+                // Rick
+                // if (t == 0) {
+                //    System.out.println("Maj: " + padLeftZeros(Integer.toBinaryString(maj(TEMP[0], TEMP[1], TEMP[2])), 32));
+               // System.out.println("Sig0: " + padLeftZeros(Integer.toBinaryString(bigSig0(TEMP[0])), 32));
+                
+                // }
+                // end Rick
+//temp comment start
+//                System.arraycopy(temp, 0, temp, 1, temp.length - 1);
+//                // E
+//                temp[4] += t1;
+//                temp[0] = t1 + t2;
+//            }
+
+            // add values in TEMP to values in H
+//            for (int t = 0; t < h.length; ++t) {
+//                h[t] += temp[t];
+//            }
+//       }
+// temp comment end                
+        
+    }
+    
+    public int [] initializeMessage(byte [] message){
+        //let H = H0
+        System.arraycopy(H0, 0, h, 0, H0.length);
+
+        // initialize all words
+        int initWords [] = pad(message);  
+        
+        return initWords;
+    } 
+    
+    public void enumerateMessageBlocks (int m, int[] words){
+        // initialize w from the block's words
+            System.arraycopy(words, m * 16, w, 0, 16);
+         
             // Modify the zero-ed indexes at the end of the array using the following algorithm:
             for (int t = 16; t < w.length; ++t) {
                  w[t] = smallSig1(w[t - 2]) + w[t - 7] + smallSig0(w[t - 15]) + w[t - 16];
             }
-
-            // let TEMP = H
+            
             System.arraycopy(h, 0, temp, 0, h.length);
 
-            // operate on TEMP
-            for (int t = 0; t < w.length; ++t) {
-                //     =  H                 E              E         F        G
-                int t1 = temp[7] + bigSig1(temp[4]) + ch(temp[4], temp[5], temp[6]) + K[t] + w[t];
+    }
+    public void compressionRound (int cr){
+        //     =  H              E        F        G
+                choice = ch(temp[4], temp[5], temp[6]);
+                                //A         B       C
+                majority = maj(temp[0], temp[1], temp[2]);
+        //                                A
+                bigSig0Val = bigSig0(temp[0]);
+        //                                E        
+                bigSig1Val = bigSig1(temp[4]);
+                Kt = K[cr];
+                Wt = w[cr];
+                mod3 = Wt + Kt;
+                mod2 = temp[7] + choice + mod3;
                 
-                //                  A             A         B       C
-                int t2 = bigSig0(temp[0]) + maj(temp[0], temp[1], temp[2]);
+        //                    E                 D
+                t1 = temp[7] + bigSig1Val + choice + Kt + Wt;
+                
+                //                               
+                t2 = bigSig0Val + majority;
                 
                 // Rick
                 // if (t == 0) {
@@ -323,19 +437,18 @@ public class SHA_256 {
                 
                 // }
                 // end Rick
-
+                System.arraycopy(temp, 0, inTemp, 0, temp.length);
                 System.arraycopy(temp, 0, temp, 1, temp.length - 1);
                 // E
                 temp[4] += t1;
                 temp[0] = t1 + t2;
-            }
-
-            // add values in TEMP to values in H
-            for (int t = 0; t < h.length; ++t) {
-                h[t] += temp[t];
-            }
+    }
+    
+    public void nextMessageBlockHValue (){
+     // add values in TEMP to values in H
+        for (int t = 0; t < h.length; ++t) {
+            h[t] += temp[t];
         }
-        return toByteArray(h);
     }
 
     /**
@@ -422,6 +535,58 @@ public class SHA_256 {
                 ^ (x >>> 10);
     }
     
+    
+    public String getTempOutValue (int value){
+        return Integer.toBinaryString(temp[value]);
+    }
+    
+    public String getInTempValue (int value){
+        return Integer.toBinaryString(inTemp[value]);
+    } 
+    
+    public String getChoice (){
+        return Integer.toBinaryString(choice);
+    } 
+    public String getMajority (){
+        return Integer.toBinaryString(majority);
+    }
+    
+    public String getBigSig0Val (){
+        return Integer.toBinaryString(bigSig0Val);
+    }
+    
+    public String getBigSig1Val (){
+        return Integer.toBinaryString(bigSig1Val);
+    }
+    
+    public int getTempLength (){
+        return temp.length;
+    }
+    
+    public String getKt (){
+        return Integer.toBinaryString(Kt);
+    }
+    
+    public String getWt (){
+        return Integer.toBinaryString(Wt);
+    }
+    
+    public String getT1 (){
+        return Integer.toBinaryString(t1);
+    }
+    
+    public String getT2 (){
+        return Integer.toBinaryString(t2);
+    }
+    
+    public String getMod2(){
+        return Integer.toBinaryString(mod2);
+    }
+    
+    public String getMod3(){
+        return Integer.toBinaryString(mod3);
+    }
+    
     // Rickb
     public  String padLeftZeros(String inputString, int length) {
     if (inputString.length() >= length) {
@@ -435,4 +600,5 @@ public class SHA_256 {
 
     return sb.toString();
     }
+    
 }
