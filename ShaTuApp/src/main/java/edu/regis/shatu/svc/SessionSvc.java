@@ -12,10 +12,9 @@
  */
 package edu.regis.shatu.svc;
 
-import edu.regis.shatu.err.IllegalArgException;
+import edu.regis.shatu.dao.interfaces.CRUD;
 import edu.regis.shatu.err.NonRecoverableException;
 import edu.regis.shatu.err.ObjNotFoundException;
-import edu.regis.shatu.model.Student;
 import edu.regis.shatu.model.TutoringSession;
 
 /**
@@ -23,27 +22,29 @@ import edu.regis.shatu.model.TutoringSession;
  * 
  * @author rickb
  */
-public interface SessionSvc {
-    /**
-     * Insert the given session into the database.
-     * 
-     * @param session the TutoringSession to create.
-     * @throws IllegalArgException     a session for the associated student account
-     *                                 already exists.
-     * @throws NonRecoverableException perhaps see getCause().getErrorCode().
-     */
-    void create(TutoringSession session) throws IllegalArgException, NonRecoverableException;
+public interface SessionSvc extends CRUD<TutoringSession> {
+    // /**
+    // * Insert the given session into the database.
+    // *
+    // * @param session the TutoringSession to create.
+    // * @throws ObjDuplicateException a session for the associated student account
+    // * already exists.
+    // * @throws NonRecoverableException perhaps see getCause().getErrorCode().
+    // */
+    // void create(TutoringSession session) throws ObjDuplicateException,
+    // NonRecoverableException;
 
-    /**
-     * Return the session with the specified id (this is a full session with all
-     * events versus a digest).
-     * 
-     * @param student the student whose session to return
-     * @return the Session for the given user id
-     * @throws ObjNotFoundException    no trial with the given id exists
-     * @throws NonRecoverableException perhaps see getCause().getErrorCode().
-     */
-    TutoringSession retrieve(Student student) throws ObjNotFoundException, NonRecoverableException;
+    // /**
+    // * Return the session with the specified id (this is a full session with all
+    // * events versus a digest).
+    // *
+    // * @param student the student whose session to return
+    // * @return the Session for the given user id
+    // * @throws ObjNotFoundException no trial with the given id exists
+    // * @throws NonRecoverableException perhaps see getCause().getErrorCode().
+    // */
+    // TutoringSession retrieve(String student) throws ObjNotFoundException,
+    // NonRecoverableException;
 
     /**
      * Return the security token (from the DB) for the given user id
@@ -55,14 +56,15 @@ public interface SessionSvc {
      */
     String retrieveSecurityToken(String userId) throws ObjNotFoundException, NonRecoverableException;
 
-    /**
-     * Update the session in formation in the database using the given session.
-     * 
-     * @param session a Session containing new information.
-     * @throws ObjNotFoundException    the session does not exist in the database.
-     * @throws NonRecoverableException perhaps see getCause().getErrorCode().
-     */
-    void update(TutoringSession session) throws ObjNotFoundException, NonRecoverableException;
+    // /**
+    // * Update the session in formation in the database using the given session.
+    // *
+    // * @param session a Session containing new information.
+    // * @throws ObjNotFoundException the session does not exist in the database.
+    // * @throws NonRecoverableException perhaps see getCause().getErrorCode().
+    // */
+    // void update(TutoringSession session) throws ObjNotFoundException,
+    // NonRecoverableException;
 
     // /**
     // * Delete the session from the database for the given student user id.
