@@ -12,6 +12,7 @@
  */
 package edu.regis.shatu.view;
 
+import edu.regis.shatu.svc.SHA_256;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -21,8 +22,10 @@ import java.awt.event.MouseListener;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
-
+import edu.regis.shatu.view.CompressionCanvasView;
+import javax.swing.JOptionPane;
 
 /**
  * ToDo: Should this be a HilightLabel class?
@@ -74,8 +77,8 @@ public class AddMod256Label extends JLabel implements MouseListener {
      * 
      * @param text the text of this label
      */
-    public AddMod256Label() {
-        super("", SwingConstants.CENTER);
+    public AddMod256Label(String text) {
+        super(text, SwingConstants.CENTER);
         
         isSelected = false;
 
@@ -115,14 +118,66 @@ public class AddMod256Label extends JLabel implements MouseListener {
     //TO DO:  Add label click functionality to show value
     @Override
     public void mouseClicked(MouseEvent evt) {
-        if (!isSelected) {
-            select();
-            System.out.print("This is us");
-        }
-        else if (isSelected) {
-            deselect();
-        }
+        String labelText = getText();
         
+        if (SwingUtilities.isRightMouseButton(evt)){
+            switch(labelText){
+                case ("0"):
+                    JOptionPane.showMessageDialog(null, 
+                            "Two incoming values\n" +
+                            "\t d: " + SHA_256.instance().getInTempValue(3) +
+                            "\n\t T\u2081: " + SHA_256.instance().getT1() 
+                            + "\n\n One outgoing value based on Modulo Addition: " 
+                                    + SHA_256.instance().getTempOutValue(4), 
+                        "Binary value", JOptionPane.WARNING_MESSAGE);
+                    break;
+                case ("1"):
+                    JOptionPane.showMessageDialog(null, 
+                            "Three incoming values\n" +
+                            "\t h: " + SHA_256.instance().getInTempValue(7) +
+                            "\n\t Ch: " + SHA_256.instance().getChoice() +
+                            "\n\t W\u209C % K\u209C : " + SHA_256.instance().getMod3()
+                            + "\n\n One outgoing value based on Modulo Addition: " 
+                                    + SHA_256.instance().getMod2(), 
+                        "Binary value", JOptionPane.WARNING_MESSAGE);
+                    break; 
+                case ("2"):
+                    JOptionPane.showMessageDialog(null, 
+                        "Two incoming values\n" +
+                            "\t W\u209C: " + SHA_256.instance().getWt() +
+                            "\n\t K\u209C: " + SHA_256.instance().getChoice() 
+                            + "\n\n One outgoing value based on Modulo Addition: " 
+                                    + SHA_256.instance().getMod3(), 
+                        "Binary value", JOptionPane.WARNING_MESSAGE);
+                    break; 
+                case ("3"):
+                    JOptionPane.showMessageDialog(null, 
+                            "Incoming value\n" +
+                            "\t modulo 1: " + SHA_256.instance().getMod2() +
+                             "\n\n One outgoing value based on Modulo Addition: "
+                                    + SHA_256.instance().getT1(), 
+                        "Binary value", JOptionPane.WARNING_MESSAGE);
+                    break; 
+                case ("4"):
+                    JOptionPane.showMessageDialog(null, 
+                        "Two incoming values\n" +
+                            "\t Maj: " + SHA_256.instance().getMajority() +
+                            "\n\t K\u209C: " + SHA_256.instance().getBigSig0Val() 
+                            + "\n\n One outgoing value based on Modulo Addition: " 
+                                    + SHA_256.instance().getT2(), 
+                        "Binary value", JOptionPane.WARNING_MESSAGE); 
+                    break; 
+                case ("5"):
+                    JOptionPane.showMessageDialog(null, 
+                        "Two incoming values\n" +
+                            "\t T\u2081: " + SHA_256.instance().getT1() +
+                            "\n\t T\u2082: "  + SHA_256.instance().getT2() 
+                            + "\n\n One outgoing value based on Modulo Addition: " 
+                                    + SHA_256.instance().getTempOutValue(0), 
+                        "Binary value", JOptionPane.WARNING_MESSAGE); 
+                    break; 
+            }
+        }
     }
 
     @Override

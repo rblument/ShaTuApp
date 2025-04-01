@@ -348,7 +348,7 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
 
         modAdditions = new AddMod256Label[MOD_ADDITIONS_LEN];
         for (int i = 0; i < modAdditions.length; i++) {
-            modAdditions[i] = new AddMod256Label();
+            modAdditions[i] = new AddMod256Label(String.valueOf(i));
         }
         
         int sigma = 931;
@@ -570,9 +570,6 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
         g.drawPolygon(xpoints, ypoints, 3); // Rickb
     }
     
-    public int getCount(){
-        return count;
-    }
     
      @Override
     public void actionPerformed(ActionEvent event) {

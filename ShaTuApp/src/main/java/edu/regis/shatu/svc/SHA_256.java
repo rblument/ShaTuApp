@@ -100,6 +100,17 @@ public class SHA_256 {
     private int counter = 0;
     private int majority = 0;
     private int choice = 0;
+    private int bigSig0Val = 0;
+    private int bigSig1Val = 0;
+    private int Kt = 0;
+    private int Wt = 0;
+    private int t1 = 0;
+    private int t2 = 0;
+    private int mod2 = 0;
+    private int mod3 = 0;
+    
+    
+            
    
     
  
@@ -404,12 +415,20 @@ public class SHA_256 {
                 choice = ch(temp[4], temp[5], temp[6]);
                                 //A         B       C
                 majority = maj(temp[0], temp[1], temp[2]);
+        //                                A
+                bigSig0Val = bigSig0(temp[0]);
+        //                                E        
+                bigSig1Val = bigSig1(temp[4]);
+                Kt = K[cr];
+                Wt = w[cr];
+                mod3 = Wt + Kt;
+                mod2 = temp[7] + choice + mod3;
                 
         //                    E                 D
-                int t1 = temp[7] + bigSig1(temp[4]) + choice + K[cr] + w[cr];
+                t1 = temp[7] + bigSig1Val + choice + Kt + Wt;
                 
-                //                  A             
-                int t2 = bigSig0(temp[0]) + majority;
+                //                               
+                t2 = bigSig0Val + majority;
                 
                 // Rick
                 // if (t == 0) {
@@ -532,8 +551,40 @@ public class SHA_256 {
         return Integer.toBinaryString(majority);
     }
     
+    public String getBigSig0Val (){
+        return Integer.toBinaryString(bigSig0Val);
+    }
+    
+    public String getBigSig1Val (){
+        return Integer.toBinaryString(bigSig1Val);
+    }
+    
     public int getTempLength (){
         return temp.length;
+    }
+    
+    public String getKt (){
+        return Integer.toBinaryString(Kt);
+    }
+    
+    public String getWt (){
+        return Integer.toBinaryString(Wt);
+    }
+    
+    public String getT1 (){
+        return Integer.toBinaryString(t1);
+    }
+    
+    public String getT2 (){
+        return Integer.toBinaryString(t2);
+    }
+    
+    public String getMod2(){
+        return Integer.toBinaryString(mod2);
+    }
+    
+    public String getMod3(){
+        return Integer.toBinaryString(mod3);
     }
     
     // Rickb
