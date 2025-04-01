@@ -12,6 +12,9 @@
  */
 package edu.regis.shatu.view;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import edu.regis.shatu.model.PrepScheduleStep;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -25,8 +28,12 @@ import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.ProblemType;
+import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.view.act.NewExampleAction;
 import edu.regis.shatu.view.act.StepCompletionAction;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * This class represents the Prepare Schedule operation step in a multiple-choice format.
@@ -40,17 +47,26 @@ public class PrepareScheduleView extends UserRequestView /*implements ActionList
     private JLabel titleLabel, stepLabel, feedbackLabel, previousStepsLabel;
     private JRadioButton[] answerOptions;
     private ButtonGroup answerGroup;
-    private JButton checkAnswerButton, hintButton, newExampleButton;
-    private int currentStep = 1;
+    private JButton checkButton, hintButton, nextButton;
+    private int stepNumber = 0;
     private int correctAnswerIndex; // Stores the shuffled position of the correct answer
+    private String question;
 
     // Correct Steps (displayed in order)
     private final String[] correctSteps = {
-        "The input message has been padded and divided into 512-bit chunks.",
-        "Each chunk is divided into 32-bit words (initially 16 words).",
-        "The words are expanded to 64 using shifts, rotations, and bitwise operations.",
-        "The expanded words are used in the compression phase."
+        "Padding is added to ensure the message is a multiple of 512 bits.",
+        "The block is split into 32-bit segments for further manipulation.",
+        "A series of bitwise operations and shifts increase the number of words.",
+        "The transformed sequence helps derive intermediate hash values."
     };
+    
+    // More challenging step questions
+    private final String[] stepQuestions = {
+            "Which process ensures the input message conforms to the required block size in SHA-256?",
+            "What transformation is applied to each 512-bit block before processing?",
+            "What technique does SHA-256 use to extend a small set of words into a larger sequence?",
+            "How is the expanded word sequence utilized in the hashing process?"
+        };
 
     /**
      * Generates the prepare schedule view.
@@ -170,19 +186,12 @@ public class PrepareScheduleView extends UserRequestView /*implements ActionList
     private void loadStep() {
         feedbackLabel.setText("");
 
-        // More challenging step questions
-        String[] stepQuestions = {
-            "Which process ensures the input message conforms to the required block size in SHA-256?",
-            "What transformation is applied to each 512-bit block before processing?",
-            "What technique does SHA-256 use to extend a small set of words into a larger sequence?",
-            "How is the expanded word sequence utilized in the hashing process?"
-        };
-
+        
         // Ensure the first question always appears correctly
-        if (currentStep == 1) {
+        if (stepNumber == 0) {
             stepLabel.setText("<html><u>Step 1: " + stepQuestions[0] + "</u></html>");
-        } else {
-            stepLabel.setText("<html><u>Step " + currentStep + ": " + stepQuestions[currentStep - 1] + "</u></html>");
+        }else{   
+            stepLabel.setText("<html><u>Step " + stepNumber+1 + ": " + stepQuestions[stepNumber] + "</u></html>");
         }
 
         // Answer choices with correct answers always in the first position before shuffling
@@ -202,11 +211,11 @@ public class PrepareScheduleView extends UserRequestView /*implements ActionList
         };
 
         // Store correct answer before shuffling
-        String correctAnswer = answerChoices[currentStep - 1][0];
+        String correctAnswer = answerChoices[stepNumber][0];
 
         // Shuffle answer choices to randomize positions
         List<String> shuffledAnswers = new ArrayList<>();
-        for (String answer : answerChoices[currentStep - 1]) {
+        for (String answer : answerChoices[stepNumber]) {
             shuffledAnswers.add(answer);
         }
         Collections.shuffle(shuffledAnswers, new Random()); // Shuffle the answers
@@ -317,7 +326,7 @@ public class PrepareScheduleView extends UserRequestView /*implements ActionList
      */
     private void updatePreviousStepsDisplay() {
         StringBuilder sb = new StringBuilder("<html>");
-        for (int i = 0; i < currentStep - 1; i++) {
+        for (int i = 0; i < stepNumber; i++) {
             sb.append("<b>Step ").append(i + 1).append(":</b> ").append(correctSteps[i]).append("<br>");
         }
         sb.append("</html>");
@@ -329,8 +338,31 @@ public class PrepareScheduleView extends UserRequestView /*implements ActionList
      */
     @Override
     public StepCompletion stepCompletion() {
-        Step currentStepObj = model.currentTask().currentStep().getStep();
-        return new StepCompletion(currentStepObj, gson.toJson(correctSteps[this.currentStep - 1]));
+        Step currentStep = model.currentTask().currentStep().getStep();
+        
+        PrepScheduleStep example = gson.fromJson(currentStep.getData(), PrepScheduleStep.class);
+        String userAnswer = "";
+        for(int i = 0; i < 3; i++){
+            if (answerOptions[i].isSelected()){
+                userAnswer = answerOptions[i].getText();
+            }
+        }
+        
+        System.out.print("\n\n\n Current Step of prepare schedule: " + (stepNumber) + "\n\n");
+
+        example.setUserAnswer(userAnswer);
+        example.setQuestion(stepQuestions[stepNumber]);
+        example.setCorrectAnswer(correctSteps[stepNumber]);
+        example.setStepNumber(stepNumber);
+                
+        StepCompletion step = new StepCompletion(currentStep, gson.toJson(example));
+        step.setStep(currentStep);
+        if(userAnswer.equals(correctSteps[stepNumber])){
+            stepNumber++;
+            System.out.print("\n\n STEP NUMBER: " + stepNumber + "\n\n");
+        }
+        
+        return step;
     }
 
     /**
@@ -338,12 +370,66 @@ public class PrepareScheduleView extends UserRequestView /*implements ActionList
      */
     @Override
     protected void updateView() {
+        if(stepNumber > 3){
+            updatePreviousStepsDisplay();
+            stepLabel.setText("<html><u>You did it! Congragulations, you have finished the Prepare Schedule Task!</u></html>");
+            
+            return;
+        }
         view = SplashFrame.instance().getTutoringSessionView();
-        view.resetButtonListeners();
+        hintButton = view.getHintButton();
+        checkButton = view.getCheckButton();
+        nextButton = view.getNewExampleButton();
+        
+        StepSubType type = StepSubType.PREPARE_SCHEDULE;
+        
+        System.out.println("Prepare Schedule update view called"); // Error checking
 
+        Step step = model.currentTask().getCurrentStep().getStep(); // Will be the last subtype a example was created for or empty
+                
+        System.out.println("Prepare View substep from current step: " + step.getSubType()); // Error checking
+        System.out.println("preapare schedule type: " + type); // Error checking
+        
+        System.out.print("\n\nSTEP SUB TYPE: " + step.getSubType());
+        System.out.print("PrepSchedule SUB TYPE: " + StepSubType.PREPARE_SCHEDULE +"\n\n");
+        
+        if(step.getSubType() == StepSubType.PREPARE_SCHEDULE){
+            System.out.println("BRANCH TAKEN!!!"); // Error checking
+            PrepScheduleStep prepareScheduleStep = gson.fromJson(step.getData(), PrepScheduleStep.class);
+            
+            stepNumber = prepareScheduleStep.getStepNumber();
+            
+            for (int i = 0; i < 3; i++) { //reset radio button selections
+                answerOptions[i].setSelected(false);
+            }
+            
+            System.out.println("If branch was taken, subtype was a prepare schedule"); // Error checking.'
+            this.question = prepareScheduleStep.getQuestion();
+            System.out.println("THIS.QUESTION: " + this.question); // Error checking.'
+
+            if (this.question == null) { // new example hasnt been created yet
+                checkButton.setEnabled(false);
+                hintButton.setEnabled(false);
+            } else{ // example has been created.
+                checkButton.setEnabled(true);
+                hintButton.setEnabled(true);
+                nextButton.setEnabled(false);
+                //System.out.print("WE ARE HERE AT THE UPDATE AND LOAD STEP NUMBER : " + stepNumber + "\n\n");
+                updatePreviousStepsDisplay();
+                loadStep();
+            }
+        }else { // subtype didnt match, new example needs to be created.
+            System.out.println("Else branch was taken, subtype not prepae schedule"); // Error checking.
+            System.out.println("Please click new example button to get started");
+
+            checkButton.setEnabled(false);
+            hintButton.setEnabled(false);
+        }
+      
+        
         // Only update label if the step is greater than 1 to prevent overriding first question
-        if (currentStep > 1) {
-            stepLabel.setText("<html><u>Step " + currentStep + ": " + correctSteps[currentStep - 1] + "</u></html>");
+        if (stepNumber > 0) {
+            stepLabel.setText("<html><u>Step " + (stepNumber+1) + ": " + stepQuestions[stepNumber] + "</u></html>");
         }
 
         feedbackLabel.setText("");
@@ -356,8 +442,19 @@ public class PrepareScheduleView extends UserRequestView /*implements ActionList
     @Override
     public NewExampleRequest newRequest() {
         NewExampleRequest ex = new NewExampleRequest();
+
         ex.setExampleType(ProblemType.PREPARE_SCHEDULE);
-        ex.setData(gson.toJson(correctSteps));
+
+        PrepScheduleStep newPrepareScheduleStep = new PrepScheduleStep();
+        
+        if(stepNumber > 3){
+            return ex;
+        }
+        newPrepareScheduleStep.setQuestion(stepQuestions[stepNumber]);
+        newPrepareScheduleStep.setStepNumber(stepNumber);
+
+        ex.setData(gson.toJson(newPrepareScheduleStep));
+
         return ex;
     }
 }

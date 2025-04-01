@@ -42,6 +42,7 @@ import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.model.aol.StudentModel;
 import edu.regis.shatu.model.aol.TaskKind;
 import edu.regis.shatu.model.aol.Timeout;
+import java.util.HashSet;
 
 /**
  * The ShaTu tutor, which implements the tutoring service.
@@ -421,7 +422,7 @@ public class ShaTuTutor implements TutorSvc {
     public TutorReply requestHint(String jsonObj) {
         System.out.println("requestHint");
         StepCompletion completion = gson.fromJson(jsonObj, StepCompletion.class);
-
+  
         Step step = completion.getStep();
 
         switch (step.getSubType()) {
@@ -1024,20 +1025,56 @@ public class ShaTuTutor implements TutorSvc {
     }
 
     public TutorReply completePrepareScheduleStep(StepCompletion completion) {
+        System.out.print("\n\n\n\n DID WE GET HERE???? \n\n\n\n");
         StepCompletionReply stepReply = new StepCompletionReply();
         stepReply.setResponse(" ");
+        
+        PrepScheduleStep completedPrepareScheduleStep = gson.fromJson(completion.getData(), PrepScheduleStep.class);
+        
+        String userAnswer = completedPrepareScheduleStep.getUserAnswer();
+        String correctAnswer = completedPrepareScheduleStep.getCorrectAnswer();
 
-        stepReply.setIsCorrect(true);
-        stepReply.setIsRepeatStep(false);
-        stepReply.setIsNewStep(true);
+        System.out.println("User answer: " + userAnswer); // Error checking
+        System.out.println("Correct answer: " + correctAnswer); // Error checking
+                
+        if (userAnswer.equals(correctAnswer)) { // User was correct
+            if(completedPrepareScheduleStep.getStepNumber() == 4){
+                System.out.print("\n\n COMPLETED THE LAST STEP OF THE WHOLE THING\n\n\n");
+                stepReply.setIsCorrect(true);
+                stepReply.setIsNextStep(true);
+            }
+            System.out.println("Answer was correct, correct if branch taken."); // Error checking
+            stepReply.setIsCorrect(true);
+            stepReply.setIsRepeatStep(false);
+            stepReply.setIsNewStep(true);
+            stepReply.setIsNextStep(true);
+            stepReply.setResponse("Please click new example to move on!");
+            //TO DO: IMPLEMENT UPDATE TO DATABASE
+            
+
+        }else{ //User was wrong
+            System.out.println("Answer was not correct, correct if branch taken."); // Error checking
+            stepReply.setIsCorrect(false);
+            stepReply.setIsRepeatStep(true);
+            stepReply.setIsNewStep(false);
+            stepReply.setIsNewTask(false);
+            stepReply.setIsNextStep(true);
+        }
+
+        //stepReply.setCorrectAnswer(correctAnswer);
+        //stepReply.setResponse(userAnswer);
+
+        
+        //stepReply.setIsRepeatStep(true);
+        //stepReply.setIsNewStep(true);
 
         // ToDo: Use the student model to figure out whether we want
         // to give the student another practice problem of the same
         // type or move on to an entirely different problem.
-        stepReply.setIsNewTask(true);
+        //stepReply.setIsNewTask(true);
 
         // ToDo: currently only one step in a task, so there isn't a next one???
-        stepReply.setIsNextStep(false);
+        //stepReply.setIsNextStep(false);
 
         // Update the assessment data and save it to the database.
         int dbId = KnowledgeComponentKind.fromString("Prepare Schedule").dbId();
@@ -2262,8 +2299,10 @@ public class ShaTuTutor implements TutorSvc {
      * @return a TutorReply
      */
     private TutorReply newPrepareScheduleExample(TutoringSession session, String jsonData) {
+        //FIX HERE
+        System.out.print("\n\nTHIS IS THE JSON DATA\n\n" + jsonData + "\n\n" + jsonData.getClass() + "\n\n");
         PrepScheduleStep subStep = gson.fromJson(jsonData, PrepScheduleStep.class);
-
+                
         Step step = new Step(1, 0, StepSubType.PREPARE_SCHEDULE);
 
         // ToDo: fix timeouts
@@ -2289,7 +2328,7 @@ public class ShaTuTutor implements TutorSvc {
             pendingStep.setCurrentHintIndex(0);
             pendingStep.setNotifyTutor(true);
             pendingStep.setIsCompleted(false);
-
+            
             PendingTask pendingTask = new PendingTask(task);
             pendingTask.setCurrentStep(pendingStep);
 
@@ -3483,18 +3522,32 @@ public class ShaTuTutor implements TutorSvc {
         stepReply.setIsNewStep(false);
         stepReply.setIsNewTask(false);
         stepReply.setIsNextStep(false);
+        
+        
 
         Hint hintOne = new Hint();
-        hintOne.setId(0);
-        hintOne.setText("Extend the first 16 words to a total of 64 words");
-
+        hintOne.setId(1);
+        //hintOne.setText("Extend the first 16 words to a total of 64 words");
+        hintOne.setText("Does SHA-256 allow arbitrary block sizes, or does it standardize them?");
+        
         Hint hintTwo = new Hint();
-        hintTwo.setId(1);
-        hintTwo.setText("Use bitwise operations to generate each new word");
-
+        hintTwo.setId(2);
+        //hintTwo.setText("Use bitwise operations to generate each new word");
+        hintTwo.setText("What is the purpose of dividing blocks into smaller segments?");
+        
+        Hint hintThree = new Hint();
+        hintThree.setId(3);
+        hintThree.setText( "Does SHA-256 add external words, or does it derive them from existing ones?");
+        
+        Hint hintFour = new Hint();
+        hintFour.setId(4);
+        hintFour.setText("Does SHA-256 allow arbitrary block sizes, or does it standardize them?");
+        
         Step step = completion.getStep();
         step.addHint(hintOne);
         step.addHint(hintTwo);
+        step.addHint(hintThree);
+        step.addHint(hintFour);
 
         step.setSubType(StepSubType.REQUEST_HINT);
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
@@ -3502,7 +3555,7 @@ public class ShaTuTutor implements TutorSvc {
         step.setData(gson.toJson(stepReply));
 
         PendingStep pendingStep = new PendingStep(step);
-        pendingStep.setCurrentHintIndex(0);
+        pendingStep.setCurrentHintIndex(1);
         pendingStep.setNotifyTutor(true);
         pendingStep.setIsCompleted(false);
 
