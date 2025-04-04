@@ -1,0 +1,287 @@
+package edu.regis.shatu.objectives;
+
+import java.util.Random;
+
+import edu.regis.shatu.err.NonRecoverableException;
+import edu.regis.shatu.model.BitShiftStep;
+import edu.regis.shatu.model.Hint;
+import edu.regis.shatu.model.KnowledgeComponentKind;
+import edu.regis.shatu.model.Step;
+import edu.regis.shatu.model.StepCompletion;
+import edu.regis.shatu.model.StepCompletionReply;
+import edu.regis.shatu.model.Student;
+import edu.regis.shatu.model.StudentModelFieldKind;
+import edu.regis.shatu.model.Task;
+import edu.regis.shatu.model.TutoringSession;
+import edu.regis.shatu.model.aol.Assessment;
+import edu.regis.shatu.model.aol.AssessmentLevel;
+import edu.regis.shatu.model.aol.PendingStep;
+import edu.regis.shatu.model.aol.PendingTask;
+import edu.regis.shatu.model.aol.ProblemType;
+import edu.regis.shatu.model.aol.StepSubType;
+import edu.regis.shatu.model.aol.TaskKind;
+import edu.regis.shatu.model.aol.Timeout;
+import edu.regis.shatu.svc.ServiceFactory;
+import edu.regis.shatu.svc.StudentModelSvc;
+import edu.regis.shatu.svc.TutorReply;
+
+public class ShiftBits extends Objective {
+
+    public ShiftBits(Student student) {
+        super(student);
+    }
+
+    @Override
+    public TutorReply hint(StepCompletion completion) {
+        System.out.println("Tutor hintShiftBits");
+
+        BitShiftStep example = gson.fromJson(completion.getData(), BitShiftStep.class);
+        String operand = example.getOperand();
+        int shiftLength = example.getShiftLength();
+        boolean shiftRight = example.isShiftRight();
+        int bitLength = example.getBitLength();
+        String result = example.getResult();
+
+        String expectedResult = bitShiftFunction(operand,
+                shiftLength,
+                shiftRight,
+                bitLength);
+
+        StepCompletionReply stepReply = new StepCompletionReply();
+        stepReply.setCorrectAnswer(expectedResult);
+        stepReply.setResponse(result);
+
+        stepReply.setIsCorrect(false);
+        stepReply.setIsRepeatStep(true);
+        stepReply.setIsNewStep(false);
+        stepReply.setIsNewTask(false);
+        stepReply.setIsNextStep(false);
+
+        Hint hintOne = new Hint();
+        hintOne.setId(0);
+        String hintText = "There will be " + shiftLength + " zeros on the left";
+        hintOne.setText(hintText);
+
+        Hint hintTwo = new Hint();
+        hintTwo.setId(1);
+        hintText = "Remove " + shiftLength + " bits from the right";
+        hintTwo.setText(hintText);
+
+        Step step = completion.getStep();
+        step.addHint(hintOne);
+        step.addHint(hintTwo);
+
+        step.setSubType(StepSubType.REQUEST_HINT);
+        // ToDo: fix timeouts
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+        step.setData(gson.toJson(stepReply));
+
+        PendingStep pendingStep = new PendingStep(step);
+        pendingStep.setCurrentHintIndex(0);
+        pendingStep.setNotifyTutor(true);
+        pendingStep.setIsCompleted(false);
+
+        TutorReply reply = new TutorReply(":Success");
+
+        reply.setData(gson.toJson(pendingStep));
+
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("Shift Bits").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId);
+        assessment.incrementHints();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.HINTS);
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
+
+        return reply;
+    }
+
+    /**
+     * Handles client requests for a new shift bits zeros example.
+     *
+     * @return a TutorReply
+     */
+    @Override
+    public TutorReply example(TutoringSession session, String jsonData) {
+        System.out.println("newShiftBitsExample");
+        BitShiftStep substep = gson.fromJson(jsonData, BitShiftStep.class);
+
+        int bitLength = substep.getBitLength();
+
+        String operand = generateInputString(bitLength);
+        int shiftLength = new Random().nextInt(bitLength);
+        boolean shiftRight = substep.isShiftRight();
+
+        substep.setOperand(operand);
+        substep.setShiftLength(shiftLength);
+        substep.setShiftRight(shiftRight);
+
+        substep.setResult(bitShiftFunction(operand, shiftLength, shiftRight, bitLength));
+
+        Step step = new Step(1, 0, StepSubType.SHIFT_BITS);
+
+        // ToDo: fix timeouts
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+
+        step.setData(gson.toJson(substep));
+
+        Task task = new Task();
+        task.setKind(TaskKind.PROBLEM);
+        task.setType(ProblemType.SHIFT_BITS);
+        task.setDescription("Compute the result of the bitshift on the operand");
+        task.addStep(step);
+
+        // Update the assessment data and save it to the database.
+        int knowledgeCompId = KnowledgeComponentKind.fromString("Shift Bits").dbId();
+        System.out.println("knowledCompId: " + knowledgeCompId);
+        Assessment assessment = studentModel.findAssessment(knowledgeCompId);
+
+        assessment.incrementExposures();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
+
+            PendingStep pendingStep = new PendingStep(step);
+            pendingStep.setCurrentHintIndex(0);
+            pendingStep.setNotifyTutor(true);
+            pendingStep.setIsCompleted(false);
+
+            PendingTask pendingTask = new PendingTask(task);
+            pendingTask.setCurrentStep(pendingStep);
+
+            TutorReply reply = new TutorReply(":Success");
+            reply.setData(gson.toJson(pendingTask));
+
+            return reply;
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
+    }
+
+    @Override
+    public TutorReply completeStep(StepCompletion completion) {
+        System.out.println("Tutor completeShiftBitsStep");
+
+        BitShiftStep example = gson.fromJson(completion.getData(), BitShiftStep.class);
+        String operand = example.getOperand();
+        int shiftLength = example.getShiftLength();
+        boolean shiftRight = example.isShiftRight();
+        int bitLength = example.getBitLength();
+        String result = example.getResult();
+
+        String expectedResult = bitShiftFunction(operand,
+                shiftLength,
+                shiftRight,
+                bitLength);
+
+        StepCompletionReply stepReply = new StepCompletionReply();
+        stepReply.setCorrectAnswer(expectedResult);
+        stepReply.setResponse(result);
+
+        if (expectedResult.equals(result)) {
+            stepReply.setIsCorrect(true);
+            stepReply.setIsRepeatStep(false);
+            stepReply.setIsNewStep(true);
+
+            // ToDo: currently only one step in a task, so there isn't a next one???
+            stepReply.setIsNextStep(false);
+
+            // Update the assessment data and save it to the database.
+            int dbId = KnowledgeComponentKind.fromString("Shift Bits").dbId();
+            Assessment assessment = studentModel.findAssessment(dbId);
+            assessment.incrementSuccessess();
+
+            int exposures = assessment.getExposures();
+            int successes = assessment.getSuccessess();
+
+            if (exposures > 0 && (double) successes / exposures > 0.6) {
+                stepReply.setIsNewTask(true);
+                System.out.println("%%%%%%%%%%% Next Task Recommended");
+                assessment.setAssessment(AssessmentLevel.COMPLETED);
+            } else {
+                stepReply.setIsNewTask(false);
+            }
+
+            try {
+                StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+                modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.SUCCESSES);
+                modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ASSESSMENT_LEVEL);
+
+            } catch (NonRecoverableException ex) {
+                return createError("Unknown error", ex);
+            }
+
+        } else {
+            stepReply.setIsCorrect(false);
+            stepReply.setIsRepeatStep(true);
+            stepReply.setIsNewStep(false);
+            stepReply.setIsNewTask(false);
+            stepReply.setIsNextStep(false);
+        }
+
+        Step step = new Step(1, 0, StepSubType.STEP_COMPLETION_REPLY);
+
+        // ToDo: fix timeouts
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+        step.setData(gson.toJson(stepReply));
+
+        Task task = new Task();
+        task.setKind(TaskKind.PROBLEM);
+        task.setType(ProblemType.STEP_COMPLETION_REPLY);
+        task.setDescription("Choose your next action");
+        task.addStep(step);
+
+        PendingStep pendingStep = new PendingStep(step);
+        pendingStep.setCurrentHintIndex(0);
+        pendingStep.setNotifyTutor(true);
+        pendingStep.setIsCompleted(false);
+
+        PendingTask pendingTask = new PendingTask(task);
+        pendingTask.setCurrentStep(pendingStep);
+
+        TutorReply reply = new TutorReply(":Success");
+
+        reply.setData(gson.toJson(pendingTask));
+
+        return reply;
+    }
+
+    /**
+     * Performs a bit shift (left or right) on a binary string operand.
+     *
+     * @param operand     The binary string to be shifted.
+     * @param shiftLength The number of positions to shift the bits.
+     * @param bitLength   The length of the resulting binary string.
+     * @param shiftRight  If true, performs a right shift; if false, performs a
+     *                    left shift.
+     * @return The binary string result after shifting.
+     */
+    private String bitShiftFunction(String operand, int shiftLength, boolean shiftRight, int bitLength) {
+        // Convert the binary string to a long integer
+        String tempOperand = operand.replaceAll("\\s", "");
+        long intOperand = Long.parseLong(tempOperand, 2);
+
+        // Perform the shift
+        long shiftedOperand;
+        if (shiftRight) {
+            shiftedOperand = intOperand >>> shiftLength;
+        } else {
+            shiftedOperand = intOperand << shiftLength;
+        }
+
+        // Convert the result back to binary string
+        String binaryResult = formatResult(shiftedOperand, bitLength);
+
+        return binaryResult;
+    }
+}
