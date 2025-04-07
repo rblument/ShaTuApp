@@ -25,10 +25,33 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import edu.regis.shatu.dao.AccountDAO;
-import edu.regis.shatu.err.IllegalArgException;
 import edu.regis.shatu.err.NonRecoverableException;
+import edu.regis.shatu.err.ObjDuplicateException;
 import edu.regis.shatu.err.ObjNotFoundException;
-import edu.regis.shatu.model.*;
+import edu.regis.shatu.model.Account;
+import edu.regis.shatu.model.AddOneStep;
+import edu.regis.shatu.model.BitShiftStep;
+import edu.regis.shatu.model.ChoiceFunctionStep;
+import edu.regis.shatu.model.CompressRoundStep;
+import edu.regis.shatu.model.Course;
+import edu.regis.shatu.model.EncodeAsciiStep;
+import edu.regis.shatu.model.Hint;
+import edu.regis.shatu.model.InitVarStep;
+import edu.regis.shatu.model.KnowledgeComponent;
+import edu.regis.shatu.model.KnowledgeComponentKind;
+import edu.regis.shatu.model.MajorityStep;
+import edu.regis.shatu.model.MessageLenStep;
+import edu.regis.shatu.model.Pad0Step;
+import edu.regis.shatu.model.PrepScheduleStep;
+import edu.regis.shatu.model.ShaZeroStep;
+import edu.regis.shatu.model.Step;
+import edu.regis.shatu.model.StepCompletion;
+import edu.regis.shatu.model.StepCompletionReply;
+import edu.regis.shatu.model.Student;
+import edu.regis.shatu.model.StudentModelFieldKind;
+import edu.regis.shatu.model.Task;
+import edu.regis.shatu.model.TutoringSession;
+import edu.regis.shatu.model.Unit;
 import edu.regis.shatu.model.aol.Assessment;
 import edu.regis.shatu.model.aol.AssessmentLevel;
 import edu.regis.shatu.model.aol.BitOpExample;
@@ -136,7 +159,7 @@ public class ShaTuTutor implements TutorSvc {
                             return reply;
                         }
 
-                        session = ServiceFactory.findSessionSvc().retrieve(student);
+                        session = ServiceFactory.findSessionSvc().retrieve(student.getAccount().getUserId());
 
                     } else {
                         TutorReply reply = new TutorReply(":ERR");
@@ -194,7 +217,11 @@ public class ShaTuTutor implements TutorSvc {
 
         int courseId = DEFAULT_COURSE_ID; // Currently only one course
 
-        ServiceFactory.findAccountSvc().create(acct);
+        try {
+            ServiceFactory.findAccountSvc().create(acct);
+        } catch (ObjDuplicateException e) {
+            return createError(String.format("Account %s exists", acct.getUserId()), null);
+        }
 
         try {
             Course course = ServiceFactory.findCourseSvc().retrieve(courseId);
@@ -326,7 +353,7 @@ public class ShaTuTutor implements TutorSvc {
                 }
 
                 SessionSvc svc = ServiceFactory.findSessionSvc();
-                TutoringSession session = svc.retrieve(student);
+                TutoringSession session = svc.retrieve(student.getAccount().getUserId());
 
                 TutorReply reply = new TutorReply("Authenticated");
 
@@ -1899,7 +1926,7 @@ public class ShaTuTutor implements TutorSvc {
 
             return tSession;
 
-        } catch (IllegalArgException ex) {
+        } catch (ObjDuplicateException ex) {
             throw new NonRecoverableException("Session already exists", ex);
         }
     }
@@ -2832,12 +2859,12 @@ public class ShaTuTutor implements TutorSvc {
     /**
      * Handler that returns a new example problem to the ShaSigmaZero client view
      *
-     * @param session The active Tutoring Session
+     * @param session  The active Tutoring Session
      * @param jsonData The JSON sent from the client which models the SigmaZero step
-     * @return Returns a response which can be sent back to the client with a new example problem in the body
+     * @return Returns a response which can be sent back to the client with a new
+     *         example problem in the body
      */
-    private TutorReply newSigmaZeroFunctionExample(TutoringSession session, String jsonData)
-    {
+    private TutorReply newSigmaZeroFunctionExample(TutoringSession session, String jsonData) {
         ShaZeroStep substep = gson.fromJson(jsonData, ShaZeroStep.class);
 
         substep.setOperandA(generateInputString(substep.getBitLength()));
@@ -3951,7 +3978,8 @@ public class ShaTuTutor implements TutorSvc {
     }
 
     /**
-     * Handler for returning Hint information to the client for the ShaSigmaZero View
+     * Handler for returning Hint information to the client for the ShaSigmaZero
+     * View
      *
      * @param completion The StepCompletion that the user is on
      * @return Returns a response to the Tutor with the hint in the response body

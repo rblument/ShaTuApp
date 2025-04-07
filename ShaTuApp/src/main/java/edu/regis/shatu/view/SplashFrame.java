@@ -24,6 +24,7 @@ import javax.swing.SwingUtilities;
 
 import edu.regis.shatu.model.Account;
 import edu.regis.shatu.model.TutoringSession;
+import edu.regis.shatu.model.aol.ViewType;
 
 /**
  * The first window displayed to a student user, which contains a splash panel 
@@ -306,11 +307,14 @@ public class SplashFrame extends JFrame {
      * Selects a personalized practice screen for each user upon selecting
      * the dashboard's practice button.
      */
-     public void selectPracticeScreen() {
-         if (tutoringSessionView == null) {
-            tutoringSessionView = new TutoringSessionView(); 
-            cards.add(tutoringSessionView, TUTOR);
-        }
+     public void selectScreen(ViewType viewType) {
+//         if (tutoringSessionView == null) {
+//            tutoringSessionView = new TutoringSessionView(viewType);
+//            cards.add(tutoringSessionView, TUTOR);
+//        }
+
+         tutoringSessionView = new TutoringSessionView(viewType);
+         cards.add(tutoringSessionView, TUTOR);
 
         // Dynamically resize the frame to fit the screen
         // ToDo:

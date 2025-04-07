@@ -302,11 +302,38 @@ public class ShiftRightView extends UserRequestView implements KeyListener {
     @Override
     protected void updateView() {
         view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
+
+        switch(view.getCurrentViewType())
+        {
+            case DO_ONE:
+                updatePracticeView();
+                break;
+
+            case SEE_ONE:
+                updateTeachView();
+                break;
+
+            case TEACH_ONE:
+                updateQuizView();
+                break;
+
+            default:
+                throw new UnsupportedOperationException("Unknown Update Operation for view type: "
+                        + view.getCurrentViewType());
+        }
+    }
+
+    /**
+     * Defines each view classes' standard method for updating in the Practice View
+     */
+    @Override
+    protected void updatePracticeView() {
+
         hintButton = view.getHintButton();
         checkButton = view.getCheckButton();
         nextButton = view.getNewExampleButton();
 
-        
+
         responseTextArea.setText("");
         feedbackTextArea.setText("");
 
@@ -323,10 +350,10 @@ public class ShiftRightView extends UserRequestView implements KeyListener {
         System.out.println(" Data: " + step.getData());
 
         // If we got here by the user selecting this step/view, the current
-        // task could be anything. 
+        // task could be anything.
         if (step.getSubType() == StepSubType.SHIFT_BITS) {
             BitShiftStep example = gson.fromJson(step.getData(), BitShiftStep.class);
-        
+
             System.out.println("Shift right update display called");
             operand = example.getOperand();
             if (operand == null || operand.isEmpty()) {
@@ -342,8 +369,24 @@ public class ShiftRightView extends UserRequestView implements KeyListener {
             shiftLength = example.getShiftLength();
             operandLabel.setText(operand);
             instructionLabel.setText("Logical right shift the input given below by "
-              + shiftLength + " bits:");
+                    + shiftLength + " bits:");
         }
+    }
+
+    /**
+     * Defines each view classes' standard method for updating in the Teach Me View
+     */
+    @Override
+    protected void updateTeachView() {
+
+    }
+
+    /**
+     * Defines each view classes' standard method for updating in the Teach Me View
+     */
+    @Override
+    protected void updateQuizView() {
+
     }
 
 

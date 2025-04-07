@@ -21,6 +21,7 @@ import java.util.HashMap;
 
 import edu.regis.shatu.dao.interfaces.CRUD;
 import edu.regis.shatu.err.NonRecoverableException;
+import edu.regis.shatu.err.ObjDuplicateException;
 import edu.regis.shatu.err.ObjNotFoundException;
 import edu.regis.shatu.model.Account;
 import edu.regis.shatu.svc.AccountSvc;
@@ -52,7 +53,7 @@ public class AccountDAO extends MySqlDAO implements AccountSvc, CRUD<Account> {
      * {@inheritDoc}
      */
     @Override
-    public void create(Account acct) throws NonRecoverableException {
+    public void create(Account acct) throws NonRecoverableException, ObjDuplicateException {
         final String sql = "INSERT INTO Account (UserId, Password, FirstName, LastName, Question, Answer, IsStudent) VALUES (?,?,?,?,?,?,?)";
 
         // if (acct.isStudent()) { // Can only create students, not admins.
@@ -64,8 +65,8 @@ public class AccountDAO extends MySqlDAO implements AccountSvc, CRUD<Account> {
         try {
             conn = DriverManager.getConnection(URL);
 
-            if (exists(userId, conn)) {
-                throw new SQLException("User already exists " + userId);
+            if (exists("UserId", userId)) {
+                throw new ObjDuplicateException("User already exists " + userId);
             }
 
             String[] keyCol = { "Id" };

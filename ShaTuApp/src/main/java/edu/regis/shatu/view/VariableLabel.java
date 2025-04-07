@@ -12,6 +12,7 @@
  */
 package edu.regis.shatu.view;
 
+import edu.regis.shatu.svc.SHA_256;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.MouseEvent;
@@ -19,10 +20,13 @@ import java.awt.event.MouseListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import edu.regis.shatu.view.CompressionCanvasView;
 
 /**
  * ToDo: Should this be a HightLable class?
@@ -111,7 +115,43 @@ public class VariableLabel extends JLabel implements MouseListener {
 
     @Override
     public void mouseClicked(MouseEvent evt) {
-        if (!isSelected) {
+        String labelText = getText();
+        
+        if (SwingUtilities.isRightMouseButton(evt)){
+            switch(labelText){
+                case ("W\u209C"):
+                    JOptionPane.showMessageDialog(null, 
+                            "Outgoing value\n" + SHA_256.instance().getWt()
+                            , 
+                        "Binary value", JOptionPane.WARNING_MESSAGE);
+                    break;
+                case ("K\u209C"):
+                    JOptionPane.showMessageDialog(null, 
+                            "Outgoing value\n" + SHA_256.instance().getKt()
+                            , 
+                        "Binary value", JOptionPane.WARNING_MESSAGE);
+                    break;
+                case ("T\u2081"):
+                    JOptionPane.showMessageDialog(null, 
+                            "Value of T\u2081 \n" + SHA_256.instance().getT1()
+                            , 
+                        "Binary value", JOptionPane.WARNING_MESSAGE);
+                    break;
+                case ("T\u2082"):
+                    JOptionPane.showMessageDialog(null, 
+                            "Value of T\u2082 \n" + SHA_256.instance().getT2()
+                            , 
+                        "Binary value", JOptionPane.WARNING_MESSAGE);
+                    break;
+                
+            }
+        }
+        else if (SwingUtilities.isLeftMouseButton(evt)){
+            switch(labelText){
+                case ("W\u209C"):
+                    stepSelection = StepSelection.PREPARE;
+                    break;
+            }
             select();
         }
     }

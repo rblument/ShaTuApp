@@ -134,8 +134,10 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
 
         ex.setExampleType(ProblemType.SHA_ZERO);
 
-        answerField = new JTextField(10);
-        answerField.addKeyListener(this);
+        ShaZeroStep step = new ShaZeroStep();
+        step.setBitLength(problemSize);
+
+        ex.setData(gson.toJson(step));
 
         return ex;
     }
@@ -168,13 +170,13 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
         // Add exampleInputLabel centered
 
 
-      //  addc(exampleInputLabel, 0, 0, 2, 1, 0.0, 0.0,
-       //         GridBagConstraints.CENTER, GridBagConstraints.NONE,
-      //          5, 5, 5, 5);
+//        addc(exampleInputLabel, 0, 0, 2, 1, 0.0, 0.0,
+//                GridBagConstraints.CENTER, GridBagConstraints.NONE,
+//                5, 5, 5, 5);
         // Add answerField to the layout, centered
-       // addc(answerField, 0, 1, 1, 1, 1.0, 0.0,
-       //         GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-       //         5, 5, 5, 5);
+//        addc(answerField, 0, 1, 1, 1, 1.0, 0.0,
+//                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+//                5, 5, 5, 5);
        
        return step;
 
@@ -484,12 +486,25 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
     protected void updateView() {
         view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
 
-        
-        // If check and hint buttons are disabled, reset listenerers and apply those used by this view
-        if(!checkHintEnabled) {
-            view.resetButtonListeners(); // Clear any listeners applied from other views          
+        switch(view.getCurrentViewType())
+        {
+            case DO_ONE:
+                updatePracticeView();
+                break;
 
+            case SEE_ONE:
+                updateTeachView();
+                break;
+
+            case TEACH_ONE:
+                updateQuizView();
+                break;
+
+            default:
+                throw new UnsupportedOperationException("Unknown Update Operation for view type: "
+                        + view.getCurrentViewType());
         }
+
 
         if (model != null) {
 
@@ -506,6 +521,35 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
             }
 
         }
+    }
+
+    /**
+     * Defines each view classes' standard method for updating in the Practice View
+     */
+    @Override
+    protected void updatePracticeView() {
+
+        // If check and hint buttons are disabled, reset listenerers and apply those used by this view
+        if(!checkHintEnabled) {
+            view.resetButtonListeners(); // Clear any listeners applied from other views
+
+        }
+    }
+
+    /**
+     * Defines each view classes' standard method for updating in the Teach Me View
+     */
+    @Override
+    protected void updateTeachView() {
+
+    }
+
+    /**
+     * Defines each view classes' standard method for updating in the Teach Me View
+     */
+    @Override
+    protected void updateQuizView() {
+
     }
 
     /**

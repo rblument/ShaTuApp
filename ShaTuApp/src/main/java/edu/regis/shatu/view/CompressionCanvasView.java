@@ -18,6 +18,7 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 
@@ -28,6 +29,9 @@ import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.view.act.NewExampleAction;
 import edu.regis.shatu.view.act.StepCompletionAction;
+import edu.regis.shatu.svc.SHA_256;
+import java.nio.charset.Charset;
+import javax.swing.JOptionPane;
 
 /**
  * Displays a single round of the SHA-256 compression algorithm.
@@ -36,7 +40,7 @@ import edu.regis.shatu.view.act.StepCompletionAction;
  *
  * @author rickb
  */
-public class CompressionCanvasView extends UserRequestView {
+public class CompressionCanvasView extends UserRequestView implements ActionListener {
     
     /**
      * Required for access to the current view.
@@ -92,15 +96,28 @@ public class CompressionCanvasView extends UserRequestView {
     private VariableLabel kLabel;
     private VariableLabel temp1Label;
     private VariableLabel temp2Label;
-    private JButton continueButton = new JButton(StepCompletionAction.instance());
-    private CounterLabel counter;
+    //to be removed once linked in with the tutor view
+    //private JButton continueButton = new JButton(StepCompletionAction.instance());
+    private JButton nextRoundButton = new JButton();
+    private JButton newMessageButton = new JButton();
+    private JButton counterButton = new JButton();
+    //for debugging will reset to private and use setter in model
+    //public CounterLabel counter;
+    private SHA_256 hash;
+    private String msg;
+    public int count = 0;
 
     public CompressionCanvasView() {
         setLayout(null);
+        //compressModel = new CompressRoundStep();
 
         initializeComponents();
         layoutComponents();
-        continueButton.setText("Continue");
+        //continueButton.setText("Continue");
+        nextRoundButton.setText("Next Round");
+        newMessageButton.setText("New Message");
+        counterButton.setText("Compression Round: " + count);
+      
     }
 
     /**
@@ -311,6 +328,7 @@ public class CompressionCanvasView extends UserRequestView {
         y2 = p.y;
         g.drawLine(x, y, x2, y);
         drawArrowLine(g, x2, y, x2, y2, 6, 6);
+        
     }
 
     /**
@@ -329,8 +347,9 @@ public class CompressionCanvasView extends UserRequestView {
 
         modAdditions = new AddMod256Label[MOD_ADDITIONS_LEN];
         for (int i = 0; i < modAdditions.length; i++) {
-            modAdditions[i] = new AddMod256Label();
+            modAdditions[i] = new AddMod256Label(String.valueOf(i));
         }
+        
         int sigma = 931;
         sigma1Label = new BitOpLabel((char)sigma + "\u2081");
         sigma0Label = new BitOpLabel((char) sigma + "\u2080");
@@ -350,22 +369,26 @@ public class CompressionCanvasView extends UserRequestView {
         temp1Label = new VariableLabel("T\u2081");
         temp2Label = new VariableLabel("T\u2082");
         
-        counter = new CounterLabel("Round: ");
+        //counter = new CounterLabel("Round: ");
         
         temp1Label.setFont(new Font("", Font.PLAIN, 16));
         temp2Label.setFont(new Font("", Font.PLAIN, 16));
         
-        continueButton.addActionListener((ActionEvent e) ->
-        {
-            NewExampleAction.instance().actionPerformed(null);
-        });
+        //to be removed once linked with tutor view for new example
+        //continueButton.addActionListener((ActionEvent e) ->
+        //{
+           // NewExampleAction.instance().actionPerformed(null);
+        //});
+        nextRoundButton.addActionListener(this);
+        newMessageButton.addActionListener(this);
+        
     }
 
     private void layoutComponents() {
         Color white = new Color(255,255,255);
         setBackground(white);
         Point p;
-        int x, y, countX, countY;
+        int x, y, countX, countY, newMessageX, roundX, roundY;
         
         
         for (int i = 0; i < WORKING_VARS_LEN; i++) {
@@ -438,11 +461,11 @@ public class CompressionCanvasView extends UserRequestView {
         
          //Add counter label to the right of W location
         
-        countX = modAdditions[2].getLocation().x + CounterLabel.SIZE * 3;
-        countY = inWorkingVars[7].getLocation().y - CounterLabel.HALF_SIZE ;
+        //countX = modAdditions[2].getLocation().x + CounterLabel.SIZE * 3;
+        //countY = inWorkingVars[7].getLocation().y - CounterLabel.HALF_SIZE ;
         
-        counter.setLocation(countX, countY);
-        add(counter);
+        //counter.setLocation(countX, countY);
+        //add(counter);
         
         // Third mod addition has Sigma1 inputs and centered on it
         x = sigma1Label.getLocation().x + BitOpLabel.HALF_SIZE - AddMod256Label.HALF_SIZE + 150;
@@ -478,13 +501,23 @@ public class CompressionCanvasView extends UserRequestView {
         
         // Add continueButton to the bottom right corner
         int buttonWidth = 100;
+        int messageButtonWidth = 150;
+        int roundButtonWidth = 200;
         int buttonHeight = 30;
         int margin = 10;
         x = getWidth() - buttonWidth - margin;
         y = getHeight() - buttonHeight - margin;
+        newMessageX = getWidth() - (messageButtonWidth + buttonWidth) - margin;
+        roundX = getWidth() - roundButtonWidth - margin;
+        roundY = buttonHeight + margin;
+        //newMessageY = getHeight() - (buttonHeight) - margin;
         
-        continueButton.setBounds(x, y, buttonWidth, buttonHeight);
-        add(continueButton);
+        nextRoundButton.setBounds(x, y, buttonWidth, buttonHeight);
+        newMessageButton.setBounds(newMessageX, y, messageButtonWidth, buttonHeight);
+        counterButton.setBounds(roundX, roundY, roundButtonWidth, buttonHeight);
+        add(nextRoundButton);
+        add(newMessageButton);
+        add(counterButton);
         
         
     }
@@ -493,9 +526,13 @@ public class CompressionCanvasView extends UserRequestView {
     public void doLayout() {
         super.doLayout();
         int buttonWidth = 100;
+        int messageButtonWidth = 150;
+        int roundButtonWidth = 200;
         int buttonHeight = 30;
         int margin = 10;
-        continueButton.setBounds(getWidth() - buttonWidth - margin, getHeight() - buttonHeight - margin, buttonWidth, buttonHeight);
+        nextRoundButton.setBounds(getWidth() - buttonWidth - margin, getHeight() - buttonHeight - margin, buttonWidth, buttonHeight);
+        newMessageButton.setBounds(getWidth() - (messageButtonWidth + buttonWidth) - margin, getHeight() - (buttonHeight) - margin, messageButtonWidth, buttonHeight);
+        counterButton.setBounds(getWidth() - roundButtonWidth - margin, buttonHeight + margin, roundButtonWidth, buttonHeight);
     }
 
     /**
@@ -531,6 +568,42 @@ public class CompressionCanvasView extends UserRequestView {
         g.drawLine(x1, y1, x2, y2);
         g.drawPolygon(xpoints, ypoints, 3); // Rickb
     }
+    
+    
+     @Override
+    public void actionPerformed(ActionEvent event) {
+       
+       if (event.getSource() == newMessageButton){
+           msg = JOptionPane.showInputDialog(this, "Enter a message to hash");
+           count = 0;   
+       }
+       else if (event.getSource() == nextRoundButton){
+       
+           counterButton.setText("Compression Round: " + count);
+           if (count == 0){
+            Charset charset = Charset.forName("ASCII");
+            byte[] asciiEncodeMsg = msg.getBytes(charset);
+            int [] words = SHA_256.instance().initializeMessage(asciiEncodeMsg);
+            
+            SHA_256.instance().enumerateMessageBlocks (count, words);
+            
+            SHA_256.instance().compressionRound (count);
+            count++;
+           }
+           
+           else if (count > 63){
+               JOptionPane.showMessageDialog(null, "Compression of  one message block complete.  "
+                       + "Press new message button to see another SHA_256 hash.", 
+                       "Compression round complete", HEIGHT);
+               count = 0;
+           }
+           else{
+            SHA_256.instance().compressionRound (count);
+            count++; 
+           }
+           
+       }
+    }
 
     @Override
     /**
@@ -540,11 +613,26 @@ public class CompressionCanvasView extends UserRequestView {
      */
     protected void updateView() {
         view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
-        view.resetButtonListeners(); // Clear any listeners applied from other views
-        view.getCheckButton().setEnabled(false);
-        view.getHintButton().setEnabled(false);
-        view.getNewExampleButton().setEnabled(false);
-        
+
+        switch(view.getCurrentViewType())
+        {
+            case DO_ONE:
+                updatePracticeView();
+                break;
+
+            case SEE_ONE:
+                updateTeachView();
+                break;
+
+            case TEACH_ONE:
+                updateQuizView();
+                break;
+
+            default:
+                throw new UnsupportedOperationException("Unknown Update Operation for view type: "
+                        + view.getCurrentViewType());
+        }
+
         if (model != null) {
             // ****TO-DO*****
             // Update the view's information from the model
@@ -552,7 +640,34 @@ public class CompressionCanvasView extends UserRequestView {
             System.out.println("CompressionCanvasView");
         }
     }
-    
+
+    /**
+     * Defines each view classes' standard method for updating in the Practice View
+     */
+    @Override
+    protected void updatePracticeView() {
+        view.resetButtonListeners(); // Clear any listeners applied from other views
+        view.getCheckButton().setEnabled(false);
+        view.getHintButton().setEnabled(false);
+        view.getNewExampleButton().setEnabled(false);
+    }
+
+    /**
+     * Defines each view classes' standard method for updating in the Teach Me View
+     */
+    @Override
+    protected void updateTeachView() {
+
+    }
+
+    /**
+     * Defines each view classes' standard method for updating in the Teach Me View
+     */
+    @Override
+    protected void updateQuizView() {
+
+    }
+
     @Override
     public NewExampleRequest newRequest() {
         NewExampleRequest ex = new NewExampleRequest(); // Will be sent to the tutor.
@@ -578,4 +693,8 @@ public class CompressionCanvasView extends UserRequestView {
         
         return step;
     }
+    
+    
+
 }
+

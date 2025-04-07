@@ -99,9 +99,10 @@ public abstract class MySqlDAO {
 
                 URL = String.format("jdbc:mysql://%s:%s/%s?user=%s&password=%s", dbHost, dbPort, dbName, dbUser,
                         dbPass);
-                
+
                 // ToDo: Do we want to convert port to an int?
-                //URL = String.format("jdbc:mysql://%s:%d/%s?user=%s&password=%s", dbHost, dbPort, dbName, dbUser, dbPass);
+                // URL = String.format("jdbc:mysql://%s:%d/%s?user=%s&password=%s", dbHost,
+                // dbPort, dbName, dbUser, dbPass);
 
                 Class.forName(DRIVER); // Old School
 
@@ -216,37 +217,22 @@ public abstract class MySqlDAO {
     /**
      * Checks if an entry in the Database exists.
      * 
-     * @param column the column to search on
-     * @param key    the value to match
+     * @param keyColumn the column to search on
+     * @param keyValue  the value to match
      * @return boolean
      * @throws ObjNotFoundException
      * @throws NonRecoverableException
      */
-    public boolean exists(String column, Object key) throws NonRecoverableException {
-       // ToDo: Currently the original code didn't work. It passed in
-       // the connection as the key object, which isn't corret. This isn't
-       // required since the connection is obtained on line
-       // In order to generalize this appropriately for use in other DAOs
-       // beyond the demonstration in AccountDAO, we''l need to pass the key's 
-       // value, which is currently incorrectly passed with a name of column
-       // and the name of the key colum. For Account DAO, this would be somethign
-       // like exists("UserId", userId)
-       // and the signature of this method changed to:
-       // public boolean exists(String keyColumnName, Object keyColumnValue) ...
-       //
-       // then, the call to sqlTypeCoerce will need to be
-       //  prepstmt = sqlTypeCoerce(keyColumnValue)
-       
-       // String stmt = String.format("SELECT %s FROM %s WHERE %s = ?", this.primaryKey, this.table, column);
-        String stmt = String.format("SELECT %s FROM %s WHERE %s = ?", this.primaryKey, this.table, "UserId");
+    public boolean exists(String keyColumn, Object keyValue) throws NonRecoverableException {
+
+        String stmt = String.format("SELECT %s FROM %s WHERE %s = ?", this.primaryKey, this.table, keyColumn);
         Connection conn;
         PreparedStatement prepstmt = null;
         try {
             conn = DriverManager.getConnection(URL);
             prepstmt = conn.prepareStatement(stmt);
 
-           // prepstmt = sqlTypeCoerce(key, prepstmt);
-           prepstmt = sqlTypeCoerce(column, prepstmt);
+            prepstmt = sqlTypeCoerce(keyValue, prepstmt);
 
             ResultSet result = prepstmt.executeQuery();
 

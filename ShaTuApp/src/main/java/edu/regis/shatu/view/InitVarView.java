@@ -453,27 +453,69 @@ public class InitVarView extends UserRequestView implements ActionListener {
     @Override
     protected void updateView() {
         view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
+
+        switch(view.getCurrentViewType())
+        {
+            case DO_ONE:
+                updatePracticeView();
+                break;
+
+            case SEE_ONE:
+                updateTeachView();
+                break;
+
+            case TEACH_ONE:
+                updateQuizView();
+                break;
+
+            default:
+                throw new UnsupportedOperationException("Unknown Update Operation for view type: "
+                        + view.getCurrentViewType());
+        }
+    }
+
+    /**
+     * Defines each view classes' standard method for updating in the Practice View
+     */
+    @Override
+    protected void updatePracticeView() {
         view.resetButtonListeners(); // Clear any listeners applied from other views
-        feedbackTextArea.setText(""); // Resets text feedback area      
+        feedbackTextArea.setText(""); // Resets text feedback area
         setupButtons();
-        
+
         // New example is uniquely hidden for this view, as
-        // There are only 8 initial values, 
-        // all of which the user shall define.          
-        view.getNewExampleButton().setEnabled(false);   
-        
+        // There are only 8 initial values,
+        // all of which the user shall define.
+        view.getNewExampleButton().setEnabled(false);
+
         if (model == null) {
             System.out.println("Error: The model is null when switching to Initialize Variables...");
         }
         else {
             // TODO: Debug statements. Task is not being set properly.
             // The model's tasks list holds only the first task. It must be populated with each task.
-            // This should originate from a lack of data within the database. 
+            // This should originate from a lack of data within the database.
             // Populating it should aid in resolving this error.
             System.out.println("Initialize update view called.");
             System.out.println("----Init Var Task Title-----"+model.currentTask().getTask().getTitle());
-            System.out.println("----Init Var Step Title-----"+model.currentTask().getCurrentStep().getStep().getTitle());        
+            System.out.println("----Init Var Step Title-----"+model.currentTask().getCurrentStep().getStep().getTitle());
         }
+    }
+
+    /**
+     * Defines each view classes' standard method for updating in the Teach Me View
+     */
+    @Override
+    protected void updateTeachView() {
+
+    }
+
+    /**
+     * Defines each view classes' standard method for updating in the Teach Me View
+     */
+    @Override
+    protected void updateQuizView() {
+
     }
 
     @Override
