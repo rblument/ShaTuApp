@@ -41,6 +41,7 @@ import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.PendingStep;
 import edu.regis.shatu.model.aol.PendingTask;
 import edu.regis.shatu.model.aol.ProblemType;
+import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.model.aol.StudentModel;
 import edu.regis.shatu.objectives.AddBits;
 import edu.regis.shatu.objectives.AddMsgLen;
@@ -460,26 +461,10 @@ public class ShaTuTutor implements TutorSvc {
         switch (step.getSubType()) {
             case INFO_MESSAGE:
                 return completeInfoMsgStep(completion);
-            case ENCODE_BINARY: // TO_DO: Really the same
-            case ENCODE_HEX:
-            case ENCODE_ASCII:
-            case ADD_ONE_BIT:
-            case PAD_ZEROS:
-            case ADD_MSG_LENGTH:
-            case PREPARE_SCHEDULE:
-            case INITIALIZE_VARS:
-            case COMPRESS_ROUND:
-            case ROTATE_BITS:
-            case SHIFT_BITS:
-            case XOR_BITS:
-            case ADD_BITS:
-            case MAJORITY_FUNCTION:
-            case CHOICE_FUNCTION:
-            case SHA_ZERO:
-                return currObjective.hint(completion);
 
             default:
-                return createError("Unknown step completion: " + step.getSubType(), null);
+                currObjective = getCurrentObjectiveByProbelmType(convertStepToProblemType(step.getSubType()));
+                return currObjective.hint(completion);
         }
     }
 
@@ -493,31 +478,14 @@ public class ShaTuTutor implements TutorSvc {
         StepCompletion completion = gson.fromJson(jsonObj, StepCompletion.class);
 
         Step step = completion.getStep();
-
+ 
         switch (step.getSubType()) {
             case INFO_MESSAGE:
-                return completeInfoMsgStep(completion);
-
-            case ENCODE_BINARY: // TO_DO: Really the same
-            case ENCODE_HEX:
-            case ENCODE_ASCII:
-            case ADD_ONE_BIT:
-            case PAD_ZEROS:
-            case ADD_MSG_LENGTH:
-            case PREPARE_SCHEDULE:
-            case INITIALIZE_VARS:
-            case COMPRESS_ROUND:
-            case ROTATE_BITS:
-            case SHIFT_BITS:
-            case XOR_BITS:
-            case ADD_BITS:
-            case MAJORITY_FUNCTION:
-            case CHOICE_FUNCTION:
-            case SHA_ZERO:
-                return currObjective.completeStep(completion);
+                return completeInfoMsgStep(completion); 
 
             default:
-                return createError("Unknown step completion: " + step.getSubType(), null);
+                currObjective = getCurrentObjectiveByProbelmType(convertStepToProblemType(step.getSubType()));
+                return currObjective.completeStep(completion);
         }
     }
 
@@ -538,29 +506,100 @@ public class ShaTuTutor implements TutorSvc {
      * @return TutorReply
      */
     public TutorReply newExample(String json) {
-        // gson = new GsonBuilder().setPrettyPrinting().create();
+        System.out.println("nexExample()");
 
         NewExampleRequest request = gson.fromJson(json, NewExampleRequest.class);
-
-        switch (request.getExampleType()) {
-            case ADD_ONE_BIT:
-            case PAD_ZEROS:
-            case ADD_MSG_LENGTH:
+        
+        currObjective = getCurrentObjectiveByProbelmType(request.getExampleType());
+ 
+        return currObjective.example(session, request.getData());
+    }
+    
+    /**
+     * 
+     * ToDO: Can ProblemType and StepSubType be combined?
+     * 
+     * @param problemType
+     * @return 
+     */
+    private Objective getCurrentObjectiveByProbelmType(ProblemType problemType) {
+        switch (problemType) {
             case PREPARE_SCHEDULE:
-            case INITIALIZE_VARS:
+                return new PrepareSchedule(student);
             case COMPRESS_ROUND:
-            case ROTATE_BITS:
+                return new CompressRound(student);
             case SHIFT_BITS:
+                return new ShiftBits(student);
             case XOR_BITS:
+                return  new XorBits(student);
             case ADD_BITS:
+                return new AddBits(student);
             case MAJORITY_FUNCTION:
+                return new MajorityFunction(student);
+            case ADD_ONE_BIT:
+                return new AddOne(student);
+            case PAD_ZEROS:
+                return new PadZeros(student);
+            case ROTATE_BITS:
+                return new RotateBits(student);
+            case INITIALIZE_VARS:
+                return new InitVars(student);
             case CHOICE_FUNCTION:
-            case SHA_ZERO:
+                return new ChoiceFunction(student);
+            case ADD_MSG_LENGTH:
+                return new AddMsgLen(student);
             case ASCII_ENCODE:
-                return currObjective.example(session, request.getData());
-
+                return new EncodeAscii(student);
             default:
-                return createError("Unknown new example request: " + request.getExampleType(), null);
+                System.out.println("ShaUnknown new example request: " + problemType);
+                return null;
+        }
+    }
+    
+    /**
+     * KLUDGE
+     * ToDO: Can ProblemType and StepSubType be combined?
+     * 
+     * @param stepType
+     * @return 
+     */
+    private ProblemType convertStepToProblemType(StepSubType stepType) {
+        switch (stepType) {
+            case ENCODE_BINARY: 
+            case ENCODE_HEX:
+            case ENCODE_ASCII:
+                return ProblemType.ASCII_ENCODE;
+            case ADD_ONE_BIT:
+                return ProblemType.ADD_ONE_BIT;
+            case PAD_ZEROS:
+                return ProblemType.PAD_ZEROS;
+            case ADD_MSG_LENGTH:
+                return ProblemType.ADD_MSG_LENGTH;
+            case PREPARE_SCHEDULE:
+                return ProblemType.PREPARE_SCHEDULE;
+            case INITIALIZE_VARS:
+                return ProblemType.INITIALIZE_VARS;
+            case COMPRESS_ROUND:
+                return ProblemType.COMPRESS_ROUND;
+            case ROTATE_BITS:
+                return ProblemType.ROTATE_BITS;
+            case SHIFT_BITS:
+                return ProblemType.SHIFT_BITS;
+            case XOR_BITS:
+                return ProblemType.XOR_BITS;
+            case ADD_BITS:
+                return ProblemType.ADD_BITS;
+            case MAJORITY_FUNCTION:
+                return ProblemType.MAJORITY_FUNCTION;
+            case CHOICE_FUNCTION:
+                return ProblemType.CHOICE_FUNCTION;
+            case SHA_ZERO:
+                return ProblemType.SHA_ZERO;
+            //case SHA_ONE:
+            //    return ProblemType.SHA_ONE;
+            default:
+                System.out.println("Unknown step type in convert: " + stepType);
+                return null;
         }
     }
 

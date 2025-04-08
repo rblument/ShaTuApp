@@ -13,15 +13,10 @@ package edu.regis.shatu.view;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.awt.GridBagConstraints;
-import java.awt.Insets;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-
-import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
-
 import edu.regis.shatu.model.StepCompletion;
 import javax.swing.JRadioButton;
 import edu.regis.shatu.model.aol.ShaOneViewStep;
@@ -60,8 +55,6 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
     private JLabel exampleInputLabel;
     private JLabel problem;
     private JTextField answerField;
-    private JButton nextQuestionButton;
-    private boolean checkHintEnabled = false;
 
     /**
      * Label describing the A operand for the function
@@ -297,6 +290,11 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
         questionPanel.addc(operandALabel, 0, 3, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
+        
+                
+        addc(buttonPanel, 0, 4, 1, 1, 0.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                5, 5, 5, 5);
     }
 
     /**
@@ -396,13 +394,9 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
     @Override
     protected void updatePracticeView() {
 
-        //hintButton = view.getHintButton();
-        //checkButton = view.getCheckButton();
-        nextQuestionButton = view.getNewExampleButton();
-
         // If check and hint buttons are disabled, reset listenerers and apply those used by this view
         if(!checkHintEnabled) {
-            view.resetButtonListeners(); // Clear any listeners applied from other views
+            resetButtonListeners(); // Clear any listeners applied from other views
         }
     }
 

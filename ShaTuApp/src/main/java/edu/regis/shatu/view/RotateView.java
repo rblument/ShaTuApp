@@ -17,17 +17,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-
 import javax.swing.ButtonGroup;
-import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.NewExampleRequest;
@@ -35,9 +29,6 @@ import edu.regis.shatu.model.aol.PendingTask;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.RotateStep;
 import edu.regis.shatu.model.aol.StepSubType;
-import edu.regis.shatu.view.act.HintAction;
-import edu.regis.shatu.view.act.NewExampleAction;
-import edu.regis.shatu.view.act.StepCompletionAction;
 
 /**
  * RotateView class represents the GUI view for rotating strings using ROTR
@@ -58,8 +49,7 @@ public class RotateView extends UserRequestView implements KeyListener {
     private JLabel prompt;
     private JLabel problem;
     private JTextField answerField;
-    private JButton checkButton, hintButton, nextButton;
-    private boolean checkHintEnabled = false;
+
     private JRadioButton shortProblem;
     private JRadioButton longProblem;
     private JRadioButton rightRotate;
@@ -232,6 +222,10 @@ public class RotateView extends UserRequestView implements KeyListener {
         addc(rotate16Bits, 3, 7, 1, 1, 0.0, 0.0,
                 GridBagConstraints.WEST, GridBagConstraints.NONE,
                 5, 5, 5, 5);
+                
+        addc(buttonPanel, 0, 8, 4, 1, 0.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                5, 5, 5, 5);
     }
 
     @Override
@@ -281,17 +275,11 @@ public class RotateView extends UserRequestView implements KeyListener {
      */
     @Override
     protected void updatePracticeView() {
-
-        hintButton = view.getHintButton();
-        checkButton = view.getCheckButton();
-        nextButton = view.getNewExampleButton();
-
         // If check and hint buttons are disabled, reset listenerers and apply those used by this view
         if (!checkHintEnabled) {
-            view.resetButtonListeners(); // Clear any listeners applied from other views
+            resetButtonListeners(); // Clear any listeners applied from other views
         }
 
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
         Step step = model.currentTask().getCurrentStep().getStep();
 
         if (step.getSubType() == StepSubType.ROTATE_BITS) {

@@ -27,8 +27,6 @@ import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.ProblemType;
-import edu.regis.shatu.view.act.NewExampleAction;
-import edu.regis.shatu.view.act.StepCompletionAction;
 import edu.regis.shatu.svc.SHA_256;
 import java.nio.charset.Charset;
 import javax.swing.JOptionPane;
@@ -646,10 +644,10 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
      */
     @Override
     protected void updatePracticeView() {
-        view.resetButtonListeners(); // Clear any listeners applied from other views
-        view.getCheckButton().setEnabled(false);
-        view.getHintButton().setEnabled(false);
-        view.getNewExampleButton().setEnabled(false);
+        resetButtonListeners(); // Clear any listeners applied from other views
+        checkButton.setEnabled(false);
+        hintButton.setEnabled(false);
+        newExampleButton.setEnabled(false);
     }
 
     /**
@@ -693,8 +691,5 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
         
         return step;
     }
-    
-    
-
 }
 

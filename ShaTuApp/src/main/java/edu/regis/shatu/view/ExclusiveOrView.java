@@ -19,7 +19,6 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -45,9 +44,6 @@ import edu.regis.shatu.model.aol.BitOpStep;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
-import edu.regis.shatu.view.act.HintAction;
-import edu.regis.shatu.view.act.NewExampleAction;
-import edu.regis.shatu.view.act.StepCompletionAction;
 
 /**
  * ExclusiveOrView class represents a GUI view for performing Exclusive OR (XOR)
@@ -66,8 +62,6 @@ public class ExclusiveOrView extends UserRequestView implements KeyListener {
     private JScrollPane feedbackPane, responsePane;
     private GPanel questionPanel, descriptionPanel, qrPanel;
     private JPanel  radioButtonPanel;
-    private JButton checkButton, hintButton, newExampleButton;
-    private boolean checkHintEnabled = false;
     private ButtonGroup problemSizeGroup;
     private JRadioButton fourRadioButton, eightRadioButton, sixteenRadioButton,
             thirtytwoRadioButton;
@@ -112,6 +106,10 @@ public class ExclusiveOrView extends UserRequestView implements KeyListener {
 
         addc(qrPanel, 0, 2, 3, 1, 1.0, 1.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
+                5, 5, 5, 5);
+                
+        addc(buttonPanel, 0, 3, 1, 1, 0.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
     }
 
@@ -521,21 +519,15 @@ public class ExclusiveOrView extends UserRequestView implements KeyListener {
      */
     @Override
     protected void updatePracticeView() {
-
-        hintButton = view.getHintButton();
-        checkButton = view.getCheckButton();
-        newExampleButton = view.getNewExampleButton();
-
         responseTextArea.setText("");
         feedbackTextArea.setText("");
 
         // If check and hint buttons are disabled, reset listenerers and apply those used by this view
         if (!checkHintEnabled) {
-            view.resetButtonListeners(); // Clear any listeners applied from other views
+            resetButtonListeners(); // Clear any listeners applied from other views
         }
 
         if (model != null) {
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
             Step step = model.currentTask().getCurrentStep().getStep();
 
             if (step.getSubType() == StepSubType.XOR_BITS) {
