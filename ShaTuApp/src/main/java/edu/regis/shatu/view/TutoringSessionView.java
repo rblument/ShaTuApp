@@ -14,9 +14,6 @@ package edu.regis.shatu.view;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.event.ActionListener;
-
-import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -28,9 +25,6 @@ import edu.regis.shatu.model.aol.PendingStep;
 import edu.regis.shatu.model.aol.PendingTask;
 import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.model.aol.ViewType;
-import edu.regis.shatu.view.act.HintAction;
-import edu.regis.shatu.view.act.NewExampleAction;
-import edu.regis.shatu.view.act.StepCompletionAction;
 
 
 /**
@@ -49,11 +43,6 @@ public class TutoringSessionView extends GPanel {
      * Universal button for returning to the dashboard.
      */
     private JButton dashboardButton;
-    
-    /**
-     * Universal 'Check', 'New Example', 'Hint' buttons.
-     */
-    private JButton checkButton, newExampleButton, hintButton;
     
     /*
      * Universal button for logging off. 
@@ -84,11 +73,6 @@ public class TutoringSessionView extends GPanel {
      * The container for the StepView
      */
     private JPanel stepViewContainer;
-
-    /**
-     * The Panel for each view's buttons to sit in
-     */
-    private JPanel buttonPanel;
 
     /**
      * The Split Pane to split step and main view panes
@@ -140,7 +124,6 @@ public class TutoringSessionView extends GPanel {
      * Set up the Practice View screen
      */
     private void setupPracticeView() {
-        initializePracticeComponents();
         layoutPracticeComponents();
     }
 
@@ -221,7 +204,7 @@ public class TutoringSessionView extends GPanel {
         stepViewContainer = new JPanel(new BorderLayout());
 
         // Create a button panel for Check and Hint buttons
-        buttonPanel = new JPanel(); // Default FlowLayout
+       // buttonPanel = new JPanel(); // Default FlowLayout
 
         // Create a JSplitPane to allow resizing of the left panel
         splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, scrollPane, stepViewContainer);
@@ -244,8 +227,6 @@ public class TutoringSessionView extends GPanel {
 
         stepViewContainer.add(stepView, BorderLayout.CENTER);
 
-        buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Add padding
-
         splitPane.setDividerLocation(259); // Initial width of the left panel in pixels
         splitPane.setOneTouchExpandable(true); // Allow collapsing and expanding by the user
 
@@ -260,30 +241,17 @@ public class TutoringSessionView extends GPanel {
     }
 
     /**
-     * Create the child GUI components appearing in this frame.
-     */
-    private void initializePracticeComponents() {
-        
-        checkButton = this.initializeButton(StepCompletionAction.instance());
-        hintButton = this.initializeButton(HintAction.instance());
-        newExampleButton = this.initializeButton(NewExampleAction.instance());
-        newExampleButton.addActionListener(e -> {
-            checkButton.setEnabled(true);
-            hintButton.setEnabled(true);
-        });
-    }
-    /**
     * Layout the child components in this view
     */
    private void layoutPracticeComponents() {
 
        // Add buttons to the button panel
-       buttonPanel.add(checkButton);
-       buttonPanel.add(newExampleButton);
-       buttonPanel.add(hintButton);
+     //  buttonPanel.add(checkButton);
+     //  buttonPanel.add(newExampleButton);
+      // buttonPanel.add(hintButton);
 
        // Add the button panel to the bottom of the stepViewContainer
-       stepViewContainer.add(buttonPanel, BorderLayout.SOUTH);
+     //  stepViewContainer.add(buttonPanel, BorderLayout.SOUTH);
    }
 
     /**
@@ -297,11 +265,11 @@ public class TutoringSessionView extends GPanel {
      * Set up the layout for Teach Me View components
      */
    private void layoutTeachComponents() {
-       buttonPanel.removeAll();
+      // buttonPanel.removeAll();
        stepViewContainer.removeAll();
 
        // Add the button panel to the bottom of the stepViewContainer
-       stepViewContainer.add(buttonPanel, BorderLayout.SOUTH);
+      // stepViewContainer.add(buttonPanel, BorderLayout.SOUTH);
 
 
        //TODO: Layout Teach Me View specific components here
@@ -318,36 +286,16 @@ public class TutoringSessionView extends GPanel {
      * Set up the layout for Quiz Me View components
      */
     private void layoutQuizComponents() {
-        buttonPanel.removeAll();
+       // buttonPanel.removeAll();
         stepViewContainer.removeAll();
 
         // Add the button panel to the bottom of the stepViewContainer
-        stepViewContainer.add(buttonPanel, BorderLayout.SOUTH);
+       // stepViewContainer.add(buttonPanel, BorderLayout.SOUTH);
 
 
         //TODO: Layout Teach Me View specific components here
     }
-   
-   /**
-     * Initializes the universal StepView buttons requiring Strings.
-     * Initializing these buttons via this method aids in consistency.
-     * @param buttonText the text to display within the button.
-     * @return an initialized button according to the button type.
-     */
-    public JButton initializeButton(String buttonText){
-            return new JButton(buttonText);
-    }
-    
-    /**
-     * Initializes the universal StepView buttons requiring actions.
-     * Initializing these buttons via this method aids in consistency.
-     * @param buttonInstance the text to display within the button.
-     * @return an initialized button according to the button type.
-     */
-    public JButton initializeButton(Action buttonInstance){
-            return new JButton(buttonInstance);
-    }
-    
+
     /**
      * Toggles the given button on/off
      * Ensures the GUI updates to display the button's new state
@@ -357,69 +305,8 @@ public class TutoringSessionView extends GPanel {
         button.repaint();
         button.revalidate();
     }
-    
-    /**
-     * These buttons are used universally by each view
-     * Each view attaches its own listeners, and must be cleaned up
-     * before interacting with a new view.
-     * 
-     * Failure to clean up the additional listeners will result in unnecessary,
-     * or redundant, operations executed.
-     */
-    public void resetButtonListeners() {
-        // Keep track of the known initial listeners
-        ActionListener hintAction = HintAction.instance();
-        ActionListener checkAction = StepCompletionAction.instance();
-        ActionListener newExampleAction = NewExampleAction.instance();
 
-        // Clear all listeners for the check button and re-add the known listener
-        for (ActionListener listener : checkButton.getActionListeners()) {
-            checkButton.removeActionListener(listener);
-        }
-        checkButton.addActionListener(checkAction);
-
-        // Clear all listeners for the hint button and re-add the known listener
-        for (ActionListener listener : hintButton.getActionListeners()) {
-            hintButton.removeActionListener(listener);
-        }
-        hintButton.addActionListener(hintAction);
-
-        // Clear all listeners for the new example button and re-add the known listeners
-        for (ActionListener listener : newExampleButton.getActionListeners()) {
-            newExampleButton.removeActionListener(listener);
-        }
-        newExampleButton.addActionListener(newExampleAction);
-        newExampleButton.addActionListener(e -> {
-            checkButton.setEnabled(true);
-            hintButton.setEnabled(true);
-        }); // Re-add the lambda listener
-
-        // Reset button text
-        checkButton.setText("Check");
-        hintButton.setText("Hint");
-        newExampleButton.setText("New Example");
-
-        // Set the default button states
-        checkButton.setEnabled(false);
-        hintButton.setEnabled(false);
-        newExampleButton.setEnabled(true); // Enable New Example by default
-    }
-   
-    public JButton getCheckButton() {
-        return checkButton;
-    }
-    
-    public JButton getNewExampleButton(){
-        newExampleButton.setEnabled(true);
-        return newExampleButton;
-    }
-
-    public JButton getHintButton() {
-        return hintButton;
-    }
-
-    public ViewType getCurrentViewType()
-    {
+    public ViewType getCurrentViewType() {
         return this.currentViewType;
     }
     

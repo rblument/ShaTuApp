@@ -18,29 +18,21 @@ package edu.regis.shatu.view;
 
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.math.BigInteger;
-
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
 import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.BitOpStep;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
-import edu.regis.shatu.view.act.HintAction;
-import edu.regis.shatu.view.act.NewExampleAction;
-import edu.regis.shatu.view.act.StepCompletionAction;
 
 /**
  * AddTwoBitView class represents a GUI view for adding two binary numbers
@@ -69,10 +61,6 @@ public class AddTwoBitView extends UserRequestView implements KeyListener {
     private JLabel stringLabel2;
     private JLabel stringLabel3;
     private JLabel stringLabel4; // Only for testing that view is communicating with server
-    private JButton checkButton; // Add the check button
-    private JButton hintButton;
-    private JButton nextButton;
-    private boolean checkHintEnabled = false;
 
     /**
      * Initializes the AddTwoBitView by creating and laying out its child
@@ -138,6 +126,10 @@ public class AddTwoBitView extends UserRequestView implements KeyListener {
                 5, 5, 5, 5);
 
         responseTextArea.setEnabled(false);  // Text area disabled at initialization 
+        
+        addc(buttonPanel, 0, 5, 1, 1, 0.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                5, 5, 5, 5);
 
     }
 
@@ -327,17 +319,12 @@ public class AddTwoBitView extends UserRequestView implements KeyListener {
      */
     @Override
     protected void updatePracticeView() {
-
-        hintButton = view.getHintButton();
-        checkButton = view.getCheckButton();
-        nextButton = view.getNewExampleButton();
-
         responseTextArea.setText("");
 
         // If check and hint buttons are disabled, reset listenerers and apply those
         // used by this view
         if (!checkHintEnabled) {
-            view.resetButtonListeners(); // Clear any listeners applied from other views
+            resetButtonListeners(); // Clear any listeners applied from other views
         }
 
         if (model != null) {
@@ -345,8 +332,6 @@ public class AddTwoBitView extends UserRequestView implements KeyListener {
             // Update the view's information from the model
             // Debugging dynamic updates to the model can be done here.
             System.out.println("AddTwoBitView");
-
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
             Step step = model.currentTask().getCurrentStep().getStep();
 
