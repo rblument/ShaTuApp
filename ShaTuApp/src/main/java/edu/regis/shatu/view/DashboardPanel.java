@@ -14,6 +14,7 @@ package edu.regis.shatu.view;
 
 import edu.regis.shatu.model.TutoringSession;
 import edu.regis.shatu.model.aol.AssessmentLevel;
+import edu.regis.shatu.model.aol.ScaffoldLevel;
 import edu.regis.shatu.model.aol.ViewType;
 import edu.regis.shatu.svc.ServiceFactory;
 import edu.regis.shatu.svc.StudentModelSvc;
@@ -129,12 +130,48 @@ public class DashboardPanel extends JPanel {
         practiceButton = new JButton("Practice");
         quizMeButton = new JButton("Quiz Me");
         
-        // Set button actions
+        // Set button actions and update scaffold level based on chosen study mode.
         logOutButton.addActionListener(evt -> logOut());
         settingsButton.setVerticalAlignment(SwingConstants.TOP);
-        teachMeButton.addActionListener(evt -> SplashFrame.instance().selectScreen(ViewType.SEE_ONE));
-        practiceButton.addActionListener(evt -> SplashFrame.instance().selectScreen(ViewType.DO_ONE));
-        quizMeButton.addActionListener(evt -> SplashFrame.instance().selectScreen(ViewType.TEACH_ONE));
+
+        teachMeButton.addActionListener(evt -> {
+            // Set scaffold level to EXTREME when in Teach Me mode.
+            try {
+                ServiceFactory.findStudentModelSvc().updateScaffoldLevel(
+                        model.getStudent().getAccount().getUserId(),
+                        ScaffoldLevel.EXTREME);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            // Navigate to the view for Teach Me mode using ViewType.SEE_ONE
+            SplashFrame.instance().selectScreen(ViewType.SEE_ONE);
+        });
+
+        practiceButton.addActionListener(evt -> {
+            // Set scaffold level to HIGH when in Practice mode.
+            try {
+                ServiceFactory.findStudentModelSvc().updateScaffoldLevel(
+                        model.getStudent().getAccount().getUserId(),
+                        ScaffoldLevel.MEDIUM);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            // Navigate to the view for Practice mode using ViewType.DO_ONE
+            SplashFrame.instance().selectScreen(ViewType.DO_ONE);
+        });
+
+        quizMeButton.addActionListener(evt -> {
+            // Set scaffold level to MEDIUM when in Quiz Me mode.
+            try {
+                ServiceFactory.findStudentModelSvc().updateScaffoldLevel(
+                        model.getStudent().getAccount().getUserId(),
+                        ScaffoldLevel.NONE);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            // Navigate to the view for Quiz Me mode using ViewType.TEACH_ONE
+            SplashFrame.instance().selectScreen(ViewType.TEACH_ONE);
+        });
         
         // Initialize progress bar maps and panels
         teachMeProgressBars = new HashMap<>();

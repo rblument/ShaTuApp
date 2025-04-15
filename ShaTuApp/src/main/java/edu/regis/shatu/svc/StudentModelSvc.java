@@ -19,6 +19,7 @@ import edu.regis.shatu.model.Student;
 import edu.regis.shatu.model.StudentModelFieldKind;
 import edu.regis.shatu.model.aol.Assessment;
 import edu.regis.shatu.model.aol.AssessmentLevel;
+import edu.regis.shatu.model.aol.ScaffoldLevel;
 import edu.regis.shatu.model.aol.StudentModel;
 import java.util.List;
 
@@ -118,5 +119,16 @@ public interface StudentModelSvc {
      * @throws NonRecoverableException if an error occurs during retrieval.
      */
     AssessmentLevel retrieveAssessmentLevel(String userId, String lesson)
+            throws ObjNotFoundException, NonRecoverableException;
+    
+    /**
+     * Updates the scaffold level for the given student.
+     *
+     * @param userId the unique identifier of the student.
+     * @param level the new ScaffoldLevel to be set.
+     * @throws NonRecoverableException if a database error occurs.
+     * @throws ObjNotFoundException if no student model is found.
+     */
+    void updateScaffoldLevel(String userId, ScaffoldLevel level)
             throws ObjNotFoundException, NonRecoverableException;
 }
