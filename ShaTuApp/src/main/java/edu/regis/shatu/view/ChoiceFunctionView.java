@@ -49,8 +49,12 @@ import edu.regis.shatu.view.act.StepCompletionAction;
 
 /**
  * ChoiceFunctionView class represents a GUI view for a choice function Ch(x, y,
- * z). Users can input their answers in a JTextField and check correctness.
+ * z). 
+ * Given three inputs (variables e, f, g) perform a bitwise if/then/else.
+ * If the 𝑥-bit is set (1), the 𝑦 bit is output,otherwise, the 𝑧 bit is output.
+ * Users can input their answers in a JTextField and check correctness.
  * Provides functionality for hints and moving to the next question.
+  * Returns a single 32 bit binary value.
  *
  * @author rickb
  */
@@ -105,7 +109,10 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
 
         return ex;
     }
-
+    /*
+    Sends notification to the tutor that this step in the tutoring has been
+    successfully completed and student is ready to move on to the next step.
+    */
     @Override
     public StepCompletion stepCompletion() {
         Step currentStep = model.currentTask().currentStep().getStep();
