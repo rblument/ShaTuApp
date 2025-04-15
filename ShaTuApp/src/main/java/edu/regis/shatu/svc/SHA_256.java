@@ -391,7 +391,7 @@ public class SHA_256 {
 
         //arrays to hold orinal values of working variables and new values 
         //after compression round is finished 
-        //System.arraycopy(temp, 0, inTemp, 0, temp.length);
+        System.arraycopy(temp, 0, inTemp, 0, temp.length);
         System.arraycopy(temp, 0, temp, 1, temp.length - 1);
 
         temp[4] += t1;
