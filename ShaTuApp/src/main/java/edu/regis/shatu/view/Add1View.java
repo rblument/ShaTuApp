@@ -411,6 +411,16 @@ public class Add1View extends UserRequestView {
                 this.repaint();
             }
         }
+        
+        // Hide feedback panel if not used (fixes grey box visibility issue)
+        if (feedbackArea.getText().trim().isEmpty()) 
+        {
+            feedbackScrollPane.setVisible(false);
+        } 
+        else 
+        {
+            feedbackScrollPane.setVisible(true);
+        }
     }
 
     /**

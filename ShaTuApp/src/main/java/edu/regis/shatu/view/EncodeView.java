@@ -95,11 +95,7 @@ public class EncodeView extends UserRequestView {
                 GridBagConstraints.HORIZONTAL, 5, 5, 5, 5);
         addc(responseScrollPane, 0, 4, 1, 1,
                 1.0, 1.0, GridBagConstraints.CENTER,
-                GridBagConstraints.BOTH, 5, 5, 5, 5);
-        addc(feedbackScrollPane, 0, 5, 1, 1,
-                1.0, 1.0, GridBagConstraints.CENTER,
-                GridBagConstraints.BOTH, 5, 5, 5, 5);
-        
+                GridBagConstraints.BOTH, 5, 5, 5, 5);      
         addc(buttonPanel, 0, 6, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
@@ -353,7 +349,7 @@ public class EncodeView extends UserRequestView {
                 // Clear any existing feedback and response from the previous question.
                 feedbackArea.setText("");
                 responseTextArea.setText("");
-
+              
                 if ((step.getSubType() == type)) { // Subtype was correct
                     System.out.println("If branch was taken, subtype was a encode ascii"); // Error checking.
 
