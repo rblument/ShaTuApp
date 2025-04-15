@@ -369,16 +369,10 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
         temp1Label = new VariableLabel("T\u2081");
         temp2Label = new VariableLabel("T\u2082");
         
-        //counter = new CounterLabel("Round: ");
-        
         temp1Label.setFont(new Font("", Font.PLAIN, 16));
         temp2Label.setFont(new Font("", Font.PLAIN, 16));
         
-        //to be removed once linked with tutor view for new example
-        //continueButton.addActionListener((ActionEvent e) ->
-        //{
-           // NewExampleAction.instance().actionPerformed(null);
-        //});
+  
         nextRoundButton.addActionListener(this);
         newMessageButton.addActionListener(this);
         
@@ -459,13 +453,6 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
         kLabel.setLocation(x, y);
         add(kLabel);
         
-         //Add counter label to the right of W location
-        
-        //countX = modAdditions[2].getLocation().x + CounterLabel.SIZE * 3;
-        //countY = inWorkingVars[7].getLocation().y - CounterLabel.HALF_SIZE ;
-        
-        //counter.setLocation(countX, countY);
-        //add(counter);
         
         // Third mod addition has Sigma1 inputs and centered on it
         x = sigma1Label.getLocation().x + BitOpLabel.HALF_SIZE - AddMod256Label.HALF_SIZE + 150;
@@ -510,7 +497,7 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
         newMessageX = getWidth() - (messageButtonWidth + buttonWidth) - margin;
         roundX = getWidth() - roundButtonWidth - margin;
         roundY = buttonHeight + margin;
-        //newMessageY = getHeight() - (buttonHeight) - margin;
+        
         
         nextRoundButton.setBounds(x, y, buttonWidth, buttonHeight);
         newMessageButton.setBounds(newMessageX, y, messageButtonWidth, buttonHeight);
@@ -518,10 +505,11 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
         add(nextRoundButton);
         add(newMessageButton);
         add(counterButton);
-        
-        
+         
     }
-    
+    /* 
+    Causes layout to respond dynamically when window is resized.
+    */
     @Override
     public void doLayout() {
         super.doLayout();
@@ -577,6 +565,8 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
            msg = JOptionPane.showInputDialog(this, "Enter a message to hash");
            count = 0;   
        }
+       //triggers one compression round to be completed.  
+       //asks for new message if all 64 rounds are completed
        else if (event.getSource() == nextRoundButton){
        
            counterButton.setText("Compression Round: " + count);
@@ -667,7 +657,7 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
     protected void updateQuizView() {
 
     }
-
+    //TO DO:  not implemented at this time
     @Override
     public NewExampleRequest newRequest() {
         NewExampleRequest ex = new NewExampleRequest(); // Will be sent to the tutor.
@@ -680,7 +670,8 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
         
         return ex;
     }
-
+    
+    //TO DO:  not implemented at this time
     @Override
     public StepCompletion stepCompletion() {
         Step currentStep = model.currentTask().currentStep().getStep();
