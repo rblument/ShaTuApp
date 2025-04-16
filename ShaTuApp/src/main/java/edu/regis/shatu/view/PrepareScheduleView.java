@@ -67,20 +67,10 @@ public class PrepareScheduleView extends UserRequestView {
         };
     
     /**
-     * Create the child GUI components appearing in this frame.
-     */
-    private void initializePracticeButtons() {
-        //checkButton = new JButton(StepCompletionAction.instance());
-        //hintButton = new JButton(HintAction.instance());
-        //newExampleButton = new JButton (NewExampleAction.instance());
-    }
-    
-    /**
      * Generates the prepare schedule view.
      */
     public PrepareScheduleView() {
         initializeComponents();
-        initializePracticeButtons();
         initializeLayout();
         updatePreviousStepsDisplay();  // Ensure previous steps are cleared initially
         loadStep();
