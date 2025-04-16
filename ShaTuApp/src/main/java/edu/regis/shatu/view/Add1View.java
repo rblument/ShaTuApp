@@ -17,13 +17,8 @@
 package edu.regis.shatu.view;
 
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
 import javax.swing.BoxLayout;
-import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -33,19 +28,12 @@ import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 import edu.regis.shatu.model.AddOneStep;
 import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
-import edu.regis.shatu.view.act.HintAction;
-import edu.regis.shatu.view.act.NewExampleAction;
-import edu.regis.shatu.view.act.StepCompletionAction;
 
 /**
  * A view that requests the student to add a single '1' bit to the byte prompt.
@@ -60,8 +48,6 @@ public class Add1View extends UserRequestView {
     private JTextField messageLengthField;
     private JTextArea responseTextArea;
     private JTextArea feedbackArea;
-    private JButton checkButton, nextButton, hintButton;
-    private boolean checkHintEnabled = false;
     private JTable asciiTable;
     private JScrollPane responseScrollPane, asciiTableScrollPane, feedbackScrollPane;
     private String question;
@@ -137,6 +123,10 @@ public class Add1View extends UserRequestView {
         addc(feedbackScrollPane, 0, 5, 1, 1,
                 1.0, 1.0, GridBagConstraints.CENTER,
                 GridBagConstraints.BOTH, 5, 5, 5, 5);
+        
+        addc(buttonPanel, 0, 6, 1, 1, 0.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                5, 5, 5, 5);
     }
 
     /**
@@ -338,13 +328,35 @@ public class Add1View extends UserRequestView {
     @Override
     protected void updateView() {
         view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
-        hintButton = view.getHintButton();
-        checkButton = view.getCheckButton();
-        nextButton = view.getNewExampleButton();
 
+        switch(view.getCurrentViewType())
+        {
+            case DO_ONE:
+                updatePracticeView();
+                break;
+
+            case SEE_ONE:
+                updateTeachView();
+                break;
+
+            case TEACH_ONE:
+                updateQuizView();
+                break;
+
+            default:
+                throw new UnsupportedOperationException("Unknown Update Operation for view type: "
+                        + view.getCurrentViewType());
+        }
+    }
+
+    /**
+     * Defines each view classes' standard method for updating in the Practice View
+     */
+    @Override
+    protected void updatePracticeView() {
         // If check and hint buttons are disabled, reset listenerers and apply those used by this view
         if (!checkHintEnabled) {
-            view.resetButtonListeners(); // Clear any listeners applied from other views          
+            resetButtonListeners(); // Clear any listeners applied from other views
         }
 
         /*
@@ -355,8 +367,6 @@ public class Add1View extends UserRequestView {
         StepSubType type = StepSubType.ADD_ONE_BIT;
 
         System.out.println("Add One Bit update display called"); // Error checking
-
-        Gson gson = new GsonBuilder().setPrettyPrinting().create(); // May not be needed here.
 
         Step step = model.currentTask().getCurrentStep().getStep(); // Will be the last subtype a example was created for or empty
 
@@ -401,6 +411,22 @@ public class Add1View extends UserRequestView {
                 this.repaint();
             }
         }
+    }
+
+    /**
+     * Defines each view classes' standard method for updating in the Teach Me View
+     */
+    @Override
+    protected void updateTeachView() {
+
+    }
+
+    /**
+     * Defines each view classes' standard method for updating in the Teach Me View
+     */
+    @Override
+    protected void updateQuizView() {
+
     }
 
     /**

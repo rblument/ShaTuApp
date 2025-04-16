@@ -43,9 +43,6 @@ import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
-import edu.regis.shatu.view.act.HintAction;
-import edu.regis.shatu.view.act.NewExampleAction;
-import edu.regis.shatu.view.act.StepCompletionAction;
 
 /**
  * ChoiceFunctionView class represents a GUI view for a choice function Ch(x, y,
@@ -64,8 +61,7 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
     private GPanel truthTablePanel, questionPanel, descriptionPanel, qrPanel;
     private JPanel radioButtonPanel;
     private JTable chTruthTable;
-    private JButton checkButton, newExButton, hintButton, truthTableToggleButton;
-    private boolean checkHintEnabled = false;
+    private JButton truthTableToggleButton;
     private ButtonGroup problemSizeGroup;
     private JRadioButton fourRadioButton, eightRadioButton, sixteenRadioButton,
             thirtytwoRadioButton;
@@ -151,6 +147,10 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
 
         addc(qrPanel, 0, 2, 3, 1, 1.0, 1.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
+                5, 5, 5, 5);
+        
+        addc(buttonPanel, 0, 3, 1, 1, 0.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
     }
 
@@ -513,15 +513,42 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
     @Override
     protected void updateView() {
         view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
-        hintButton = view.getHintButton();
-        checkButton = view.getCheckButton();
-        newExButton = view.getNewExampleButton();
+
+        switch(view.getCurrentViewType())
+        {
+            case DO_ONE:
+                updatePracticeView();
+                break;
+
+            case SEE_ONE:
+                updateTeachView();
+                break;
+
+            case TEACH_ONE:
+                updateQuizView();
+                break;
+
+            default:
+                throw new UnsupportedOperationException("Unknown Update Operation for view type: "
+                        + view.getCurrentViewType());
+        }
+    }
+
+    /**
+     * Defines each view classes' standard method for updating in the Practice View
+     */
+    @Override
+    protected void updatePracticeView() {
+
+       // hintButton = view.getHintButton();
+       // checkButton = view.getCheckButton();
+       // newExButton = view.getNewExampleButton();
 
         // If check and hint buttons are disabled, reset listenerers and apply those used by this view
         if (!checkHintEnabled) {
-            view.resetButtonListeners(); // Clear any listeners applied from other views            
+           resetButtonListeners(); // Clear any listeners applied from other views
         }
-        
+
         System.out.println("Choice function update view called."); // Error checking
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -549,6 +576,22 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
                 checkButton.setEnabled(true);
             }
         }
+    }
+
+    /**
+     * Defines each view classes' standard method for updating in the Teach Me View
+     */
+    @Override
+    protected void updateTeachView() {
+
+    }
+
+    /**
+     * Defines each view classes' standard method for updating in the Teach Me View
+     */
+    @Override
+    protected void updateQuizView() {
+
     }
 
 }

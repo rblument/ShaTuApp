@@ -14,9 +14,7 @@ package edu.regis.shatu.svc;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.math.BigInteger;
 import java.util.GregorianCalendar;
-import java.util.Map;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,10 +23,22 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import edu.regis.shatu.dao.AccountDAO;
-import edu.regis.shatu.err.IllegalArgException;
 import edu.regis.shatu.err.NonRecoverableException;
+import edu.regis.shatu.err.ObjDuplicateException;
 import edu.regis.shatu.err.ObjNotFoundException;
 import edu.regis.shatu.model.*;
+import edu.regis.shatu.model.Account;
+import edu.regis.shatu.model.Course;
+import edu.regis.shatu.model.KnowledgeComponent;
+import edu.regis.shatu.model.KnowledgeComponentKind;
+import edu.regis.shatu.model.Step;
+import edu.regis.shatu.model.StepCompletion;
+import edu.regis.shatu.model.StepCompletionReply;
+import edu.regis.shatu.model.Student;
+import edu.regis.shatu.model.StudentModelFieldKind;
+import edu.regis.shatu.model.Task;
+import edu.regis.shatu.model.TutoringSession;
+import edu.regis.shatu.model.Unit;
 import edu.regis.shatu.model.aol.Assessment;
 import edu.regis.shatu.model.aol.AssessmentLevel;
 import edu.regis.shatu.model.aol.BitOpExample;
@@ -43,6 +53,22 @@ import edu.regis.shatu.model.aol.StudentModel;
 import edu.regis.shatu.model.aol.TaskKind;
 import edu.regis.shatu.model.aol.Timeout;
 import java.util.HashSet;
+import edu.regis.shatu.objectives.AddBits;
+import edu.regis.shatu.objectives.AddMsgLen;
+import edu.regis.shatu.objectives.AddOne;
+import edu.regis.shatu.objectives.ChoiceFunction;
+import edu.regis.shatu.objectives.CompressRound;
+import edu.regis.shatu.objectives.EncodeAscii;
+import edu.regis.shatu.objectives.InitVars;
+import edu.regis.shatu.objectives.MajorityFunction;
+import edu.regis.shatu.objectives.Objective;
+import edu.regis.shatu.objectives.PadZeros;
+import edu.regis.shatu.objectives.PrepareSchedule;
+import edu.regis.shatu.objectives.RotateBits;
+import edu.regis.shatu.objectives.ShiftBits;
+import edu.regis.shatu.objectives.XorBits;
+import java.math.BigInteger;
+import java.util.Map;
 
 /**
  * The ShaTu tutor, which implements the tutoring service.
@@ -82,6 +108,8 @@ public class ShaTuTutor implements TutorSvc {
      * Convenience reference to the current gson object.
      */
     private Gson gson;
+
+    private Objective currObjective;
 
     /**
      * Initialize the tutor singleton (a NoOp).
@@ -137,7 +165,7 @@ public class ShaTuTutor implements TutorSvc {
                             return reply;
                         }
 
-                        session = ServiceFactory.findSessionSvc().retrieve(student);
+                        session = ServiceFactory.findSessionSvc().retrieve(student.getAccount().getUserId());
 
                     } else {
                         TutorReply reply = new TutorReply(":ERR");
@@ -195,7 +223,11 @@ public class ShaTuTutor implements TutorSvc {
 
         int courseId = DEFAULT_COURSE_ID; // Currently only one course
 
-        ServiceFactory.findAccountSvc().create(acct);
+        try {
+            ServiceFactory.findAccountSvc().create(acct);
+        } catch (ObjDuplicateException e) {
+            return createError(String.format("Account %s exists", acct.getUserId()), null);
+        }
 
         try {
             Course course = ServiceFactory.findCourseSvc().retrieve(courseId);
@@ -327,7 +359,7 @@ public class ShaTuTutor implements TutorSvc {
                 }
 
                 SessionSvc svc = ServiceFactory.findSessionSvc();
-                TutoringSession session = svc.retrieve(student);
+                TutoringSession session = svc.retrieve(student.getAccount().getUserId());
 
                 TutorReply reply = new TutorReply("Authenticated");
 
@@ -367,42 +399,55 @@ public class ShaTuTutor implements TutorSvc {
         switch (currentTask) {
             case 106:
                 task.setType(ProblemType.PREPARE_SCHEDULE);
+                currObjective = new PrepareSchedule(student);
                 break;
             case 108:
                 task.setType(ProblemType.COMPRESS_ROUND);
+                currObjective = new CompressRound(student);
                 break;
             case 101:
                 task.setType(ProblemType.SHIFT_BITS);
+                currObjective = new ShiftBits(student);
                 break;
             case 110:
                 task.setType(ProblemType.XOR_BITS);
+                currObjective = new XorBits(student);
                 break;
             case 111:
                 task.setType(ProblemType.ADD_BITS);
+                currObjective = new AddBits(student);
                 break;
             case 112:
                 task.setType(ProblemType.MAJORITY_FUNCTION);
+                currObjective = new MajorityFunction(student);
                 break;
             case 103:
                 task.setType(ProblemType.ADD_ONE_BIT);
+                currObjective = new AddOne(student);
                 break;
             case 104:
                 task.setType(ProblemType.PAD_ZEROS);
+                currObjective = new PadZeros(student);
                 break;
             case 109:
                 task.setType(ProblemType.ROTATE_BITS);
+                currObjective = new RotateBits(student);
                 break;
             case 107:
                 task.setType(ProblemType.INITIALIZE_VARS);
+                currObjective = new InitVars(student);
                 break;
             case 100:
                 task.setType(ProblemType.CHOICE_FUNCTION);
+                currObjective = new ChoiceFunction(student);
                 break;
             case 105:
                 task.setType(ProblemType.ADD_MSG_LENGTH);
+                currObjective = new AddMsgLen(student);
                 break;
             default:
                 task.setType(ProblemType.ASCII_ENCODE);
+                currObjective = new EncodeAscii(student);
                 break;
         }
         TutorReply reply = new TutorReply(":Success");
@@ -428,52 +473,10 @@ public class ShaTuTutor implements TutorSvc {
         switch (step.getSubType()) {
             case INFO_MESSAGE:
                 return completeInfoMsgStep(completion);
-            case ENCODE_BINARY: // TO_DO: Really the same
-            case ENCODE_HEX:
-            case ENCODE_ASCII:
-                return hintEncode(completion);
-
-            case ADD_ONE_BIT:
-                return hintAddOne(completion);
-
-            case PAD_ZEROS:
-                return hintPadZeros(completion);
-
-            case ADD_MSG_LENGTH:
-                return hintAddMsgLen(completion);
-
-            case PREPARE_SCHEDULE:
-                return hintPrepareSchedule(completion);
-
-            case INITIALIZE_VARS:
-                return hintInitVars(completion);
-
-            case COMPRESS_ROUND:
-                return hintCompressRound(completion);
-
-            case ROTATE_BITS:
-                return hintRotateBits(completion);
-
-            case SHIFT_BITS:
-                return hintShiftBits(completion);
-
-            case XOR_BITS:
-                return hintXorBits(completion);
-
-            case ADD_BITS:
-                return hintAddBits(completion);
-
-            case MAJORITY_FUNCTION:
-                return hintMajorityFunction(completion);
-
-            case CHOICE_FUNCTION:
-                return hintChoiceFunction(completion);
-
-            case SHA_ZERO:
-                return hintShaZeroFunction(completion);
 
             default:
-                return createError("Unknown step completion: " + step.getSubType(), null);
+                currObjective = getCurrentObjectiveByProbelmType(convertStepToProblemType(step.getSubType()));
+                return currObjective.hint(completion);
         }
     }
 
@@ -487,140 +490,15 @@ public class ShaTuTutor implements TutorSvc {
         StepCompletion completion = gson.fromJson(jsonObj, StepCompletion.class);
 
         Step step = completion.getStep();
-
+ 
         switch (step.getSubType()) {
             case INFO_MESSAGE:
-                return completeInfoMsgStep(completion);
-
-            case ENCODE_BINARY: // TO_DO: Really the same
-            case ENCODE_HEX:
-            case ENCODE_ASCII:
-                return completeEncodeStep(completion);
-
-            case ADD_ONE_BIT:
-                return completeAddOneStep(completion);
-
-            case PAD_ZEROS:
-                return completePadZerosStep(completion);
-
-            case ADD_MSG_LENGTH:
-                return completeAddMsgLenStep(completion);
-
-            case PREPARE_SCHEDULE:
-                return completePrepareScheduleStep(completion);
-
-            case INITIALIZE_VARS:
-                return completeInitVarsStep(completion);
-
-            case COMPRESS_ROUND:
-                return completeCompressRoundStep(completion);
-
-            case ROTATE_BITS:
-                return completeRotateStep(completion);
-
-            case SHIFT_BITS:
-                return completeShiftBitsStep(completion);
-
-            case XOR_BITS:
-                return completeXorBitsStep(completion);
-
-            case ADD_BITS:
-                return completeAddBitsStep(completion);
-
-            case MAJORITY_FUNCTION:
-                return completeMajorityStep(completion);
-
-            case CHOICE_FUNCTION:
-                return completeChoiceStep(completion);
-
-            case SHA_ZERO:
-                return completeSigmaZeroStep(completion);
+                return completeInfoMsgStep(completion); 
 
             default:
-                return createError("Unknown step completion: " + step.getSubType(), null);
+                currObjective = getCurrentObjectiveByProbelmType(convertStepToProblemType(step.getSubType()));
+                return currObjective.completeStep(completion);
         }
-    }
-
-    public TutorReply completeRotateStep(StepCompletion completion) {
-        System.out.println("Tutor completeRotateStep");
-        RotateStep example = gson.fromJson(completion.getData(), RotateStep.class);
-        int amount = example.getAmount();
-        String data = example.getData();
-
-        String expectedResult = performBitRotation(data, amount);
-
-        StepCompletionReply stepReply = new StepCompletionReply();
-        String result = example.getUserResponse();
-
-        stepReply.setCorrectAnswer(expectedResult);
-        stepReply.setResponse(result);
-
-        System.out.println("Answer: " + expectedResult);
-
-        if (expectedResult.equals(result)) {
-            stepReply.setIsCorrect(true);
-            stepReply.setIsRepeatStep(false);
-            stepReply.setIsNewStep(true);
-            stepReply.setIsNewTask(true);
-            stepReply.setIsNextStep(false);
-
-            // Update the assessment data and save it to the database.
-            int dbId = KnowledgeComponentKind.fromString("Rotate n BITS").dbId();
-            Assessment assessment = studentModel.findAssessment(dbId);
-            assessment.incrementSuccessess();
-
-            int exposures = assessment.getExposures();
-            int successes = assessment.getSuccessess();
-
-            if (exposures > 0 && (double) successes / exposures > 0.6) {
-                stepReply.setIsNewTask(true);
-                System.out.println("%%%%%%%%%%% Next Task Recommended");
-                assessment.setAssessment(AssessmentLevel.COMPLETED);
-            } else {
-                stepReply.setIsNewTask(false);
-            }
-
-            try {
-                StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
-                modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.SUCCESSES);
-
-            } catch (NonRecoverableException ex) {
-                return createError("Unknown error", ex);
-            }
-
-        } else {
-            stepReply.setIsCorrect(false);
-            stepReply.setIsRepeatStep(true);
-            stepReply.setIsNewStep(false);
-            stepReply.setIsNewTask(false);
-            stepReply.setIsNextStep(false);
-        }
-
-        Step step = new Step(1, 0, StepSubType.STEP_COMPLETION_REPLY);
-
-        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
-        step.setTimeout(timeout);
-        step.setData(gson.toJson(stepReply));
-
-        Task task = new Task();
-        task.setKind(TaskKind.PROBLEM);
-        task.setType(ProblemType.STEP_COMPLETION_REPLY);
-        task.setDescription("Choose your next action");
-        task.addStep(step);
-
-        PendingStep pendingStep = new PendingStep(step);
-        pendingStep.setCurrentHintIndex(0);
-        pendingStep.setNotifyTutor(true);
-        pendingStep.setIsCompleted(false);
-
-        PendingTask pendingTask = new PendingTask(task);
-        pendingTask.setCurrentStep(pendingStep);
-
-        TutorReply reply = new TutorReply(":Success");
-
-        reply.setData(gson.toJson(pendingTask));
-
-        return reply;
     }
 
     public TutorReply completeInfoMsgStep(StepCompletion completion) {
@@ -1837,55 +1715,100 @@ public class ShaTuTutor implements TutorSvc {
      * @return TutorReply
      */
     public TutorReply newExample(String json) {
-        // gson = new GsonBuilder().setPrettyPrinting().create();
+        System.out.println("nexExample()");
 
         NewExampleRequest request = gson.fromJson(json, NewExampleRequest.class);
-
-        switch (request.getExampleType()) {
-            case ASCII_ENCODE:
-                return newAsciiEncodeExample(session, request.getData());
-
-            case ADD_ONE_BIT:
-                return newAddOneBitExample(session, request.getData());
-
-            case PAD_ZEROS:
-                return newPadZerosExample(session, request.getData());
-
-            case ADD_MSG_LENGTH:
-                return newAddMsgLenExample(session, request.getData());
-
+        
+        currObjective = getCurrentObjectiveByProbelmType(request.getExampleType());
+ 
+        return currObjective.example(session, request.getData());
+    }
+    
+    /**
+     * 
+     * ToDO: Can ProblemType and StepSubType be combined?
+     * 
+     * @param problemType
+     * @return 
+     */
+    private Objective getCurrentObjectiveByProbelmType(ProblemType problemType) {
+        switch (problemType) {
             case PREPARE_SCHEDULE:
-                return newPrepareScheduleExample(session, request.getData());
-
-            case INITIALIZE_VARS:
-                return newInitializeVarsExample(session, request.getData());
-
+                return new PrepareSchedule(student);
             case COMPRESS_ROUND:
-                return newCompressRoundExample(session, request.getData());
-
-            case ROTATE_BITS:
-                return newRotateBitsExample(session, request.getData());
-
+                return new CompressRound(student);
             case SHIFT_BITS:
-                return newShiftBitsExample(session, request.getData());
-
+                return new ShiftBits(student);
             case XOR_BITS:
-                return newXorBitsExample(session, request.getData());
-
+                return  new XorBits(student);
             case ADD_BITS:
-                return newAddBitsExample(session, request.getData());
-
+                return new AddBits(student);
             case MAJORITY_FUNCTION:
-                return newMajorityFunctionExample(session, request.getData());
-
+                return new MajorityFunction(student);
+            case ADD_ONE_BIT:
+                return new AddOne(student);
+            case PAD_ZEROS:
+                return new PadZeros(student);
+            case ROTATE_BITS:
+                return new RotateBits(student);
+            case INITIALIZE_VARS:
+                return new InitVars(student);
             case CHOICE_FUNCTION:
-                return newChoiceFunctionExample(session, request.getData());
-
-            case SHA_ZERO:
-                return newSigmaZeroFunctionExample(session, request.getData());
-
+                return new ChoiceFunction(student);
+            case ADD_MSG_LENGTH:
+                return new AddMsgLen(student);
+            case ASCII_ENCODE:
+                return new EncodeAscii(student);
             default:
-                return createError("Unknown new example request: " + request.getExampleType(), null);
+                System.out.println("ShaUnknown new example request: " + problemType);
+                return null;
+        }
+    }
+    
+    /**
+     * KLUDGE
+     * ToDO: Can ProblemType and StepSubType be combined?
+     * 
+     * @param stepType
+     * @return 
+     */
+    private ProblemType convertStepToProblemType(StepSubType stepType) {
+        switch (stepType) {
+            case ENCODE_BINARY: 
+            case ENCODE_HEX:
+            case ENCODE_ASCII:
+                return ProblemType.ASCII_ENCODE;
+            case ADD_ONE_BIT:
+                return ProblemType.ADD_ONE_BIT;
+            case PAD_ZEROS:
+                return ProblemType.PAD_ZEROS;
+            case ADD_MSG_LENGTH:
+                return ProblemType.ADD_MSG_LENGTH;
+            case PREPARE_SCHEDULE:
+                return ProblemType.PREPARE_SCHEDULE;
+            case INITIALIZE_VARS:
+                return ProblemType.INITIALIZE_VARS;
+            case COMPRESS_ROUND:
+                return ProblemType.COMPRESS_ROUND;
+            case ROTATE_BITS:
+                return ProblemType.ROTATE_BITS;
+            case SHIFT_BITS:
+                return ProblemType.SHIFT_BITS;
+            case XOR_BITS:
+                return ProblemType.XOR_BITS;
+            case ADD_BITS:
+                return ProblemType.ADD_BITS;
+            case MAJORITY_FUNCTION:
+                return ProblemType.MAJORITY_FUNCTION;
+            case CHOICE_FUNCTION:
+                return ProblemType.CHOICE_FUNCTION;
+            case SHA_ZERO:
+                return ProblemType.SHA_ZERO;
+            //case SHA_ONE:
+            //    return ProblemType.SHA_ONE;
+            default:
+                System.out.println("Unknown step type in convert: " + stepType);
+                return null;
         }
     }
 
@@ -1919,7 +1842,7 @@ public class ShaTuTutor implements TutorSvc {
 
             return tSession;
 
-        } catch (IllegalArgException ex) {
+        } catch (ObjDuplicateException ex) {
             throw new NonRecoverableException("Session already exists", ex);
         }
     }
@@ -3263,6 +3186,8 @@ public class ShaTuTutor implements TutorSvc {
     }
 
     /**
+=======
+>>>>>>> development
      * Utility for logging an error and an creating a tutoring reply error with
      * the given message, and optional originating exception.
      *
@@ -3271,7 +3196,7 @@ public class ShaTuTutor implements TutorSvc {
      *               otherwise null.
      * @return a TutorReply with an ":ERR" status
      */
-    private TutorReply createError(String errMsg, Exception ex) {
+    public TutorReply createError(String errMsg, Exception ex) {
         if (ex == null) {
             Logger.getLogger(ShaTuTutor.class.getName()).log(Level.SEVERE, errMsg);
         } else {
@@ -3288,7 +3213,7 @@ public class ShaTuTutor implements TutorSvc {
      *
      * @return
      */
-    private String generateRandomString(int length) {
+    protected String generateRandomString(int length) {
 
         Random random = new Random();
         StringBuilder sb = new StringBuilder(length); // StringBuilder allows easier altering of a string.

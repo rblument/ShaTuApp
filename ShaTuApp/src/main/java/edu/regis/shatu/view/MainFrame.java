@@ -21,8 +21,7 @@ import javax.swing.JFrame;
 import javax.swing.Timer;
 
 import edu.regis.shatu.model.TutoringSession;
-
-
+import edu.regis.shatu.model.aol.ViewType;
 
 
 /**
@@ -154,7 +153,7 @@ public class MainFrame extends JFrame implements WindowListener {
      * Create the child components used in this frame.
      */
     private void initializeComponents() {
-        view = new TutoringSessionView(); 
+        view = new TutoringSessionView(ViewType.DO_ONE);
 
     }
     

@@ -11,22 +11,15 @@
 package edu.regis.shatu.view;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-
 import javax.swing.*;
-
 import edu.regis.shatu.model.ShaZeroStep;
 import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.ProblemType;
-import edu.regis.shatu.model.aol.RotateStep;
-import edu.regis.shatu.view.act.HintAction;
-import edu.regis.shatu.view.act.NewExampleAction;
-import edu.regis.shatu.view.act.StepCompletionAction;
 
 /**
  * ShaZero class represents the GUI view for performing the SHA Σ₀ function,
@@ -69,7 +62,6 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
      */
     private JTextField answerField;
 
-    private boolean checkHintEnabled = false;
     /**
      * The area in which the Sigma0 function is described
      */
@@ -134,8 +126,10 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
 
         ex.setExampleType(ProblemType.SHA_ZERO);
 
-        answerField = new JTextField(10);
-        answerField.addKeyListener(this);
+        ShaZeroStep step = new ShaZeroStep();
+        step.setBitLength(problemSize);
+
+        ex.setData(gson.toJson(step));
 
         return ex;
     }
@@ -164,17 +158,7 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
         StepCompletion step = new StepCompletion(currentStep, gson.toJson(example));
 
         step.setStep(currentStep);
-        
-        // Add exampleInputLabel centered
-
-
-      //  addc(exampleInputLabel, 0, 0, 2, 1, 0.0, 0.0,
-       //         GridBagConstraints.CENTER, GridBagConstraints.NONE,
-      //          5, 5, 5, 5);
-        // Add answerField to the layout, centered
-       // addc(answerField, 0, 1, 1, 1, 1.0, 0.0,
-       //         GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-       //         5, 5, 5, 5);
+     
        
        return step;
 
@@ -331,6 +315,10 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
         descriptionPanel.addc(questionPanel, 0, 2, 1, 1, 0.0, 0.0,
                 GridBagConstraints.SOUTHWEST, GridBagConstraints.NONE,
                 5, 5, 5, 5);
+        
+        addc(buttonPanel, 0, 3, 1, 1, 0.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                5, 5, 5, 5);
     }
 
     /**
@@ -484,12 +472,25 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
     protected void updateView() {
         view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
 
-        
-        // If check and hint buttons are disabled, reset listenerers and apply those used by this view
-        if(!checkHintEnabled) {
-            view.resetButtonListeners(); // Clear any listeners applied from other views          
+        switch(view.getCurrentViewType())
+        {
+            case DO_ONE:
+                updatePracticeView();
+                break;
 
+            case SEE_ONE:
+                updateTeachView();
+                break;
+
+            case TEACH_ONE:
+                updateQuizView();
+                break;
+
+            default:
+                throw new UnsupportedOperationException("Unknown Update Operation for view type: "
+                        + view.getCurrentViewType());
         }
+
 
         if (model != null) {
 
@@ -506,6 +507,35 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
             }
 
         }
+    }
+
+    /**
+     * Defines each view classes' standard method for updating in the Practice View
+     */
+    @Override
+    protected void updatePracticeView() {
+
+        // If check and hint buttons are disabled, reset listenerers and apply those used by this view
+        if(!checkHintEnabled) {
+            resetButtonListeners(); // Clear any listeners applied from other views
+
+        }
+    }
+
+    /**
+     * Defines each view classes' standard method for updating in the Teach Me View
+     */
+    @Override
+    protected void updateTeachView() {
+
+    }
+
+    /**
+     * Defines each view classes' standard method for updating in the Teach Me View
+     */
+    @Override
+    protected void updateQuizView() {
+
     }
 
     /**

@@ -23,8 +23,8 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import edu.regis.shatu.model.Account;
-import edu.regis.shatu.model.LessonSession;
 import edu.regis.shatu.model.TutoringSession;
+import edu.regis.shatu.model.aol.ViewType;
 
 /**
  * The first window displayed to a student user, which contains a splash panel 
@@ -120,15 +120,7 @@ public class SplashFrame extends JFrame {
      * (teach, practice, quiz) upon sign in.
      */
     private DashboardPanel dashboardPanel;
-    
-    /**
-     * The panel that allows users to select a type of service
-     * (teach, practice, quiz) upon sign in.
-     */
-    private LessonSessionView lessonSessionView;
 
-    private LessonSession lessonSession;
-    
     /**
      * The "Do One" tutoring view (see its documentation).
      */
@@ -268,15 +260,7 @@ public class SplashFrame extends JFrame {
     public TutoringSessionView getTutoringSessionView(){
         return tutoringSessionView;
     }
-    
-    /**
-     * Returns the current lesson session for the SplashFrame.
-     * @return The current LessonSession instance.
-     */
-    
-    public LessonSession getLessonSession() {
-        return this.lessonSession;
-    }
+
     /**
      * Clears the tutoringSession instance.
      * Changes current user to an empty user instance.
@@ -323,11 +307,14 @@ public class SplashFrame extends JFrame {
      * Selects a personalized practice screen for each user upon selecting
      * the dashboard's practice button.
      */
-     public void selectPracticeScreen() {
-         if (tutoringSessionView == null) {
-            tutoringSessionView = new TutoringSessionView(); 
-            cards.add(tutoringSessionView, TUTOR);
-        }
+     public void selectScreen(ViewType viewType) {
+//         if (tutoringSessionView == null) {
+//            tutoringSessionView = new TutoringSessionView(viewType);
+//            cards.add(tutoringSessionView, TUTOR);
+//        }
+
+         tutoringSessionView = new TutoringSessionView(viewType);
+         cards.add(tutoringSessionView, TUTOR);
 
         // Dynamically resize the frame to fit the screen
         // ToDo:
@@ -345,32 +332,6 @@ public class SplashFrame extends JFrame {
         
               // Switch to the tutoring session view
         selectPanel(TUTOR);
-    }
-        
-    /**
-     * Selects a personalized lesson screen for each user upon selecting
-     * the dashboard's practice teach me.
-     */
-    public void selectLessonScreen() {
-        LessonSession session = getLessonSession(); // Retrieve the lesson session
-
-        //Initialize the LessonSessionView if it's not already initialized
-        if (this.lessonSessionView == null) {
-            this.lessonSessionView = new LessonSessionView(tutoringSession); // Create the lesson session view
-            cards.add(lessonSessionView, LESSON);  // Add it to the CardLayout
-        }
-        
-        // Set the model (session) for the LessonSessionView
-        this.lessonSessionView.setLessonModel(session);
-
-        // Sets size of lesson screen window.
-        // Without this, the window opens too small.
-        this.setPreferredSize(new Dimension(1000, 800));
-        this.pack();
-        
-        // Switch to the lesson session view
-        selectPanel(LESSON);
-        
     }
 
     /**

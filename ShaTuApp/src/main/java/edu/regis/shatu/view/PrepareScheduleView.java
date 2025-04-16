@@ -15,18 +15,20 @@ package edu.regis.shatu.view;
 
 import edu.regis.shatu.model.PrepScheduleStep;
 import java.awt.*;
-
 import javax.swing.*;
 import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Random;
-
 import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
+import edu.regis.shatu.view.act.HintAction;
+import edu.regis.shatu.view.act.NewExampleAction;
+import edu.regis.shatu.view.act.StepCompletionAction;
+
 
 
 /**
@@ -35,14 +37,16 @@ import edu.regis.shatu.model.aol.StepSubType;
  * 
  * @author rickb
  */
-public class PrepareScheduleView extends UserRequestView /*implements ActionListener*/ {
+public class PrepareScheduleView extends UserRequestView {
 
     private TutoringSessionView view;
     private JLabel titleLabel, stepLabel, feedbackLabel, previousStepsLabel;
     private JRadioButton[] answerOptions;
     private ButtonGroup answerGroup;
-    private JButton checkButton, hintButton, nextButton;
+    //private JButton checkButton, hintButton, newExampleButton;
     private int stepNumber = 0;
+    private int currentStep = 1;
+    
     private int correctAnswerIndex; // Stores the shuffled position of the correct answer
     private String question;
 
@@ -61,20 +65,30 @@ public class PrepareScheduleView extends UserRequestView /*implements ActionList
             "What technique does SHA-256 use to extend a small set of words into a larger sequence?",
             "How is the expanded word sequence utilized in the hashing process?"
         };
-
+    
+    /**
+     * Create the child GUI components appearing in this frame.
+     */
+    private void initializePracticeButtons() {
+        //checkButton = new JButton(StepCompletionAction.instance());
+        //hintButton = new JButton(HintAction.instance());
+        //newExampleButton = new JButton (NewExampleAction.instance());
+    }
+    
     /**
      * Generates the prepare schedule view.
      */
     public PrepareScheduleView() {
         initializeComponents();
+        initializePracticeButtons();
         initializeLayout();
         updatePreviousStepsDisplay();  // Ensure previous steps are cleared initially
         loadStep();
         revalidate();  // Forces UI refresh
         repaint();  // Ensures the correct question is displayed
     }
-
-
+    
+    
     /**
      * Initializes UI components.
      */
@@ -105,36 +119,29 @@ public class PrepareScheduleView extends UserRequestView /*implements ActionList
      * Sets up the layout for the view.
      */
     private void initializeLayout() {
-        setLayout(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.anchor = GridBagConstraints.CENTER;
-
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.gridwidth = 2;
-        add(titleLabel, gbc);
-
-        gbc.gridy++;
-        add(previousStepsLabel, gbc);
-
-        gbc.gridy++;
-        add(stepLabel, gbc);
-
-        gbc.gridwidth = 1;
-        gbc.gridy++;
+        addc(titleLabel, 0, 0, 1, 1, 0.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                5, 5, 5, 5);
         
+        addc(previousStepsLabel, 0, 1, 1, 1, 1.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                5, 5, 5, 5);
+        
+        addc(stepLabel, 0, 2, 1, 1, 1.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                5, 5, 5, 5);
+             
+        int gridX = 3;
         for (JRadioButton option : answerOptions) {
-            gbc.gridx = 0;
-            gbc.gridwidth = 2;  // Ensure buttons span properly
-            add(option, gbc);
-            gbc.gridy++;
-        }
-
-        gbc.gridwidth = 2;
-        add(feedbackLabel, gbc);
-        gbc.gridy++;
+            addc(option, 0, gridX++, 1, 1, 1.0, 0.0,
+                GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL,
+                5, 5, 5, 5);
+         }
+        
+        addc(buttonPanel, 0, ++gridX, 1, 1, 0.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                5, 5, 5, 5);
+        
     }
 
 
@@ -211,9 +218,7 @@ public class PrepareScheduleView extends UserRequestView /*implements ActionList
         Step currentStep = model.currentTask().currentStep().getStep();
         
         view = SplashFrame.instance().getTutoringSessionView();
-        hintButton = view.getHintButton();
-        checkButton = view.getCheckButton();
-        nextButton = view.getNewExampleButton();
+
         
         PrepScheduleStep example = gson.fromJson(currentStep.getData(), PrepScheduleStep.class);
         String userAnswer = "";
@@ -243,11 +248,37 @@ public class PrepareScheduleView extends UserRequestView /*implements ActionList
      */
     @Override
     protected void updateView() {
-
         view = SplashFrame.instance().getTutoringSessionView();
-        hintButton = view.getHintButton();
-        checkButton = view.getCheckButton();
-        nextButton = view.getNewExampleButton();
+
+        switch(view.getCurrentViewType())
+        {
+            case DO_ONE:
+                updatePracticeView();
+                break;
+
+            case SEE_ONE:
+                updateTeachView();
+                break;
+
+            case TEACH_ONE:
+                updateQuizView();
+                break;
+
+            default:
+                throw new UnsupportedOperationException("Unknown Update Operation for view type: "
+                        + view.getCurrentViewType());
+        }
+    }
+
+    /**
+     * Defines each view classes' standard method for updating in the Practice View
+     */
+    @Override
+    protected void updatePracticeView() {
+
+        resetButtonListeners();
+        
+
         
         StepSubType type = StepSubType.PREPARE_SCHEDULE;
         
@@ -279,7 +310,7 @@ public class PrepareScheduleView extends UserRequestView /*implements ActionList
                 titleLabel.setText("<html><b>Please choose the correct option for each step.<b></html>");
                 checkButton.setEnabled(true);
                 hintButton.setEnabled(true);
-                nextButton.setEnabled(false);
+                newExampleButton.setEnabled(false);
                 updatePreviousStepsDisplay();
                 loadStep();
             }
@@ -299,6 +330,24 @@ public class PrepareScheduleView extends UserRequestView /*implements ActionList
 
         feedbackLabel.setText("");
         updatePreviousStepsDisplay();
+        revalidate();
+        repaint();
+    }
+
+    /**
+     * Defines each view classes' standard method for updating in the Teach Me View
+     */
+    @Override
+    protected void updateTeachView() {
+
+    }
+
+    /**
+     * Defines each view classes' standard method for updating in the Teach Me View
+     */
+    @Override
+    protected void updateQuizView() {
+
     }
 
     /**

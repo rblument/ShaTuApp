@@ -17,11 +17,9 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -30,19 +28,12 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 import edu.regis.shatu.model.BitShiftStep;
 import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
-import edu.regis.shatu.view.act.HintAction;
-import edu.regis.shatu.view.act.NewExampleAction;
-import edu.regis.shatu.view.act.StepCompletionAction;
 
 /**
  * ShiftRightView class represents the GUI view for performing the right shift operation on a binary number.
@@ -64,8 +55,7 @@ public class ShiftRightView extends UserRequestView implements KeyListener {
     private JScrollPane responsePane;
     private GPanel questionPanel, descriptionPanel, feedbackPanel, qrPanel;
     private JPanel radioButtonPanel;
-    private JButton checkButton, nextButton, hintButton;
-    private boolean checkHintEnabled = false;
+
     private ButtonGroup problemSizeGroup;
     private JRadioButton fourRadioButton, eightRadioButton, sixteenRadioButton,
             thirtytwoRadioButton;
@@ -126,6 +116,10 @@ public class ShiftRightView extends UserRequestView implements KeyListener {
 
         addc(qrPanel, 0, 2, 3, 1, 1.0, 1.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
+                5, 5, 5, 5);
+        
+        addc(buttonPanel, 0, 4, 1, 1, 0.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
     }
     
@@ -302,31 +296,50 @@ public class ShiftRightView extends UserRequestView implements KeyListener {
     @Override
     protected void updateView() {
         view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
-        hintButton = view.getHintButton();
-        checkButton = view.getCheckButton();
-        nextButton = view.getNewExampleButton();
 
-        
+        switch(view.getCurrentViewType())
+        {
+            case DO_ONE:
+                updatePracticeView();
+                break;
+
+            case SEE_ONE:
+                updateTeachView();
+                break;
+
+            case TEACH_ONE:
+                updateQuizView();
+                break;
+
+            default:
+                throw new UnsupportedOperationException("Unknown Update Operation for view type: "
+                        + view.getCurrentViewType());
+        }
+    }
+
+    /**
+     * Defines each view classes' standard method for updating in the Practice View
+     */
+    @Override
+    protected void updatePracticeView() {
         responseTextArea.setText("");
         feedbackTextArea.setText("");
 
 
         // If check and hint buttons are disabled, reset listenerers and apply those used by this view
         if(!checkHintEnabled) {
-            view.resetButtonListeners(); // Clear any listeners applied from other views
+            resetButtonListeners(); // Clear any listeners applied from other views
         }
-
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
         Step step = model.currentTask().getCurrentStep().getStep();
         System.out.println("Current Step: " + step.getSubType());
         System.out.println(" Data: " + step.getData());
 
         // If we got here by the user selecting this step/view, the current
-        // task could be anything. 
+        // task could be anything.
         if (step.getSubType() == StepSubType.SHIFT_BITS) {
             BitShiftStep example = gson.fromJson(step.getData(), BitShiftStep.class);
-        
+
             System.out.println("Shift right update display called");
             operand = example.getOperand();
             if (operand == null || operand.isEmpty()) {
@@ -342,8 +355,24 @@ public class ShiftRightView extends UserRequestView implements KeyListener {
             shiftLength = example.getShiftLength();
             operandLabel.setText(operand);
             instructionLabel.setText("Logical right shift the input given below by "
-              + shiftLength + " bits:");
+                    + shiftLength + " bits:");
         }
+    }
+
+    /**
+     * Defines each view classes' standard method for updating in the Teach Me View
+     */
+    @Override
+    protected void updateTeachView() {
+
+    }
+
+    /**
+     * Defines each view classes' standard method for updating in the Teach Me View
+     */
+    @Override
+    protected void updateQuizView() {
+
     }
 
 
