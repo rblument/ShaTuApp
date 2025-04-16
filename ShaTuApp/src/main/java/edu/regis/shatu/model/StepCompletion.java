@@ -38,6 +38,12 @@ public class StepCompletion {
     private int hintsGiven;
     
     /**
+     * The step number of a multi-Step problem
+     * EX: prepareSchedule is a 4 step example.
+     */
+    private int stepNumber;
+    
+    /**
      * A JSon encoded objects corresponding to the example step type.
      */
     private String data;
@@ -98,4 +104,13 @@ public class StepCompletion {
     public void setHintsGiven(int hintsGiven) {
         this.hintsGiven = hintsGiven;
     }
+        
+    public int getStepNumber() {
+        return stepNumber;
+    }
+
+    public void setStepNumber(int stepNumber) {
+        this.stepNumber = stepNumber;
+    }
+    
 }

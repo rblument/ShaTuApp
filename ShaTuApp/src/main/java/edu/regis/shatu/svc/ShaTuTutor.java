@@ -1025,7 +1025,6 @@ public class ShaTuTutor implements TutorSvc {
     }
 
     public TutorReply completePrepareScheduleStep(StepCompletion completion) {
-        System.out.print("\n\n\n\n DID WE GET HERE???? \n\n\n\n");
         StepCompletionReply stepReply = new StepCompletionReply();
         stepReply.setResponse(" ");
         
@@ -1033,22 +1032,21 @@ public class ShaTuTutor implements TutorSvc {
         
         String userAnswer = completedPrepareScheduleStep.getUserAnswer();
         String correctAnswer = completedPrepareScheduleStep.getCorrectAnswer();
-
-        System.out.println("User answer: " + userAnswer); // Error checking
-        System.out.println("Correct answer: " + correctAnswer); // Error checking
-                
+        
         if (userAnswer.equals(correctAnswer)) { // User was correct
-            if(completedPrepareScheduleStep.getStepNumber() == 4){
-                System.out.print("\n\n COMPLETED THE LAST STEP OF THE WHOLE THING\n\n\n");
+            if(completedPrepareScheduleStep.getStepNumber() == 3){
                 stepReply.setIsCorrect(true);
                 stepReply.setIsNextStep(true);
+                stepReply.setResponse("Please click new example to move on!");
+            }else{
+                stepReply.setIsCorrect(true);
+                stepReply.setIsRepeatStep(false);
+                stepReply.setIsNewStep(true);
+                stepReply.setIsNextStep(true);
+                stepReply.setResponse("Please click new example to move on!");
             }
             System.out.println("Answer was correct, correct if branch taken."); // Error checking
-            stepReply.setIsCorrect(true);
-            stepReply.setIsRepeatStep(false);
-            stepReply.setIsNewStep(true);
-            stepReply.setIsNextStep(true);
-            stepReply.setResponse("Please click new example to move on!");
+
             //TO DO: IMPLEMENT UPDATE TO DATABASE
             
 
@@ -1060,22 +1058,7 @@ public class ShaTuTutor implements TutorSvc {
             stepReply.setIsNewTask(false);
             stepReply.setIsNextStep(true);
         }
-
-        //stepReply.setCorrectAnswer(correctAnswer);
-        //stepReply.setResponse(userAnswer);
-
         
-        //stepReply.setIsRepeatStep(true);
-        //stepReply.setIsNewStep(true);
-
-        // ToDo: Use the student model to figure out whether we want
-        // to give the student another practice problem of the same
-        // type or move on to an entirely different problem.
-        //stepReply.setIsNewTask(true);
-
-        // ToDo: currently only one step in a task, so there isn't a next one???
-        //stepReply.setIsNextStep(false);
-
         // Update the assessment data and save it to the database.
         int dbId = KnowledgeComponentKind.fromString("Prepare Schedule").dbId();
         Assessment assessment = studentModel.findAssessment(dbId);
@@ -3515,6 +3498,10 @@ public class ShaTuTutor implements TutorSvc {
     private TutorReply hintPrepareSchedule(StepCompletion completion) {
         System.out.println("Tutor hintPrepareSchedule");
 
+        int stepNumber = completion.getStepNumber();
+        
+        System.out.print("\n Hint Prep Sched " + stepNumber + "\n\n");
+        
         StepCompletionReply stepReply = new StepCompletionReply();
 
         stepReply.setIsCorrect(false);
@@ -3527,28 +3514,17 @@ public class ShaTuTutor implements TutorSvc {
 
         Hint hintOne = new Hint();
         hintOne.setId(1);
-        //hintOne.setText("Extend the first 16 words to a total of 64 words");
-        hintOne.setText("Does SHA-256 allow arbitrary block sizes, or does it standardize them?");
-        
-        Hint hintTwo = new Hint();
-        hintTwo.setId(2);
-        //hintTwo.setText("Use bitwise operations to generate each new word");
-        hintTwo.setText("What is the purpose of dividing blocks into smaller segments?");
-        
-        Hint hintThree = new Hint();
-        hintThree.setId(3);
-        hintThree.setText( "Does SHA-256 add external words, or does it derive them from existing ones?");
-        
-        Hint hintFour = new Hint();
-        hintFour.setId(4);
-        hintFour.setText("Does SHA-256 allow arbitrary block sizes, or does it standardize them?");
+
+        switch (stepNumber){
+            case 0 -> hintOne.setText("Does SHA-256 allow arbitrary block sizes, or does it standardize them?");
+            case 1 -> hintOne.setText("What is the purpose of dividing blocks into smaller segments?");
+            case 2 -> hintOne.setText( "Does SHA-256 add external words, or does it derive them from existing ones?");
+            case 3 -> hintOne.setText("How does SHA-256 use transformed words in its compression phase?");
+        }
         
         Step step = completion.getStep();
         step.addHint(hintOne);
-        step.addHint(hintTwo);
-        step.addHint(hintThree);
-        step.addHint(hintFour);
-
+  
         step.setSubType(StepSubType.REQUEST_HINT);
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);
@@ -3561,7 +3537,7 @@ public class ShaTuTutor implements TutorSvc {
 
         TutorReply reply = new TutorReply(":Success");
         reply.setData(gson.toJson(pendingStep));
-
+        
         // Update the assessment data and save it to the database.
         int dbId = KnowledgeComponentKind.fromString("Prepare Schedule").dbId();
         Assessment assessment = studentModel.findAssessment(dbId);
