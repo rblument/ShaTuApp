@@ -81,6 +81,54 @@ public class CompressRound extends Objective {
         return reply;
     }
 
+    /**
+     * Handles client requests for a new compress round example.
+     *
+     * @return a TutorReply
+     */
+    @Override
+    public TutorReply example(TutoringSession session, String jsonData) {
+        CompressRoundStep subStep = gson.fromJson(jsonData, CompressRoundStep.class);
+
+        Step step = new Step(1, 0, StepSubType.COMPRESS_ROUND);
+
+        // ToDo: fix timeouts
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+        step.setData(gson.toJson(subStep));
+
+        Task task = new Task();
+        task.setKind(TaskKind.PROBLEM);
+        task.setType(ProblemType.COMPRESS_ROUND);
+        task.addStep(step);
+
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("Compress Round").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId);
+        assessment.incrementExposures();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
+
+            PendingStep pendingStep = new PendingStep(step);
+            pendingStep.setCurrentHintIndex(0);
+            pendingStep.setNotifyTutor(true);
+            pendingStep.setIsCompleted(false);
+
+            PendingTask pendingTask = new PendingTask(task);
+            pendingTask.setCurrentStep(pendingStep);
+
+            TutorReply reply = new TutorReply(":Success");
+            reply.setData(gson.toJson(pendingTask));
+
+            return reply;
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
+    }
+
     @Override
     public TutorReply completeStep(StepCompletion completion) {
         StepCompletionReply stepReply = new StepCompletionReply();
@@ -151,51 +199,4 @@ public class CompressRound extends Objective {
         return reply;
     }
 
-    /**
-     * Handles client requests for a new compress round example.
-     *
-     * @return a TutorReply
-     */
-    @Override
-    public TutorReply example(TutoringSession session, String jsonData) {
-        CompressRoundStep subStep = gson.fromJson(jsonData, CompressRoundStep.class);
-
-        Step step = new Step(1, 0, StepSubType.COMPRESS_ROUND);
-
-        // ToDo: fix timeouts
-        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
-        step.setTimeout(timeout);
-        step.setData(gson.toJson(subStep));
-
-        Task task = new Task();
-        task.setKind(TaskKind.PROBLEM);
-        task.setType(ProblemType.COMPRESS_ROUND);
-        task.addStep(step);
-
-        // Update the assessment data and save it to the database.
-        int dbId = KnowledgeComponentKind.fromString("Compress Round").dbId();
-        Assessment assessment = studentModel.findAssessment(dbId);
-        assessment.incrementExposures();
-
-        try {
-            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
-            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
-
-            PendingStep pendingStep = new PendingStep(step);
-            pendingStep.setCurrentHintIndex(0);
-            pendingStep.setNotifyTutor(true);
-            pendingStep.setIsCompleted(false);
-
-            PendingTask pendingTask = new PendingTask(task);
-            pendingTask.setCurrentStep(pendingStep);
-
-            TutorReply reply = new TutorReply(":Success");
-            reply.setData(gson.toJson(pendingTask));
-
-            return reply;
-
-        } catch (NonRecoverableException ex) {
-            return createError("Unknown error", ex);
-        }
-    }
 }

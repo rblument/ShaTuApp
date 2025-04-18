@@ -28,6 +28,55 @@ public class MajorityFunction extends Objective {
         super(student);
     }
 
+    @Override
+    public TutorReply hint(StepCompletion completion) {
+        System.out.println("Tutor hintMajorityFunction");
+
+        StepCompletionReply stepReply = new StepCompletionReply();
+
+        stepReply.setIsCorrect(false);
+        stepReply.setIsRepeatStep(true);
+        stepReply.setIsNewStep(false);
+        stepReply.setIsNewTask(false);
+        stepReply.setIsNextStep(false);
+
+        Hint hintOne = new Hint();
+        hintOne.setId(0);
+        hintOne.setText(
+                "The majority function returns the bit value that appears most frequently among the three inputs");
+
+        Step step = completion.getStep();
+        step.addHint(hintOne);
+
+        step.setSubType(StepSubType.REQUEST_HINT);
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+        step.setData(gson.toJson(stepReply));
+
+        PendingStep pendingStep = new PendingStep(step);
+        pendingStep.setCurrentHintIndex(0);
+        pendingStep.setNotifyTutor(true);
+        pendingStep.setIsCompleted(false);
+
+        TutorReply reply = new TutorReply(":Success");
+        reply.setData(gson.toJson(pendingStep));
+
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("Majority Function").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId);
+        assessment.incrementHints();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.HINTS);
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
+
+        return reply;
+    }
+
     /**
      * Handles client requests for a new majority function example.
      *
@@ -89,87 +138,6 @@ public class MajorityFunction extends Objective {
         } catch (NonRecoverableException ex) {
             return createError("Unknown error", ex);
         }
-    }
-
-    /**
-     * Evaluates the maj function maj(x, y, z).
-     *
-     * @param x Binary string representation of x.
-     * @param y Binary string representation of y.
-     * @param z Binary string representation of z.
-     * @return Binary string result of maj(x, y, z).
-     */
-    private String majorityFunction(String x, String y, String z, int bitLength) {
-        // Convert the binary strings to integer values
-        String tempX = x.replaceAll("\\s", "");
-        String tempY = y.replaceAll("\\s", "");
-        String tempZ = z.replaceAll("\\s", "");
-
-        long intX = Long.parseLong(tempX, 2);
-        long intY = Long.parseLong(tempY, 2);
-        long intZ = Long.parseLong(tempZ, 2);
-
-        long xy = intX & intY;
-
-        long xz = intX & intZ;
-
-        long yz = intY & intZ;
-
-        long result = xy ^ xz ^ yz;
-
-        // Convert the result back to binary string
-        String binaryResult = formatResult(result, bitLength);
-
-        return binaryResult;
-    }
-
-    @Override
-    public TutorReply hint(StepCompletion completion) {
-        System.out.println("Tutor hintMajorityFunction");
-
-        StepCompletionReply stepReply = new StepCompletionReply();
-
-        stepReply.setIsCorrect(false);
-        stepReply.setIsRepeatStep(true);
-        stepReply.setIsNewStep(false);
-        stepReply.setIsNewTask(false);
-        stepReply.setIsNextStep(false);
-
-        Hint hintOne = new Hint();
-        hintOne.setId(0);
-        hintOne.setText(
-                "The majority function returns the bit value that appears most frequently among the three inputs");
-
-        Step step = completion.getStep();
-        step.addHint(hintOne);
-
-        step.setSubType(StepSubType.REQUEST_HINT);
-        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
-        step.setTimeout(timeout);
-        step.setData(gson.toJson(stepReply));
-
-        PendingStep pendingStep = new PendingStep(step);
-        pendingStep.setCurrentHintIndex(0);
-        pendingStep.setNotifyTutor(true);
-        pendingStep.setIsCompleted(false);
-
-        TutorReply reply = new TutorReply(":Success");
-        reply.setData(gson.toJson(pendingStep));
-
-        // Update the assessment data and save it to the database.
-        int dbId = KnowledgeComponentKind.fromString("Majority Function").dbId();
-        Assessment assessment = studentModel.findAssessment(dbId);
-        assessment.incrementHints();
-
-        try {
-            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
-            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.HINTS);
-
-        } catch (NonRecoverableException ex) {
-            return createError("Unknown error", ex);
-        }
-
-        return reply;
     }
 
     @Override
@@ -263,5 +231,37 @@ public class MajorityFunction extends Objective {
         reply.setData(gson.toJson(pendingTask));
 
         return reply;
+    }
+
+    /**
+     * Evaluates the maj function maj(x, y, z).
+     *
+     * @param x Binary string representation of x.
+     * @param y Binary string representation of y.
+     * @param z Binary string representation of z.
+     * @return Binary string result of maj(x, y, z).
+     */
+    private String majorityFunction(String x, String y, String z, int bitLength) {
+        // Convert the binary strings to integer values
+        String tempX = x.replaceAll("\\s", "");
+        String tempY = y.replaceAll("\\s", "");
+        String tempZ = z.replaceAll("\\s", "");
+
+        long intX = Long.parseLong(tempX, 2);
+        long intY = Long.parseLong(tempY, 2);
+        long intZ = Long.parseLong(tempZ, 2);
+
+        long xy = intX & intY;
+
+        long xz = intX & intZ;
+
+        long yz = intY & intZ;
+
+        long result = xy ^ xz ^ yz;
+
+        // Convert the result back to binary string
+        String binaryResult = formatResult(result, bitLength);
+
+        return binaryResult;
     }
 }

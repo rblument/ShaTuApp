@@ -37,6 +37,130 @@ public class XorBits extends Objective {
     }
 
     @Override
+    public TutorReply hint(StepCompletion completion) {
+        System.out.println("Tutor hintXorBits");
+
+        StepCompletionReply stepReply = new StepCompletionReply();
+
+        stepReply.setIsCorrect(false);
+        stepReply.setIsRepeatStep(true);
+        stepReply.setIsNewStep(false);
+        stepReply.setIsNewTask(false);
+        stepReply.setIsNextStep(false);
+
+        Hint hintOne = new Hint();
+        hintOne.setId(0);
+        hintOne.setText("XOR operation results in 1 only when the bits are different");
+
+        Step step = completion.getStep();
+        step.addHint(hintOne);
+
+        step.setSubType(StepSubType.REQUEST_HINT);
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+        step.setData(gson.toJson(stepReply));
+
+        PendingStep pendingStep = new PendingStep(step);
+        pendingStep.setCurrentHintIndex(0);
+        pendingStep.setNotifyTutor(true);
+        pendingStep.setIsCompleted(false);
+
+        TutorReply reply = new TutorReply(":Success");
+        reply.setData(gson.toJson(pendingStep));
+
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("XOR Bits").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId);
+        assessment.incrementHints();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.HINTS);
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
+
+        return reply;
+    }
+
+    /**
+     * Handles client requests for a new XOR bits example.
+     *
+     * @return a TutorReply
+     */
+    @Override
+    public TutorReply example(TutoringSession session, String jsonData) {
+        Random rnd = new Random();
+
+        BitOpExample example = gson.fromJson(jsonData, BitOpExample.class);
+
+        int size = example.getPreSize();
+
+        if (size == 0) {
+            // ToDo: The tutor should generate the string length and timeout
+            // based on the the current student model.
+            size = rnd.nextInt(MAX_BITS_SIZE - 1) + 1;
+            example.setTimeOut(600);
+
+        } else if (size > MAX_BITS_SIZE) {
+            // The student is requesting practice for a specific string length.
+            size = MAX_ASCII_SIZE;
+            example.setTimeOut(0);
+        }
+
+        example.generatedRandomOperands(size);
+
+        int xor = (int) example.getOperand1Val() ^ (int) example.getOperand2Val();
+        example.setResultVal(xor);
+
+        BitOpStep subStep = new BitOpStep();
+        subStep.setExample(example);
+        // ToDo: multistep should be determined by the student model.
+        subStep.setMultiStep(rnd.nextBoolean());
+
+        Step step = new Step(1, 0, StepSubType.XOR_BITS);
+
+        // ToDo: fix timeouts
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+
+        step.setData(gson.toJson(subStep));
+
+        Task task = new Task();
+        task.setKind(TaskKind.PROBLEM);
+        task.setType(ProblemType.XOR_BITS);
+        task.setDescription("Xor the bits in the two operands");
+        task.addStep(step);
+
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("XOR Bits").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId);
+        assessment.incrementExposures();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
+
+            PendingStep pendingStep = new PendingStep(step);
+            pendingStep.setCurrentHintIndex(0);
+            pendingStep.setNotifyTutor(true);
+            pendingStep.setIsCompleted(false);
+
+            PendingTask pendingTask = new PendingTask(task);
+            pendingTask.setCurrentStep(pendingStep);
+
+            TutorReply reply = new TutorReply(":Success");
+            reply.setData(gson.toJson(pendingTask));
+
+            return reply;
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
+    }
+
+    @Override
     public TutorReply completeStep(StepCompletion completion) {
         System.out.println("Tutor completeXorBitsStep");
 
@@ -123,130 +247,6 @@ public class XorBits extends Objective {
         TutorReply reply = new TutorReply(":Success");
 
         reply.setData(gson.toJson(pendingTask));
-
-        return reply;
-    }
-
-    /**
-     * Handles client requests for a new XOR bits example.
-     *
-     * @return a TutorReply
-     */
-    @Override
-    public TutorReply example(TutoringSession session, String jsonData) {
-        Random rnd = new Random();
-
-        BitOpExample example = gson.fromJson(jsonData, BitOpExample.class);
-
-        int size = example.getPreSize();
-
-        if (size == 0) {
-            // ToDo: The tutor should generate the string length and timeout
-            // based on the the current student model.
-            size = rnd.nextInt(MAX_BITS_SIZE - 1) + 1;
-            example.setTimeOut(600);
-
-        } else if (size > MAX_BITS_SIZE) {
-            // The student is requesting practice for a specific string length.
-            size = MAX_ASCII_SIZE;
-            example.setTimeOut(0);
-        }
-
-        example.generatedRandomOperands(size);
-
-        int xor = (int) example.getOperand1Val() ^ (int) example.getOperand2Val();
-        example.setResultVal(xor);
-
-        BitOpStep subStep = new BitOpStep();
-        subStep.setExample(example);
-        // ToDo: multistep should be determined by the student model.
-        subStep.setMultiStep(rnd.nextBoolean());
-
-        Step step = new Step(1, 0, StepSubType.XOR_BITS);
-
-        // ToDo: fix timeouts
-        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
-        step.setTimeout(timeout);
-
-        step.setData(gson.toJson(subStep));
-
-        Task task = new Task();
-        task.setKind(TaskKind.PROBLEM);
-        task.setType(ProblemType.XOR_BITS);
-        task.setDescription("Xor the bits in the two operands");
-        task.addStep(step);
-
-        // Update the assessment data and save it to the database.
-        int dbId = KnowledgeComponentKind.fromString("XOR Bits").dbId();
-        Assessment assessment = studentModel.findAssessment(dbId);
-        assessment.incrementExposures();
-
-        try {
-            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
-            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
-
-            PendingStep pendingStep = new PendingStep(step);
-            pendingStep.setCurrentHintIndex(0);
-            pendingStep.setNotifyTutor(true);
-            pendingStep.setIsCompleted(false);
-
-            PendingTask pendingTask = new PendingTask(task);
-            pendingTask.setCurrentStep(pendingStep);
-
-            TutorReply reply = new TutorReply(":Success");
-            reply.setData(gson.toJson(pendingTask));
-
-            return reply;
-
-        } catch (NonRecoverableException ex) {
-            return createError("Unknown error", ex);
-        }
-    }
-
-    @Override
-    public TutorReply hint(StepCompletion completion) {
-        System.out.println("Tutor hintXorBits");
-
-        StepCompletionReply stepReply = new StepCompletionReply();
-
-        stepReply.setIsCorrect(false);
-        stepReply.setIsRepeatStep(true);
-        stepReply.setIsNewStep(false);
-        stepReply.setIsNewTask(false);
-        stepReply.setIsNextStep(false);
-
-        Hint hintOne = new Hint();
-        hintOne.setId(0);
-        hintOne.setText("XOR operation results in 1 only when the bits are different");
-
-        Step step = completion.getStep();
-        step.addHint(hintOne);
-
-        step.setSubType(StepSubType.REQUEST_HINT);
-        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
-        step.setTimeout(timeout);
-        step.setData(gson.toJson(stepReply));
-
-        PendingStep pendingStep = new PendingStep(step);
-        pendingStep.setCurrentHintIndex(0);
-        pendingStep.setNotifyTutor(true);
-        pendingStep.setIsCompleted(false);
-
-        TutorReply reply = new TutorReply(":Success");
-        reply.setData(gson.toJson(pendingStep));
-
-        // Update the assessment data and save it to the database.
-        int dbId = KnowledgeComponentKind.fromString("XOR Bits").dbId();
-        Assessment assessment = studentModel.findAssessment(dbId);
-        assessment.incrementHints();
-
-        try {
-            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
-            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.HINTS);
-
-        } catch (NonRecoverableException ex) {
-            return createError("Unknown error", ex);
-        }
 
         return reply;
     }

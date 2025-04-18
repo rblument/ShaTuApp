@@ -78,6 +78,68 @@ public class AddMsgLen extends Objective {
     }
 
     /**
+     * Handles client requests for a new add message length example.
+     *
+     * @return a TutorReply
+     */
+    @Override
+    public TutorReply example(TutoringSession session, String jsonData) {
+        System.out.println("Start tutor newAddMsgLenExample"); // Error checking
+
+        MessageLenStep subStep = gson.fromJson(jsonData, MessageLenStep.class);
+
+        int messageLength = subStep.getMessageLength();
+
+        String question = generateRandomString(messageLength);
+
+        subStep.setQuestion(question);
+
+        subStep.setResult(Integer.toBinaryString(messageLength * 8));
+
+        System.out.println(subStep.getResult()); // Error checking
+
+        Step step = new Step(1, 0, StepSubType.ADD_MSG_LENGTH);
+
+        // ToDo: fix timeouts
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+
+        step.setData(gson.toJson(subStep));
+
+        Task task = new Task();
+        task.setKind(TaskKind.PROBLEM);
+        task.setType(ProblemType.ADD_MSG_LENGTH);
+        task.setDescription("Calculate the message length for the last 64 bits of the message length step");
+        task.addStep(step);
+
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("Add Message Length").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId);
+        assessment.incrementExposures();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
+
+            PendingStep pendingStep = new PendingStep(step);
+            pendingStep.setCurrentHintIndex(0);
+            pendingStep.setNotifyTutor(true);
+            pendingStep.setIsCompleted(false);
+
+            PendingTask pendingTask = new PendingTask(task);
+            pendingTask.setCurrentStep(pendingStep);
+
+            TutorReply reply = new TutorReply(":Success");
+            reply.setData(gson.toJson(pendingTask));
+
+            return reply;
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
+    }
+
+    /**
      * Function that is called from the overrided stepCompletion method from the
      * MessageLenView. Checks the users answer with the correct answer and will
      * provide the user with further guidance.
@@ -172,68 +234,6 @@ public class AddMsgLen extends Objective {
         reply.setData(gson.toJson(pendingTask));
 
         return reply;
-    }
-
-    /**
-     * Handles client requests for a new add message length example.
-     *
-     * @return a TutorReply
-     */
-    @Override
-    public TutorReply example(TutoringSession session, String jsonData) {
-        System.out.println("Start tutor newAddMsgLenExample"); // Error checking
-
-        MessageLenStep subStep = gson.fromJson(jsonData, MessageLenStep.class);
-
-        int messageLength = subStep.getMessageLength();
-
-        String question = generateRandomString(messageLength);
-
-        subStep.setQuestion(question);
-
-        subStep.setResult(Integer.toBinaryString(messageLength * 8));
-
-        System.out.println(subStep.getResult()); // Error checking
-
-        Step step = new Step(1, 0, StepSubType.ADD_MSG_LENGTH);
-
-        // ToDo: fix timeouts
-        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
-        step.setTimeout(timeout);
-
-        step.setData(gson.toJson(subStep));
-
-        Task task = new Task();
-        task.setKind(TaskKind.PROBLEM);
-        task.setType(ProblemType.ADD_MSG_LENGTH);
-        task.setDescription("Calculate the message length for the last 64 bits of the message length step");
-        task.addStep(step);
-
-        // Update the assessment data and save it to the database.
-        int dbId = KnowledgeComponentKind.fromString("Add Message Length").dbId();
-        Assessment assessment = studentModel.findAssessment(dbId);
-        assessment.incrementExposures();
-
-        try {
-            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
-            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
-
-            PendingStep pendingStep = new PendingStep(step);
-            pendingStep.setCurrentHintIndex(0);
-            pendingStep.setNotifyTutor(true);
-            pendingStep.setIsCompleted(false);
-
-            PendingTask pendingTask = new PendingTask(task);
-            pendingTask.setCurrentStep(pendingStep);
-
-            TutorReply reply = new TutorReply(":Success");
-            reply.setData(gson.toJson(pendingTask));
-
-            return reply;
-
-        } catch (NonRecoverableException ex) {
-            return createError("Unknown error", ex);
-        }
     }
 
 }

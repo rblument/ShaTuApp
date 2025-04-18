@@ -35,6 +35,54 @@ public class AddBits extends Objective {
         super(student);
     }
 
+    @Override
+    public TutorReply hint(StepCompletion completion) {
+        System.out.println("Tutor hintAddBits");
+
+        StepCompletionReply stepReply = new StepCompletionReply();
+
+        stepReply.setIsCorrect(false);
+        stepReply.setIsRepeatStep(true);
+        stepReply.setIsNewStep(false);
+        stepReply.setIsNewTask(false);
+        stepReply.setIsNextStep(false);
+
+        Hint hintOne = new Hint();
+        hintOne.setId(0);
+        hintOne.setText("Add the bits as if they were unsigned integers, discarding any overflow beyond 32 bits");
+
+        Step step = completion.getStep();
+        step.addHint(hintOne);
+
+        step.setSubType(StepSubType.REQUEST_HINT);
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+        step.setData(gson.toJson(stepReply));
+
+        PendingStep pendingStep = new PendingStep(step);
+        pendingStep.setCurrentHintIndex(0);
+        pendingStep.setNotifyTutor(true);
+        pendingStep.setIsCompleted(false);
+
+        TutorReply reply = new TutorReply(":Success");
+        reply.setData(gson.toJson(pendingStep));
+
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString("Add Bits").dbId();
+        Assessment assessment = studentModel.findAssessment(dbId);
+        assessment.incrementHints();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.HINTS);
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
+
+        return reply;
+    }
+
     /**
      * Handles client requests for a new add bits example.
      *
@@ -133,54 +181,6 @@ public class AddBits extends Objective {
         } catch (NonRecoverableException ex) {
             return createError("Unknown error", ex);
         }
-    }
-
-    @Override
-    public TutorReply hint(StepCompletion completion) {
-        System.out.println("Tutor hintAddBits");
-
-        StepCompletionReply stepReply = new StepCompletionReply();
-
-        stepReply.setIsCorrect(false);
-        stepReply.setIsRepeatStep(true);
-        stepReply.setIsNewStep(false);
-        stepReply.setIsNewTask(false);
-        stepReply.setIsNextStep(false);
-
-        Hint hintOne = new Hint();
-        hintOne.setId(0);
-        hintOne.setText("Add the bits as if they were unsigned integers, discarding any overflow beyond 32 bits");
-
-        Step step = completion.getStep();
-        step.addHint(hintOne);
-
-        step.setSubType(StepSubType.REQUEST_HINT);
-        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
-        step.setTimeout(timeout);
-        step.setData(gson.toJson(stepReply));
-
-        PendingStep pendingStep = new PendingStep(step);
-        pendingStep.setCurrentHintIndex(0);
-        pendingStep.setNotifyTutor(true);
-        pendingStep.setIsCompleted(false);
-
-        TutorReply reply = new TutorReply(":Success");
-        reply.setData(gson.toJson(pendingStep));
-
-        // Update the assessment data and save it to the database.
-        int dbId = KnowledgeComponentKind.fromString("Add Bits").dbId();
-        Assessment assessment = studentModel.findAssessment(dbId);
-        assessment.incrementHints();
-
-        try {
-            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
-            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.HINTS);
-
-        } catch (NonRecoverableException ex) {
-            return createError("Unknown error", ex);
-        }
-
-        return reply;
     }
 
     @Override

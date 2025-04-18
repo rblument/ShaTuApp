@@ -160,8 +160,8 @@ abstract public class Objective {
 
     abstract public TutorReply hint(StepCompletion completion);
 
-    abstract public TutorReply completeStep(StepCompletion completion);
-
     abstract public TutorReply example(TutoringSession session, String jsonData);
+
+    abstract public TutorReply completeStep(StepCompletion completion);
 
 }
