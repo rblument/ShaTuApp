@@ -29,7 +29,8 @@ public class AddOne extends Objective {
 
     @Override
     public TutorReply hint(StepCompletion completion) {
-        return simpleHint(completion, "Add One Bit", "Add a single '1' bit to the end of the message");
+        return simpleHint(completion, KnowledgeComponentKind.ADD_ONE_BIT,
+                "Add a single '1' bit to the end of the message");
     }
 
     /**

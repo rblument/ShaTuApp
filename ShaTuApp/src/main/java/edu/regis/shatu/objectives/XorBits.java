@@ -37,7 +37,8 @@ public class XorBits extends Objective {
 
     @Override
     public TutorReply hint(StepCompletion completion) {
-        return simpleHint(completion, "XOR Bits", "XOR operation results in 1 only when the bits are different");
+        return simpleHint(completion, KnowledgeComponentKind.XOR_BITS,
+                "XOR operation results in 1 only when the bits are different");
     }
 
     /**

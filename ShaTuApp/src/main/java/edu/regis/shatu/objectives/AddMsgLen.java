@@ -30,7 +30,7 @@ public class AddMsgLen extends Objective {
 
     @Override
     public TutorReply hint(StepCompletion completion) {
-        return simpleHint(completion, "Add Message Length",
+        return simpleHint(completion, KnowledgeComponentKind.ADD_MSG_LENGTH,
                 "Append the original message length as a 64-bit big-endian integer");
     }
 

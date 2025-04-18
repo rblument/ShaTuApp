@@ -29,7 +29,7 @@ public class RotateBits extends Objective {
 
     @Override
     public TutorReply hint(StepCompletion completion) {
-        return simpleHint(completion, "Rotate n BITS",
+        return simpleHint(completion, KnowledgeComponentKind.ROTATE_BITS,
                 "The bits that 'fall off' one end should be added to the other end");
     }
 

@@ -29,7 +29,7 @@ public class MajorityFunction extends Objective {
 
     @Override
     public TutorReply hint(StepCompletion completion) {
-        return simpleHint(completion, "Majority Function",
+        return simpleHint(completion, KnowledgeComponentKind.MAJORITY_FUNCTION,
                 "The majority function returns the bit value that appears most frequently among the three inputs");
     }
 

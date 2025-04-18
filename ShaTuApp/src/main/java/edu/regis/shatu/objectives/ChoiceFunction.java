@@ -29,7 +29,7 @@ public class ChoiceFunction extends Objective {
 
     @Override
     public TutorReply hint(StepCompletion completion) {
-        return simpleHint(completion, "Choice Function",
+        return simpleHint(completion, KnowledgeComponentKind.CHOICE_FUNCTION,
                 "The choice function selects bits from one input or another based on the value of the first input");
     }
 

@@ -28,7 +28,8 @@ public class PadZeros extends Objective {
 
     @Override
     public TutorReply hint(StepCompletion completion) {
-        return simpleHint(completion, "Pad with Zeros", "Add '0' bits until the message length is 448 mod 512");
+        return simpleHint(completion, KnowledgeComponentKind.PAD_ZEROS,
+                "Add '0' bits until the message length is 448 mod 512");
     }
 
     /**

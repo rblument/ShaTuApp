@@ -36,7 +36,7 @@ public class AddBits extends Objective {
 
     @Override
     public TutorReply hint(StepCompletion completion) {
-        return simpleHint(completion, "Add Bits",
+        return simpleHint(completion, KnowledgeComponentKind.ADD_BITS,
                 "Add the bits as if they were unsigned integers, discarding any overflow beyond 32 bits");
     }
 

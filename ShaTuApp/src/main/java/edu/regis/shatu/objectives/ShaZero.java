@@ -36,7 +36,7 @@ public class ShaZero extends Objective {
      */
     @Override
     public TutorReply hint(StepCompletion completion) {
-        return simpleHint(completion, "SHA Sum 0 Function",
+        return simpleHint(completion, KnowledgeComponentKind.SHAR_ZERO,
                 "The Σ₀ function involves three ROTR operations XOR'd together ");
     }
 

@@ -170,7 +170,7 @@ abstract public class Objective {
         return sb.toString();
     }
 
-    public TutorReply simpleHint(StepCompletion completion, String stepName, String hintText) {
+    public TutorReply simpleHint(StepCompletion completion, KnowledgeComponentKind stepName, String hintText) {
         // System.out.println("Tutor hintAddBits");
 
         StepCompletionReply stepReply = new StepCompletionReply();
@@ -202,8 +202,7 @@ abstract public class Objective {
         reply.setData(gson.toJson(pendingStep));
 
         // Update the assessment data and save it to the database.
-        int dbId = KnowledgeComponentKind.fromString(stepName).dbId();
-        Assessment assessment = studentModel.findAssessment(dbId);
+        Assessment assessment = studentModel.findAssessment(stepName.dbId());
         assessment.incrementHints();
 
         try {
