@@ -5,7 +5,6 @@ import edu.regis.shatu.model.KnowledgeComponentKind;
 import edu.regis.shatu.model.Pad0Step;
 import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
-import edu.regis.shatu.model.StepCompletionReply;
 import edu.regis.shatu.model.Student;
 import edu.regis.shatu.model.StudentModelFieldKind;
 import edu.regis.shatu.model.Task;
@@ -116,82 +115,7 @@ public class PadZeros extends Objective {
         System.out.println("user answer: " + userAnswer); // Error checking
         System.out.println("Correct answer: " + correctAnswer); // Error checking
 
-        StepCompletionReply stepReply = new StepCompletionReply();
-        stepReply.setCorrectAnswer(correctAnswer);
-        stepReply.setResponse(userAnswer);
-
-        if (userAnswer.equals(correctAnswer)) { // User was correct
-            System.out.println("Answer was correct, correct if branch taken."); // Error checking
-            stepReply.setIsCorrect(true);
-            stepReply.setIsRepeatStep(false);
-            stepReply.setIsNewStep(true);
-
-            // ToDo: Use the student model to figure out whether we want
-            // to give the student another practice problem of the same
-            // type or move on to an entirely different problem.
-            stepReply.setIsNewTask(true);
-
-            // ToDo: currently only one step in a task, so there isn't a next one???
-            stepReply.setIsNextStep(false);
-
-            // Update the assessment data and save it to the database.
-            int dbId = KnowledgeComponentKind.fromString("Pad with Zeros").dbId();
-            Assessment assessment = studentModel.findAssessment(dbId);
-            assessment.incrementSuccessess();
-
-            try {
-                StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
-                modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.SUCCESSES);
-
-            } catch (NonRecoverableException ex) {
-                return createError("Unknown error", ex);
-            }
-
-            int exposures = assessment.getExposures();
-            int successes = assessment.getSuccessess();
-
-            if (exposures > 0 && (double) successes / exposures > 0.6) {
-                stepReply.setIsNewTask(true);
-                System.out.println("%%%%%%%%%%% Next Task Recommended");
-            } else {
-                stepReply.setIsNewTask(false);
-            }
-
-        } else { // User was wrong
-            System.out.println("Answer was not correct, correct if branch taken."); // Error checking
-            stepReply.setIsCorrect(false);
-            stepReply.setIsRepeatStep(true);
-            stepReply.setIsNewStep(false);
-            stepReply.setIsNewTask(false);
-            stepReply.setIsNextStep(false);
-        }
-
-        Step step = new Step(1, 0, StepSubType.STEP_COMPLETION_REPLY);
-
-        // ToDo: fix timeouts
-        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
-        step.setTimeout(timeout);
-        step.setData(gson.toJson(stepReply));
-
-        Task task = new Task();
-        task.setKind(TaskKind.PROBLEM);
-        task.setType(ProblemType.STEP_COMPLETION_REPLY);
-        task.setDescription("Choose your next action");
-        task.addStep(step);
-
-        PendingStep pendingStep = new PendingStep(step);
-        pendingStep.setCurrentHintIndex(0);
-        pendingStep.setNotifyTutor(true);
-        pendingStep.setIsCompleted(false);
-
-        PendingTask pendingTask = new PendingTask(task);
-        pendingTask.setCurrentStep(pendingStep);
-
-        TutorReply reply = new TutorReply(":Success");
-
-        reply.setData(gson.toJson(pendingTask));
-
-        return reply;
+        return genericComplete(correctAnswer, userAnswer, KnowledgeComponentKind.PAD_ZEROS);
     }
 
     /**

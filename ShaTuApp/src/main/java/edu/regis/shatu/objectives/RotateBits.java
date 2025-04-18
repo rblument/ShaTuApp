@@ -4,20 +4,17 @@ import edu.regis.shatu.err.NonRecoverableException;
 import edu.regis.shatu.model.KnowledgeComponentKind;
 import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
-import edu.regis.shatu.model.StepCompletionReply;
 import edu.regis.shatu.model.Student;
 import edu.regis.shatu.model.StudentModelFieldKind;
 import edu.regis.shatu.model.Task;
 import edu.regis.shatu.model.TutoringSession;
 import edu.regis.shatu.model.aol.Assessment;
-import edu.regis.shatu.model.aol.AssessmentLevel;
 import edu.regis.shatu.model.aol.PendingStep;
 import edu.regis.shatu.model.aol.PendingTask;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.RotateStep;
 import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.model.aol.TaskKind;
-import edu.regis.shatu.model.aol.Timeout;
 import edu.regis.shatu.svc.ServiceFactory;
 import edu.regis.shatu.svc.StudentModelSvc;
 import edu.regis.shatu.svc.TutorReply;
@@ -92,78 +89,9 @@ public class RotateBits extends Objective {
 
         String expectedResult = performBitRotation(data, amount);
 
-        StepCompletionReply stepReply = new StepCompletionReply();
         String result = example.getUserResponse();
 
-        stepReply.setCorrectAnswer(expectedResult);
-        stepReply.setResponse(result);
-
-        System.out.println("Answer: " + expectedResult);
-
-        if (expectedResult.equals(result)) {
-            stepReply.setIsCorrect(true);
-            stepReply.setIsRepeatStep(false);
-            stepReply.setIsNewStep(true);
-            stepReply.setIsNewTask(true);
-            stepReply.setIsNextStep(false);
-
-            // Update the assessment data and save it to the database.
-            int dbId = KnowledgeComponentKind.fromString("Rotate n BITS").dbId();
-            Assessment assessment = studentModel.findAssessment(dbId);
-            assessment.incrementSuccessess();
-
-            int exposures = assessment.getExposures();
-            int successes = assessment.getSuccessess();
-
-            if (exposures > 0 && (double) successes / exposures > 0.6) {
-                stepReply.setIsNewTask(true);
-                System.out.println("%%%%%%%%%%% Next Task Recommended");
-                assessment.setAssessment(AssessmentLevel.COMPLETED);
-            } else {
-                stepReply.setIsNewTask(false);
-            }
-
-            try {
-                StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
-                modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.SUCCESSES);
-
-            } catch (NonRecoverableException ex) {
-                return createError("Unknown error", ex);
-            }
-
-        } else {
-            stepReply.setIsCorrect(false);
-            stepReply.setIsRepeatStep(true);
-            stepReply.setIsNewStep(false);
-            stepReply.setIsNewTask(false);
-            stepReply.setIsNextStep(false);
-        }
-
-        Step step = new Step(1, 0, StepSubType.STEP_COMPLETION_REPLY);
-
-        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
-        step.setTimeout(timeout);
-        step.setData(gson.toJson(stepReply));
-
-        Task task = new Task();
-        task.setKind(TaskKind.PROBLEM);
-        task.setType(ProblemType.STEP_COMPLETION_REPLY);
-        task.setDescription("Choose your next action");
-        task.addStep(step);
-
-        PendingStep pendingStep = new PendingStep(step);
-        pendingStep.setCurrentHintIndex(0);
-        pendingStep.setNotifyTutor(true);
-        pendingStep.setIsCompleted(false);
-
-        PendingTask pendingTask = new PendingTask(task);
-        pendingTask.setCurrentStep(pendingStep);
-
-        TutorReply reply = new TutorReply(":Success");
-
-        reply.setData(gson.toJson(pendingTask));
-
-        return reply;
+        return genericComplete(expectedResult, result, KnowledgeComponentKind.ROTATE_BITS);
     }
 
     /**
