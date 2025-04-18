@@ -7,11 +7,23 @@ import java.util.logging.Logger;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import edu.regis.shatu.err.NonRecoverableException;
+import edu.regis.shatu.model.Hint;
+import edu.regis.shatu.model.KnowledgeComponentKind;
+import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
+import edu.regis.shatu.model.StepCompletionReply;
 import edu.regis.shatu.model.Student;
+import edu.regis.shatu.model.StudentModelFieldKind;
 import edu.regis.shatu.model.TutoringSession;
+import edu.regis.shatu.model.aol.Assessment;
+import edu.regis.shatu.model.aol.PendingStep;
+import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.model.aol.StudentModel;
+import edu.regis.shatu.model.aol.Timeout;
+import edu.regis.shatu.svc.ServiceFactory;
 import edu.regis.shatu.svc.ShaTuTutor;
+import edu.regis.shatu.svc.StudentModelSvc;
 import edu.regis.shatu.svc.TutorReply;
 
 abstract public class Objective {
@@ -156,6 +168,53 @@ abstract public class Objective {
         }
 
         return sb.toString();
+    }
+
+    public TutorReply simpleHint(StepCompletion completion, String stepName, String hintText) {
+        // System.out.println("Tutor hintAddBits");
+
+        StepCompletionReply stepReply = new StepCompletionReply();
+
+        stepReply.setIsCorrect(false);
+        stepReply.setIsRepeatStep(true);
+        stepReply.setIsNewStep(false);
+        stepReply.setIsNewTask(false);
+        stepReply.setIsNextStep(false);
+
+        Hint hintOne = new Hint();
+        hintOne.setId(0);
+        hintOne.setText(hintText);
+
+        Step step = completion.getStep();
+        step.addHint(hintOne);
+
+        step.setSubType(StepSubType.REQUEST_HINT);
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+        step.setData(gson.toJson(stepReply));
+
+        PendingStep pendingStep = new PendingStep(step);
+        pendingStep.setCurrentHintIndex(0);
+        pendingStep.setNotifyTutor(true);
+        pendingStep.setIsCompleted(false);
+
+        TutorReply reply = new TutorReply(":Success");
+        reply.setData(gson.toJson(pendingStep));
+
+        // Update the assessment data and save it to the database.
+        int dbId = KnowledgeComponentKind.fromString(stepName).dbId();
+        Assessment assessment = studentModel.findAssessment(dbId);
+        assessment.incrementHints();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.HINTS);
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
+
+        return reply;
     }
 
     abstract public TutorReply hint(StepCompletion completion);

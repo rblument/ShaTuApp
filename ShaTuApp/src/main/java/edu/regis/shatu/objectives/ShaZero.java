@@ -1,7 +1,6 @@
 package edu.regis.shatu.objectives;
 
 import edu.regis.shatu.err.NonRecoverableException;
-import edu.regis.shatu.model.Hint;
 import edu.regis.shatu.model.KnowledgeComponentKind;
 import edu.regis.shatu.model.ShaZeroStep;
 import edu.regis.shatu.model.Step;
@@ -37,50 +36,8 @@ public class ShaZero extends Objective {
      */
     @Override
     public TutorReply hint(StepCompletion completion) {
-        System.out.println("Tutor hintChoiceFunction");
-
-        StepCompletionReply stepReply = new StepCompletionReply();
-
-        stepReply.setIsCorrect(false);
-        stepReply.setIsRepeatStep(true);
-        stepReply.setIsNewStep(false);
-        stepReply.setIsNewTask(false);
-        stepReply.setIsNextStep(false);
-
-        Hint hintOne = new Hint();
-        hintOne.setId(0);
-        hintOne.setText("The Σ₀ function involves three ROTR operations XOR'd together ");
-
-        Step step = completion.getStep();
-        step.addHint(hintOne);
-
-        step.setSubType(StepSubType.REQUEST_HINT);
-        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
-        step.setTimeout(timeout);
-        step.setData(gson.toJson(stepReply));
-
-        PendingStep pendingStep = new PendingStep(step);
-        pendingStep.setCurrentHintIndex(0);
-        pendingStep.setNotifyTutor(true);
-        pendingStep.setIsCompleted(false);
-
-        TutorReply reply = new TutorReply(":Success");
-        reply.setData(gson.toJson(pendingStep));
-
-        // Update the assessment data and save it to the database.
-        int dbId = KnowledgeComponentKind.fromString("SHA Sum 0 Function").dbId();
-        Assessment assessment = studentModel.findAssessment(dbId);
-        assessment.incrementHints();
-
-        try {
-            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
-            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.HINTS);
-
-        } catch (NonRecoverableException ex) {
-            return createError("Unknown error", ex);
-        }
-
-        return reply;
+        return simpleHint(completion, "SHA Sum 0 Function",
+                "The Σ₀ function involves three ROTR operations XOR'd together ");
     }
 
     /**
