@@ -175,7 +175,18 @@ abstract public class Objective {
         return sb.toString();
     }
 
-    public TutorReply simpleHint(StepCompletion completion, KnowledgeComponentKind stepName, String hintText) {
+    abstract public TutorReply hint(StepCompletion completion);
+
+    /**
+     * Generic Hint function for objectives to leverage. Currently only supports 1
+     * hint message.
+     * 
+     * @param completion
+     * @param stepName
+     * @param hintText
+     * @return
+     */
+    public TutorReply genericHint(StepCompletion completion, KnowledgeComponentKind stepName, String hintText) {
         // System.out.println("Tutor hintAddBits");
 
         StepCompletionReply stepReply = new StepCompletionReply();
@@ -221,10 +232,72 @@ abstract public class Objective {
         return reply;
     }
 
-    abstract public TutorReply hint(StepCompletion completion);
-
     abstract public TutorReply example(TutoringSession session, String jsonData);
 
+    /**
+     * Generic example function covering the more mundane repetitive parts of hint
+     * creation.
+     * 
+     * @param subStep
+     * @param subType
+     * @param probType
+     * @param kind
+     * @param description
+     * @return
+     */
+    public TutorReply genericExample(Object subStep, StepSubType subType, ProblemType probType,
+            KnowledgeComponentKind kind, String description) {
+        Step step = new Step(1, 0, subType);
+
+        // ToDo: fix timeouts
+        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
+        step.setTimeout(timeout);
+
+        step.setData(gson.toJson(subStep));
+
+        Task task = new Task();
+        task.setKind(TaskKind.PROBLEM);
+        task.setType(probType);
+        task.setDescription(description);
+        task.addStep(step);
+
+        // Update the assessment data and save it to the database.
+        Assessment assessment = studentModel.findAssessment(kind.dbId());
+        assessment.incrementExposures();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
+
+            PendingStep pendingStep = new PendingStep(step);
+            pendingStep.setCurrentHintIndex(0);
+            pendingStep.setNotifyTutor(true);
+            pendingStep.setIsCompleted(false);
+
+            PendingTask pendingTask = new PendingTask(task);
+            pendingTask.setCurrentStep(pendingStep);
+
+            TutorReply reply = new TutorReply(":Success");
+            reply.setData(gson.toJson(pendingTask));
+
+            return reply;
+
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error", ex);
+        }
+    }
+
+    abstract public TutorReply completeStep(StepCompletion completion);
+
+    /**
+     * Generic Step completion function again covering the repetitive aspects of
+     * marking a step as completed.
+     * 
+     * @param correctAnswer
+     * @param userAnswer
+     * @param stepName
+     * @return
+     */
     public TutorReply genericComplete(String correctAnswer, String userAnswer, KnowledgeComponentKind stepName) {
         StepCompletionReply stepReply = new StepCompletionReply();
         stepReply.setCorrectAnswer(correctAnswer);
@@ -303,7 +376,5 @@ abstract public class Objective {
 
         return reply;
     }
-
-    abstract public TutorReply completeStep(StepCompletion completion);
 
 }

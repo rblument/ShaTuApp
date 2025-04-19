@@ -1,23 +1,12 @@
 package edu.regis.shatu.objectives;
 
-import edu.regis.shatu.err.NonRecoverableException;
 import edu.regis.shatu.model.KnowledgeComponentKind;
 import edu.regis.shatu.model.MajorityStep;
-import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.Student;
-import edu.regis.shatu.model.StudentModelFieldKind;
-import edu.regis.shatu.model.Task;
 import edu.regis.shatu.model.TutoringSession;
-import edu.regis.shatu.model.aol.Assessment;
-import edu.regis.shatu.model.aol.PendingStep;
-import edu.regis.shatu.model.aol.PendingTask;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
-import edu.regis.shatu.model.aol.TaskKind;
-import edu.regis.shatu.model.aol.Timeout;
-import edu.regis.shatu.svc.ServiceFactory;
-import edu.regis.shatu.svc.StudentModelSvc;
 import edu.regis.shatu.svc.TutorReply;
 
 public class MajorityFunction extends Objective {
@@ -27,7 +16,7 @@ public class MajorityFunction extends Objective {
 
     @Override
     public TutorReply hint(StepCompletion completion) {
-        return simpleHint(completion, KnowledgeComponentKind.MAJORITY_FUNCTION,
+        return genericHint(completion, KnowledgeComponentKind.MAJORITY_FUNCTION,
                 "The majority function returns the bit value that appears most frequently among the three inputs");
     }
 
@@ -53,45 +42,9 @@ public class MajorityFunction extends Objective {
 
         substep.setResult(majorityFunction(operand1, operand2, operand3, bitLength));
 
-        Step step = new Step(1, 0, StepSubType.MAJORITY_FUNCTION);
-
-        // ToDo: fix timeouts
-        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
-        step.setTimeout(timeout);
-
-        step.setData(gson.toJson(substep));
-
-        Task task = new Task();
-        task.setKind(TaskKind.PROBLEM);
-        task.setType(ProblemType.MAJORITY_FUNCTION);
-        task.setDescription("Compute the result of the majority function on the three operands");
-        task.addStep(step);
-
-        // Update the assessment data and save it to the database.
-        int dbId = KnowledgeComponentKind.fromString("Majority Function").dbId();
-        Assessment assessment = studentModel.findAssessment(dbId);
-        assessment.incrementExposures();
-
-        try {
-            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
-            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
-
-            PendingStep pendingStep = new PendingStep(step);
-            pendingStep.setCurrentHintIndex(0);
-            pendingStep.setNotifyTutor(true);
-            pendingStep.setIsCompleted(false);
-
-            PendingTask pendingTask = new PendingTask(task);
-            pendingTask.setCurrentStep(pendingStep);
-
-            TutorReply reply = new TutorReply(":Success");
-            reply.setData(gson.toJson(pendingTask));
-
-            return reply;
-
-        } catch (NonRecoverableException ex) {
-            return createError("Unknown error", ex);
-        }
+        return genericExample(substep, StepSubType.MAJORITY_FUNCTION, ProblemType.MAJORITY_FUNCTION,
+                KnowledgeComponentKind.MAJORITY_FUNCTION,
+                "Compute the result of the majority function on the three operands");
     }
 
     @Override

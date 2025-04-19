@@ -1,23 +1,12 @@
 package edu.regis.shatu.objectives;
 
-import edu.regis.shatu.err.NonRecoverableException;
 import edu.regis.shatu.model.AddOneStep;
 import edu.regis.shatu.model.KnowledgeComponentKind;
-import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.Student;
-import edu.regis.shatu.model.StudentModelFieldKind;
-import edu.regis.shatu.model.Task;
 import edu.regis.shatu.model.TutoringSession;
-import edu.regis.shatu.model.aol.Assessment;
-import edu.regis.shatu.model.aol.PendingStep;
-import edu.regis.shatu.model.aol.PendingTask;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
-import edu.regis.shatu.model.aol.TaskKind;
-import edu.regis.shatu.model.aol.Timeout;
-import edu.regis.shatu.svc.ServiceFactory;
-import edu.regis.shatu.svc.StudentModelSvc;
 import edu.regis.shatu.svc.TutorReply;
 
 public class AddOne extends Objective {
@@ -27,7 +16,7 @@ public class AddOne extends Objective {
 
     @Override
     public TutorReply hint(StepCompletion completion) {
-        return simpleHint(completion, KnowledgeComponentKind.ADD_ONE_BIT,
+        return genericHint(completion, KnowledgeComponentKind.ADD_ONE_BIT,
                 "Add a single '1' bit to the end of the message");
     }
 
@@ -57,44 +46,9 @@ public class AddOne extends Objective {
 
         System.out.println(newAddOneBit.getResult()); // Error checking
 
-        Step step = new Step(1, 0, StepSubType.ADD_ONE_BIT);
-
-        // ToDo: fix timeouts
-        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
-        step.setTimeout(timeout);
-
-        step.setData(gson.toJson(newAddOneBit));
-
-        Task task = new Task();
-        task.setKind(TaskKind.PROBLEM);
-        task.setType(ProblemType.ADD_ONE_BIT);
-        task.setDescription("Add one bit to the given bit string");
-        task.addStep(step);
-
-        // Update the assessment data and save it to the database.
-        int dbId = KnowledgeComponentKind.fromString("Add One Bit").dbId();
-        Assessment assessment = studentModel.findAssessment(dbId);
-        assessment.incrementExposures();
-
-        try {
-            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
-            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
-
-            PendingStep pendingStep = new PendingStep(step);
-            pendingStep.setCurrentHintIndex(0);
-            pendingStep.setNotifyTutor(true);
-            pendingStep.setIsCompleted(false);
-
-            PendingTask pendingTask = new PendingTask(task);
-            pendingTask.setCurrentStep(pendingStep);
-            TutorReply reply = new TutorReply(":Success");
-            reply.setData(gson.toJson(pendingTask));
-
-            return reply;
-
-        } catch (NonRecoverableException ex) {
-            return createError("Unknown error", ex);
-        }
+        return genericExample(newAddOneBit, StepSubType.ADD_ONE_BIT, ProblemType.ADD_ONE_BIT,
+                KnowledgeComponentKind.ADD_ONE_BIT,
+                "Add one bit to the given bit string");
     }
 
     /**

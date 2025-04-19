@@ -2,25 +2,14 @@ package edu.regis.shatu.objectives;
 
 import java.util.Random;
 
-import edu.regis.shatu.err.NonRecoverableException;
 import edu.regis.shatu.model.KnowledgeComponentKind;
-import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.Student;
-import edu.regis.shatu.model.StudentModelFieldKind;
-import edu.regis.shatu.model.Task;
 import edu.regis.shatu.model.TutoringSession;
-import edu.regis.shatu.model.aol.Assessment;
 import edu.regis.shatu.model.aol.BitOpExample;
 import edu.regis.shatu.model.aol.BitOpStep;
-import edu.regis.shatu.model.aol.PendingStep;
-import edu.regis.shatu.model.aol.PendingTask;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
-import edu.regis.shatu.model.aol.TaskKind;
-import edu.regis.shatu.model.aol.Timeout;
-import edu.regis.shatu.svc.ServiceFactory;
-import edu.regis.shatu.svc.StudentModelSvc;
 import edu.regis.shatu.svc.TutorReply;
 
 public class XorBits extends Objective {
@@ -35,7 +24,7 @@ public class XorBits extends Objective {
 
     @Override
     public TutorReply hint(StepCompletion completion) {
-        return simpleHint(completion, KnowledgeComponentKind.XOR_BITS,
+        return genericHint(completion, KnowledgeComponentKind.XOR_BITS,
                 "XOR operation results in 1 only when the bits are different");
     }
 
@@ -74,45 +63,8 @@ public class XorBits extends Objective {
         // ToDo: multistep should be determined by the student model.
         subStep.setMultiStep(rnd.nextBoolean());
 
-        Step step = new Step(1, 0, StepSubType.XOR_BITS);
-
-        // ToDo: fix timeouts
-        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
-        step.setTimeout(timeout);
-
-        step.setData(gson.toJson(subStep));
-
-        Task task = new Task();
-        task.setKind(TaskKind.PROBLEM);
-        task.setType(ProblemType.XOR_BITS);
-        task.setDescription("Xor the bits in the two operands");
-        task.addStep(step);
-
-        // Update the assessment data and save it to the database.
-        int dbId = KnowledgeComponentKind.fromString("XOR Bits").dbId();
-        Assessment assessment = studentModel.findAssessment(dbId);
-        assessment.incrementExposures();
-
-        try {
-            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
-            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
-
-            PendingStep pendingStep = new PendingStep(step);
-            pendingStep.setCurrentHintIndex(0);
-            pendingStep.setNotifyTutor(true);
-            pendingStep.setIsCompleted(false);
-
-            PendingTask pendingTask = new PendingTask(task);
-            pendingTask.setCurrentStep(pendingStep);
-
-            TutorReply reply = new TutorReply(":Success");
-            reply.setData(gson.toJson(pendingTask));
-
-            return reply;
-
-        } catch (NonRecoverableException ex) {
-            return createError("Unknown error", ex);
-        }
+        return genericExample(subStep, StepSubType.XOR_BITS, ProblemType.XOR_BITS, KnowledgeComponentKind.XOR_BITS,
+                "Xor the bits in the two operands");
     }
 
     @Override

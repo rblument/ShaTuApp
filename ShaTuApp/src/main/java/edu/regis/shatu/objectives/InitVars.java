@@ -107,42 +107,8 @@ public class InitVars extends Objective {
 
         InitVarStep subStep = gson.fromJson(jsonData, InitVarStep.class);
 
-        Step step = new Step(1, 0, StepSubType.INITIALIZE_VARS);
-
-        // ToDo: fix timeouts
-        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
-        step.setTimeout(timeout);
-        step.setData(gson.toJson(subStep));
-
-        Task task = new Task();
-        task.setKind(TaskKind.PROBLEM);
-        task.setType(ProblemType.INITIALIZE_VARS);
-        task.addStep(step);
-
-        // Update the assessment data and save it to the database.
-        int dbId = KnowledgeComponentKind.fromString("Initialize Variables").dbId();
-        Assessment assessment = studentModel.findAssessment(dbId);
-
-        try {
-            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
-            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
-
-            PendingStep pendingStep = new PendingStep(step);
-            pendingStep.setCurrentHintIndex(0);
-            pendingStep.setNotifyTutor(true);
-            pendingStep.setIsCompleted(false);
-
-            PendingTask pendingTask = new PendingTask(task);
-            pendingTask.setCurrentStep(pendingStep);
-
-            TutorReply reply = new TutorReply(":Success");
-            reply.setData(gson.toJson(pendingTask));
-
-            return reply;
-
-        } catch (NonRecoverableException ex) {
-            return createError("Unknown error", ex);
-        }
+        return genericExample(subStep, StepSubType.INITIALIZE_VARS, ProblemType.INITIALIZE_VARS,
+                KnowledgeComponentKind.INITIALIZE_VARS, "Variables are Initialized using preset values.");
     }
 
     @Override

@@ -1,23 +1,12 @@
 package edu.regis.shatu.objectives;
 
-import edu.regis.shatu.err.NonRecoverableException;
 import edu.regis.shatu.model.ChoiceFunctionStep;
 import edu.regis.shatu.model.KnowledgeComponentKind;
-import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.Student;
-import edu.regis.shatu.model.StudentModelFieldKind;
-import edu.regis.shatu.model.Task;
 import edu.regis.shatu.model.TutoringSession;
-import edu.regis.shatu.model.aol.Assessment;
-import edu.regis.shatu.model.aol.PendingStep;
-import edu.regis.shatu.model.aol.PendingTask;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
-import edu.regis.shatu.model.aol.TaskKind;
-import edu.regis.shatu.model.aol.Timeout;
-import edu.regis.shatu.svc.ServiceFactory;
-import edu.regis.shatu.svc.StudentModelSvc;
 import edu.regis.shatu.svc.TutorReply;
 
 public class ChoiceFunction extends Objective {
@@ -27,7 +16,7 @@ public class ChoiceFunction extends Objective {
 
     @Override
     public TutorReply hint(StepCompletion completion) {
-        return simpleHint(completion, KnowledgeComponentKind.CHOICE_FUNCTION,
+        return genericHint(completion, KnowledgeComponentKind.CHOICE_FUNCTION,
                 "The choice function selects bits from one input or another based on the value of the first input");
     }
 
@@ -53,45 +42,9 @@ public class ChoiceFunction extends Objective {
 
         substep.setResult(choiceFunction(operand1, operand2, operand3, bitLength));
 
-        Step step = new Step(1, 0, StepSubType.CHOICE_FUNCTION);
-
-        // ToDo: fix timeouts
-        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
-        step.setTimeout(timeout);
-
-        step.setData(gson.toJson(substep));
-
-        Task task = new Task();
-        task.setKind(TaskKind.PROBLEM);
-        task.setType(ProblemType.CHOICE_FUNCTION);
-        task.setDescription("Compute the result of the choice function on the three operands");
-        task.addStep(step);
-
-        // Update the assessment data and save it to the database.
-        int dbId = KnowledgeComponentKind.fromString("Choice Function").dbId();
-        Assessment assessment = studentModel.findAssessment(dbId);
-        assessment.incrementExposures();
-
-        try {
-            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
-            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
-
-            PendingStep pendingStep = new PendingStep(step);
-            pendingStep.setCurrentHintIndex(0);
-            pendingStep.setNotifyTutor(true);
-            pendingStep.setIsCompleted(false);
-
-            PendingTask pendingTask = new PendingTask(task);
-            pendingTask.setCurrentStep(pendingStep);
-
-            TutorReply reply = new TutorReply(":Success");
-            reply.setData(gson.toJson(pendingTask));
-
-            return reply;
-
-        } catch (NonRecoverableException ex) {
-            return createError("Unknown error", ex);
-        }
+        return genericExample(substep, StepSubType.CHOICE_FUNCTION, ProblemType.CHOICE_FUNCTION,
+                KnowledgeComponentKind.CHOICE_FUNCTION,
+                "Compute the result of the choice function on the three operands");
     }
 
     @Override

@@ -11,14 +11,11 @@ import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.StepCompletionReply;
 import edu.regis.shatu.model.Student;
 import edu.regis.shatu.model.StudentModelFieldKind;
-import edu.regis.shatu.model.Task;
 import edu.regis.shatu.model.TutoringSession;
 import edu.regis.shatu.model.aol.Assessment;
 import edu.regis.shatu.model.aol.PendingStep;
-import edu.regis.shatu.model.aol.PendingTask;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
-import edu.regis.shatu.model.aol.TaskKind;
 import edu.regis.shatu.model.aol.Timeout;
 import edu.regis.shatu.svc.ServiceFactory;
 import edu.regis.shatu.svc.StudentModelSvc;
@@ -123,47 +120,8 @@ public class ShiftBits extends Objective {
 
         substep.setResult(bitShiftFunction(operand, shiftLength, shiftRight, bitLength));
 
-        Step step = new Step(1, 0, StepSubType.SHIFT_BITS);
-
-        // ToDo: fix timeouts
-        Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
-        step.setTimeout(timeout);
-
-        step.setData(gson.toJson(substep));
-
-        Task task = new Task();
-        task.setKind(TaskKind.PROBLEM);
-        task.setType(ProblemType.SHIFT_BITS);
-        task.setDescription("Compute the result of the bitshift on the operand");
-        task.addStep(step);
-
-        // Update the assessment data and save it to the database.
-        int knowledgeCompId = KnowledgeComponentKind.fromString("Shift Bits").dbId();
-        System.out.println("knowledCompId: " + knowledgeCompId);
-        Assessment assessment = studentModel.findAssessment(knowledgeCompId);
-
-        assessment.incrementExposures();
-
-        try {
-            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
-            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
-
-            PendingStep pendingStep = new PendingStep(step);
-            pendingStep.setCurrentHintIndex(0);
-            pendingStep.setNotifyTutor(true);
-            pendingStep.setIsCompleted(false);
-
-            PendingTask pendingTask = new PendingTask(task);
-            pendingTask.setCurrentStep(pendingStep);
-
-            TutorReply reply = new TutorReply(":Success");
-            reply.setData(gson.toJson(pendingTask));
-
-            return reply;
-
-        } catch (NonRecoverableException ex) {
-            return createError("Unknown error", ex);
-        }
+        return genericExample(substep, StepSubType.SHIFT_BITS, ProblemType.SHIFT_BITS,
+                KnowledgeComponentKind.SHIFT_BITS, "Compute the result of the bitshift on the operand");
     }
 
     @Override
