@@ -248,37 +248,56 @@ public class ShaTuTutor implements TutorSvc {
      *         status is ":ERR".
      * @throws edu.regis.shatu.err.NonRecoverableException
      */
-    public TutorReply verifyUser(String jsonAcct) throws NonRecoverableException {
-        Account requestAcct = gson.fromJson(jsonAcct, Account.class);
+public TutorReply verifyUser(String jsonAcct) throws NonRecoverableException {
+    Account requestAcct = gson.fromJson(jsonAcct, Account.class);
+    AccountDAO acctSvc = ServiceFactory.findAccountSvc();
 
-        AccountDAO acctSvc = ServiceFactory.findAccountSvc();
-        if (!acctSvc.exists(acctSvc.primaryKey, requestAcct.getUserId())) {
-            return new TutorReply("IllegalUserId");
-        }
+    if (!acctSvc.exists(acctSvc.primaryKey, requestAcct.getUserId())) {
+        return new TutorReply("IllegalUserId");
+    }
 
-        try {
-            Account dbAcct = acctSvc.retrieve(requestAcct.getUserId());
+    try {
+        Account dbAcct = acctSvc.retrieve(requestAcct.getUserId());
 
-            if ((dbAcct.getSecurityAnswer().equals(requestAcct.getSecurityAnswer()))
-                    && (dbAcct.getSecurityQuestion() == requestAcct.getSecurityQuestion())) {
+        if ((dbAcct.getSecurityAnswer().equals(requestAcct.getSecurityAnswer())) &&
+            (dbAcct.getSecurityQuestion() == requestAcct.getSecurityQuestion())) {
 
-                TutorReply reply = new TutorReply("Verified");
+            student = new Student(dbAcct);
 
-                return reply;
-
-            } else {
-                return new TutorReply("InvalidAnswer");
+            try {
+                StudentModelSvc stuModSvc = ServiceFactory.findStudentModelSvc();
+                studentModel = stuModSvc.retrieve(dbAcct.getUserId());
+                student.setStudentModel(studentModel);
+            } catch (ObjNotFoundException e) {
+                student = createStudent(dbAcct, ServiceFactory.findCourseSvc().retrieve(DEFAULT_COURSE_ID));
             }
+
+            // Check if session already exists before creating
+            SessionSvc sessionSvc = ServiceFactory.findSessionSvc();
+            TutoringSession session;
+
+            try {
+                session = sessionSvc.retrieve(dbAcct.getUserId()); // already exists
+            } catch (ObjNotFoundException e) {
+                // session does not exist, create it
+                session = createSession(student, ServiceFactory.findCourseSvc().retrieve(DEFAULT_COURSE_ID));
+            }
+
+            TutorReply reply = new TutorReply("Verified");
+            reply.setData("\"" + session.getSecurityToken() + "\"");
+            return reply;
+
+        } else {
+            return new TutorReply("InvalidAnswer");
+        }
 
         } catch (ObjNotFoundException e) {
             return new TutorReply("UnknownUser");
         } catch (NonRecoverableException ex) {
-            Logger.getLogger(ShaTuTutor.class
-                    .getName()).log(Level.SEVERE, null, ex);
+            LOGGER.log(Level.SEVERE, null, ex);
             return new TutorReply();
         }
-
-    }
+}
 
     /**
      * Resets password for user currently in database
@@ -290,30 +309,34 @@ public class ShaTuTutor implements TutorSvc {
      *         status is ":ERR".
      * @throws edu.regis.shatu.err.NonRecoverableException
      */
-    public TutorReply resetPassword(String jsonAcct) throws NonRecoverableException {
-        Account acct = gson.fromJson(jsonAcct, Account.class);
+public TutorReply resetPassword(String jsonAcct) throws NonRecoverableException {
+    Account acct = gson.fromJson(jsonAcct, Account.class);
+    AccountDAO acctSvc = ServiceFactory.findAccountSvc();
 
-        AccountDAO acctSvc = ServiceFactory.findAccountSvc();
-
-        if (!acctSvc.exists(acctSvc.primaryKey, acct.getUserId())) {
-            return new TutorReply("IllegalUserId");
-        }
-
-        try {
-            acctSvc.update(acct);
-
-            // ToDo: Account updated.
-            return new TutorReply("PasswordReset");
-
-        } catch (ObjNotFoundException ex) {
-            // Should never get here since we tested whether the account exists
-            return new TutorReply("IllegalUserId");
-        }
-        // catch (IllegalArgException ex) {
-        // // ToDo: More specific err information returned
-        // return new TutorReply("IllegalArg");
-        // }
+    if (!acctSvc.exists(acctSvc.primaryKey, acct.getUserId())) {
+        return new TutorReply("IllegalUserId");
     }
+
+    try {
+        //Retrieve full DB account so we don't lose names or other info
+        Account dbAcct = acctSvc.retrieve(acct.getUserId());
+
+        //Only update the changed fields
+        dbAcct.setPassword(acct.getPassword());
+
+        //Only set security question/answer if needed
+        dbAcct.setSecurityQuestion(acct.getSecurityQuestion());
+        dbAcct.setSecurityAnswer(acct.getSecurityAnswer());
+
+        acctSvc.update(dbAcct);
+
+        return new TutorReply("PasswordReset");
+
+    } catch (ObjNotFoundException ex) {
+        return new TutorReply("IllegalUserId");
+    }
+}
+
 
     /**
      * Attempts to sign a student in.

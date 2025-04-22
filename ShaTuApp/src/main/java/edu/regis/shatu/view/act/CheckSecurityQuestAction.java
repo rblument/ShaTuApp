@@ -92,12 +92,17 @@ public class CheckSecurityQuestAction extends ShaTuGuiAction {
         String msg;
         switch (reply.getStatus()) {
             case "Verified":
-                msg = "Success!\n\n" +
-                        "Press okay to create a new password\n\n";
-                JOptionPane.showMessageDialog(SplashFrame.instance(), msg);
-                SplashFrame.instance().initializeResetPassword(account.getUserId());
-                SplashFrame.instance().selectResetPassword(account.getUserId());
-                break;
+            // Extract token from reply data
+            String token = gson.fromJson(reply.getData(), String.class);
+    
+            frame.initializeResetPassword(account.getUserId(), token);
+            frame.selectResetPassword(account.getUserId());
+
+            msg = "Success!\n\n" +
+                "Press OK to create a new password\n\n";
+            JOptionPane.showMessageDialog(frame, msg);
+            break;
+
             case "IllegalUserId":
                 msg = "User id does not exist: " + account.getUserId();
                 JOptionPane.showMessageDialog(null, msg, "Information",

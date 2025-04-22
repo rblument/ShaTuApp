@@ -431,14 +431,14 @@ public class SplashFrame extends JFrame {
      * 
      * @param email
      */
-    public void initializeResetPassword(String email) {
+    public void initializeResetPassword(String email, String token) {
         if (email == null) {
             System.err.println("Email is null in initializeResetPassword");
             return;
         }
 
         this.resetPasswordPanel = new ResetPasswordPanel(email);
-        
+        this.resetPasswordPanel.setSecurityToken(token);
         this.cards.add(resetPasswordPanel, RESET_PASSWORD);
     }
 
