@@ -96,6 +96,9 @@ public class SHA_256 {
 
     private static final int BLOCK_BYTES = BLOCK_BITS / 8;
 
+    /**
+     * Variables for holding values for labels in CompressionCanvasView
+     */
     private final int[] w = new int[64];
     private final int[] h = new int[8];
     private final int[] temp = new int[8];
@@ -177,6 +180,11 @@ public class SHA_256 {
         return digestStr;
     }
 
+    /**
+     * Takes a string in hexidecimal and returns a binary string representation
+     * 
+     * @param hexString
+     */
     private static String hexToBin(String hexString) {
         StringBuffer buffer = new StringBuffer();
         for (int pos = 0; pos < hexString.length(); pos++) {
@@ -281,113 +289,146 @@ public class SHA_256 {
             return null;
         }
 
-        int[] words = pad(message);
+        int [] words = initializeMessage(message);
 
         // PAD_WITH_ZEROS breakpoint
         if (breakpointWrapper != null
                 && breakpointWrapper.shouldBreakHere(new SHA_256BreakPoint(SHA_256BreakPoint.SHA256Breakpoint.PAD_WITH_ZEROS))) {
             return null;
         }
+        
 
+        
+        if (isSendCallbacks){
+            
+            // enumerate all blocks (each containing 16 words -- uses method)
+
+            for (int i = 0, n = words.length / 16; i < n; ++i) {
+                enumerateMessageBlocks (i, words);
+                
+        // use method to operate on temp and do compression rounds        
+                for (int t = 0; t < w.length; ++t) {
+                    compressionRound (t);
+                }
+         // add values in TEMP to values in H        
+                nextMessageBlockHValue ();
+            }
+        }
+        
+        return toByteArray(h); 
+    }
+    
+    /**
+     * Prepares the message for hashing by creating all words, padding with a zero 
+     * bit and adding the 64 bit length of the original message.
+     *
+     * @param message The bytes to hash.
+     * @return The int array of words that make up the message.
+     */
+    
+    public int [] initializeMessage(byte [] message){
+        //let H = H0
         System.arraycopy(H0, 0, h, 0, H0.length);
 
-        // INIT_HASH_VALUES breakpoint
-        if (breakpointWrapper != null
-                && breakpointWrapper.shouldBreakHere(new SHA_256BreakPoint(SHA_256BreakPoint.SHA256Breakpoint.INIT_HASH_VALUES))) {
-            return null;
-        }
-
-        for (int i = 0, n = words.length / 16; i < n; ++i) {
-            enumerateMessageBlocks(i, words);
-        }
-
-        return toByteArray(h);
-    }
-
-    public void enumerateMessageBlocks(int i, int[] words) {
+        // initialize all words
+        int initWords [] = pad(message);  
+        
+        return initWords;
+    } 
+    
+     /**
+     * Completes message schedule prepartion by creating the array of words for 
+     * a single block (64 words) to be hashed.  
+     * Appends additional zero bit words until total of 64 32-bit words in block 
+     * then adds length of original message to end of block .
+     *
+     * @param m The block number being enumerated.
+     * @param words Array of words created from original message by initializeMessage 
+     *        method
+     */
+    public void enumerateMessageBlocks (int m, int[] words){
         // initialize w from the block's words
-        System.arraycopy(words, i * 16, w, 0, 16);
-
-        // Modify the zero-ed indexes at the end of the array using the following algorithm:
-        for (int t = 16; t < w.length; ++t) {
-            w[t] = smallSig1(w[t - 2]) + w[t - 7] + smallSig0(w[t - 15]) + w[t - 16];
-        }
-
-        // SCHEDULE_EXPANSION breakpoint
-        if (breakpointWrapper != null
-                && breakpointWrapper.shouldBreakHere(new SHA_256BreakPoint(SHA_256BreakPoint.SHA256Breakpoint.SCHEDULE_EXPANSION))) {
-            return;
-        }
-
-        System.arraycopy(h, 0, temp, 0, h.length);  // let temp = h
-
-        for (int t = 0; t < w.length; ++t) {
-            if (breakpointWrapper != null
-                    && breakpointWrapper.shouldBreakHere(
-                            new SHA_256BreakPoint(SHA_256BreakPoint.SHA256Breakpoint.COMPRESS_ROUND), t)) {
-                return;
+            System.arraycopy(words, m * 16, w, 0, 16);
+         
+            // Modify the zero-ed indexes at the end of the array using the following algorithm:
+            for (int t = 16; t < w.length; ++t) {
+                 w[t] = smallSig1(w[t - 2]) + w[t - 7] + smallSig0(w[t - 15]) + w[t - 16];
             }
-
-            compressionRound(t);
-
-            // FINAL_HASH breakpoint
-            if (breakpointWrapper != null
-                    && breakpointWrapper.shouldBreakHere(new SHA_256BreakPoint(SHA_256BreakPoint.SHA256Breakpoint.FINAL_HASH))) {
-                return;
-            }
-        }
-
-        nextMessageBlockHValue();
-    }
-
-    public void compressionRound(int t) {
-        //            E        F        G
-        choice = ch(temp[4], temp[5], temp[6]);
-
-        //               A         B       C
-        majority = maj(temp[0], temp[1], temp[2]);
-
-        //                     A
-        bigSig0Val = bigSig0(temp[0]);
-
-        //                     E        
-        bigSig1Val = bigSig1(temp[4]);
-
-        Kt = K[t];
-        Wt = w[t];
-        mod3 = Wt + Kt;
-        mod2 = temp[7] + choice + mod3;
-
-        //      H 
-        t1 = temp[7] + bigSig1Val + choice + Kt + Wt;
-
-        t2 = bigSig0Val + majority;
-
-        //System.arraycopy(temp, 0, inTemp, 0, temp.length);
-        System.arraycopy(temp, 0, temp, 1, temp.length - 1);
-
-        temp[4] += t1;
-        temp[0] = t1 + t2;
+            
+            //create copy of array holding initial values for working variables
+            
+            System.arraycopy(h, 0, temp, 0, h.length);
 
     }
-
-    public void nextMessageBlockHValue() {
-        // add values in TEMP to values in H
+    
+    /**
+     * Performs one round of compression for the given message block.  Copies new 
+     * inputs given by calculated outputs into a temporary array used in round 
+     * compression round 1-63.
+     * @param cr The number of the compression round (0-63).
+     * 
+     */
+    public void compressionRound (int cr){
+        //     Choice function (if/then/else function using three variables)
+        //        =  H              E        F        G
+                choice = ch(temp[4], temp[5], temp[6]); 
+        //                        A         B       C
+                majority = maj(temp[0], temp[1], temp[2]);
+        //                                A
+                bigSig0Val = bigSig0(temp[0]);
+        //                                E        
+                bigSig1Val = bigSig1(temp[4]);
+                Kt = K[cr];
+                Wt = w[cr];
+                mod3 = Wt + Kt;
+                mod2 = temp[7] + choice + mod3;
+                
+        //                    E                 D
+                t1 = temp[7] + bigSig1Val + choice + Kt + Wt;
+                
+                //                               
+                t2 = bigSig0Val + majority;
+                
+                // Rick
+                // if (t == 0) {
+                //    System.out.println("Maj: " + padLeftZeros(Integer.toBinaryString(maj(TEMP[0], TEMP[1], TEMP[2])), 32));
+               // System.out.println("Sig0: " + padLeftZeros(Integer.toBinaryString(bigSig0(TEMP[0])), 32));
+                
+                // }
+                // end Rick
+                
+                //arrays to hold orinal values of working variables and new values 
+                //after compression round is finished 
+                System.arraycopy(temp, 0, inTemp, 0, temp.length);
+                System.arraycopy(temp, 0, temp, 1, temp.length - 1);
+                // E
+                temp[4] += t1;
+                temp[0] = t1 + t2;
+    }
+    
+    /**
+     * Adds each outgoing variable value from last compression round to the initial
+     * incoming variables from compression round 0 of the message block to prepare
+     * for compression of next message block (if there is one).
+     * 
+     */
+    public void nextMessageBlockHValue (){
+     // add values in TEMP to values in H
         for (int t = 0; t < h.length; ++t) {
             h[t] += temp[t];
         }
     }
 
-    /**
-     * <b>Internal method, no need to call.</b> Pads the given message to have a
-     * length that is a multiple of 512 bits (64 bytes), including the addition
-     * of a 1-bit, k 0-bits, and the message length as a 64-bit integer. The
-     * result is a 32-bit integer array with big-endian byte representation.
+      /**
+     * <b>Internal method, no need to call.</b> Pads the given message to have a length
+     * that is a multiple of 512 bits (64 bytes), including the addition of a
+     * 1-bit, k 0-bits, and the message length as a 64-bit integer.
+     * The result is a 32-bit integer array with big-endian byte representation.
      *
      * @param message The message to pad.
      * @return A new array with the padded message bytes.
      */
-    public int[] pad(byte[] message) {
+    public  int[] pad(byte[] message) {
         // new message length: original + 1-bit and padding + 8-byte length
         // --> block count: whole blocks + (padding + length rounded up)
         int finalBlockLength = message.length % BLOCK_BYTES;
@@ -430,90 +471,197 @@ public class SHA_256 {
         return buf.array();
     }
 
+    /**
+     * Performs the choice function (bitwise if/then/else) for the compression 
+     * round 
+     * @param x value of working variable e (temp[4]).
+     * @param y value of working variable f (temp[5]).
+     * @param x value of working variable g (temp[6]).
+     * @return single 32 bit int from the bitwise if/then/else addition
+     * 
+     */
     private int ch(int x, int y, int z) {
         return (x & y) | ((~x) & z);
     }
 
+    /**
+     * Performs the majority function.
+     * Outputs the majority of the input bits
+     * If two or more input bits are zero, then zero is output.
+     * Else (two or more bits are ones) output a one
+     * @param x value of working variable a (temp[0]).
+     * @param y value of working variable b (temp[1]).
+     * @param z value of working variable c (temp[2]).
+     * @return single 32 bit int.
+     */
     private int maj(int x, int y, int z) {
         return (x & y) | (x & z) | (y & z);
     }
 
+    /**
+     * Performs the Sigma 0 function.
+     * Takes variable a and performs 3 rotate right functions to get three values
+     * to use in modulo addition. (ROTR^2, ROTR^13, ROTR^22
+     * @param x value of working variable a (temp[0]).
+     * @return single 32 bit int.
+     */
     private int bigSig0(int x) {
         return Integer.rotateRight(x, 2)
                 ^ Integer.rotateRight(x, 13)
                 ^ Integer.rotateRight(x, 22);
     }
 
+    /**
+     * Performs the Sigma 1 function.
+     * Takes working variable e and performs 3 rotate right functions to get 
+     * three values to use in modulo addition. (ROTR^6, ROTR^11, ROTR^25)
+     * @param x value of working variable e (temp[4]).
+     * @return single 32 bit int.
+     */
     private int bigSig1(int x) {
         return Integer.rotateRight(x, 6)
                 ^ Integer.rotateRight(x, 11)
                 ^ Integer.rotateRight(x, 25);
     }
 
+    /**
+     * Performs the Small Sigma 0 function during message preparation.
+     * Takes second word in message block and performs 3 rotate right functions 
+     * to get three values to use in modulo addition. (ROTR^7, ROTR^18, ROTR^3)
+     * @param x value of second word in message block (w[2]).
+     * @return single 32 bit int.
+     */
     private int smallSig0(int x) {
         return Integer.rotateRight(x, 7)
                 ^ Integer.rotateRight(x, 18)
                 ^ (x >>> 3);
     }
 
+    /**
+     * Performs the Small Sigma 1 function during message preparation.
+     * Takes fifteenth word in message block and performs 3 rotate right functions 
+     * to get three values to use in modulo addition. (ROTR^17, ROTR^19, ROTR^14)
+     * @param x value of fifteenth word in message block (w[14]).
+     * @return single 32 bit int.
+     */
     private int smallSig1(int x) {
         return Integer.rotateRight(x, 17)
                 ^ Integer.rotateRight(x, 19)
                 ^ (x >>> 10);
     }
 
+    /**
+     * Returns the value of the given working variable at the end of the 
+     * compression round in binary form
+     * @param value value for index in array holding working variables.
+     * @return Binary string representation of value.
+     */
     public String getTempOutValue(int value) {
         return Integer.toBinaryString(temp[value]);
     }
 
+    /**
+     * Returns the value of the given working variable at the beginning of the 
+     * compression round in binary form
+     * @param value value for index in array holding working variables.
+     * @return Binary string representation of value.
+     */
     public String getInTempValue(int value) {
         return Integer.toBinaryString(inTemp[value]);
     }
 
+    /**
+     * Returns the final value of the choice function in binary form
+     * @return Binary string representation of value.
+     */
     public String getChoice() {
         return Integer.toBinaryString(choice);
     }
 
+    /**
+     * Returns the final value of the majority function in binary form
+     * @return Binary string representation of value.
+     */
     public String getMajority() {
         return Integer.toBinaryString(majority);
     }
 
+    /**
+     * Returns the final value of the Sigma 0 function from compression round in 
+     * binary form
+     * @return Binary string representation of value.
+     */
     public String getBigSig0Val() {
         return Integer.toBinaryString(bigSig0Val);
     }
 
+    /**
+     * Returns the final value of the Sigma 1 function from compression round in 
+     * binary form
+     * @return Binary string representation of value.
+     */
     public String getBigSig1Val() {
         return Integer.toBinaryString(bigSig1Val);
     }
 
+    /**
+     * Returns the length of the array holding the incoming working variables
+     * @return an integer representation of the number of indicies in the array.
+     */
     public int getTempLength() {
         return temp.length;
     }
-
+    
+    /**
+     * Returns the constant value of variable K for a given round
+     * @return Binary string representation of value.
+     */
     public String getKt() {
         return Integer.toBinaryString(Kt);
     }
 
+    /**
+     * Returns the message schedule value in word array for a given round
+     * @return Binary string representation of value.
+     */
     public String getWt() {
         return Integer.toBinaryString(Wt);
     }
 
+    /**
+     * Returns the final value of the T1 variable from a given compression round 
+     * in binary form
+     * @return Binary string representation of value.
+     */
     public String getT1() {
         return Integer.toBinaryString(t1);
     }
 
+    /**
+     * Returns the final value of the T2 variable from a given compression round 
+     * in binary form
+     * @return Binary string representation of value.
+     */
     public String getT2() {
         return Integer.toBinaryString(t2);
     }
 
-    public String getMod2() {
+    /**
+     * Returns the final value of variable Mod2 in binary form
+     * @return Binary string representation of value.
+     */
+    public String getMod2(){
         return Integer.toBinaryString(mod2);
     }
-
-    public String getMod3() {
+    
+    /**
+     * Returns the final value of variable Mod3 in binary form
+     * @return Binary string representation of value.
+     */
+    public String getMod3(){
         return Integer.toBinaryString(mod3);
     }
-
+    
     // Rickb
     public String padLeftZeros(String inputString, int length) {
         if (inputString.length() >= length) {
@@ -526,10 +674,5 @@ public class SHA_256 {
         sb.append(inputString);
 
         return sb.toString();
-    }
-  
-  // ToDo: tmp?? was this lost? Rick
-    public int[] initializeMessage(byte[] asciiEncodeMsg) {
-          return null;
     }
 }

@@ -329,6 +329,23 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
         }
     }
 
+     @Override
+    public void updateScaffoldLevel(String userId, ScaffoldLevel level)
+            throws ObjNotFoundException, NonRecoverableException {
+        final String sql = "UPDATE StudentModel SET ScaffoldLevel = ? WHERE UserId = ?";
+        try (Connection conn = DriverManager.getConnection(URL);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             stmt.setString(1, level.toString());
+             stmt.setString(2, userId);
+             int rows = stmt.executeUpdate();
+             if (rows == 0) {
+                 throw new ObjNotFoundException("No student model found for user: " + userId);
+             }
+        } catch (SQLException e) {
+             throw new NonRecoverableException("Error updating scaffold level: " + e.toString(), e);
+        }
+    }
+    
     /**
      * Retrive
      * 

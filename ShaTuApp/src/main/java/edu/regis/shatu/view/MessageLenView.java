@@ -334,6 +334,16 @@ public class MessageLenView extends UserRequestView {
                 hintButton.setEnabled(false);
             }
         }
+        
+        // Hide feedback panel if not used (fixes grey box visibility issue)
+        if (feedbackArea.getText().trim().isEmpty()) 
+        {
+            feedbackScrollPane.setVisible(false);
+        } 
+        else 
+        {
+            feedbackScrollPane.setVisible(true);
+        }
     }
 
     /**
