@@ -94,5 +94,4 @@ public class PrepareSchedule extends Objective {
     public TutorReply completeStep(StepCompletion completion) {
         return genericComplete("true", "true", KnowledgeComponentKind.PREPARE_SCHEDULE);
     }
-
 }

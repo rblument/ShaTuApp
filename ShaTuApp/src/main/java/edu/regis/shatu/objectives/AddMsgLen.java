@@ -51,6 +51,13 @@ public class AddMsgLen extends Objective {
      * Function that is called from the overrided stepCompletion method from the
      * MessageLenView. Checks the users answer with the correct answer and will
      * provide the user with further guidance.
+     * TODO: Refactor so that:
+     *  1.) Steps in the database are actually completed since as of now, none exist
+     *  2.) Steps are completed for Tasks (Task table) in Units (Unit Table)
+     *  3.) Steps are completed for each Unit (See One, Do One, Teach One)
+     *  As of now, this is only logging assessment data (Assessment table) to the database based on the number of
+     *  exposures, successes, and hints the user has completed during the Do One section of the application and it is
+     *  not actually logging anything
      *
      * @param completion
      * @return

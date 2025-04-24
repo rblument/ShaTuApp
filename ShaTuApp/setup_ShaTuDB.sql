@@ -416,6 +416,47 @@ VALUES
      'Use the Sigma0 function.',
      'Application', 0, 'Other', '0', 'Knowledge Component');
 
+INSERT INTO task (TaskId, CourseId, UnitId, Title, Description, Kind, SequenceIndex, ExampleType, ProblemId)
+VALUES (10, 1, 0, 'Encode ASCII', 'Convert an English Text String into its ASCII equivalent.', 'Usage', 1, 'N/A', -1);
+
+INSERT INTO task (TaskId, CourseId, UnitId, Title, Description, Kind, SequenceIndex, ExampleType, ProblemId)
+VALUES (20, 1, 0, 'Add One Bit', 'Add a single bit to the end of a bit string.', 'Usage', 2, 'N/A', -1);
+
+INSERT INTO task (TaskId, CourseId, UnitId, Title, Description, Kind, SequenceIndex, ExampleType, ProblemId)
+VALUES (30, 1, 0, 'Pad with Zeroes', 'Pad a bit string to the appropriate length with zeroes', 'Usage', 3, 'N/A', -1);
+
+INSERT INTO task (TaskId, CourseId, UnitId, Title, Description, Kind, SequenceIndex, ExampleType, ProblemId)
+VALUES (40, 1, 0, 'Add a msg length to the bit string', 'Add the appropriate message length to the bit string', 'Usage', 4, 'N/A', -1);
+
+INSERT INTO task (TaskId, CourseId, UnitId, Title, Description, Kind, SequenceIndex, ExampleType, ProblemId)
+VALUES (50, 1, 0, 'Prepare Schedue', 'Prepare the schedule', 'Usage', 5, 'N/A', -1);
+
+INSERT INTO task (TaskId, CourseId, UnitId, Title, Description, Kind, SequenceIndex, ExampleType, ProblemId)
+VALUES (60, 1, 0, 'Initialize Variables', 'Initialize the compression round variables.', 'Usage', 6, 'N/A', -1);
+
+INSERT INTO task (TaskId, CourseId, UnitId, Title, Description, Kind, SequenceIndex, ExampleType, ProblemId)
+VALUES (70, 1, 0, 'Compression Round', 'Sequence the Compression Round.', 'Usage', 7, 'N/A', -1);
+
+INSERT INTO task (TaskId, CourseId, UnitId, Title, Description, Kind, SequenceIndex, ExampleType, ProblemId)
+VALUES (80, 1, 0, 'Rotate BIts', 'Rotate a bit string.', 'Usage', 8, 'N/A', -1);
+
+INSERT INTO task (TaskId, CourseId, UnitId, Title, Description, Kind, SequenceIndex, ExampleType, ProblemId)
+VALUES (90, 1, 0, 'Shift Bits', 'Shift a bit string.', 'Usage', 9, 'N/A', -1);
+
+INSERT INTO task (TaskId, CourseId, UnitId, Title, Description, Kind, SequenceIndex, ExampleType, ProblemId)
+VALUES (100, 1, 0, 'XOR Bits', 'XOR a bit string.', 'Usage', 10, 'N/A', -1);
+
+INSERT INTO task (TaskId, CourseId, UnitId, Title, Description, Kind, SequenceIndex, ExampleType, ProblemId)
+VALUES (110, 1, 0, 'Choice Function', 'Demonstrate the choice function on appropriate bit strings.', 'Usage', 11, 'N/A', -1);
+
+INSERT INTO task (TaskId, CourseId, UnitId, Title, Description, Kind, SequenceIndex, ExampleType, ProblemId)
+VALUES (120, 1, 0, 'Majority Function', 'Use the majority function on appropriate bit strings.', 'Usage', 12, 'N/A', -1);
+
+INSERT INTO task (TaskId, CourseId, UnitId, Title, Description, Kind, SequenceIndex, ExampleType, ProblemId)
+VALUES (130, 1, 0, 'Encode ASCII', 'Convert an English Text String into its ASCII equivalent.', 'Usage', 13, 'N/A', -1);
+
+INSERT INTO task (TaskId, CourseId, UnitId, Title, Description, Kind, SequenceIndex, ExampleType, ProblemId)
+VALUES (140, 1, 0, 'SHA Sum 0 Function', 'Use the Sigma0 function.', 'Usage', 14, 'N/A', -1);
 
 INSERT INTO ExercisingLocation
 (Id, CourseId, UnitId, TaskId, StepId)
