@@ -289,29 +289,53 @@ public class SHA_256 {
             return null;
         }
 
-        int[] words = pad(message);
+        int [] words = initializeMessage(message);
 
         // PAD_WITH_ZEROS breakpoint
         if (breakpointWrapper != null
                 && breakpointWrapper.shouldBreakHere(new SHA_256BreakPoint(SHA_256BreakPoint.SHA256Breakpoint.PAD_WITH_ZEROS))) {
             return null;
         }
+        
 
+        
+        if (isSendCallbacks){
+            
+            // enumerate all blocks (each containing 16 words -- uses method)
+
+            for (int i = 0, n = words.length / 16; i < n; ++i) {
+                enumerateMessageBlocks (i, words);
+                
+        // use method to operate on temp and do compression rounds        
+                for (int t = 0; t < w.length; ++t) {
+                    compressionRound (t);
+                }
+         // add values in TEMP to values in H        
+                nextMessageBlockHValue ();
+            }
+        }
+        
+        return toByteArray(h); 
+    }
+    
+    /**
+     * Prepares the message for hashing by creating all words, padding with a zero 
+     * bit and adding the 64 bit length of the original message.
+     *
+     * @param message The bytes to hash.
+     * @return The int array of words that make up the message.
+     */
+    
+    public int [] initializeMessage(byte [] message){
+        //let H = H0
         System.arraycopy(H0, 0, h, 0, H0.length);
 
-        // INIT_HASH_VALUES breakpoint
-        if (breakpointWrapper != null
-                && breakpointWrapper.shouldBreakHere(new SHA_256BreakPoint(SHA_256BreakPoint.SHA256Breakpoint.INIT_HASH_VALUES))) {
-            return null;
-        }
-
-        for (int i = 0, n = words.length / 16; i < n; ++i) {
-            enumerateMessageBlocks(i, words);
-        }
-
-        return toByteArray(h);
-    }
-
+        // initialize all words
+        int initWords [] = pad(message);  
+        
+        return initWords;
+    } 
+    
      /**
      * Completes message schedule prepartion by creating the array of words for 
      * a single block (64 words) to be hashed.  
@@ -322,106 +346,89 @@ public class SHA_256 {
      * @param words Array of words created from original message by initializeMessage 
      *        method
      */
-    public void enumerateMessageBlocks(int i, int[] words) {
+    public void enumerateMessageBlocks (int m, int[] words){
         // initialize w from the block's words
-        System.arraycopy(words, i * 16, w, 0, 16);
-
-        // Modify the zero-ed indexes at the end of the array using the following algorithm:
-        for (int t = 16; t < w.length; ++t) {
-            w[t] = smallSig1(w[t - 2]) + w[t - 7] + smallSig0(w[t - 15]) + w[t - 16];
-        }
-
-        // SCHEDULE_EXPANSION breakpoint
-        if (breakpointWrapper != null
-                && breakpointWrapper.shouldBreakHere(new SHA_256BreakPoint(SHA_256BreakPoint.SHA256Breakpoint.SCHEDULE_EXPANSION))) {
-            return;
-        }
-
-         //create copy of array holding initial values for working variables
-        System.arraycopy(h, 0, temp, 0, h.length);  // let temp = h
-
-        for (int t = 0; t < w.length; ++t) {
-            if (breakpointWrapper != null
-                    && breakpointWrapper.shouldBreakHere(
-                            new SHA_256BreakPoint(SHA_256BreakPoint.SHA256Breakpoint.COMPRESS_ROUND), t)) {
-                return;
+            System.arraycopy(words, m * 16, w, 0, 16);
+         
+            // Modify the zero-ed indexes at the end of the array using the following algorithm:
+            for (int t = 16; t < w.length; ++t) {
+                 w[t] = smallSig1(w[t - 2]) + w[t - 7] + smallSig0(w[t - 15]) + w[t - 16];
             }
+            
+            //create copy of array holding initial values for working variables
+            
+            System.arraycopy(h, 0, temp, 0, h.length);
 
-            compressionRound(t);
-
-            // FINAL_HASH breakpoint
-            if (breakpointWrapper != null
-                    && breakpointWrapper.shouldBreakHere(new SHA_256BreakPoint(SHA_256BreakPoint.SHA256Breakpoint.FINAL_HASH))) {
-                return;
-            }
-        }
-
-        nextMessageBlockHValue();
     }
-
-     /**
+    
+    /**
      * Performs one round of compression for the given message block.  Copies new 
      * inputs given by calculated outputs into a temporary array used in round 
      * compression round 1-63.
      * @param cr The number of the compression round (0-63).
      * 
      */
-    public void compressionRound(int t) {
-        //            E        F        G
-        choice = ch(temp[4], temp[5], temp[6]);
-
-        //               A         B       C
-        majority = maj(temp[0], temp[1], temp[2]);
-
-        //                     A
-        bigSig0Val = bigSig0(temp[0]);
-
-        //                     E        
-        bigSig1Val = bigSig1(temp[4]);
-
-        Kt = K[t];
-        Wt = w[t];
-        mod3 = Wt + Kt;
-        mod2 = temp[7] + choice + mod3;
-
-        //      H 
-        t1 = temp[7] + bigSig1Val + choice + Kt + Wt;
-
-        t2 = bigSig0Val + majority;
-
-        //arrays to hold orinal values of working variables and new values 
-        //after compression round is finished 
-        System.arraycopy(temp, 0, inTemp, 0, temp.length);
-        System.arraycopy(temp, 0, temp, 1, temp.length - 1);
-
-        temp[4] += t1;
-        temp[0] = t1 + t2;
-
+    public void compressionRound (int cr){
+        //     Choice function (if/then/else function using three variables)
+        //        =  H              E        F        G
+                choice = ch(temp[4], temp[5], temp[6]); 
+        //                        A         B       C
+                majority = maj(temp[0], temp[1], temp[2]);
+        //                                A
+                bigSig0Val = bigSig0(temp[0]);
+        //                                E        
+                bigSig1Val = bigSig1(temp[4]);
+                Kt = K[cr];
+                Wt = w[cr];
+                mod3 = Wt + Kt;
+                mod2 = temp[7] + choice + mod3;
+                
+        //                    E                 D
+                t1 = temp[7] + bigSig1Val + choice + Kt + Wt;
+                
+                //                               
+                t2 = bigSig0Val + majority;
+                
+                // Rick
+                // if (t == 0) {
+                //    System.out.println("Maj: " + padLeftZeros(Integer.toBinaryString(maj(TEMP[0], TEMP[1], TEMP[2])), 32));
+               // System.out.println("Sig0: " + padLeftZeros(Integer.toBinaryString(bigSig0(TEMP[0])), 32));
+                
+                // }
+                // end Rick
+                
+                //arrays to hold orinal values of working variables and new values 
+                //after compression round is finished 
+                System.arraycopy(temp, 0, inTemp, 0, temp.length);
+                System.arraycopy(temp, 0, temp, 1, temp.length - 1);
+                // E
+                temp[4] += t1;
+                temp[0] = t1 + t2;
     }
-
-     /**
+    
+    /**
      * Adds each outgoing variable value from last compression round to the initial
      * incoming variables from compression round 0 of the message block to prepare
      * for compression of next message block (if there is one).
      * 
      */
-    public void nextMessageBlockHValue() {
-        // add values in TEMP to values in H
+    public void nextMessageBlockHValue (){
+     // add values in TEMP to values in H
         for (int t = 0; t < h.length; ++t) {
             h[t] += temp[t];
         }
     }
 
-    /**
-     * <b>Internal method, no need to call.</b> Pads the given message to have a
-     * length that is a multiple of 512 bits (64 bytes), including the addition
-     * of a 1-bit, k 0-bits, and the message length as a 64-bit integer. The
-     * result is a 32-bit integer array with big-endian byte representation.
+      /**
+     * <b>Internal method, no need to call.</b> Pads the given message to have a length
+     * that is a multiple of 512 bits (64 bytes), including the addition of a
+     * 1-bit, k 0-bits, and the message length as a 64-bit integer.
+     * The result is a 32-bit integer array with big-endian byte representation.
      *
      * @param message The message to pad.
      * @return A new array with the padded message bytes.
      */
-    public int[] pad(byte[] message) {
+    public  int[] pad(byte[] message) {
         // new message length: original + 1-bit and padding + 8-byte length
         // --> block count: whole blocks + (padding + length rounded up)
         int finalBlockLength = message.length % BLOCK_BYTES;
@@ -604,7 +611,7 @@ public class SHA_256 {
     public int getTempLength() {
         return temp.length;
     }
-
+    
     /**
      * Returns the constant value of variable K for a given round
      * @return Binary string representation of value.
@@ -643,18 +650,18 @@ public class SHA_256 {
      * Returns the final value of variable Mod2 in binary form
      * @return Binary string representation of value.
      */
-    public String getMod2() {
+    public String getMod2(){
         return Integer.toBinaryString(mod2);
     }
-
-     /**
+    
+    /**
      * Returns the final value of variable Mod3 in binary form
      * @return Binary string representation of value.
      */
-    public String getMod3() {
+    public String getMod3(){
         return Integer.toBinaryString(mod3);
     }
-
+    
     // Rickb
     public String padLeftZeros(String inputString, int length) {
         if (inputString.length() >= length) {
@@ -668,23 +675,4 @@ public class SHA_256 {
 
         return sb.toString();
     }
-  
-  // ToDo: tmp?? was this lost? Rick.  
-    // yes it was, this is how it was previously. Krista
-    
-    /**
-     * Prepares the message for hashing by creating all words, padding with a zero 
-     * bit and adding the 64 bit length of the original message.
-     *
-     * @param message The bytes to hash.
-     * @return The int array of words that make up the message.
-     */
-    public int [] initializeMessage(byte [] message) {
-         //let H = H0
-        System.arraycopy(H0, 0, h, 0, H0.length);
-        // initialize all words
-        int initWords [] = pad(message);  
-        
-        return initWords;
-    } 
 }

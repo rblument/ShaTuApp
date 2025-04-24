@@ -105,7 +105,10 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
 
         return ex;
     }
-
+    /*
+    Sends notification to the tutor that this step in the tutoring has been
+    successfully completed and student is ready to move on to the next step.
+    */
     @Override
     public StepCompletion stepCompletion() {
         Step currentStep = model.currentTask().currentStep().getStep();
