@@ -45,6 +45,16 @@ import edu.regis.shatu.view.act.ResetPasswordAction;
  */
 public class ResetPasswordPanel extends GPanel{
     
+    private String securityToken;
+    
+    public void setSecurityToken(String token) {
+        this.securityToken = token;
+    }
+
+    public String getSecurityToken() {
+        return securityToken;
+    }
+    
     /**
      * Events of interest occurring in this class are logged to this logger.
      */

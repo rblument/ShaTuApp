@@ -18,6 +18,7 @@ import java.awt.event.KeyEvent;
 import javax.swing.JOptionPane;
 
 import com.google.gson.Gson;
+import java.awt.Component;
 
 import edu.regis.shatu.model.Account;
 import edu.regis.shatu.svc.ClientRequest;
@@ -80,32 +81,62 @@ public class ResetPasswordAction extends ShaTuGuiAction {
         SplashFrame frame = SplashFrame.instance();
         
         Account account = frame.getAccount();
+        
+        // Find the ResetPasswordPanel instance
+        String token = null;
+        for (Component comp : frame.getContentPane().getComponents()) {
+            if (comp instanceof edu.regis.shatu.view.ResetPasswordPanel) {
+                token = ((edu.regis.shatu.view.ResetPasswordPanel) comp).getSecurityToken();
+                break;
+            }
+        }
 
         ClientRequest request = new ClientRequest(ServerRequestType.RESET_PASSWORD);
+        request.setUserId(account.getUserId());
+        request.setSecurityToken(token);
+        request.setData(new Gson().toJson(account));
+
+        request.setUserId(account.getUserId()); //required for session tracking
         request.setData(gson.toJson(account));
-       
+
+        System.out.println(">>> Submitting RESET_PASSWORD request for: " + account.getUserId());
+        System.out.println(">>> Security token: " + token);
+        System.out.println(">>> Full JSON account data: " + gson.toJson(account));
+  
         TutorReply reply = SvcFacade.instance().tutorRequest(request);
 
         String msg;
-        switch (reply.getStatus()) {
+        String status = reply.getStatus();
+        System.out.println("ResetPasswordAction: Server reply status = " + status);
+        System.out.println("Account JSON sent: " + gson.toJson(account));
+
+        if (status == null) {
+            msg = "Server response was invalid. Please try again or contact support.";
+            JOptionPane.showMessageDialog(null, msg, "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        switch (status) {
             case "PasswordReset":
                 frame.clearNewAccountPanel();
                 msg = "Student user account password successfully reset\n\n" +
-                        "Press okay and we'll return you to the sign-in screen\n\n" +
-                        "Then, please sign-in to the tutor using this account.";
+                    "Press OK and we'll return you to the sign-in screen\n\n" +
+                    "Then, please sign-in to the tutor using this account.";
                 JOptionPane.showMessageDialog(SplashFrame.instance(), msg);
                 frame.selectSplash();
                 break;
+
             case "IllegalUserId":
-                msg = "User id does not exist: " + account.getUserId();
-                JOptionPane.showMessageDialog(null, msg, "Information",
-                                              JOptionPane.INFORMATION_MESSAGE);
+                msg = "User ID does not exist: " + account.getUserId();
+                JOptionPane.showMessageDialog(null, msg, "Information", JOptionPane.INFORMATION_MESSAGE);
                 break;
-            default: // "ERR" Error should have been logged in tutor.
-                msg = "An unexpected error occurred. Please contact ShaTu support";
-                JOptionPane.showMessageDialog(null, msg, "Error",
-                                              JOptionPane.ERROR_MESSAGE);
+
+            default:
+                msg = "An unexpected error occurred. Server responded with status: " + status;
+                JOptionPane.showMessageDialog(null, msg, "Error", JOptionPane.ERROR_MESSAGE);
+                break;
         }
+
     }
 }
 
