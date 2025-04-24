@@ -12,6 +12,7 @@ package edu.regis.shatu.view;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import edu.regis.shatu.model.ShaZeroStep;
 import java.awt.GridBagConstraints;
 import java.awt.event.ActionListener;
 import javax.swing.JLabel;
@@ -144,11 +145,11 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
 
         NewExampleRequest ex = new NewExampleRequest();
 
-        ex.setExampleType(ProblemType.SHA_ONE);
+        ex.setExampleType(ProblemType.SHA_ZERO);
+        ShaZeroStep step = new ShaZeroStep();
+        step.setBitLength(problemSize);
 
-        ShaOneViewStep newStep = new ShaOneViewStep();
-
-        ex.setData(gson.toJson(newStep));
+        ex.setData(gson.toJson(step));
 
         return ex;
     }
@@ -157,11 +158,11 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
     public StepCompletion stepCompletion() {
         Step currentStep = model.currentTask().currentStep().getStep();
 
-        ShaOneViewStep example = gson.fromJson(currentStep.getData(), ShaOneViewStep.class);
+        ShaZeroStep example = gson.fromJson(currentStep.getData(), ShaZeroStep.class);
 
         String userResponse = answerField.getText().replaceAll("\\s", "");
 
-        example.setUserResponse(userResponse);
+        example.setResult(userResponse);
 
         StepCompletion step = new StepCompletion(currentStep, gson.toJson(example));
         step.setStep(currentStep);
@@ -189,7 +190,7 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
         if (answerField.getText().equals("")) {
             JOptionPane.showMessageDialog(this, "Please provide an answer");
         } else {
-            verifyAnswer();
+            //verifyAnswer();
         }
     }
 
@@ -228,6 +229,7 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
         descriptionPanel.addc(questionPanel, 0, 2, 1, 1, 0.0, 0.0,
                 GridBagConstraints.SOUTHWEST, GridBagConstraints.NONE,
                 5, 5, 5, 5);
+        
     }
 
     /**
@@ -310,6 +312,10 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
         responsePane.setPreferredSize(new Dimension(800, 200));
     }
     
+        /**
+     * Creates a GPanel containing the response JScrollPanes and the button
+     * panel.
+     */
         private void setUpQRPanel() {
         qrPanel = new GPanel();
 
@@ -379,12 +385,19 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
                 throw new UnsupportedOperationException("Unknown Update Operation for view type: "
                         + view.getCurrentViewType());
         }
-
         if (model != null) {
-            // ****TO-DO*****
-            // Update the view's information from the model
-            // Debugging dynamic updates to the model can be done here.
-            System.out.println("ShaOneView");
+
+            Step step = model.currentTask().getCurrentStep().getStep();
+
+            if (step != null) {
+                ShaZeroStep example = gson.fromJson(step.getData(), ShaZeroStep.class);
+
+                if (example != null) {
+                    operandAValue = example.getOperandA();
+                    operandALabel.setText("Operand A: " + operandAValue);
+                }
+
+            }
         }
     }
 
@@ -467,10 +480,6 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
         }
     }
     
-
-    
-
-
     /**
      * Updates the size of the problem to display.
      *
@@ -487,6 +496,4 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
             problemSize = 32;
         }
     }
-
-
 }
