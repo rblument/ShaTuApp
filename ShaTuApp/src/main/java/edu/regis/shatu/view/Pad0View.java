@@ -16,11 +16,7 @@
 package edu.regis.shatu.view;
 
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -32,19 +28,12 @@ import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 import edu.regis.shatu.model.Pad0Step;
 import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
-import edu.regis.shatu.view.act.HintAction;
-import edu.regis.shatu.view.act.NewExampleAction;
-import edu.regis.shatu.view.act.StepCompletionAction;
 
 /**
  * A view that requests the student to figure out the number of zeros needed to 
@@ -60,8 +49,6 @@ public class Pad0View extends UserRequestView {
     private JTextField messageLengthField;
     private JTextArea responseTextArea;
     private JTextArea feedbackArea;
-    private JButton checkButton, nextButton, hintButton;
-    private boolean checkHintEnabled = false;
     private JTable asciiTable;
     private JScrollPane responseScrollPane, asciiTableScrollPane, feedbackScrollPane;
     private String question;
@@ -118,6 +105,10 @@ public class Pad0View extends UserRequestView {
         addc(feedbackScrollPane, 0, 5, 1, 1, 
                 1.0, 1.0, GridBagConstraints.CENTER, 
                 GridBagConstraints.BOTH, 5, 5, 5, 5);
+                
+        addc(buttonPanel, 0, 6, 1, 1, 0.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                5, 5, 5, 5);
     }  
     
     /**
@@ -347,13 +338,9 @@ public class Pad0View extends UserRequestView {
     @Override
     protected void updatePracticeView() {
 
-        hintButton = view.getHintButton();
-        checkButton = view.getCheckButton();
-        nextButton = view.getNewExampleButton();
-
         // If check and hint buttons are disabled, reset listenerers and apply those used by this view
         if(!checkHintEnabled) {
-            view.resetButtonListeners(); // Clear any listeners applied from other views
+            resetButtonListeners(); // Clear any listeners applied from other views
         }
         /*
         When switching between steps, the current step will be the previous enum
@@ -363,8 +350,6 @@ public class Pad0View extends UserRequestView {
         StepSubType type = StepSubType.PAD_ZEROS;
 
         System.out.println("Pad Zero update display called"); // Error checking
-
-        Gson gson = new GsonBuilder().setPrettyPrinting().create(); // May not be needed here.
 
         Step step = model.currentTask().getCurrentStep().getStep(); // will be the last step a example was created for.
 
@@ -409,6 +394,16 @@ public class Pad0View extends UserRequestView {
                 this.revalidate(); // Refreshes the view
                 this.repaint(); // Refreshes the view
             }
+        }
+        
+        // Hide feedback panel if not used (fixes grey box visibility issue)
+        if (feedbackArea.getText().trim().isEmpty()) 
+        {
+            feedbackScrollPane.setVisible(false);
+        } 
+        else 
+        {
+            feedbackScrollPane.setVisible(true);
         }
     }
 

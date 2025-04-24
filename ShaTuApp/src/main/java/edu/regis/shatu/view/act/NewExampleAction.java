@@ -35,7 +35,7 @@ import edu.regis.shatu.view.UserRequestView;
 /**
  * An (MVC) controller handling a GUI gesture representing a user's request for
  * a new problem to solve via selecting a new panel or requesting a new example
- * directly. A client request for a new example is sent to the tutor who will 
+ * directly. A client request for a new example is sent to the tutor who will
  * reply with the new Task and Step to be completed along with their associated
  * data.
  *
@@ -88,7 +88,7 @@ public class NewExampleAction extends ShaTuGuiAction {
     /**
      * Handle the user's request for a new example by sending it to the tutor.
      *
-     * If successful, the current view is updated with the contents of the new 
+     * If successful, the current view is updated with the contents of the new
      * example (and associated task) in the reply from the tutor.
      *
      * @param evt ignored
@@ -97,44 +97,41 @@ public class NewExampleAction extends ShaTuGuiAction {
     public void actionPerformed(ActionEvent evt) {
         System.out.println("actionPerformed");
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        
 
-        System.out.println("Here1");
         Account account = SplashFrame.instance().getAccount();
-        System.out.println("Here2");
+
         //Catches a possible IllegalArgumentException thrown by the 
-        try{
-            System.out.println("Here3");
-           //Get the view that originated the NewExampleRequest
-           UserRequestView exView = GuiController.instance().getStepView().getUserRequestView();
-            System.out.println("Get view: " + exView);
-           //Call the overridden newRequest() method to generate an appropriate
-           //request to the tutor based on the current view
-           NewExampleRequest ex = exView.newRequest();
-            System.out.println("after new request: " + ex);
-           //Construct the request with the users data and NewExampleRequest
-           //returned by the newRequest() method
-           ClientRequest request = new ClientRequest(ServerRequestType.NEW_EXAMPLE);
-           request.setUserId(account.getUserId());
-           request.setSecurityToken(MainFrame.instance().getModel().getSecurityToken());
-           request.setData(gson.toJson(ex));
-           //Send the request to the tutor and save the reply
-           TutorReply reply = SvcFacade.instance().tutorRequest(request);
-        switch (reply.getStatus()) {
-            case ":ERR":
-                // If we get here, there is a coding error in the tutor svc
-                System.out.println("Coding error  status: " + reply.getStatus());
-                break;
-            default:
-                System.out.println("got a reply");
-               //If the status was not an error, we can update the model and the
-               //view with the new task sent by the tutor
-                
-                exView.setCurrentTask(gson.fromJson(reply.getData(), PendingTask.class)); 
-             //  exView.setCurrentTask(gson.fromJson(reply.getData(), Task.class)); 
+        try {
+            //Get the view that originated the NewExampleRequest
+            UserRequestView exView = GuiController.instance().getStepView().getUserRequestView();
+
+            //Call the overridden newRequest() method to generate an appropriate
+            //request to the tutor based on the current view
+            NewExampleRequest ex = exView.newRequest();
+
+            //Construct the request with the users data and NewExampleRequest
+            //returned by the newRequest() method
+            ClientRequest request = new ClientRequest(ServerRequestType.NEW_EXAMPLE);
+            request.setUserId(account.getUserId());
+            request.setSecurityToken(MainFrame.instance().getModel().getSecurityToken());
+            request.setData(gson.toJson(ex));
+            
+            //Send the request to the tutor and save the reply
+            TutorReply reply = SvcFacade.instance().tutorRequest(request);
+
+            switch (reply.getStatus()) {
+                case ":ERR":
+                    // If we get here, there is a coding error in the tutor svc
+                    System.out.println("Coding error  status: " + reply.getStatus());
+                    break;
+                default:
+                    //If the status was not an error, we can update the model and the
+                    //view with the new task sent by the tutor
+
+                    exView.setCurrentTask(gson.fromJson(reply.getData(), PendingTask.class));
             }
-        }catch(IllegalArgException e){
-           System.out.println("Illegal arg exception " + e);
+        } catch (IllegalArgException e) {
+            System.out.println("Illegal arg exception " + e);
         }
     }
 }

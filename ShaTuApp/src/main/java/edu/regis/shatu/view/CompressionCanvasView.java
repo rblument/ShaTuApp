@@ -27,8 +27,6 @@ import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.ProblemType;
-import edu.regis.shatu.view.act.NewExampleAction;
-import edu.regis.shatu.view.act.StepCompletionAction;
 import edu.regis.shatu.svc.SHA_256;
 import java.nio.charset.Charset;
 import javax.swing.JOptionPane;
@@ -96,24 +94,18 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
     private VariableLabel kLabel;
     private VariableLabel temp1Label;
     private VariableLabel temp2Label;
-    //to be removed once linked in with the tutor view
-    //private JButton continueButton = new JButton(StepCompletionAction.instance());
     private JButton nextRoundButton = new JButton();
     private JButton newMessageButton = new JButton();
     private JButton counterButton = new JButton();
-    //for debugging will reset to private and use setter in model
-    //public CounterLabel counter;
     private SHA_256 hash;
     private String msg;
     public int count = 0;
 
     public CompressionCanvasView() {
         setLayout(null);
-        //compressModel = new CompressRoundStep();
 
         initializeComponents();
         layoutComponents();
-        //continueButton.setText("Continue");
         nextRoundButton.setText("Next Round");
         newMessageButton.setText("New Message");
         counterButton.setText("Compression Round: " + count);
@@ -368,11 +360,10 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
         
         temp1Label = new VariableLabel("T\u2081");
         temp2Label = new VariableLabel("T\u2082");
-        
+           
         temp1Label.setFont(new Font("", Font.PLAIN, 16));
         temp2Label.setFont(new Font("", Font.PLAIN, 16));
-        
-  
+
         nextRoundButton.addActionListener(this);
         newMessageButton.addActionListener(this);
         
@@ -382,7 +373,7 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
         Color white = new Color(255,255,255);
         setBackground(white);
         Point p;
-        int x, y, countX, countY, newMessageX, roundX, roundY;
+        int x, y, newMessageX, roundX, roundY;
         
         
         for (int i = 0; i < WORKING_VARS_LEN; i++) {
@@ -452,8 +443,7 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
         y -= VariableLabel.HALF_SIZE;
         kLabel.setLocation(x, y);
         add(kLabel);
-        
-        
+
         // Third mod addition has Sigma1 inputs and centered on it
         x = sigma1Label.getLocation().x + BitOpLabel.HALF_SIZE - AddMod256Label.HALF_SIZE + 150;
         y = sigma1Label.getLocation().y + BitOpLabel.HALF_SIZE - AddMod256Label.HALF_SIZE;
@@ -498,7 +488,6 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
         roundX = getWidth() - roundButtonWidth - margin;
         roundY = buttonHeight + margin;
         
-        
         nextRoundButton.setBounds(x, y, buttonWidth, buttonHeight);
         newMessageButton.setBounds(newMessageX, y, messageButtonWidth, buttonHeight);
         counterButton.setBounds(roundX, roundY, roundButtonWidth, buttonHeight);
@@ -507,6 +496,7 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
         add(counterButton);
          
     }
+
     /* 
     Causes layout to respond dynamically when window is resized.
     */
@@ -565,6 +555,7 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
            msg = JOptionPane.showInputDialog(this, "Enter a message to hash");
            count = 0;   
        }
+
        //triggers one compression round to be completed.  
        //asks for new message if all 64 rounds are completed
        else if (event.getSource() == nextRoundButton){
@@ -636,10 +627,10 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
      */
     @Override
     protected void updatePracticeView() {
-        view.resetButtonListeners(); // Clear any listeners applied from other views
-        view.getCheckButton().setEnabled(false);
-        view.getHintButton().setEnabled(false);
-        view.getNewExampleButton().setEnabled(false);
+        resetButtonListeners(); // Clear any listeners applied from other views
+        checkButton.setEnabled(false);
+        hintButton.setEnabled(false);
+        newExampleButton.setEnabled(false);
     }
 
     /**
@@ -684,8 +675,5 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
         
         return step;
     }
-    
-    
-
 }
 

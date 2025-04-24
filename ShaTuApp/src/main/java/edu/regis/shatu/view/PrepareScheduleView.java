@@ -13,20 +13,15 @@
 package edu.regis.shatu.view;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import javax.swing.*;
 import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Random;
-
 import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.ProblemType;
-import edu.regis.shatu.view.act.NewExampleAction;
-import edu.regis.shatu.view.act.StepCompletionAction;
 
 /**
  * This class represents the Prepare Schedule operation step in a multiple-choice format.
@@ -34,13 +29,12 @@ import edu.regis.shatu.view.act.StepCompletionAction;
  * 
  * @author rickb
  */
-public class PrepareScheduleView extends UserRequestView implements ActionListener {
-
+public class PrepareScheduleView extends UserRequestView { //implements ActionListener {
     private TutoringSessionView view;
     private JLabel titleLabel, stepLabel, feedbackLabel, previousStepsLabel;
     private JRadioButton[] answerOptions;
     private ButtonGroup answerGroup;
-    private JButton checkAnswerButton, hintButton, newExampleButton;
+
     private int currentStep = 1;
     private int correctAnswerIndex; // Stores the shuffled position of the correct answer
 
@@ -65,20 +59,6 @@ public class PrepareScheduleView extends UserRequestView implements ActionListen
     }
 
     /**
-     * Handles button actions for checking answers, hints, and new examples.
-     */
-    @Override
-    public void actionPerformed(ActionEvent event) {
-        if (event.getSource() == checkAnswerButton) {
-            checkAnswer();
-        } else if (event.getSource() == hintButton) {
-            showHint();
-        } else if (event.getSource() == newExampleButton) {
-            loadNewExample();
-        }
-    }
-
-    /**
      * Initializes UI components.
      */
     private void initializeComponents() {
@@ -99,15 +79,6 @@ public class PrepareScheduleView extends UserRequestView implements ActionListen
             answerGroup.add(answerOptions[i]);
         }
 
-        checkAnswerButton = new JButton("Check Answer");
-        checkAnswerButton.addActionListener(this);
-
-        hintButton = new JButton("Hint");
-        hintButton.addActionListener(this);
-
-        newExampleButton = new JButton("New Example");
-        newExampleButton.addActionListener(this);
-
         feedbackLabel = new JLabel(""); // To display hints and feedback
         feedbackLabel.setHorizontalAlignment(SwingConstants.CENTER);
         feedbackLabel.setForeground(Color.BLUE); // System messages in blue
@@ -117,6 +88,26 @@ public class PrepareScheduleView extends UserRequestView implements ActionListen
      * Sets up the layout for the view.
      */
     private void initializeLayout() {
+        addc(titleLabel, 0, 0, 1, 1, 0.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                5, 5, 5, 5);
+        
+        addc(stepLabel, 0, 1, 1, 1, 1.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                5, 5, 5, 5);
+        
+        int gridX = 2;
+        for (JRadioButton option : answerOptions) {
+            addc(option, 0, gridX++, 1, 1, 1.0, 0.0,
+                GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL,
+                5, 5, 5, 5);
+         }
+        
+        addc(buttonPanel, 0, ++gridX, 1, 1, 0.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                5, 5, 5, 5);
+        
+        /*
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 10, 10, 10);
@@ -157,6 +148,7 @@ public class PrepareScheduleView extends UserRequestView implements ActionListen
 
         gbc.gridy++;
         add(newExampleButton, gbc);
+        */
     }
 
 
@@ -219,12 +211,6 @@ public class PrepareScheduleView extends UserRequestView implements ActionListen
         revalidate();
         repaint();
     }
-
-
-
-
-
-
 
     /**
      * Checks if the selected answer is correct.
@@ -360,7 +346,7 @@ public class PrepareScheduleView extends UserRequestView implements ActionListen
     @Override
     protected void updatePracticeView() {
 
-        view.resetButtonListeners();
+        resetButtonListeners();
 
         // Only update label if the step is greater than 1 to prevent overriding first question
         if (currentStep > 1) {
