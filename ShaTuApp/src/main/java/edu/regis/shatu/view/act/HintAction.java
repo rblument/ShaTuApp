@@ -81,6 +81,7 @@ public class HintAction extends ShaTuGuiAction {
      */
     private HintAction() {
         super("Hint");
+        this.setEnabled(false);
 
         putValue(SHORT_DESCRIPTION, "Hint");
 

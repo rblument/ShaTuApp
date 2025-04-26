@@ -91,6 +91,7 @@ public class StepCompletionAction extends ShaTuGuiAction {
      */
     private StepCompletionAction() {
         super("Check");
+        this.setEnabled(false);
         putValue(SHORT_DESCRIPTION, "Check Example");
         putValue(MNEMONIC_KEY, KeyEvent.VK_C);
     }
