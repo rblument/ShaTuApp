@@ -638,6 +638,7 @@ public class MajFunctionView extends UserRequestView implements KeyListener {
                 stringXLabel.setText("x: " + example.getOperandA());
                 stringYLabel.setText("y: " + example.getOperandB());
                 stringZLabel.setText("z: " + example.getOperandC());
+                responseTextArea.setText("");
                 hintButton.setEnabled(true);
                 checkButton.setEnabled(true);
                 responseTextArea.setEnabled(true);
