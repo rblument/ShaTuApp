@@ -20,7 +20,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import edu.regis.shatu.model.StepCompletion;
 import javax.swing.JRadioButton;
-import edu.regis.shatu.model.aol.ShaOneViewStep;
 import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.ProblemType;
@@ -307,9 +306,11 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
         responseTextArea = new JTextArea(3, 20);
         responseTextArea.setLineWrap(true);
         responseTextArea.setWrapStyleWord(true);
+        responseTextArea.setEnabled(false);  // Text area disabled at initialization 
 
         responsePane = new JScrollPane(responseTextArea);
         responsePane.setPreferredSize(new Dimension(800, 200));
+        
     }
     
         /**
@@ -318,7 +319,7 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
      */
         private void setUpQRPanel() {
         qrPanel = new GPanel();
-
+        responsePane.setPreferredSize(new Dimension(300, 20));
         qrPanel.addc(responsePane, 0, 4, 4, 4, 1.0, 0,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 5, 5, 5, 5);

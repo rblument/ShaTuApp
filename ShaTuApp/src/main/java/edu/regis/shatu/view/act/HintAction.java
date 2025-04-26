@@ -13,7 +13,6 @@
 package edu.regis.shatu.view.act;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
 import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
@@ -36,6 +35,7 @@ import edu.regis.shatu.view.GuiController;
 import edu.regis.shatu.view.MainFrame;
 import edu.regis.shatu.view.SplashFrame;
 import edu.regis.shatu.view.UserRequestView;
+import java.awt.event.KeyEvent;
 
 /**
  * An (MVC) controller handling a GUI gesture representing a user's request to 
