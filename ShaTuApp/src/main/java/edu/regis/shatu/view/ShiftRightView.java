@@ -20,14 +20,15 @@ import java.awt.GridBagConstraints;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+
 import javax.swing.ButtonGroup;
-import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+
 import edu.regis.shatu.model.BitShiftStep;
 import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
@@ -36,11 +37,14 @@ import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
 
 /**
- * ShiftRightView class represents the GUI view for performing the right shift operation on a binary number.
+ * ShiftRightView class represents the GUI view for performing the right shift
+ * operation on a binary number.
  * It extends GPanel and implements ActionListener and KeyListener interfaces.
  * <p>
- * The class provides a user interface for shifting a binary number to the right by a specified number of places
- * and checking the result. Inline comments have been added for better understanding of the code.
+ * The class provides a user interface for shifting a binary number to the right
+ * by a specified number of places
+ * and checking the result. Inline comments have been added for better
+ * understanding of the code.
  *
  * @author rickb, Chandon Hamel
  */
@@ -50,7 +54,7 @@ public class ShiftRightView extends UserRequestView implements KeyListener {
     private int shiftLength;
     private final boolean shiftRight = true;
     private int bitLength;
-    
+
     private JTextArea descTextArea, feedbackTextArea, responseTextArea;
     private JScrollPane responsePane;
     private GPanel questionPanel, descriptionPanel, feedbackPanel, qrPanel;
@@ -70,16 +74,15 @@ public class ShiftRightView extends UserRequestView implements KeyListener {
         initializeLayout();
     }
 
-    
     /**
      * Handles the action for the Hint button.
      */
     private void onNextHint() {
         feedbackTextArea.setText(String.format(
-            "Hint: Put %d 0s on the left and remove %d bits from the right", 
-            shiftLength, shiftLength));
+                "Hint: Put %d 0s on the left and remove %d bits from the right",
+                shiftLength, shiftLength));
     }
-    
+
     /**
      * Handles the action for the Check button.
      */
@@ -115,14 +118,14 @@ public class ShiftRightView extends UserRequestView implements KeyListener {
                 5, 5, 5, 5);
 
         addc(qrPanel, 0, 2, 3, 1, 1.0, 1.0,
-                GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
+                GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
                 5, 5, 5, 5);
-        
+
         addc(buttonPanel, 0, 4, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
     }
-    
+
     /**
      * Sets up the description area
      */
@@ -136,12 +139,12 @@ public class ShiftRightView extends UserRequestView implements KeyListener {
         descTextArea.setWrapStyleWord(true);
         descTextArea.setOpaque(false);
         descTextArea.append("""
-                            The Right Shift operation moves bits to the right 
-                            by a specified number of positions. Zeros fill the 
-                            empty left positions. This operation effectively 
-                            divides the number by powers of two.""");
+                The Right Shift operation moves bits to the right
+                by a specified number of positions. Zeros fill the
+                empty left positions. This operation effectively
+                divides the number by powers of two.""");
     }
-    
+
     /**
      * Creates the description panel
      */
@@ -160,7 +163,7 @@ public class ShiftRightView extends UserRequestView implements KeyListener {
                 GridBagConstraints.SOUTHWEST, GridBagConstraints.NONE,
                 5, 5, 5, 5);
     }
-    
+
     /**
      * Sets up the radio buttons and action listener
      */
@@ -173,7 +176,7 @@ public class ShiftRightView extends UserRequestView implements KeyListener {
         ActionListener selection = e -> {
             JRadioButton source = (JRadioButton) e.getSource();
             updateProblemSize(source);
-            //generateNewQuestion();
+            // generateNewQuestion();
         };
 
         fourRadioButton.addActionListener(selection);
@@ -187,7 +190,7 @@ public class ShiftRightView extends UserRequestView implements KeyListener {
         problemSizeGroup.add(sixteenRadioButton);
         problemSizeGroup.add(thirtytwoRadioButton);
 
-        fourRadioButton.setSelected(true); //Set default radio button to true
+        fourRadioButton.setSelected(true); // Set default radio button to true
 
         radioButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         radioButtonPanel.add(fourRadioButton);
@@ -195,7 +198,7 @@ public class ShiftRightView extends UserRequestView implements KeyListener {
         radioButtonPanel.add(sixteenRadioButton);
         radioButtonPanel.add(thirtytwoRadioButton);
     }
-    
+
     /**
      * Updates the size of the problem to display.
      *
@@ -212,7 +215,7 @@ public class ShiftRightView extends UserRequestView implements KeyListener {
             bitLength = 32;
         }
     }
-    
+
     /**
      * Initializes the question components and adds them to the question panel.
      */
@@ -225,7 +228,7 @@ public class ShiftRightView extends UserRequestView implements KeyListener {
 
         problemSizeLabel = new JLabel("Select Problem Size:");
         instructionLabel = new JLabel("Logical right shift the input given below by "
-              + shiftLength + " bits:");
+                + shiftLength + " bits:");
 
         questionPanel = new GPanel();
 
@@ -242,7 +245,7 @@ public class ShiftRightView extends UserRequestView implements KeyListener {
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
     }
-    
+
     /**
      * Initializes the response area
      */
@@ -251,12 +254,12 @@ public class ShiftRightView extends UserRequestView implements KeyListener {
         responseTextArea = new JTextArea();
         responseTextArea.setLineWrap(true);
         responseTextArea.setWrapStyleWord(true);
-        responseTextArea.setEnabled(false);  // Text area disabled at initialization 
+        responseTextArea.setEnabled(false); // Text area disabled at initialization
 
         responsePane = new JScrollPane(responseTextArea);
         responsePane.setPreferredSize(new Dimension(250, 50));
     }
-    
+
     /**
      * Initialized the feedback area
      */
@@ -273,7 +276,7 @@ public class ShiftRightView extends UserRequestView implements KeyListener {
                 GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
                 5, 5, 5, 5);
     }
-    
+
     /**
      * Creates a GPanel containing the response and feedback JScrollPanes and
      * the button panel.
@@ -297,8 +300,7 @@ public class ShiftRightView extends UserRequestView implements KeyListener {
     protected void updateView() {
         view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
 
-        switch(view.getCurrentViewType())
-        {
+        switch (view.getCurrentViewType()) {
             case DO_ONE:
                 updatePracticeView();
                 break;
@@ -325,9 +327,9 @@ public class ShiftRightView extends UserRequestView implements KeyListener {
         responseTextArea.setText("");
         feedbackTextArea.setText("");
 
-
-        // If check and hint buttons are disabled, reset listenerers and apply those used by this view
-        if(!checkHintEnabled) {
+        // If check and hint buttons are disabled, reset listenerers and apply those
+        // used by this view
+        if (!checkHintEnabled) {
             resetButtonListeners(); // Clear any listeners applied from other views
         }
 
@@ -375,9 +377,9 @@ public class ShiftRightView extends UserRequestView implements KeyListener {
 
     }
 
-
     /**
-     * Performs the right shift operation on the given input binary number for the specified number of places.
+     * Performs the right shift operation on the given input binary number for the
+     * specified number of places.
      *
      * @param x      The input binary number.
      * @param places The number of places for the right shift.
@@ -419,16 +421,16 @@ public class ShiftRightView extends UserRequestView implements KeyListener {
     @Override
     public NewExampleRequest newRequest() {
         NewExampleRequest ex = new NewExampleRequest();
-        //Set example type to the problem associated with the current view
+        // Set example type to the problem associated with the current view
         ex.setExampleType(ProblemType.SHIFT_BITS);
-        
+
         BitShiftStep newStep = new BitShiftStep();
-        
+
         newStep.setBitLength(bitLength);
         newStep.setShiftRight(shiftRight);
-        
+
         ex.setData(gson.toJson(newStep));
-        
+
         return ex;
     }
 
@@ -443,7 +445,7 @@ public class ShiftRightView extends UserRequestView implements KeyListener {
         example.setResult(userResponse);
 
         StepCompletion step = new StepCompletion(currentStep, gson.toJson(example));
-        
+
         step.setStep(currentStep);
 
         return step;

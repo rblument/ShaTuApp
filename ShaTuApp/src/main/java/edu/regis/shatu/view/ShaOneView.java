@@ -13,7 +13,6 @@ package edu.regis.shatu.view;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import edu.regis.shatu.model.ShaOneStep;
-import edu.regis.shatu.model.ShaZeroStep;
 import java.awt.GridBagConstraints;
 import java.awt.event.ActionListener;
 import javax.swing.JLabel;
@@ -151,7 +150,7 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
         step.setBitLength(problemSize);
         
         ex.setData(gson.toJson(step));
-        
+
         return ex;
     }
     
@@ -193,7 +192,7 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
         if (answerField.getText().equals("")) {
             JOptionPane.showMessageDialog(this, "Please provide an answer");
         } else {
-            verifyAnswer();
+            //verifyAnswer();
         }
     }
 
@@ -232,6 +231,7 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
         descriptionPanel.addc(questionPanel, 0, 2, 1, 1, 0.0, 0.0,
                 GridBagConstraints.SOUTHWEST, GridBagConstraints.NONE,
                 5, 5, 5, 5);
+        
     }
 
     /**
@@ -314,6 +314,10 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
         responsePane.setPreferredSize(new Dimension(800, 200));
     }
     
+        /**
+     * Creates a GPanel containing the response JScrollPanes and the button
+     * panel.
+     */
         private void setUpQRPanel() {
         qrPanel = new GPanel();
 
@@ -383,12 +387,15 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
                 throw new UnsupportedOperationException("Unknown Update Operation for view type: "
                         + view.getCurrentViewType());
         }
-
         if (model != null) {
+
             Step step = model.currentTask().getCurrentStep().getStep();
 
             if (step != null) {
                 ShaOneStep example = gson.fromJson(step.getData(), ShaOneStep.class);
+=======
+
+
 
                 if (example != null) {
                     operandAValue = example.getOperandA();
@@ -478,10 +485,6 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
         }
     }
     
-
-    
-
-
     /**
      * Updates the size of the problem to display.
      *
@@ -498,6 +501,4 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
             problemSize = 32;
         }
     }
-
-
 }
