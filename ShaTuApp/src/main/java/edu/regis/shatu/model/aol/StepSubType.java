@@ -79,6 +79,8 @@ public enum StepSubType {
 
     SHA_ZERO("SHA Sum 0 Function", StepSelection.SHA_ZERO),
     
+    SHA_ONE("SHA Sum 1 Function", StepSelection.SHA_ONE),
+    
     STEP_COMPLETION_REPLY("Step Completion Reply", null),
     
     REQUEST_HINT("Request Hint", null),    

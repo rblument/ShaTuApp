@@ -24,7 +24,7 @@ import edu.regis.shatu.svc.StudentModelSvc;
 import edu.regis.shatu.svc.TutorReply;
 
 public class ShaZero extends Objective {
-    ShaZero(Student student) {
+    public ShaZero(Student student) {
         super(student);
     }
 

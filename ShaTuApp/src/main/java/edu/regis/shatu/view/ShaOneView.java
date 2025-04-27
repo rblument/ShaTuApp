@@ -12,6 +12,8 @@ package edu.regis.shatu.view;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import edu.regis.shatu.model.ShaOneStep;
+import edu.regis.shatu.model.ShaZeroStep;
 import java.awt.GridBagConstraints;
 import java.awt.event.ActionListener;
 import javax.swing.JLabel;
@@ -19,7 +21,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import edu.regis.shatu.model.StepCompletion;
 import javax.swing.JRadioButton;
-import edu.regis.shatu.model.aol.ShaOneViewStep;
 import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.ProblemType;
@@ -140,16 +141,17 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
      */
     @Override
     public NewExampleRequest newRequest() {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
         NewExampleRequest ex = new NewExampleRequest();
-
+        
         ex.setExampleType(ProblemType.SHA_ONE);
-
-        ShaOneViewStep newStep = new ShaOneViewStep();
-
-        ex.setData(gson.toJson(newStep));
-
+        
+        ShaOneStep step = new ShaOneStep();
+        
+        step.setBitLength(problemSize);
+        
+        ex.setData(gson.toJson(step));
+        
         return ex;
     }
     
@@ -157,14 +159,16 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
     public StepCompletion stepCompletion() {
         Step currentStep = model.currentTask().currentStep().getStep();
 
-        ShaOneViewStep example = gson.fromJson(currentStep.getData(), ShaOneViewStep.class);
+        ShaOneStep example = gson.fromJson(currentStep.getData(), ShaOneStep.class);
 
         String userResponse = answerField.getText().replaceAll("\\s", "");
 
-        example.setUserResponse(userResponse);
+        example.setResult(userResponse);
 
         StepCompletion step = new StepCompletion(currentStep, gson.toJson(example));
+        
         step.setStep(currentStep);
+        
         return step;
     }
 
@@ -381,10 +385,17 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
         }
 
         if (model != null) {
-            // ****TO-DO*****
-            // Update the view's information from the model
-            // Debugging dynamic updates to the model can be done here.
-            System.out.println("ShaOneView");
+            Step step = model.currentTask().getCurrentStep().getStep();
+
+            if (step != null) {
+                ShaOneStep example = gson.fromJson(step.getData(), ShaOneStep.class);
+
+                if (example != null) {
+                    operandAValue = example.getOperandA();
+                    operandALabel.setText("Operand A: " + operandAValue);
+                }
+
+            }
         }
     }
 

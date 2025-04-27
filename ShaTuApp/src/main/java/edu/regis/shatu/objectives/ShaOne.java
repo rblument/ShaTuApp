@@ -26,12 +26,12 @@ import edu.regis.shatu.svc.StudentModelSvc;
 import edu.regis.shatu.svc.TutorReply;
 
 public class ShaOne extends Objective {
-    ShaOne(Student student) {
+    public ShaOne(Student student) {
         super(student);
     }
 
     /**
-     * Handler for returning Hint information to the client for the ShaSigmaZero
+     * Handler for returning Hint information to the client for the ShaSigmaOne
      * View
      *
      * @param completion The StepCompletion that the user is on
