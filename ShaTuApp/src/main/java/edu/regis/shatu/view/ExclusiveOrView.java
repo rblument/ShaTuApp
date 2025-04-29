@@ -58,8 +58,8 @@ public class ExclusiveOrView extends UserRequestView implements KeyListener {
     private TutoringSessionView view;
     private String stringX, stringY;
     private int problemSize;
-    private JTextArea descTextArea, feedbackTextArea, responseTextArea;
-    private JScrollPane feedbackPane, responsePane;
+    private JTextArea descTextArea, responseTextArea;
+    private JScrollPane responsePane;
     private GPanel questionPanel, descriptionPanel, qrPanel;
     private JPanel  radioButtonPanel;
     private ButtonGroup problemSizeGroup;
@@ -87,7 +87,6 @@ public class ExclusiveOrView extends UserRequestView implements KeyListener {
         setUpRadioButtons();
         setUpQuestionArea();
         setUpResponseArea();
-        setUpFeedbackArea();
         setUpDescriptionPanel();
         setUpQRPanel();
     }
@@ -251,19 +250,6 @@ public class ExclusiveOrView extends UserRequestView implements KeyListener {
         responsePane.setPreferredSize(new Dimension(800, 200));
     }
 
-    /**
-     * Initialized the feedback area
-     */
-    private void setUpFeedbackArea() {
-        feedbackTextArea = new JTextArea(3, 20);
-        feedbackTextArea.setEditable(false);
-        feedbackTextArea.setLineWrap(true);
-        feedbackTextArea.setWrapStyleWord(true);
-        feedbackTextArea.setBackground(null);
-
-        feedbackPane = new JScrollPane(feedbackTextArea);
-        feedbackPane.setPreferredSize(new Dimension(800, 200));
-    }
 
 
     /**
@@ -274,9 +260,6 @@ public class ExclusiveOrView extends UserRequestView implements KeyListener {
         qrPanel = new GPanel();
         
         qrPanel.setMinimumSize(new Dimension(500, 100));
-        qrPanel.addc(feedbackPane, 0, 1, 1, 1, 1.0, 1.0,
-                GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
-                0, 0, 0, 0);
         qrPanel.addc(responsePane, 0, 0, 1, 1, 1.0, 1.0,
              GridBagConstraints.CENTER, GridBagConstraints.BOTH,
              0, 0, 0, 0);
@@ -379,7 +362,6 @@ public class ExclusiveOrView extends UserRequestView implements KeyListener {
      */
     private void generateNewQuestion() {
         responseTextArea.setText("");
-        feedbackTextArea.setText("");
 
         stringX = generateInputString();
         stringY = generateInputString();
@@ -465,24 +447,6 @@ public class ExclusiveOrView extends UserRequestView implements KeyListener {
         // Not used in this context
     }
 
-    /**
-     * Verifies the user's answer against the correct answer.
-     */
-    private void verifyAnswer() {
-
-    }
-
-    /**
-     * Handles the action for the Hint button.
-     */
-    private void onNextHint() {
-    }
-
-    /**
-     * Handles the action for the Check button.
-     */
-    private void onCheckButton() {
-    }
 
     /**
      * XOR Example Request Added
@@ -520,7 +484,6 @@ public class ExclusiveOrView extends UserRequestView implements KeyListener {
     @Override
     protected void updatePracticeView() {
         responseTextArea.setText("");
-        feedbackTextArea.setText("");
 
         // If check and hint buttons are disabled, reset listenerers and apply those used by this view
         if (!checkHintEnabled) {

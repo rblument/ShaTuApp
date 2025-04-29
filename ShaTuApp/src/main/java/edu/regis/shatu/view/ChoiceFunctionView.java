@@ -60,8 +60,8 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
     private TutoringSessionView view;
     private String stringX, stringY, stringZ;
     private int problemSize;
-    private JTextArea descTextArea, feedbackTextArea, responseTextArea;
-    private JScrollPane feedbackPane, responsePane, chTruthTablePane;
+    private JTextArea descTextArea, responseTextArea;
+    private JScrollPane responsePane, chTruthTablePane;
     private GPanel truthTablePanel, questionPanel, descriptionPanel, qrPanel;
     private JPanel radioButtonPanel;
     private JTable chTruthTable;
@@ -134,7 +134,6 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
         setUpRadioButtons();
         setUpQuestionArea();
         setUpResponseArea();
-        setUpFeedbackArea();
         setUpTruthTable();
         setUpDescriptionPanel();
         setUpQRPanel();
@@ -174,8 +173,7 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
         descTextArea.setWrapStyleWord(true);
         descTextArea.setOpaque(false);
         descTextArea.append("""
-                            The Choice function takes three 32-bit words as input and outputs one 32-bit word. This output is necessary to complete the
-                            second addition step in the SHA-256 algorithm.""");
+                            The Choice function takes three 32-bit words as input and outputs one 32-bit word. This output is necessary to complete the second addition step in the SHA-256 algorithm.""");
     }
 
     /**
@@ -308,19 +306,6 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
         responsePane.setPreferredSize(new Dimension(800, 200));
     }
 
-    /**
-     * Initialized the feedback area
-     */
-    private void setUpFeedbackArea() {
-        feedbackTextArea = new JTextArea(3, 20);
-        feedbackTextArea.setEditable(false);
-        feedbackTextArea.setLineWrap(true);
-        feedbackTextArea.setWrapStyleWord(true);
-        feedbackTextArea.setBackground(null);
-
-        feedbackPane = new JScrollPane(feedbackTextArea);
-        feedbackPane.setPreferredSize(new Dimension(800, 200));
-    }
 
     /**
      * Creates a GPanel containing the response and feedback JScrollPanes and
@@ -333,10 +318,6 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
         qrPanel.addc(responsePane, 0, 0, 1, 1, 1.0, 1.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
                 5, 5, 5, 5);
-
-        qrPanel.addc(feedbackPane, 0, 1, 1, 1, 1.0, 1.0,
-                GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
-                5, 5, 5, 5);   
     }
  
     /**
@@ -446,9 +427,7 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
      */
     @Override
     public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_ENTER && responseTextArea.getText().equals("")) {
-            feedbackTextArea.setText("Please provide an answer");
-        } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+        if (e.getKeyCode() == KeyEvent.VK_ENTER) {
             checkButton.doClick();
         }
     }
@@ -460,61 +439,6 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
      */
     @Override
     public void keyReleased(KeyEvent e) {
-    }
-
-    /**
-     * Verifies the user's answer against the correct answer.
-     */
-    private void verifyAnswer() {
-        /*
-        String correctAnswer = choiceFunction(stringX, stringY, stringZ);
-        String userResponse = responseTextArea.getText();
-
-        userResponse = userResponse.replaceAll("\\s", "");
-
-        if (correctAnswer.equals(userResponse)) {
-            feedbackTextArea.setText("Correct!");
-            nextButton.setEnabled(true);
-            checkButton.setEnabled(false);
-        } else {
-            feedbackTextArea.setText("Incorrect! Please check your entry and "
-                    + "try again or use the hint feature for help. Correct answer: " + correctAnswer);
-        }
-         */
-    }
-
-    /**
-     * Handles the action for the Next Question button.
-     */
-    private void onNextQuestion() {
-        /*
-        responseTextArea.setText("");
-        feedbackTextArea.setText("");
-
-        generateNewQuestion();
-
-        nextButton.setEnabled(false);
-        checkButton.setEnabled(true);
-         */
-    }
-
-    /**
-     * Handles the action for the Hint button.
-     */
-    private void onNextHint() {
-        feedbackTextArea.setText("Hint: Check the truth table above for the "
-                + "appropriate values.");
-    }
-
-    /**
-     * Handles the action for the Check button.
-     */
-    private void onCheckButton() {
-        if (responseTextArea.getText().equals("")) {
-            feedbackTextArea.setText("Please provide an answer");
-        } else {
-            verifyAnswer();
-        }
     }
 
     @Override
@@ -547,9 +471,6 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
     @Override
     protected void updatePracticeView() {
 
-       // hintButton = view.getHintButton();
-       // checkButton = view.getCheckButton();
-       // newExButton = view.getNewExampleButton();
 
         // If check and hint buttons are disabled, reset listenerers and apply those used by this view
         if (!checkHintEnabled) {
