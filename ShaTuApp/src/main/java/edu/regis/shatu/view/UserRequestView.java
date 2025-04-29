@@ -25,7 +25,9 @@ import edu.regis.shatu.view.act.HintAction;
 import edu.regis.shatu.view.act.NewExampleAction;
 import edu.regis.shatu.view.act.StepCompletionAction;
 import java.awt.GridBagConstraints;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 
@@ -178,6 +180,8 @@ public abstract class UserRequestView extends GPanel {
         ActionListener hintAction = HintAction.instance();
         ActionListener checkAction = StepCompletionAction.instance();
         ActionListener newExampleAction = NewExampleAction.instance();
+        
+        
 
         // Clear all listeners for the check button and re-add the known listener
         for (ActionListener listener : checkButton.getActionListeners()) {
@@ -200,17 +204,24 @@ public abstract class UserRequestView extends GPanel {
             checkButton.setEnabled(true);
             hintButton.setEnabled(true);
         }); // Re-add the lambda listener
+        
+        // Set the default button states
+        checkButton.setEnabled(false);
+        hintButton.setEnabled(false);
+        newExampleButton.setEnabled(true); // Enable New Example by default
 
         // Reset button text
         checkButton.setText("Check");
         hintButton.setText("Hint");
         newExampleButton.setText("New Example");
 
-        // Set the default button states
-        checkButton.setEnabled(false);
-        hintButton.setEnabled(false);
-        newExampleButton.setEnabled(true); // Enable New Example by default
     }
+    
+    public void actionPerformed(ActionEvent e){
+        checkButton.setEnabled(true);
+        hintButton.setEnabled(true);
+    } 
+    
     
     /*
      public JButton getCheckButton() {

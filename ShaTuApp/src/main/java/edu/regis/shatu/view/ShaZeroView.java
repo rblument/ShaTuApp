@@ -401,7 +401,7 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
      */
     private void setUpQRPanel() {
         qrPanel = new GPanel();
-
+        responsePane.setPreferredSize(new Dimension(300, 20));
         qrPanel.addc(responsePane, 0, 0, 1, 1, 1.0, 1.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
                 5, 5, 5, 5);

@@ -17,7 +17,7 @@ package edu.regis.shatu.model;
  * and the result that comes back from the server
  */
 public class ShaOneStep {
-        /**
+    /**
      * The operand that the Sigma1 function operates on
      */
     private String operandA;
