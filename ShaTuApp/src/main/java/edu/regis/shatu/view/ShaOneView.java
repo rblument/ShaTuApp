@@ -12,6 +12,8 @@ package edu.regis.shatu.view;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import edu.regis.shatu.model.ShaOneStep;
+import edu.regis.shatu.model.MajorityStep;
 import edu.regis.shatu.model.ShaZeroStep;
 import java.awt.GridBagConstraints;
 import java.awt.event.ActionListener;
@@ -22,10 +24,13 @@ import edu.regis.shatu.model.StepCompletion;
 import javax.swing.JRadioButton;
 import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.aol.NewExampleRequest;
+import edu.regis.shatu.model.aol.PendingTask;
 import edu.regis.shatu.model.aol.ProblemType;
+import edu.regis.shatu.model.aol.StepSubType;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.event.KeyEvent;
 import javax.swing.ButtonGroup;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -140,15 +145,16 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
      */
     @Override
     public NewExampleRequest newRequest() {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-
         NewExampleRequest ex = new NewExampleRequest();
-
-        ex.setExampleType(ProblemType.SHA_ZERO);
-        ShaZeroStep step = new ShaZeroStep();
+        
+        ex.setExampleType(ProblemType.SHA_ONE);
+        
+        ShaOneStep step = new ShaOneStep();
+        
         step.setBitLength(problemSize);
-
-        ex.setData(gson.toJson(step));
+      
+        String shaStepJson = gson.toJson(step);
+        ex.setData(shaStepJson);
 
         return ex;
     }
@@ -157,14 +163,16 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
     public StepCompletion stepCompletion() {
         Step currentStep = model.currentTask().currentStep().getStep();
 
-        ShaZeroStep example = gson.fromJson(currentStep.getData(), ShaZeroStep.class);
+        ShaOneStep example = gson.fromJson(currentStep.getData(), ShaOneStep.class);
 
         String userResponse = answerField.getText().replaceAll("\\s", "");
 
         example.setResult(userResponse);
 
         StepCompletion step = new StepCompletion(currentStep, gson.toJson(example));
+        
         step.setStep(currentStep);
+        
         return step;
     }
 
@@ -189,11 +197,9 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
         if (answerField.getText().equals("")) {
             JOptionPane.showMessageDialog(this, "Please provide an answer");
         } else {
-            //verifyAnswer();
+            verifyAnswer();
         }
     }
-
-    
     /**
      * Sets the main View title and description of the function
      */
@@ -235,9 +241,7 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
         descriptionPanel.addc(questionPanel, 0, 2, 1, 1, 0.0, 0.0,
                 GridBagConstraints.SOUTHWEST, GridBagConstraints.NONE,
                 5, 5, 5, 5);
-        
     }
-
     /**
      * Sets up the radio buttons and action listener
      */
@@ -297,9 +301,7 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
                 5, 5, 5, 5);
         questionPanel.addc(operandALabel, 0, 3, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
-                5, 5, 5, 5);
-        
-                
+                5, 5, 5, 5);           
         addc(buttonPanel, 0, 4, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
@@ -313,14 +315,13 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
         responseTextArea = new JTextArea(3, 20);
         responseTextArea.setLineWrap(true);
         responseTextArea.setWrapStyleWord(true);
-        responseTextArea.setEnabled(false);  // Text area disabled at initialization 
+        responseTextArea.setEnabled(false); 
 
         responsePane = new JScrollPane(responseTextArea);
         responsePane.setPreferredSize(new Dimension(800, 200));
         
     }
-    
-        /**
+     /**
      * Creates a GPanel containing the response JScrollPanes and the button
      * panel.
      */
@@ -330,10 +331,6 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
         qrPanel.addc(responsePane, 0, 4, 4, 4, 1.0, 0,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 5, 5, 5, 5);
-
-     //   qrPanel.addc(buttonPanel, 0, 2, 1, 1, 1.0, 1.0,
-     //           GridBagConstraints.CENTER, GridBagConstraints.NONE,
-      //          5, 5, 5, 5);
     }
     
     /**
@@ -398,7 +395,7 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
             Step step = model.currentTask().getCurrentStep().getStep();
 
             if (step != null) {
-                ShaZeroStep example = gson.fromJson(step.getData(), ShaZeroStep.class);
+                ShaOneStep example = gson.fromJson(step.getData(), ShaOneStep.class);
 
                 if (example != null) {
                     operandAValue = example.getOperandA();
@@ -418,6 +415,25 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
         // If check and hint buttons are disabled, reset listenerers and apply those used by this view
         if(!checkHintEnabled) {
             resetButtonListeners(); // Clear any listeners applied from other views
+        }
+        
+                Step step = model.currentTask().getCurrentStep().getStep();
+
+        if (step.getSubType() == StepSubType.SHA_ZERO) {
+            //Get the data from the model as a RotateStep object
+            MajorityStep example = gson.fromJson(step.getData(), MajorityStep.class);
+
+            if (example.getOperandA() == null || example.getOperandA().isEmpty()) {
+                operandALabel.setText("x: Please");
+                hintButton.setEnabled(false);
+                checkButton.setEnabled(false);
+                responseTextArea.setEnabled(false);
+            } else {
+                operandALabel.setText("x: " + example.getOperandA());
+                hintButton.setEnabled(true);
+                checkButton.setEnabled(true);
+                responseTextArea.setEnabled(true);
+            }
         }
     }
 
@@ -456,22 +472,19 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
         return Integer.toBinaryString(result);
     }
     
-
-
-    /*
-    @Override
-    public void keyPressed(KeyEvent e) {
+    public void keyTyped (KeyEvent e) {
+    }
+  
+    public void keyPressed (KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_ENTER && answerField.getText().equals("")) {
             JOptionPane.showMessageDialog(this, "Please provide an answer");
         } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-            view.checkButton.doClick();
+            checkButton.doClick();
         }
     }
-    */
-
-   // @Override
-   // public void keyReleased(KeyEvent e) {
-   // }
+    
+   public void keyReleased(KeyEvent e) {
+   }
 
     /**
      * Verifies the user's answer by comparing it with the correct result of the right shift operation.
@@ -503,5 +516,11 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
         } else if (source == thirtytwoRadioButton) {
             problemSize = 32;
         }
+    }
+    
+    @Override
+    public void setCurrentTask(PendingTask task) {
+        this.model.addCurrentTask(task);
+        updateView();
     }
 }

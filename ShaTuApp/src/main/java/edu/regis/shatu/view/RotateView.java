@@ -269,7 +269,6 @@ public class RotateView extends UserRequestView implements KeyListener {
                         + view.getCurrentViewType());
         }
     }
-
     /**
      * Defines each view classes' standard method for updating in the Practice View
      */
