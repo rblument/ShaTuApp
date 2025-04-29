@@ -23,7 +23,7 @@ public class ShaZero extends Objective {
      */
     @Override
     public TutorReply hint(StepCompletion completion) {
-        return genericHint(completion, KnowledgeComponentKind.SHAR_ZERO,
+        return genericHint(completion, KnowledgeComponentKind.SHA_ZERO,
                 "The Σ₀ function involves three ROTR operations XOR'd together ");
     }
 
@@ -43,7 +43,7 @@ public class ShaZero extends Objective {
 
         substep.setResult(calculateSigma(substep.getOperandA(), substep.getBitLength()));
 
-        return genericExample(substep, StepSubType.SHA_ZERO, ProblemType.SHA_ZERO, KnowledgeComponentKind.SHAR_ZERO,
+        return genericExample(substep, StepSubType.SHA_ZERO, ProblemType.SHA_ZERO, KnowledgeComponentKind.SHA_ZERO,
                 "Compute the result of the Σ₀ function");
     }
 
@@ -70,7 +70,7 @@ public class ShaZero extends Objective {
         String expectedResult = calculateSigma(operand1, bitLength);
         System.out.println("Expected result: " + expectedResult);
 
-        return genericComplete(expectedResult, result, KnowledgeComponentKind.SHAR_ZERO);
+        return genericComplete(expectedResult, result, KnowledgeComponentKind.SHA_ZERO);
     }
 
     /**
