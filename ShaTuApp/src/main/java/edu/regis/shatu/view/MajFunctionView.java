@@ -240,6 +240,7 @@ public class MajFunctionView extends UserRequestView implements KeyListener {
      * @param source The radio button that triggered the even.
      */
     private void updateProblemSize(JRadioButton source) {
+        setDefaultPracticeView ();
         if (source == fourRadioButton) {
             problemSize = 4;
         } else if (source == eightRadioButton) {
@@ -249,6 +250,8 @@ public class MajFunctionView extends UserRequestView implements KeyListener {
         } else if (source == thirtytwoRadioButton) {
             problemSize = 32;
         }
+        
+        
     }
 
     /**
@@ -628,18 +631,14 @@ public class MajFunctionView extends UserRequestView implements KeyListener {
             MajorityStep example = gson.fromJson(step.getData(), MajorityStep.class);
 
             if (example.getOperandA() == null || example.getOperandA().isEmpty()) {
-                stringXLabel.setText("x: Please");
-                stringYLabel.setText("y: click");
-                stringZLabel.setText("z: New Example");
-                hintButton.setEnabled(false);
-                checkButton.setEnabled(false);
-                responseTextArea.setEnabled(false);
+                setDefaultPracticeView ();
             } else {
                 stringXLabel.setText("x: " + example.getOperandA());
                 stringYLabel.setText("y: " + example.getOperandB());
                 stringZLabel.setText("z: " + example.getOperandC());
                 hintButton.setEnabled(true);
                 checkButton.setEnabled(true);
+                responseTextArea.setText("");
                 responseTextArea.setEnabled(true);
             }
         }
@@ -659,5 +658,18 @@ public class MajFunctionView extends UserRequestView implements KeyListener {
     @Override
     protected void updateQuizView() {
 
+    }
+    
+    /**
+     * Sets all fields to default values
+     */
+    public void setDefaultPracticeView (){
+        stringXLabel.setText("x: Please");
+        stringYLabel.setText("y: click");
+        stringZLabel.setText("z: New Example");
+        responseTextArea.setEnabled(false);
+        hintButton.setEnabled(false);
+        checkButton.setEnabled(false);
+        responseTextArea.setText("");
     }
 }

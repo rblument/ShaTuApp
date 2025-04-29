@@ -133,5 +133,6 @@ public class NewExampleAction extends ShaTuGuiAction {
         } catch (IllegalArgException e) {
             System.out.println("Illegal arg exception " + e);
         }
+        
     }
 }

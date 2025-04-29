@@ -21,7 +21,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import edu.regis.shatu.model.StepCompletion;
 import javax.swing.JRadioButton;
-import edu.regis.shatu.model.aol.ShaOneViewStep;
 import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.PendingTask;
@@ -308,9 +307,10 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
         responseTextArea.setLineWrap(true);
         responseTextArea.setWrapStyleWord(true);
         responseTextArea.setEnabled(false); 
-        
+
         responsePane = new JScrollPane(responseTextArea);
         responsePane.setPreferredSize(new Dimension(800, 200));
+        
     }
      /**
      * Creates a GPanel containing the response JScrollPanes and the button
