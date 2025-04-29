@@ -10,7 +10,7 @@ import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.svc.TutorReply;
 
 public class ShaZero extends Objective {
-    ShaZero(Student student) {
+    public ShaZero(Student student) {
         super(student);
     }
 

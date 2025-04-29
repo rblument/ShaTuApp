@@ -57,6 +57,8 @@ import edu.regis.shatu.objectives.PrepareSchedule;
 import edu.regis.shatu.objectives.RotateBits;
 import edu.regis.shatu.objectives.ShiftBits;
 import edu.regis.shatu.objectives.XorBits;
+import edu.regis.shatu.objectives.ShaZero;
+import edu.regis.shatu.objectives.ShaOne;
 
 /**
  * The ShaTu tutor, which implements the tutoring service.
@@ -395,7 +397,7 @@ public TutorReply resetPassword(String jsonAcct) throws NonRecoverableException 
         System.out.println("get task method");
 
         Task task = new Task();
-        int[] taskOrder = { 102, 103, 104, 105, 106, 107, 108, 109, 101, 110, 111, 100, 112 };
+        int[] taskOrder = { 102, 103, 104, 105, 106, 107, 108, 109, 101, 110, 111, 100, 112, 113, 114 };
         int currentTask = 102;
 
         for (int id : taskOrder) {
@@ -455,6 +457,14 @@ public TutorReply resetPassword(String jsonAcct) throws NonRecoverableException 
             case 105:
                 task.setType(ProblemType.ADD_MSG_LENGTH);
                 currObjective = new AddMsgLen(student);
+                break;
+            case 113:
+                task.setType(ProblemType.SHA_ZERO);
+                currObjective = new ShaZero(student);
+                break;
+            case 114:
+                task.setType(ProblemType.SHA_ONE);
+                currObjective = new ShaOne(student);
                 break;
             default:
                 task.setType(ProblemType.ASCII_ENCODE);
@@ -573,6 +583,10 @@ public TutorReply resetPassword(String jsonAcct) throws NonRecoverableException 
                 return new AddMsgLen(student);
             case ASCII_ENCODE:
                 return new EncodeAscii(student);
+            case SHA_ZERO:
+                return new ShaZero(student);
+            case SHA_ONE:
+                return new ShaOne(student);
             default:
                 System.out.println("ShaUnknown new example request: " + problemType);
                 return null;
@@ -618,8 +632,8 @@ public TutorReply resetPassword(String jsonAcct) throws NonRecoverableException 
                 return ProblemType.CHOICE_FUNCTION;
             case SHA_ZERO:
                 return ProblemType.SHA_ZERO;
-            //case SHA_ONE:
-            //    return ProblemType.SHA_ONE;
+            case SHA_ONE:
+                 return ProblemType.SHA_ONE;
             default:
                 System.out.println("Unknown step type in convert: " + stepType);
                 return null;

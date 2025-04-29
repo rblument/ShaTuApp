@@ -12,6 +12,7 @@ package edu.regis.shatu.view;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import edu.regis.shatu.model.ShaOneStep;
 import edu.regis.shatu.model.MajorityStep;
 import edu.regis.shatu.model.ShaZeroStep;
 import java.awt.GridBagConstraints;
@@ -144,15 +145,14 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
      */
     @Override
     public NewExampleRequest newRequest() {
-        
-
         NewExampleRequest ex = new NewExampleRequest();
-
-        ex.setExampleType(ProblemType.SHA_ZERO);
-        ShaZeroStep step = new ShaZeroStep();
-        step.setBitLength(problemSize);
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
         
+        ex.setExampleType(ProblemType.SHA_ONE);
+        
+        ShaOneStep step = new ShaOneStep();
+        
+        step.setBitLength(problemSize);
+      
         String shaStepJson = gson.toJson(step);
         ex.setData(shaStepJson);
 
@@ -163,14 +163,16 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
     public StepCompletion stepCompletion() {
         Step currentStep = model.currentTask().currentStep().getStep();
 
-        ShaZeroStep example = gson.fromJson(currentStep.getData(), ShaZeroStep.class);
+        ShaOneStep example = gson.fromJson(currentStep.getData(), ShaOneStep.class);
 
         String userResponse = answerField.getText().replaceAll("\\s", "");
 
         example.setResult(userResponse);
 
         StepCompletion step = new StepCompletion(currentStep, gson.toJson(example));
+        
         step.setStep(currentStep);
+        
         return step;
     }
 
@@ -386,7 +388,7 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
             Step step = model.currentTask().getCurrentStep().getStep();
 
             if (step != null) {
-                ShaZeroStep example = gson.fromJson(step.getData(), ShaZeroStep.class);
+                ShaOneStep example = gson.fromJson(step.getData(), ShaOneStep.class);
 
                 if (example != null) {
                     operandAValue = example.getOperandA();

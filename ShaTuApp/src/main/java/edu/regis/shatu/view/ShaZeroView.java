@@ -127,6 +127,7 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
         ex.setExampleType(ProblemType.SHA_ZERO);
 
         ShaZeroStep step = new ShaZeroStep();
+        
         step.setBitLength(problemSize);
 
         ex.setData(gson.toJson(step));
@@ -159,7 +160,6 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
 
         step.setStep(currentStep);
      
-       
        return step;
 
     }
@@ -240,9 +240,7 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
         if (e.getKeyCode() == KeyEvent.VK_ENTER && answerField.getText().equals("")) {
             JOptionPane.showMessageDialog(this, "Please provide an answer");
         } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-
             //checkButton.doClick();
-
         }
     }
 
@@ -490,8 +488,6 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
                 throw new UnsupportedOperationException("Unknown Update Operation for view type: "
                         + view.getCurrentViewType());
         }
-
-
         if (model != null) {
 
             Step step = model.currentTask().getCurrentStep().getStep();
@@ -503,9 +499,7 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
                     operandAValue = example.getOperandA();
                     operandALabel.setText("Operand A: " + operandAValue);
                 }
-
             }
-
         }
     }
 

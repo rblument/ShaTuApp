@@ -17,8 +17,8 @@ package edu.regis.shatu.model;
  * and the result that comes back from the server
  */
 public class ShaOneStep {
-        /**
-     * The operand that the Sigma0 function operates on
+    /**
+     * The operand that the Sigma1 function operates on
      */
     private String operandA;
 
@@ -28,41 +28,41 @@ public class ShaOneStep {
     private int bitLength;
 
     /**
-     * The result of the Sigma0 function
+     * The result of the Sigma1 function
      */
     private String result;
 
     /**
-     * Getter for operand A in the Sigma0 function
+     * Getter for operand A in the Sigma1 function
      *
-     * @return operand A for the Sigma0 function
+     * @return operand A for the Sigma1 function
      */
     public String getOperandA() {
         return operandA;
     }
 
     /**
-     * Setter for operand A in the Sigma0 function
+     * Setter for operand A in the Sigma1 function
      *
-     * @param operandA The operand for the Sigma0 function
+     * @param operandA The operand for the Sigma1 function
      */
     public void setOperandA(String operandA) {
         this.operandA = operandA;
     }
 
     /**
-     * Getter for the Sigma0 function result
+     * Getter for the Sigma1 function result
      *
-     * @return The result value of the Sigma0 function
+     * @return The result value of the Sigma1 function
      */
     public String getResult() {
         return result;
     }
 
     /**
-     * Setter for the Sigma0 function result
+     * Setter for the Sigma1 function result
      *
-     * @param result The result of the Sigma0 function
+     * @param result The result of the Sigma1 function
      */
     public void setResult(String result) {
         this.result = result;

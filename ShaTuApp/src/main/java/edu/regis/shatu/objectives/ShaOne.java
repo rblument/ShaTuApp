@@ -31,7 +31,7 @@ public class ShaOne extends Objective {
     }
 
     /**
-     * Handler for returning Hint information to the client for the ShaSigmaZero
+     * Handler for returning Hint information to the client for the ShaSigmaOne
      * View
      *
      * @param completion The StepCompletion that the user is on
