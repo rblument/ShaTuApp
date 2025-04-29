@@ -214,7 +214,14 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
         descTextArea.setWrapStyleWord(true);
         descTextArea.setOpaque(false);
         descTextArea.append("""
-                            The Σ₁ function takes a single 32-bit word operand, A, and outputs a single 32-bit word.""");
+                            The Σ₁ function takes a single 32-bit word operand then:
+                            
+                            1) Shift  input value right with n=6
+                            2) Shift  input value right with n=11
+                            3) Shift  input value right with n=25
+                            4) Modulo addition using 3 shift right values.
+                            
+                            Outputs a single 32-bit word.""");
     }
 
     /**
