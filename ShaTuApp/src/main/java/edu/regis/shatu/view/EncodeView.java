@@ -15,6 +15,7 @@ package edu.regis.shatu.view;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
+
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -24,12 +25,13 @@ import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-import edu.regis.shatu.model.EncodeAsciiStep;
-import edu.regis.shatu.model.Step;
+
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
+import edu.regis.shatu.model.steps.EncodeAsciiStep;
+import edu.regis.shatu.model.steps.Step;
 
 /**
  * A view that requests the student to add a single '1' bit to the byte prompt.
@@ -95,7 +97,7 @@ public class EncodeView extends UserRequestView {
                 GridBagConstraints.HORIZONTAL, 5, 5, 5, 5);
         addc(responseScrollPane, 0, 4, 1, 1,
                 1.0, 1.0, GridBagConstraints.CENTER,
-                GridBagConstraints.BOTH, 5, 5, 5, 5);      
+                GridBagConstraints.BOTH, 5, 5, 5, 5);
         addc(buttonPanel, 0, 6, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
@@ -196,9 +198,10 @@ public class EncodeView extends UserRequestView {
         responseTextArea.setLineWrap(true); // Enable line wrapping
         responseTextArea.setWrapStyleWord(true); // Wrap lines at word boundaries
 
-        responseTextArea.setEnabled(false);  // Text area disabled at initialization 
+        responseTextArea.setEnabled(false); // Text area disabled at initialization
         responseScrollPane = new JScrollPane(responseTextArea);
-        responseScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED); // Enable vertical scrolling
+        responseScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED); // Enable vertical
+                                                                                                 // scrolling
     }
 
     /**
@@ -211,7 +214,8 @@ public class EncodeView extends UserRequestView {
         feedbackArea.setLineWrap(true); // Enable line wrapping
         feedbackArea.setWrapStyleWord(true); // Wrap lines at word boundaries
         feedbackScrollPane = new JScrollPane(feedbackArea);
-        feedbackScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED); // Enable vertical scrolling
+        feedbackScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED); // Enable vertical
+                                                                                                 // scrolling
     }
 
     /**
@@ -310,14 +314,15 @@ public class EncodeView extends UserRequestView {
             MainFrame mainFrame = MainFrame.instance();
             if (mainFrame != null) {
                 view = SplashFrame.instance().getTutoringSessionView(); // Initialize view once SplashFrame is ready
-                                
+
             } else {
                 System.err.println("SplashFrame.instance() is null. Cannot initialize 'view'.");
                 return; // Exit updateView if the view cannot be initialized
             }
         }
 
-        if (this.model == null) { // Currently in development, Encode Ascii starts first when loaded, which model can be null initially.
+        if (this.model == null) { // Currently in development, Encode Ascii starts first when loaded, which model
+                                  // can be null initially.
             questionLabel.setText("Please click new example button to get started");
 
         } else {
@@ -349,7 +354,7 @@ public class EncodeView extends UserRequestView {
                 // Clear any existing feedback and response from the previous question.
                 feedbackArea.setText("");
                 responseTextArea.setText("");
-              
+
                 if ((step.getSubType() == type)) { // Subtype was correct
                     System.out.println("If branch was taken, subtype was a encode ascii"); // Error checking.
 
@@ -395,7 +400,6 @@ public class EncodeView extends UserRequestView {
      */
     @Override
     protected void updatePracticeView() {
-
 
     }
 

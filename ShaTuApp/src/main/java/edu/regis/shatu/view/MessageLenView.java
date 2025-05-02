@@ -16,6 +16,7 @@
 package edu.regis.shatu.view;
 
 import java.awt.GridBagConstraints;
+
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -23,12 +24,13 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
-import edu.regis.shatu.model.MessageLenStep;
-import edu.regis.shatu.model.Step;
+
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
+import edu.regis.shatu.model.steps.MessageLenStep;
+import edu.regis.shatu.model.steps.Step;
 
 /**
  * A view that requests the student to figure out the number of bits their
@@ -57,7 +59,6 @@ public class MessageLenView extends UserRequestView {
         initializeComponents();
         initializeLayout();
     }
-
 
     /**
      * Initializes all GUI components, setting up their properties and
@@ -99,7 +100,7 @@ public class MessageLenView extends UserRequestView {
         addc(feedbackScrollPane, 0, 5, 1, 1,
                 1.0, 1.0, GridBagConstraints.CENTER,
                 GridBagConstraints.BOTH, 5, 5, 5, 5);
-                
+
         addc(buttonPanel, 0, 6, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
@@ -116,7 +117,8 @@ public class MessageLenView extends UserRequestView {
         if (this.responseTextArea.getText().equals("")) {
             this.feedbackArea.setText("Please provide an answer");
         } else {
-            // Do nothing, tutor should be handling everything, but will leave incase a use can be found in development.
+            // Do nothing, tutor should be handling everything, but will leave incase a use
+            // can be found in development.
         }
     }
 
@@ -138,7 +140,7 @@ public class MessageLenView extends UserRequestView {
      */
     public void requestHint() {
 
-        //Adjust the hint as needed
+        // Adjust the hint as needed
         this.feedbackArea.setText("Hint: Lets say you have a message with 1 character, "
                 + "1 character is 8 bits.  Whats 8 in Binary form?  Its 1000, "
                 + "please review binary if you ar unfimiliar or need a review before continuing. "
@@ -159,25 +161,24 @@ public class MessageLenView extends UserRequestView {
         // TEMPORARY UNTIL WE LOAD THE MODEL DATA DESCRIPTION
         descriptionTextPane.setText(
                 "<html>"
-                + "<body>"
-                + "<h2>Add Message Length</h2>"
-                + "<p>A sha256 message needs to be 512 bits.  We know that we added '1' bit during the add-one-bit step,"
-                + " and we ensured the message was padded with zeros until it contained 448 bits during the pad-zeros step.  "
-                + "We need to account for the last 64 bits, which will be the message length.<br>"
-                + "You need to calculate the message length:<br>"
-                + "1: What is the length of your message character wise?<br>"
-                + "2: How many bits is a character? Add them together to get the total bits of your message.<br>"
-                + "3: Convert that total to binary form. That will be your answer.<br>"
-                + "EXTRA: When submitting your answer, the program will remove spaces from your answer.  "
-                + "You will only need to submit the binary form of your integer value, "
-                + "but keep in mind the last 64 bits is allocated for this step, "
-                + "the real answer will be padded with zeros until it contains 64 bits, "
-                + "but you will not be expected to do that here. "
-                + "Feel free to click the hint button for the answer to a message with 1 character for reference, "
-                + "then try different lengths yourself.</p>"
-                + "</body>"
-                + "</html>"
-        );
+                        + "<body>"
+                        + "<h2>Add Message Length</h2>"
+                        + "<p>A sha256 message needs to be 512 bits.  We know that we added '1' bit during the add-one-bit step,"
+                        + " and we ensured the message was padded with zeros until it contained 448 bits during the pad-zeros step.  "
+                        + "We need to account for the last 64 bits, which will be the message length.<br>"
+                        + "You need to calculate the message length:<br>"
+                        + "1: What is the length of your message character wise?<br>"
+                        + "2: How many bits is a character? Add them together to get the total bits of your message.<br>"
+                        + "3: Convert that total to binary form. That will be your answer.<br>"
+                        + "EXTRA: When submitting your answer, the program will remove spaces from your answer.  "
+                        + "You will only need to submit the binary form of your integer value, "
+                        + "but keep in mind the last 64 bits is allocated for this step, "
+                        + "the real answer will be padded with zeros until it contains 64 bits, "
+                        + "but you will not be expected to do that here. "
+                        + "Feel free to click the hint button for the answer to a message with 1 character for reference, "
+                        + "then try different lengths yourself.</p>"
+                        + "</body>"
+                        + "</html>");
         descriptionTextPane.setEditable(false);
         descriptionTextPane.setBackground(null);
         descriptionTextPane.setBorder(null);
@@ -198,10 +199,11 @@ public class MessageLenView extends UserRequestView {
         responseTextArea = new JTextArea(3, 20);
         responseTextArea.setLineWrap(true); // Enable line wrapping
         responseTextArea.setWrapStyleWord(true); // Wrap lines at word boundaries
-        responseTextArea.setEnabled(false);  // Text area disabled at initialization 
+        responseTextArea.setEnabled(false); // Text area disabled at initialization
 
         responseScrollPane = new JScrollPane(responseTextArea);
-        responseScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED); // Enable vertical scrolling
+        responseScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED); // Enable vertical
+                                                                                                 // scrolling
     }
 
     /**
@@ -214,7 +216,8 @@ public class MessageLenView extends UserRequestView {
         feedbackArea.setLineWrap(true); // Enable line wrapping
         feedbackArea.setWrapStyleWord(true); // Wrap lines at word boundaries
         feedbackScrollPane = new JScrollPane(feedbackArea);
-        feedbackScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED); // Enable vertical scrolling
+        feedbackScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED); // Enable vertical
+                                                                                                 // scrolling
     }
 
     /**
@@ -226,7 +229,7 @@ public class MessageLenView extends UserRequestView {
      */
     private void setupMessageLengthInput() {
         messageLengthLabel = new JLabel("Message Length:");
-        messageLengthField = new JTextField("1", 5);  // Default length 1, adjust size as needed
+        messageLengthField = new JTextField("1", 5); // Default length 1, adjust size as needed
         messageLengthField.setHorizontalAlignment(JTextField.CENTER);
     }
 
@@ -234,7 +237,7 @@ public class MessageLenView extends UserRequestView {
      * Creates and returns a JPanel dedicated to setting the message length.
      *
      * @return A JPanel containing components for message length input, arranged
-     * vertically.
+     *         vertically.
      */
     private JPanel createMessageLengthPanel() {
         JPanel messageLengthPanel = new JPanel();
@@ -261,8 +264,7 @@ public class MessageLenView extends UserRequestView {
     protected void updateView() {
         view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
 
-        switch(view.getCurrentViewType())
-        {
+        switch (view.getCurrentViewType()) {
             case DO_ONE:
                 updatePracticeView();
                 break;
@@ -287,15 +289,16 @@ public class MessageLenView extends UserRequestView {
     @Override
     protected void updatePracticeView() {
 
-        // If check and hint buttons are disabled, reset listenerers and apply those used by this view
+        // If check and hint buttons are disabled, reset listenerers and apply those
+        // used by this view
         if (!checkHintEnabled) {
             resetButtonListeners(); // Clear any listeners applied from other views
         }
 
         /*
-        When switching between steps, the current step will be the previous enum
-        that a example was created for.  If that enums related stepobject has
-        similar variables, their may be a conflict causing a error.
+         * When switching between steps, the current step will be the previous enum
+         * that a example was created for. If that enums related stepobject has
+         * similar variables, their may be a conflict causing a error.
          */
         StepSubType type = StepSubType.ADD_MSG_LENGTH;
 
@@ -305,7 +308,12 @@ public class MessageLenView extends UserRequestView {
 
         System.out.println("Message Length substep from current step: " + step.getSubType()); // Error checking.
         if (step.getSubType() == StepSubType.ADD_MSG_LENGTH) {
-            MessageLenStep newMessageLenObject = gson.fromJson(step.getData(), MessageLenStep.class); // Issues can happen here if the class contains similar named variables
+            MessageLenStep newMessageLenObject = gson.fromJson(step.getData(), MessageLenStep.class); // Issues can
+                                                                                                      // happen here if
+                                                                                                      // the class
+                                                                                                      // contains
+                                                                                                      // similar named
+                                                                                                      // variables
 
             // Clear any existing feedback and response from the previous question.
             feedbackArea.setText("");
@@ -334,14 +342,11 @@ public class MessageLenView extends UserRequestView {
                 hintButton.setEnabled(false);
             }
         }
-        
+
         // Hide feedback panel if not used (fixes grey box visibility issue)
-        if (feedbackArea.getText().trim().isEmpty()) 
-        {
+        if (feedbackArea.getText().trim().isEmpty()) {
             feedbackScrollPane.setVisible(false);
-        } 
-        else 
-        {
+        } else {
             feedbackScrollPane.setVisible(true);
         }
     }
@@ -379,9 +384,13 @@ public class MessageLenView extends UserRequestView {
 
         ex.setExampleType(ProblemType.ADD_MSG_LENGTH);
 
-        MessageLenStep newMessageLenStep = new MessageLenStep(); // New MessageLenStep class object to use for the question and answer.
+        MessageLenStep newMessageLenStep = new MessageLenStep(); // New MessageLenStep class object to use for the
+                                                                 // question and answer.
 
-        newMessageLenStep.setMessageLength(Integer.parseInt(messageLengthField.getText().trim())); // Number of characters the question should be.
+        newMessageLenStep.setMessageLength(Integer.parseInt(messageLengthField.getText().trim())); // Number of
+                                                                                                   // characters the
+                                                                                                   // question should
+                                                                                                   // be.
 
         System.out.println(newMessageLenStep); // Error checking
 
@@ -404,9 +413,19 @@ public class MessageLenView extends UserRequestView {
 
         Step currentStep = model.currentTask().currentStep().getStep();
 
-        MessageLenStep completedMessageLenStep = gson.fromJson(currentStep.getData(), MessageLenStep.class); // Assigns the class with the data assigned while creating the example.
+        MessageLenStep completedMessageLenStep = gson.fromJson(currentStep.getData(), MessageLenStep.class); // Assigns
+                                                                                                             // the
+                                                                                                             // class
+                                                                                                             // with the
+                                                                                                             // data
+                                                                                                             // assigned
+                                                                                                             // while
+                                                                                                             // creating
+                                                                                                             // the
+                                                                                                             // example.
 
-        String userResponse = this.responseTextArea.getText().replaceAll("\\s", ""); // Gets the users answer and removes spaces
+        String userResponse = this.responseTextArea.getText().replaceAll("\\s", ""); // Gets the users answer and
+                                                                                     // removes spaces
 
         completedMessageLenStep.setUserAnswer(userResponse);
 

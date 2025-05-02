@@ -10,13 +10,17 @@
  *  software is distributed on an "AS IS" basis without warranties
  *  or conditions of any kind, either expressed or implied.
  */
-package edu.regis.shatu.model;
+package edu.regis.shatu.model.steps;
+
+import edu.regis.shatu.model.aol.StepSubType;
 
 /**
  *
  * @author chand
  */
-public class PrepScheduleStep
-{
-    
+public class CompressRoundStep extends Step {
+    public CompressRoundStep() {
+        super(1, 0, StepSubType.COMPRESS_ROUND);
+    }
+
 }

@@ -11,9 +11,9 @@
  *  or conditions of any kind, either expressed or implied.
  */
 
- /*
- * Set responseTextArea to disabled at initialization per SHAT-225 John hennessey 23 Feb 2025
- */
+/*
+* Set responseTextArea to disabled at initialization per SHAT-225 John hennessey 23 Feb 2025
+*/
 package edu.regis.shatu.view;
 
 import java.awt.GridBagConstraints;
@@ -21,18 +21,20 @@ import java.awt.Insets;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.math.BigInteger;
-import javax.swing.JButton;
+
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import edu.regis.shatu.model.Step;
+
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.BitOpStep;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
+import edu.regis.shatu.model.steps.Step;
 
 /**
  * AddTwoBitView class represents a GUI view for adding two binary numbers
@@ -125,8 +127,8 @@ public class AddTwoBitView extends UserRequestView implements KeyListener {
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 5, 5, 5, 5);
 
-        responseTextArea.setEnabled(false);  // Text area disabled at initialization 
-        
+        responseTextArea.setEnabled(false); // Text area disabled at initialization
+
         addc(buttonPanel, 0, 5, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
@@ -192,7 +194,7 @@ public class AddTwoBitView extends UserRequestView implements KeyListener {
             JOptionPane.showMessageDialog(this, "Please provide an answer");
         } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
             checkButton.doClick();
-        } 
+        }
     }
 
     /**
@@ -294,8 +296,7 @@ public class AddTwoBitView extends UserRequestView implements KeyListener {
     protected void updateView() {
         view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
 
-        switch(view.getCurrentViewType())
-        {
+        switch (view.getCurrentViewType()) {
             case DO_ONE:
                 updatePracticeView();
                 break;

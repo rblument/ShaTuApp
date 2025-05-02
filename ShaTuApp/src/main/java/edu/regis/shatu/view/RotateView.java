@@ -17,18 +17,20 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+
 import javax.swing.ButtonGroup;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
-import edu.regis.shatu.model.Step;
+
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.PendingTask;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.RotateStep;
 import edu.regis.shatu.model.aol.StepSubType;
+import edu.regis.shatu.model.steps.Step;
 
 /**
  * RotateView class represents the GUI view for rotating strings using ROTR
@@ -53,8 +55,9 @@ public class RotateView extends UserRequestView implements KeyListener {
     private JRadioButton shortProblem;
     private JRadioButton longProblem;
     private JRadioButton rightRotate;
-    private JRadioButton leftRotate; // should be phased out as SHA256 does not left rotate, and the concept is simple enough.
-    private JRadioButton rotate7Bits;//           -however, there is a lot of framework already in place that includes LEFT.
+    private JRadioButton leftRotate; // should be phased out as SHA256 does not left rotate, and the concept is
+                                     // simple enough.
+    private JRadioButton rotate7Bits;// -however, there is a lot of framework already in place that includes LEFT.
     private JRadioButton rotate16Bits;
     private ButtonGroup lengthType;
     private ButtonGroup rotationType;
@@ -222,7 +225,7 @@ public class RotateView extends UserRequestView implements KeyListener {
         addc(rotate16Bits, 3, 7, 1, 1, 0.0, 0.0,
                 GridBagConstraints.WEST, GridBagConstraints.NONE,
                 5, 5, 5, 5);
-                
+
         addc(buttonPanel, 0, 8, 4, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
@@ -250,8 +253,7 @@ public class RotateView extends UserRequestView implements KeyListener {
     protected void updateView() {
         view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
 
-        switch(view.getCurrentViewType())
-        {
+        switch (view.getCurrentViewType()) {
             case DO_ONE:
                 updatePracticeView();
                 break;
@@ -269,12 +271,14 @@ public class RotateView extends UserRequestView implements KeyListener {
                         + view.getCurrentViewType());
         }
     }
+
     /**
      * Defines each view classes' standard method for updating in the Practice View
      */
     @Override
     protected void updatePracticeView() {
-        // If check and hint buttons are disabled, reset listenerers and apply those used by this view
+        // If check and hint buttons are disabled, reset listenerers and apply those
+        // used by this view
         if (!checkHintEnabled) {
             resetButtonListeners(); // Clear any listeners applied from other views
         }
