@@ -26,7 +26,7 @@ import edu.regis.shatu.svc.StudentModelSvc;
 import edu.regis.shatu.svc.TutorReply;
 
 public class ShaOne extends Objective {
-    ShaOne(Student student) {
+    public ShaOne(Student student) {
         super(student);
     }
 
@@ -195,7 +195,7 @@ public class ShaOne extends Objective {
 
         substep.setResult(calculateSigma(substep.getOperandA(), substep.getBitLength()));
 
-        Step step = new Step(1, 0, StepSubType.SHA_ZERO);
+        Step step = new Step(1, 0, StepSubType.SHA_ONE);
 
         // ToDo: fix timeouts
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
@@ -205,8 +205,8 @@ public class ShaOne extends Objective {
 
         Task task = new Task();
         task.setKind(TaskKind.PROBLEM);
-        task.setType(ProblemType.SHA_ZERO);
-        task.setDescription("Compute the result of the Σ₀ function");
+        task.setType(ProblemType.SHA_ONE);
+        task.setDescription("Compute the result of the Σ₁ function");
         task.addStep(step);
 
         // Update the assessment data and save it to the database.
@@ -237,10 +237,10 @@ public class ShaOne extends Objective {
     }
 
     /**
-     * Calculates the SHA Σ₀ function involving rotation and right shift operations.
+     * Calculates the SHA Σ₁ function involving rotation and right shift operations.
      *
      * @param input The input binary number.
-     * @return The result after performing the SHA Σ₀ function.
+     * @return The result after performing the SHA Σ₁ function.
      */
     private String calculateSigma(String input, int bitLength) {
         input = input.replaceAll("\\s", "");

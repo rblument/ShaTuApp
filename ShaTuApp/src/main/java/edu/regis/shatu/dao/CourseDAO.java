@@ -497,6 +497,10 @@ public class CourseDAO extends MySqlDAO implements CourseSvc {
                 return ""; // TBD
             case REQUEST_HINT:
                 return ""; // TBD
+            case SHA_ONE:
+                return "";
+            case SHA_ZERO:
+                return "";
             default:
                 return "";
         }
