@@ -40,6 +40,17 @@ public enum ServerRequestType {
     CREATE_ACCOUNT(":CreateAccount"),
     
     /**
+     * A user is requesting to update account information
+     * 
+     * The ClientRequest data is a JSon Account object
+     * 
+     * The TutorReply status will be:
+     *   "Updated" with no data
+     *   "ERR" 
+     */
+    UPDATE_ACCOUNT(":UpdateAccount"),
+    
+    /**
      * The student or client requested another example
      * 
      */

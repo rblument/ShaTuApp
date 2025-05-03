@@ -10,6 +10,12 @@
  *  software is distributed on an "AS IS" basis without warranties
  *  or conditions of any kind, either expressed or implied.
  */
+/*
+*Modified by John Hennessey
+*20 march 2025
+* SHAT-179 added functionality to allow user to change information 
+*/
+
 package edu.regis.shatu.view;
 
 import java.awt.CardLayout;
@@ -43,6 +49,11 @@ public class SplashFrame extends JFrame {
      */
     public static final String NEW_USER = "NewUserPanel";
     
+/**
+     * Name of the change user data panel in this frame's primary card layout panel.
+     */
+    public static final String CHANGE_DATA = "ChangeUserDataPanel";
+            
      /**
      * Dashboard Reference Name for CardLayout;
      * linked to splashPanel sign in.
@@ -75,6 +86,7 @@ public class SplashFrame extends JFrame {
      */
     public static final String RESET_PASSWORD = "ResetPasswordPanel";
     
+        
     /**
      * The single instance of this frame.
      */
@@ -156,6 +168,11 @@ public class SplashFrame extends JFrame {
      */
     private ResetPasswordPanel resetPasswordPanel;
     
+   /**
+     * A panel which allows the user to change their data.
+     */
+    private ChangeUserDataPanel changeUserDataPanel;
+    
     /**
      * The number of consecutive illegal passwords attempted by the current
      * user attempting to login (see MAX_SIGNIN_ATTEMPTS).
@@ -207,6 +224,7 @@ public class SplashFrame extends JFrame {
                 return splashPanel.getModel();
             case FORGOT_PASSWORD:
                 return forgotPasswordPanel.getModel();
+            
             case RESET_PASSWORD:
                 System.out.println("RESET");
                 return resetPasswordPanel.getModel();
@@ -381,6 +399,10 @@ public class SplashFrame extends JFrame {
         this.selectPanel(NEW_USER);
     }
     
+    public void selectChangeData() {
+        this.selectPanel(CHANGE_DATA);
+    }
+    
     /**
      * Reset the text fields in the new account panel to the empty string.
      */
@@ -494,9 +516,13 @@ public class SplashFrame extends JFrame {
         splashPanel = new SplashPanel();
         newAccountPanel = new NewAccountPanel();
         forgotPasswordPanel = new ForgotPasswordPanel();
+        changeUserDataPanel = new ChangeUserDataPanel();
+       
                       
         cards.add(splashPanel, SPLASH);
         cards.add(newAccountPanel, NEW_USER);
+        cards.add(changeUserDataPanel, CHANGE_DATA);
         cards.add(forgotPasswordPanel, FORGOT_PASSWORD); 
+        
     }
 }

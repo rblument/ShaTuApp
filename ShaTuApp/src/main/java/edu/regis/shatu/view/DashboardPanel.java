@@ -12,11 +12,12 @@
  */
 package edu.regis.shatu.view;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
+//import java.awt.BorderLayout;
+//import java.awt.Color;
+//import java.awt.Cursor;
+//import java.awt.Dimension;
+//import java.awt.GridBagConstraints;
+import java.awt.*;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -50,6 +51,7 @@ public class DashboardPanel extends javax.swing.JPanel {
     private JProgressBar quizMeProgressBar1;
     private JButton quizeMeButton1;
     private JButton settingsButton;
+    private JButton changeUserDataButton;
     private JButton teachMeButton1;
     private JProgressBar teachMeProgressBar1;
     private JLabel welcomeLabel;
@@ -85,6 +87,7 @@ public class DashboardPanel extends javax.swing.JPanel {
 
         logOutButton = new JButton();
         settingsButton = new JButton();
+        changeUserDataButton = new JButton();
         welcomeLabel = new JLabel();
         teachMeButton1 = new JButton();
         practiceButton1 = new JButton();
@@ -118,7 +121,18 @@ public class DashboardPanel extends javax.swing.JPanel {
         });   
 
         settingsButton.setText("Settings");
-        settingsButton.setVerticalAlignment(javax.swing.SwingConstants.TOP);
+        //settingsButton.setVerticalAlignment(javax.swing.SwingConstants.TOP);
+        
+        changeUserDataButton.setText("Change My Data");
+        changeUserDataButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                changeUserDataButtonActionPerformed(evt);
+            }
+        });
+                
+                
+        //changeUserDataButton.setVerticalAlignment(javax.swing.SwingConstants.TOP);
+        //changeUserDataButton.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
 
         welcomeLabel.setBackground(new java.awt.Color(0, 43, 73));
         welcomeLabel.setOpaque(true);
@@ -175,28 +189,32 @@ public class DashboardPanel extends javax.swing.JPanel {
     }
     
     private void layoutComponents() {
-        setCursor(new Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-        setMaximumSize(new Dimension(32767, 32767));
-        setMinimumSize(new Dimension(0, 0));
-        setPreferredSize(new Dimension(986, 480));
-        setLayout(new BorderLayout());
-        
-        
-        JPanel headerPanel = new JPanel();
-        headerPanel.setLayout(new BorderLayout());
-        headerPanel.add(logOutButton, BorderLayout.LINE_END);
-        
-        headerPanel.add(settingsButton, BorderLayout.LINE_START);
-        
-        headerPanel.add(welcomeLabel, java.awt.BorderLayout.CENTER);
+    setCursor(new Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+    setMaximumSize(new Dimension(32767, 32767));
+    setMinimumSize(new Dimension(0, 0));
+    setPreferredSize(new Dimension(986, 480));
+    setLayout(new BorderLayout());
+    
+    JPanel headerPanel = new JPanel();
+    headerPanel.setLayout(new BorderLayout());
+    headerPanel.add(logOutButton, BorderLayout.LINE_END);
 
-        add(headerPanel, BorderLayout.NORTH);
-        
-        GPanel contentPanel = new GPanel();
-       
-        contentPanel.setBackground(new java.awt.Color(0, 43, 73));
-        contentPanel.setAlignmentX(1.0F);
-        contentPanel.setCursor(new java.awt.Cursor(Cursor.DEFAULT_CURSOR));
+    // Create a sub-panel for settings and changeUserData buttons
+    JPanel buttonPanel = new JPanel();
+    buttonPanel.setLayout(new FlowLayout(FlowLayout.LEFT)); // Align buttons to the left
+    buttonPanel.add(settingsButton);
+    buttonPanel.add(changeUserDataButton);
+
+    headerPanel.add(buttonPanel, BorderLayout.LINE_START); // Add the button panel to the start position
+    headerPanel.add(welcomeLabel, BorderLayout.CENTER);
+
+    add(headerPanel, BorderLayout.NORTH);
+
+    GPanel contentPanel = new GPanel();
+    contentPanel.setBackground(new java.awt.Color(0, 43, 73));
+    contentPanel.setAlignmentX(1.0F);
+    contentPanel.setCursor(new java.awt.Cursor(Cursor.DEFAULT_CURSOR));
+
    
               //gridBagConstraints.ipadx = 121;
         //gridBagConstraints.ipady = 65; 
@@ -228,6 +246,11 @@ public class DashboardPanel extends javax.swing.JPanel {
        
     }
 
+    
+    private void changeUserDataButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_
+        SplashFrame.instance().selectChangeData();
+    }
+    
     private void practiceButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_practiceButton1ActionPerformed
         SplashFrame.instance().selectPracticeScreen();
     }
