@@ -419,9 +419,9 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
         
                 Step step = model.currentTask().getCurrentStep().getStep();
 
-        if (step.getSubType() == StepSubType.SHA_ZERO) {
+        if (step != null && step.getSubType() == StepSubType.SHA_ONE) {
             //Get the data from the model as a RotateStep object
-            MajorityStep example = gson.fromJson(step.getData(), MajorityStep.class);
+            ShaOneStep example = gson.fromJson(step.getData(), ShaOneStep.class);
 
             if (example.getOperandA() == null || example.getOperandA().isEmpty()) {
                 operandALabel.setText("x: Please");
