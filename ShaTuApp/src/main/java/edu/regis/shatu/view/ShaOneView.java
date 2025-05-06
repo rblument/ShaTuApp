@@ -13,6 +13,9 @@ package edu.regis.shatu.view;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import edu.regis.shatu.model.ShaOneStep;
 import java.awt.GridBagConstraints;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -31,9 +34,21 @@ import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.PendingTask;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
+
 import edu.regis.shatu.model.steps.MajorityStep;
 import edu.regis.shatu.model.steps.ShaOneStep;
 import edu.regis.shatu.model.steps.Step;
+
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import javax.swing.ButtonGroup;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+
 
 /**
  * ShaOne class represents the GUI view for performing the SHA Σ₁ function,
@@ -46,7 +61,8 @@ import edu.regis.shatu.model.steps.Step;
  *
  * @author rickb
  */
-public class ShaOneView extends UserRequestView { // implements KeyListener
+
+public class ShaOneView extends UserRequestView implements KeyListener { //implements KeyListener 
     private TutoringSessionView view;
 
     /**
@@ -421,9 +437,9 @@ public class ShaOneView extends UserRequestView { // implements KeyListener
 
         Step step = model.currentTask().getCurrentStep().getStep();
 
-        if (step.getSubType() == StepSubType.SHA_ZERO) {
-            // Get the data from the model as a RotateStep object
-            MajorityStep example = gson.fromJson(step.getData(), MajorityStep.class);
+        if (step.getSubType() == StepSubType.SHA_ONE) {
+            //Get the data from the model as a RotateStep object
+            ShaOneStep example = gson.fromJson(step.getData(), ShaOneStep.class);
 
             if (example.getOperandA() == null || example.getOperandA().isEmpty()) {
                 operandALabel.setText("x: Please");

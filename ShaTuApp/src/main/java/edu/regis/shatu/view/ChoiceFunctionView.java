@@ -43,6 +43,8 @@ import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.model.steps.ChoiceFunctionStep;
 import edu.regis.shatu.model.steps.Step;
+import java.awt.event.KeyAdapter;
+import javax.swing.JOptionPane;
 
 /**
  * ChoiceFunctionView class represents a GUI view for a choice function Ch(x, y,
@@ -92,8 +94,11 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
     @Override
     public NewExampleRequest newRequest() {
         NewExampleRequest ex = new NewExampleRequest();
-
-        // Set example type to the problem associated with the current view
+        
+        //Clear previous answer
+        responseTextArea.setText("");
+      
+        //Set example type to the problem associated with the current view
         ex.setExampleType(ProblemType.CHOICE_FUNCTION);
 
         ChoiceFunctionStep newStep = new ChoiceFunctionStep();
@@ -214,6 +219,7 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
         ActionListener selection = e -> {
             JRadioButton source = (JRadioButton) e.getSource();
             updateProblemSi(source);
+            newExampleButton.doClick();
         };
 
         fourRadioButton.addActionListener(selection);
@@ -303,7 +309,23 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
         responseTextArea = new JTextArea(3, 20);
         responseTextArea.setLineWrap(true);
         responseTextArea.setWrapStyleWord(true);
+
         responseTextArea.setEnabled(false); // Text area disabled at initialization
+
+       // responseTextArea.addKeyListener(new KeyAdapter() {
+        //    @Override
+         //   public void keyPressed(KeyEvent e){
+         //       if(e.getKeyCode() == KeyEvent.VK_ENTER){
+          //          e.consume();
+          //          if(responseTextArea.getText().equals("")){
+          //              JOptionPane.showMessageDialog(null, "Please provide an answer");
+           //         }else{
+           //             checkButton.doClick();
+           //         }
+          //      }
+         //   }
+       // });
+
 
         responsePane = new JScrollPane(responseTextArea);
         responsePane.setPreferredSize(new Dimension(800, 200));
@@ -428,9 +450,6 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
      */
     @Override
     public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-            checkButton.doClick();
-        }
     }
 
     /**

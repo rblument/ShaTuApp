@@ -63,7 +63,7 @@ public class ShaOne extends Objective {
      * @return Returns a TutorReply which tells which tasks the user has left
      */
     @Override
-    public TutorReply completeStep(StepCompletion completion) {
+      public TutorReply completeStep(StepCompletion completion) {
         ShaOneStep example = gson.fromJson(completion.getData(), ShaOneStep.class);
         String operand1 = example.getOperandA();
         int bitLength = example.getBitLength();
@@ -76,10 +76,10 @@ public class ShaOne extends Objective {
     }
 
     /**
-     * Calculates the SHA Σ₀ function involving rotation and right shift operations.
+     * Calculates the SHA Σ₁ function involving rotation and right shift operations.
      *
      * @param input The input binary number.
-     * @return The result after performing the SHA Σ₀ function.
+     * @return The result after performing the SHA Σ₁ function.
      */
     private String calculateSigma(String input, int bitLength) {
         input = input.replaceAll("\\s", "");
