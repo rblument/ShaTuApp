@@ -17,8 +17,8 @@ package edu.regis.shatu.view;
 
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
+
 import javax.swing.BoxLayout;
-import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -28,21 +28,22 @@ import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-import edu.regis.shatu.model.Pad0Step;
-import edu.regis.shatu.model.Step;
+
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
+import edu.regis.shatu.model.steps.Pad0Step;
+import edu.regis.shatu.model.steps.Step;
 
 /**
- * A view that requests the student to figure out the number of zeros needed to 
+ * A view that requests the student to figure out the number of zeros needed to
  * Pad a SHA256 message.
  * 
  * @author rickb
  */
 public class Pad0View extends UserRequestView {
-    
+
     private TutoringSessionView view;
     private JTextPane descriptionTextPane;
     private JLabel questionLabel, instructionsLabel, messageLengthLabel;
@@ -53,22 +54,21 @@ public class Pad0View extends UserRequestView {
     private JScrollPane responseScrollPane, asciiTableScrollPane, feedbackScrollPane;
     private String question;
     private boolean wasHintRequested = false;
-    
+
     /**
      * Initialize this view including creating and laying out its child components.
      */
-    public Pad0View() { 
-        
+    public Pad0View() {
+
         initializeComponents();
         initializeLayout();
     }
-    
-    
-    
+
     /**
-     * Initializes all GUI components, setting up their properties and configurations.
+     * Initializes all GUI components, setting up their properties and
+     * configurations.
      */
-    private void initializeComponents() {  
+    private void initializeComponents() {
         setupDescriptionSection();
         setupQuestionLabel();
         setupInstructionLabel();
@@ -77,58 +77,58 @@ public class Pad0View extends UserRequestView {
         setupFeedbackArea();
         setupAsciiTable();
     }
-    
+
     /**
-     * Lays out the initialized components on the panel using GridBagLayout 
+     * Lays out the initialized components on the panel using GridBagLayout
      * constraints.
      */
     private void initializeLayout() {
-        
+
         JPanel messageLengthPanel = createMessageLengthPanel();
 
         // Add components to the layout
-        addc(descriptionTextPane, 0, 0, 1, 1, 
-                1.0, 0.0, GridBagConstraints.CENTER, 
+        addc(descriptionTextPane, 0, 0, 1, 1,
+                1.0, 0.0, GridBagConstraints.CENTER,
                 GridBagConstraints.HORIZONTAL, 5, 5, 5, 5);
-        addc(messageLengthPanel, 0, 1, 1, 1, 
-                1.0, 0.0, GridBagConstraints.CENTER, 
-                GridBagConstraints.NONE, 5, 5, 5, 5);        
-        addc(questionLabel, 0, 2, 1, 1, 
-                1.0, 0.0, GridBagConstraints.CENTER, 
+        addc(messageLengthPanel, 0, 1, 1, 1,
+                1.0, 0.0, GridBagConstraints.CENTER,
+                GridBagConstraints.NONE, 5, 5, 5, 5);
+        addc(questionLabel, 0, 2, 1, 1,
+                1.0, 0.0, GridBagConstraints.CENTER,
                 GridBagConstraints.HORIZONTAL, 5, 5, 5, 5);
-         addc(instructionsLabel, 0, 3, 1, 1, 
-                1.0, 0.0, GridBagConstraints.CENTER, 
+        addc(instructionsLabel, 0, 3, 1, 1,
+                1.0, 0.0, GridBagConstraints.CENTER,
                 GridBagConstraints.HORIZONTAL, 5, 5, 5, 5);
-        addc(responseScrollPane, 0, 4, 1, 1, 
-                1.0, 1.0, GridBagConstraints.CENTER, 
+        addc(responseScrollPane, 0, 4, 1, 1,
+                1.0, 1.0, GridBagConstraints.CENTER,
                 GridBagConstraints.BOTH, 5, 5, 5, 5);
-        addc(feedbackScrollPane, 0, 5, 1, 1, 
-                1.0, 1.0, GridBagConstraints.CENTER, 
+        addc(feedbackScrollPane, 0, 5, 1, 1,
+                1.0, 1.0, GridBagConstraints.CENTER,
                 GridBagConstraints.BOTH, 5, 5, 5, 5);
-                
+
         addc(buttonPanel, 0, 6, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
-    }  
-    
+    }
+
     /**
-     * Submit the student's answer to the tutor.  Currently is suppose to just do
+     * Submit the student's answer to the tutor. Currently is suppose to just do
      * a error check, when the check button is clicked, its suppose to call
      * the stepCompletion method that calls to the tutor and lets the tutor
-     * handle checking the answer.  This method may be removed later in development.
+     * handle checking the answer. This method may be removed later in development.
      */
     public void submitAnswer() {
-        
+
         if (this.responseTextArea.getText().equals("")) {
             this.feedbackArea.setText("Please provide an answer");
-        }
-        else {
-            // Do nothing, tutor should be handling everything, but will leave incase a use can be found in development.
+        } else {
+            // Do nothing, tutor should be handling everything, but will leave incase a use
+            // can be found in development.
         }
     }
-    
+
     /**
-     * This method use to be called when the new example button is clicked, 
+     * This method use to be called when the new example button is clicked,
      * the tutor is suppose to handle creating a new example/question so this
      * method may be outdated, leaving in-case a use can be found in development,
      * but may no longer be needed.
@@ -137,15 +137,15 @@ public class Pad0View extends UserRequestView {
         // Do nothing, tutor should be handling things, will leave incase a use
         // could be found during development.
     }
-    
+
     /**
-     * Gives the student a hint and adds the ASCII table to the view, rest 
-     * should be handles by the tutor, maybe all of it should?  Adjust as development
+     * Gives the student a hint and adds the ASCII table to the view, rest
+     * should be handles by the tutor, maybe all of it should? Adjust as development
      * continues.
      */
     public void requestHint() {
-        
-        //Adjust the hint as needed
+
+        // Adjust the hint as needed
         this.feedbackArea.setText("Hint: Remember, the message must be padded to"
                 + " ensure its length is a multiple of 512 bits.  The message needs "
                 + "to be padded until its length is 448 (leaving room for the final "
@@ -155,48 +155,47 @@ public class Pad0View extends UserRequestView {
                 + "its not needed, each character is a byte, so take each byte, "
                 + "add 1 more bit to your total, then subtract that from 448, "
                 + "that answer would be the number of zeros you need to pad with.");
-        
+
         if (!this.isAncestorOf(asciiTableScrollPane)) { // If the ASCII table isnt in the view, add it.
             addc(asciiTableScrollPane, 3, 0, GridBagConstraints.REMAINDER,
-                    7, 2.0, 1.0, GridBagConstraints.CENTER, 
+                    7, 2.0, 1.0, GridBagConstraints.CENTER,
                     GridBagConstraints.BOTH, 5, 5, 5, 5);
-            
+
             this.wasHintRequested = true;
         }
-        
+
         this.revalidate(); // refreshes the view
         this.repaint(); // refreshes the view
     }
-    
+
     /**
-     * Sets up the description section of the view, explaining the purpose of 
+     * Sets up the description section of the view, explaining the purpose of
      * the encoding exercise.
      */
     private void setupDescriptionSection() {
         descriptionTextPane = new JTextPane();
         descriptionTextPane.setContentType("text/html");
-        
+
         // TEMPORARY UNTIL WE LOAD THE MODEL DATA DESCRIPTION
         descriptionTextPane.setText(
-                    "<html>" +
-                    "<body>" +
-                    "<h2>Padding with 0's (Zeros)</h2>" +
-                    "<p>For this step, you need to pad the Sha256 message with zeros. <br> "
-                            + "1: Remember, the Sha256 message is a multiple of 512 bits <br>"
-                            + "2: The last 64 bits are for the message length that will be calculated in the next step. <br>"
-                            + "3: 512 - 64 = 448 bits, that means your message for this step"
-                            + " needs to be 448 bits long. <br>"
-                            + "4: With that in mind, how many bits is the question "
-                            + "(dont forget to add 1 bit like you learned in the previous step). <br>"
-                            + "5: Maybe subtract that from 448 to get your answer?</p>" +
-                    "</body>" +
-                    "</html>"
-            );
+                "<html>" +
+                        "<body>" +
+                        "<h2>Padding with 0's (Zeros)</h2>" +
+                        "<p>For this step, you need to pad the Sha256 message with zeros. <br> "
+                        + "1: Remember, the Sha256 message is a multiple of 512 bits <br>"
+                        + "2: The last 64 bits are for the message length that will be calculated in the next step. <br>"
+                        + "3: 512 - 64 = 448 bits, that means your message for this step"
+                        + " needs to be 448 bits long. <br>"
+                        + "4: With that in mind, how many bits is the question "
+                        + "(dont forget to add 1 bit like you learned in the previous step). <br>"
+                        + "5: Maybe subtract that from 448 to get your answer?</p>" +
+                        "</body>" +
+                        "</html>");
         descriptionTextPane.setEditable(false);
         descriptionTextPane.setBackground(null);
         descriptionTextPane.setBorder(null);
     }
-    
+
     /**
      * Initializes the question label
      */
@@ -204,7 +203,7 @@ public class Pad0View extends UserRequestView {
         question = "";
         questionLabel = new JLabel("");
     }
-    
+
     /**
      * Initializes the response area and its scroll pane
      */
@@ -213,10 +212,11 @@ public class Pad0View extends UserRequestView {
         responseTextArea.setLineWrap(true); // Enable line wrapping
         responseTextArea.setWrapStyleWord(true); // Wrap lines at word boundaries
 
-        responseTextArea.setEnabled(false);  // Text area disabled at initialization 
-        
+        responseTextArea.setEnabled(false); // Text area disabled at initialization
+
         responseScrollPane = new JScrollPane(responseTextArea);
-        responseScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED); // Enable vertical scrolling
+        responseScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED); // Enable vertical
+                                                                                                 // scrolling
     }
 
     /**
@@ -229,24 +229,29 @@ public class Pad0View extends UserRequestView {
         feedbackArea.setLineWrap(true); // Enable line wrapping
         feedbackArea.setWrapStyleWord(true); // Wrap lines at word boundaries
         feedbackScrollPane = new JScrollPane(feedbackArea);
-        feedbackScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED); // Enable vertical scrolling
+        feedbackScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED); // Enable vertical
+                                                                                                 // scrolling
     }
-    
+
     /**
-     * Initializes the components for inputting the message length. This method creates and configures
-     * a JLabel and a JTextField where users can specify the length of the message they want to encode.
-     * The JTextField is initialized with a default value of "1" and is set to align text centrally.
+     * Initializes the components for inputting the message length. This method
+     * creates and configures
+     * a JLabel and a JTextField where users can specify the length of the message
+     * they want to encode.
+     * The JTextField is initialized with a default value of "1" and is set to align
+     * text centrally.
      */
     private void setupMessageLengthInput() {
         messageLengthLabel = new JLabel("Message Length:");
-        messageLengthField = new JTextField("1", 5);  // Default length 1, adjust size as needed
+        messageLengthField = new JTextField("1", 5); // Default length 1, adjust size as needed
         messageLengthField.setHorizontalAlignment(JTextField.CENTER);
     }
-    
+
     /**
-     * Creates and returns a JPanel dedicated to setting the message length. 
+     * Creates and returns a JPanel dedicated to setting the message length.
      *
-     * @return A JPanel containing components for message length input, arranged vertically.
+     * @return A JPanel containing components for message length input, arranged
+     *         vertically.
      */
     private JPanel createMessageLengthPanel() {
         JPanel messageLengthPanel = new JPanel();
@@ -255,7 +260,7 @@ public class Pad0View extends UserRequestView {
         messageLengthPanel.setLayout(new BoxLayout(messageLengthPanel, BoxLayout.Y_AXIS));
         return messageLengthPanel;
     }
-    
+
     /**
      * Creates the label for the instructions that the user may need.
      */
@@ -263,37 +268,39 @@ public class Pad0View extends UserRequestView {
         instructionsLabel = new JLabel("Please submit your answer here.");
         instructionsLabel.setHorizontalAlignment(JLabel.CENTER);
     }
-    
+
     /**
      * Initializes the ASCII table and its scroll pane
      */
     private void setupAsciiTable() {
-        DefaultTableModel tableModel = new DefaultTableModel(new Object[]{"Decimal", "Binary", "Symbol"}, 0);
+        DefaultTableModel tableModel = new DefaultTableModel(new Object[] { "Decimal", "Binary", "Symbol" }, 0);
         fillAsciiTable(tableModel); // Method to fill table data
         asciiTable = new JTable(tableModel);
         configureAsciiTable(); // Method to configure table appearance
         asciiTableScrollPane = new JScrollPane(asciiTable);
         asciiTableScrollPane.setPreferredSize(new Dimension(350, 400));
     }
-    
+
     /**
-     * Fills the ASCII table with the decimal, binary, hexadecimal and symbol representation
+     * Fills the ASCII table with the decimal, binary, hexadecimal and symbol
+     * representation
      * of printable ASCII characters
      * 
      * @param tableModel the filled ASCII table
      */
     private void fillAsciiTable(DefaultTableModel tableModel) {
         for (char i = 32; i < 127; i++) {
-            tableModel.addRow(new Object[]{
-                Integer.toString(i), // Decimal representation
-                String.format("%8s", Integer.toBinaryString(i)).replaceAll(" ", "0"), // Binary representation
-                i == 32 ? "<SPACE>" : String.valueOf(i) // Symbol representation, with special handling for the space character
+            tableModel.addRow(new Object[] {
+                    Integer.toString(i), // Decimal representation
+                    String.format("%8s", Integer.toBinaryString(i)).replaceAll(" ", "0"), // Binary representation
+                    i == 32 ? "<SPACE>" : String.valueOf(i) // Symbol representation, with special handling for the
+                                                            // space character
             });
         }
     }
-    
+
     /**
-     * Configures the appearance of the ASCII table 
+     * Configures the appearance of the ASCII table
      */
     private void configureAsciiTable() {
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
@@ -302,9 +309,9 @@ public class Pad0View extends UserRequestView {
             asciiTable.getColumnModel().getColumn(columnIndex).setCellRenderer(centerRenderer);
         }
     }
-    
+
     /**
-     * Display the current tutoring session model in this view.  Is called when
+     * Display the current tutoring session model in this view. Is called when
      * the step button is clicked automatically, and is called again from
      * the tutor when a new example is created or a step has been completed.
      */
@@ -312,8 +319,7 @@ public class Pad0View extends UserRequestView {
     protected void updateView() {
         view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
 
-        switch(view.getCurrentViewType())
-        {
+        switch (view.getCurrentViewType()) {
             case DO_ONE:
                 updatePracticeView();
                 break;
@@ -338,15 +344,16 @@ public class Pad0View extends UserRequestView {
     @Override
     protected void updatePracticeView() {
 
-        // If check and hint buttons are disabled, reset listenerers and apply those used by this view
-        if(!checkHintEnabled) {
+        // If check and hint buttons are disabled, reset listenerers and apply those
+        // used by this view
+        if (!checkHintEnabled) {
             resetButtonListeners(); // Clear any listeners applied from other views
         }
         /*
-        When switching between steps, the current step will be the previous enum
-        that a example was created for.  If that enums related stepobject has
-        similar variables, their may be a conflict causing a error.
-        */
+         * When switching between steps, the current step will be the previous enum
+         * that a example was created for. If that enums related stepobject has
+         * similar variables, their may be a conflict causing a error.
+         */
         StepSubType type = StepSubType.PAD_ZEROS;
 
         System.out.println("Pad Zero update display called"); // Error checking
@@ -355,7 +362,9 @@ public class Pad0View extends UserRequestView {
 
         System.out.println("Pad 0 View substep from current step: " + step.getSubType()); // Error checking.
         if (step.getSubType() == StepSubType.PAD_ZEROS) {
-            Pad0Step newPadZeroObject = gson.fromJson(step.getData(), Pad0Step.class); // Issues can happen here if the class contains similar named variables
+            Pad0Step newPadZeroObject = gson.fromJson(step.getData(), Pad0Step.class); // Issues can happen here if the
+                                                                                       // class contains similar named
+                                                                                       // variables
 
             // Clear any existing feedback and response from the previous question.
             feedbackArea.setText("");
@@ -395,14 +404,11 @@ public class Pad0View extends UserRequestView {
                 this.repaint(); // Refreshes the view
             }
         }
-        
+
         // Hide feedback panel if not used (fixes grey box visibility issue)
-        if (feedbackArea.getText().trim().isEmpty()) 
-        {
+        if (feedbackArea.getText().trim().isEmpty()) {
             feedbackScrollPane.setVisible(false);
-        } 
-        else 
-        {
+        } else {
             feedbackScrollPane.setVisible(true);
         }
     }
@@ -434,19 +440,20 @@ public class Pad0View extends UserRequestView {
      */
     @Override
     public NewExampleRequest newRequest() {
-        
+
         NewExampleRequest ex = new NewExampleRequest(); // Will be sent to the tutor.
-        
+
         ex.setExampleType(ProblemType.PAD_ZEROS);
-        
+
         Pad0Step newPad0Step = new Pad0Step(); // New Pad0Step class object to use for the question and answer.
-        
-        newPad0Step.setMessageLength(Integer.parseInt(messageLengthField.getText().trim())); // Number of characters the question should be.
-        
+
+        newPad0Step.setMessageLength(Integer.parseInt(messageLengthField.getText().trim())); // Number of characters the
+                                                                                             // question should be.
+
         System.out.println(newPad0Step); // Error checking
-        
+
         ex.setData(gson.toJson(newPad0Step));
-        
+
         return ex;
     }
 
@@ -456,23 +463,26 @@ public class Pad0View extends UserRequestView {
      * send it to the tutor to handle checking the answer and then will handle
      * a new GUI for the user to view.
      * 
-     * @return 
+     * @return
      */
     @Override
     public StepCompletion stepCompletion() {
-        
+
         Step currentStep = model.currentTask().currentStep().getStep();
-        
-        Pad0Step completedPadZeroStep = gson.fromJson(currentStep.getData(), Pad0Step.class); // Assigns the class with the data assigned while creating the example.
-        
-        String userResponse = this.responseTextArea.getText().replaceAll("\\s", ""); // Gets the users answer and removes spaces
-        
+
+        Pad0Step completedPadZeroStep = gson.fromJson(currentStep.getData(), Pad0Step.class); // Assigns the class with
+                                                                                              // the data assigned while
+                                                                                              // creating the example.
+
+        String userResponse = this.responseTextArea.getText().replaceAll("\\s", ""); // Gets the users answer and
+                                                                                     // removes spaces
+
         completedPadZeroStep.setUserAnswer(userResponse);
-        
+
         StepCompletion step = new StepCompletion(currentStep, gson.toJson(completedPadZeroStep));
-        
+
         step.setStep(currentStep); // Will be sent to the tutor.
-        
+
         return step;
     }
 }

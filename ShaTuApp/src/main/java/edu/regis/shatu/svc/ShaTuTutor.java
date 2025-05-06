@@ -29,7 +29,6 @@ import edu.regis.shatu.err.ObjNotFoundException;
 import edu.regis.shatu.model.Account;
 import edu.regis.shatu.model.Course;
 import edu.regis.shatu.model.KnowledgeComponent;
-import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.Student;
 import edu.regis.shatu.model.Task;
@@ -43,6 +42,7 @@ import edu.regis.shatu.model.aol.PendingTask;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.model.aol.StudentModel;
+import edu.regis.shatu.model.steps.Step;
 import edu.regis.shatu.objectives.AddBits;
 import edu.regis.shatu.objectives.AddMsgLen;
 import edu.regis.shatu.objectives.AddOne;
@@ -55,10 +55,10 @@ import edu.regis.shatu.objectives.Objective;
 import edu.regis.shatu.objectives.PadZeros;
 import edu.regis.shatu.objectives.PrepareSchedule;
 import edu.regis.shatu.objectives.RotateBits;
+import edu.regis.shatu.objectives.ShaOne;
+import edu.regis.shatu.objectives.ShaZero;
 import edu.regis.shatu.objectives.ShiftBits;
 import edu.regis.shatu.objectives.XorBits;
-import edu.regis.shatu.objectives.ShaZero;
-import edu.regis.shatu.objectives.ShaOne;
 
 /**
  * The ShaTu tutor, which implements the tutoring service.
@@ -250,48 +250,48 @@ public class ShaTuTutor implements TutorSvc {
      *         status is ":ERR".
      * @throws edu.regis.shatu.err.NonRecoverableException
      */
-public TutorReply verifyUser(String jsonAcct) throws NonRecoverableException {
-    Account requestAcct = gson.fromJson(jsonAcct, Account.class);
-    AccountDAO acctSvc = ServiceFactory.findAccountSvc();
+    public TutorReply verifyUser(String jsonAcct) throws NonRecoverableException {
+        Account requestAcct = gson.fromJson(jsonAcct, Account.class);
+        AccountDAO acctSvc = ServiceFactory.findAccountSvc();
 
-    if (!acctSvc.exists(acctSvc.primaryKey, requestAcct.getUserId())) {
-        return new TutorReply("IllegalUserId");
-    }
-
-    try {
-        Account dbAcct = acctSvc.retrieve(requestAcct.getUserId());
-
-        if ((dbAcct.getSecurityAnswer().equals(requestAcct.getSecurityAnswer())) &&
-            (dbAcct.getSecurityQuestion() == requestAcct.getSecurityQuestion())) {
-
-            student = new Student(dbAcct);
-
-            try {
-                StudentModelSvc stuModSvc = ServiceFactory.findStudentModelSvc();
-                studentModel = stuModSvc.retrieve(dbAcct.getUserId());
-                student.setStudentModel(studentModel);
-            } catch (ObjNotFoundException e) {
-                student = createStudent(dbAcct, ServiceFactory.findCourseSvc().retrieve(DEFAULT_COURSE_ID));
-            }
-
-            // Check if session already exists before creating
-            SessionSvc sessionSvc = ServiceFactory.findSessionSvc();
-            TutoringSession session;
-
-            try {
-                session = sessionSvc.retrieve(dbAcct.getUserId()); // already exists
-            } catch (ObjNotFoundException e) {
-                // session does not exist, create it
-                session = createSession(student, ServiceFactory.findCourseSvc().retrieve(DEFAULT_COURSE_ID));
-            }
-
-            TutorReply reply = new TutorReply("Verified");
-            reply.setData("\"" + session.getSecurityToken() + "\"");
-            return reply;
-
-        } else {
-            return new TutorReply("InvalidAnswer");
+        if (!acctSvc.exists(acctSvc.primaryKey, requestAcct.getUserId())) {
+            return new TutorReply("IllegalUserId");
         }
+
+        try {
+            Account dbAcct = acctSvc.retrieve(requestAcct.getUserId());
+
+            if ((dbAcct.getSecurityAnswer().equals(requestAcct.getSecurityAnswer())) &&
+                    (dbAcct.getSecurityQuestion() == requestAcct.getSecurityQuestion())) {
+
+                student = new Student(dbAcct);
+
+                try {
+                    StudentModelSvc stuModSvc = ServiceFactory.findStudentModelSvc();
+                    studentModel = stuModSvc.retrieve(dbAcct.getUserId());
+                    student.setStudentModel(studentModel);
+                } catch (ObjNotFoundException e) {
+                    student = createStudent(dbAcct, ServiceFactory.findCourseSvc().retrieve(DEFAULT_COURSE_ID));
+                }
+
+                // Check if session already exists before creating
+                SessionSvc sessionSvc = ServiceFactory.findSessionSvc();
+                TutoringSession session;
+
+                try {
+                    session = sessionSvc.retrieve(dbAcct.getUserId()); // already exists
+                } catch (ObjNotFoundException e) {
+                    // session does not exist, create it
+                    session = createSession(student, ServiceFactory.findCourseSvc().retrieve(DEFAULT_COURSE_ID));
+                }
+
+                TutorReply reply = new TutorReply("Verified");
+                reply.setData("\"" + session.getSecurityToken() + "\"");
+                return reply;
+
+            } else {
+                return new TutorReply("InvalidAnswer");
+            }
 
         } catch (ObjNotFoundException e) {
             return new TutorReply("UnknownUser");
@@ -299,7 +299,7 @@ public TutorReply verifyUser(String jsonAcct) throws NonRecoverableException {
             LOGGER.log(Level.SEVERE, null, ex);
             return new TutorReply();
         }
-}
+    }
 
     /**
      * Resets password for user currently in database
@@ -311,34 +311,33 @@ public TutorReply verifyUser(String jsonAcct) throws NonRecoverableException {
      *         status is ":ERR".
      * @throws edu.regis.shatu.err.NonRecoverableException
      */
-public TutorReply resetPassword(String jsonAcct) throws NonRecoverableException {
-    Account acct = gson.fromJson(jsonAcct, Account.class);
-    AccountDAO acctSvc = ServiceFactory.findAccountSvc();
+    public TutorReply resetPassword(String jsonAcct) throws NonRecoverableException {
+        Account acct = gson.fromJson(jsonAcct, Account.class);
+        AccountDAO acctSvc = ServiceFactory.findAccountSvc();
 
-    if (!acctSvc.exists(acctSvc.primaryKey, acct.getUserId())) {
-        return new TutorReply("IllegalUserId");
+        if (!acctSvc.exists(acctSvc.primaryKey, acct.getUserId())) {
+            return new TutorReply("IllegalUserId");
+        }
+
+        try {
+            // Retrieve full DB account so we don't lose names or other info
+            Account dbAcct = acctSvc.retrieve(acct.getUserId());
+
+            // Only update the changed fields
+            dbAcct.setPassword(acct.getPassword());
+
+            // Only set security question/answer if needed
+            dbAcct.setSecurityQuestion(acct.getSecurityQuestion());
+            dbAcct.setSecurityAnswer(acct.getSecurityAnswer());
+
+            acctSvc.update(dbAcct);
+
+            return new TutorReply("PasswordReset");
+
+        } catch (ObjNotFoundException ex) {
+            return new TutorReply("IllegalUserId");
+        }
     }
-
-    try {
-        //Retrieve full DB account so we don't lose names or other info
-        Account dbAcct = acctSvc.retrieve(acct.getUserId());
-
-        //Only update the changed fields
-        dbAcct.setPassword(acct.getPassword());
-
-        //Only set security question/answer if needed
-        dbAcct.setSecurityQuestion(acct.getSecurityQuestion());
-        dbAcct.setSecurityAnswer(acct.getSecurityAnswer());
-
-        acctSvc.update(dbAcct);
-
-        return new TutorReply("PasswordReset");
-
-    } catch (ObjNotFoundException ex) {
-        return new TutorReply("IllegalUserId");
-    }
-}
-
 
     /**
      * Attempts to sign a student in.
@@ -511,10 +510,10 @@ public TutorReply resetPassword(String jsonAcct) throws NonRecoverableException 
         StepCompletion completion = gson.fromJson(jsonObj, StepCompletion.class);
 
         Step step = completion.getStep();
- 
+
         switch (step.getSubType()) {
             case INFO_MESSAGE:
-                return completeInfoMsgStep(completion); 
+                return completeInfoMsgStep(completion);
 
             default:
                 currObjective = getCurrentObjectiveByProbelmType(convertStepToProblemType(step.getSubType()));
@@ -542,18 +541,18 @@ public TutorReply resetPassword(String jsonAcct) throws NonRecoverableException 
         System.out.println("nexExample()");
 
         NewExampleRequest request = gson.fromJson(json, NewExampleRequest.class);
-        
+
         currObjective = getCurrentObjectiveByProbelmType(request.getExampleType());
- 
+
         return currObjective.example(session, request.getData());
     }
-    
+
     /**
      * 
      * ToDO: Can ProblemType and StepSubType be combined?
      * 
      * @param problemType
-     * @return 
+     * @return
      */
     private Objective getCurrentObjectiveByProbelmType(ProblemType problemType) {
         switch (problemType) {
@@ -564,7 +563,7 @@ public TutorReply resetPassword(String jsonAcct) throws NonRecoverableException 
             case SHIFT_BITS:
                 return new ShiftBits(student);
             case XOR_BITS:
-                return  new XorBits(student);
+                return new XorBits(student);
             case ADD_BITS:
                 return new AddBits(student);
             case MAJORITY_FUNCTION:
@@ -592,17 +591,17 @@ public TutorReply resetPassword(String jsonAcct) throws NonRecoverableException 
                 return null;
         }
     }
-    
+
     /**
      * KLUDGE
      * ToDO: Can ProblemType and StepSubType be combined?
      * 
      * @param stepType
-     * @return 
+     * @return
      */
     private ProblemType convertStepToProblemType(StepSubType stepType) {
         switch (stepType) {
-            case ENCODE_BINARY: 
+            case ENCODE_BINARY:
             case ENCODE_HEX:
             case ENCODE_ASCII:
                 return ProblemType.ASCII_ENCODE;
@@ -633,7 +632,7 @@ public TutorReply resetPassword(String jsonAcct) throws NonRecoverableException 
             case SHA_ZERO:
                 return ProblemType.SHA_ZERO;
             case SHA_ONE:
-                 return ProblemType.SHA_ONE;
+                return ProblemType.SHA_ONE;
             default:
                 System.out.println("Unknown step type in convert: " + stepType);
                 return null;

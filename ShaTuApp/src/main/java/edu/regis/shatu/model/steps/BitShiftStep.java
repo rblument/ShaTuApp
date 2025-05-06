@@ -10,40 +10,40 @@
  *  software is distributed on an "AS IS" basis without warranties
  *  or conditions of any kind, either expressed or implied.
  */
-package edu.regis.shatu.model;
+package edu.regis.shatu.model.steps;
+
+import edu.regis.shatu.model.aol.StepSubType;
 
 /**
  * A bit shift problem encoded as a step
  *
  * @author Chandon Hamel
  */
-public class BitShiftStep
-{
-     /**
+public class BitShiftStep extends Step {
+    /**
      * The object on which the operation is performed.
      */
     private String operand;
-    
-     /**
-     * The result of the bit shift.
-     */
-    private String result;
-    
-     /**
+
+    /**
      * The length of the current bit.
      */
     private int bitLength;
-    
-     /**
+
+    /**
      * The length the bit is shifted.
      */
     private int shiftLength;
-    
-     /**
+
+    /**
      * The direction of the bit shift Right not Not Right.
      */
     private boolean shiftRight;
-    
+
+    public BitShiftStep() {
+        super(1, 0, StepSubType.SHIFT_BITS);
+    }
+
     // Getter and Setter for operand
     public String getOperand() {
         return operand;
@@ -53,15 +53,6 @@ public class BitShiftStep
         this.operand = operand;
     }
 
-    // Getter and Setter for result
-    public String getResult() {
-        return result;
-    }
-
-    public void setResult(String result) {
-        this.result = result;
-    }
-    
     // Getter and Setter for bitLength
     public int getBitLength() {
         return bitLength;

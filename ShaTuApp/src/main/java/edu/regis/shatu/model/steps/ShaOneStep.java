@@ -1,25 +1,27 @@
 /*
  * SHATU: SHA-256 Tutor
- *
+ * 
  *  (C) Johanna & Richard Blumenthal, All rights reserved
- *
+ * 
  *  Unauthorized use, duplication or distribution without the authors'
  *  permission is strictly prohibited.
- *
+ * 
  *  Unless required by applicable law or agreed to in writing, this
  *  software is distributed on an "AS IS" basis without warranties
  *  or conditions of any kind, either expressed or implied.
  */
-package edu.regis.shatu.model;
+package edu.regis.shatu.model.steps;
+
+import edu.regis.shatu.model.aol.StepSubType;
 
 /**
- * The tutoring step model for the ShaZeroView that models the parameters of the Sigma0 function. Contains operand a
+ * The tutoring step model for the ShaOneView that models the parameters of the
+ * Sigma1 function. Contains operand a
  * and the result that comes back from the server
  */
-public class ShaZeroStep
-{
+public class ShaOneStep extends Step {
     /**
-     * The operand that the Sigma0 function operates on
+     * The operand that the Sigma1 function operates on
      */
     private String operandA;
 
@@ -28,45 +30,26 @@ public class ShaZeroStep
      */
     private int bitLength;
 
-    /**
-     * The result of the Sigma0 function
-     */
-    private String result;
+    public ShaOneStep() {
+        super(1, 0, StepSubType.SHA_ONE);
+    }
 
     /**
-     * Getter for operand A in the Sigma0 function
+     * Getter for operand A in the Sigma1 function
      *
-     * @return operand A for the Sigma0 function
+     * @return operand A for the Sigma1 function
      */
     public String getOperandA() {
         return operandA;
     }
 
     /**
-     * Setter for operand A in the Sigma0 function
+     * Setter for operand A in the Sigma1 function
      *
-     * @param operandA The operand for the Sigma0 function
+     * @param operandA The operand for the Sigma1 function
      */
     public void setOperandA(String operandA) {
         this.operandA = operandA;
-    }
-
-    /**
-     * Getter for the Sigma0 function result
-     *
-     * @return The result value of the Sigma0 function
-     */
-    public String getResult() {
-        return result;
-    }
-
-    /**
-     * Setter for the Sigma0 function result
-     *
-     * @param result The result of the Sigma0 function
-     */
-    public void setResult(String result) {
-        this.result = result;
     }
 
     /**

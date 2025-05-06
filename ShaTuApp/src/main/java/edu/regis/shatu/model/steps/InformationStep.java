@@ -10,7 +10,7 @@
  *  software is distributed on an "AS IS" basis without warranties
  *  or conditions of any kind, either expressed or implied.
  */
-package edu.regis.shatu.model;
+package edu.regis.shatu.model.steps;
 
 /**
  * A step subtype in which the student must acknowledge a message from the
@@ -23,7 +23,7 @@ public class InformationStep {
      * The message the student must acknowledge.
      */
     private String msg;
-    
+
     /**
      * This is the information step method that establishes the message
      * the student must acknowledge.
@@ -31,20 +31,22 @@ public class InformationStep {
     public InformationStep() {
         msg = "";
     }
-    
+
     /**
-     * This is the string method that gets the message the student must 
+     * This is the string method that gets the message the student must
      * acknowledge
-     * @return the message in this method. The message returned is the one 
-     * the student must acknowledge. 
+     * 
+     * @return the message in this method. The message returned is the one
+     *         the student must acknowledge.
      */
     public String getMsg() {
         return msg;
     }
-    
+
     /**
      * This is a void method that sets the message object as the one the student
-     * must acknowledge. 
+     * must acknowledge.
+     * 
      * @param msg establishes the local value for msg.
      */
     public void setMsg(String msg) {

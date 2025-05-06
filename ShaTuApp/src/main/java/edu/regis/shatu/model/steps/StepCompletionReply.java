@@ -10,26 +10,28 @@
  *  software is distributed on an "AS IS" basis without warranties
  *  or conditions of any kind, either expressed or implied.
  */
-package edu.regis.shatu.model;
+package edu.regis.shatu.model.steps;
+
+import edu.regis.shatu.model.aol.StepSubType;
 
 /**
- * Captures the tutor's reply to a previous step completed requests. 
+ * Captures the tutor's reply to a previous step completed requests.
  * 
  * @author rickb
  */
-public class StepCompletionReply {
+public class StepCompletionReply extends Step {
     /**
      * Was the student's submitted answer correct.
      */
     private boolean isCorrect;
-    
+
     /**
      * The tutor is requesting the student to perform the same task again.
      * 
      * If true, data contains a JSon encoded Step object.
      */
     private boolean isRepeatStep;
-    
+
     /**
      * The tutor believes the student understands the previous step and
      * is requesting the student to complete a new Task.
@@ -37,7 +39,7 @@ public class StepCompletionReply {
      * If true, data contains a JSon encoded Task object.
      */
     private boolean isNewTask;
-    
+
     /**
      * The tutor is requesting the student to perform the following step,
      * which might be a new example.
@@ -45,7 +47,7 @@ public class StepCompletionReply {
      * If true, data contains a JSon encoded Step object.
      */
     private boolean isNewStep;
-    
+
     /**
      * Tutor is asking the student to perform the next step in the current
      * (previous) task.
@@ -53,23 +55,20 @@ public class StepCompletionReply {
      * If true, data contains a Json encoded Step object.
      */
     private boolean isNextStep;
-    
-    private String correctAnswer;
-    private String response;
 
     /**
      * A JSon encoded Task or Step object (see above flags for the type).
      */
     private String data;
-    
+
     public StepCompletionReply() {
-        
+        super(1, 0, StepSubType.STEP_COMPLETION_REPLY);
     }
 
     public boolean isCorrect() {
         return isCorrect;
     }
-    
+
     public boolean getIsCorrect() {
         return isCorrect;
     }
@@ -81,7 +80,7 @@ public class StepCompletionReply {
     public boolean isRepeatStep() {
         return isRepeatStep;
     }
-    
+
     public boolean getIsRepeatStep() {
         return isRepeatStep;
     }
@@ -93,7 +92,7 @@ public class StepCompletionReply {
     public boolean isNewTask() {
         return isNewTask;
     }
-    
+
     public boolean getIsNewTask() {
         return isNewTask;
     }
@@ -105,7 +104,7 @@ public class StepCompletionReply {
     public boolean isNewStep() {
         return isNewStep;
     }
-    
+
     public boolean getIsNewStep() {
         return isNewStep;
     }
@@ -117,7 +116,7 @@ public class StepCompletionReply {
     public boolean isNextStep() {
         return isNextStep;
     }
-    
+
     public boolean getIsNextStep() {
         return isNextStep;
     }
@@ -125,21 +124,22 @@ public class StepCompletionReply {
     public void setIsNextStep(boolean isNextStep) {
         this.isNextStep = isNextStep;
     }
-    
+
     public String getCorrectAnswer() {
-        return correctAnswer;
+        return this.getResult();
     }
-    
+
     public void setCorrectAnswer(String correctAnswer) {
-        this.correctAnswer = correctAnswer;
+        this.setResult(correctAnswer);
     }
-    
+
     public String getResponse() {
-        return response;
+        return this.getUserAnswer();
     }
-    
+
     public void setResponse(String response) {
-        this.response = response;
+        this.setUserAnswer(response);
+        ;
     }
 
     public String getData() {
@@ -148,5 +148,5 @@ public class StepCompletionReply {
 
     public void setData(String data) {
         this.data = data;
-    }  
+    }
 }

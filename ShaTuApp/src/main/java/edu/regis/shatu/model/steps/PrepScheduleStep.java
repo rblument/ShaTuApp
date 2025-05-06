@@ -10,16 +10,16 @@
  *  software is distributed on an "AS IS" basis without warranties
  *  or conditions of any kind, either expressed or implied.
  */
-package edu.regis.shatu.model;
-import edu.regis.shatu.view.CompressionCanvasView;
-import edu.regis.shatu.svc.SHA_256;
+package edu.regis.shatu.model.steps;
+
+import edu.regis.shatu.model.aol.StepSubType;
 
 /**
  *
  * @author chand
  */
-public class CompressRoundStep
-{
-     
-       
+public class PrepScheduleStep extends Step {
+    public PrepScheduleStep() {
+        super(1, 0, StepSubType.PREPARE_SCHEDULE);
+    }
 }

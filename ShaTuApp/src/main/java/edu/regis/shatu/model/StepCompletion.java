@@ -12,6 +12,8 @@
  */
 package edu.regis.shatu.model;
 
+import edu.regis.shatu.model.steps.Step;
+
 /**
  *
  * @author rickb
@@ -26,28 +28,28 @@ public class StepCompletion {
      * The date the associated step was completed (time in milliseconds).
      */
     private long date;
-    
+
     /**
      * Whether the step timed out.
      */
     private boolean timeoutOccur;
-    
+
     /**
      * The number of hints given in the GUI for this step.
      */
     private int hintsGiven;
-    
+
     /**
      * A JSon encoded objects corresponding to the example step type.
      */
     private String data;
-    
+
     public StepCompletion(Step step, String data) {
         date = System.currentTimeMillis();
-        
+
         this.data = data;
     }
-    
+
     public Step getStep() {
         return step;
     }
@@ -72,7 +74,7 @@ public class StepCompletion {
     public long getDate() {
         return date;
     }
-    
+
     /**
      * Set the time the associated step was completed (to only be used by
      * the database when restoring a step completion).

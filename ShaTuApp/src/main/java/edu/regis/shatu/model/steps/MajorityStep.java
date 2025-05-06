@@ -10,7 +10,9 @@
  *  software is distributed on an "AS IS" basis without warranties
  *  or conditions of any kind, either expressed or implied.
  */
-package edu.regis.shatu.model;
+package edu.regis.shatu.model.steps;
+
+import edu.regis.shatu.model.aol.StepSubType;
 
 /**
  * MajorityStep represents a single step in the SHA-256 hashing process,
@@ -22,42 +24,42 @@ package edu.regis.shatu.model;
  * @author mwemapowanga
  */
 
-public class MajorityStep {
-    
+public class MajorityStep extends Step {
+
     /**
      * First input operand for the majority function.
      * Represents a binary string.
      */
     private String operandA;
-    
+
     /**
      * Second input operand for the majority function.
      * Represents a binary string.
      */
     private String operandB;
-    
+
     /**
      * Third input operand for the majority function.
      * Represents a binary string.
      */
     private String operandC;
-    
+
     /**
-     * Result of the majority function computed from operandA, operandB, and operandC.
-     * Stored as a binary string.
-     */
-    private String result;
-    
-    /**
-     * Flag indicating whether the truth table (used for teaching/visualization) is visible.
+     * Flag indicating whether the truth table (used for teaching/visualization) is
+     * visible.
      */
     private boolean isTruthTableVisible;
-    
+
     /**
-     * The number of bits to compare in each operand during the majority computation.
+     * The number of bits to compare in each operand during the majority
+     * computation.
      * Typically, this aligns with the bit width of the SHA-256 algorithm (32 bits).
      */
     private int bitLength;
+
+    public MajorityStep() {
+        super(1, 0, StepSubType.MAJORITY_FUNCTION);
+    }
 
     /**
      * Retrieves the first operand (A).
@@ -114,25 +116,6 @@ public class MajorityStep {
     }
 
     /**
-     * Retrieves the computed majority result.
-     *
-     * @return result as a binary string
-     */
-    public String getResult() {
-        return result;
-    }
-
-    /**
-     * Sets the computed majority result.
-     * This value is typically calculated externally and stored here.
-     *
-     * @param result binary string representing the result of the majority function
-     */
-    public void setResult(String result) {
-        this.result = result;
-    }
-
-    /**
      * Retrieves the number of bits involved in the computation.
      *
      * @return the bit length
@@ -149,6 +132,5 @@ public class MajorityStep {
     public void setBitLength(int bitLength) {
         this.bitLength = bitLength;
     }
-    
-    
+
 }

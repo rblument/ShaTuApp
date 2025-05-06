@@ -22,8 +22,8 @@ import java.awt.GridBagConstraints;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+
 import javax.swing.ButtonGroup;
-import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -32,12 +32,13 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.table.DefaultTableCellRenderer;
-import edu.regis.shatu.model.MajorityStep;
-import edu.regis.shatu.model.Step;
+
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
+import edu.regis.shatu.model.steps.MajorityStep;
+import edu.regis.shatu.model.steps.Step;
 
 /**
  * This class represents the GUI for the Majority (Maj) function exercise. Given
@@ -94,15 +95,15 @@ public class MajFunctionView extends UserRequestView implements KeyListener {
     public NewExampleRequest newRequest() {
         NewExampleRequest ex = new NewExampleRequest();
 
-        //Set example type to the problem associated with the current view
+        // Set example type to the problem associated with the current view
         ex.setExampleType(ProblemType.MAJORITY_FUNCTION);
 
         MajorityStep newStep = new MajorityStep();
 
         newStep.setBitLength(problemSize);
 
-        //Set the data of the NewExampleRequest to the new RotateStep containing
-        //the desired conditions
+        // Set the data of the NewExampleRequest to the new RotateStep containing
+        // the desired conditions
         ex.setData(gson.toJson(newStep));
 
         return ex;
@@ -153,7 +154,7 @@ public class MajFunctionView extends UserRequestView implements KeyListener {
         addc(qrPanel, 0, 2, 3, 1, 1.0, 1.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
                 5, 5, 5, 5);
-                
+
         addc(buttonPanel, 0, 3, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
@@ -171,9 +172,12 @@ public class MajFunctionView extends UserRequestView implements KeyListener {
         descTextArea.setLineWrap(true);
         descTextArea.setWrapStyleWord(true);
         descTextArea.setOpaque(false);
-        descTextArea.append("""
-                            The Majority function takes three 32-bit words as input and outputs one 32-bit word. When comparing the three inputs,
-                            this function outputs the bit that shows up the most between x, y, and z."""); //Works for now. Describe better later    
+        descTextArea
+                .append("""
+                        The Majority function takes three 32-bit words as input and outputs one 32-bit word. When comparing the three inputs,
+                        this function outputs the bit that shows up the most between x, y, and z."""); // Works for now.
+                                                                                                       // Describe
+                                                                                                       // better later
     }
 
     /**
@@ -211,7 +215,7 @@ public class MajFunctionView extends UserRequestView implements KeyListener {
         ActionListener selection = e -> {
             JRadioButton source = (JRadioButton) e.getSource();
             updateProblemSize(source);
-            //    generateNewQuestion();
+            // generateNewQuestion();
         };
 
         fourRadioButton.addActionListener(selection);
@@ -225,7 +229,7 @@ public class MajFunctionView extends UserRequestView implements KeyListener {
         problemSizeGroup.add(sixteenRadioButton);
         problemSizeGroup.add(thirtytwoRadioButton);
 
-        fourRadioButton.setSelected(true); //Set default radio button to true
+        fourRadioButton.setSelected(true); // Set default radio button to true
 
         radioButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         radioButtonPanel.add(fourRadioButton);
@@ -240,7 +244,7 @@ public class MajFunctionView extends UserRequestView implements KeyListener {
      * @param source The radio button that triggered the even.
      */
     private void updateProblemSize(JRadioButton source) {
-        setDefaultPracticeView ();
+        setDefaultPracticeView();
         if (source == fourRadioButton) {
             problemSize = 4;
         } else if (source == eightRadioButton) {
@@ -250,8 +254,7 @@ public class MajFunctionView extends UserRequestView implements KeyListener {
         } else if (source == thirtytwoRadioButton) {
             problemSize = 32;
         }
-        
-        
+
     }
 
     /**
@@ -303,25 +306,24 @@ public class MajFunctionView extends UserRequestView implements KeyListener {
         responseTextArea = new JTextArea(3, 20);
         responseTextArea.setLineWrap(true);
         responseTextArea.setWrapStyleWord(true);
-        responseTextArea.setEnabled(false);  // Text area disabled at initialization 
+        responseTextArea.setEnabled(false); // Text area disabled at initialization
 
         responsePane = new JScrollPane(responseTextArea);
         responsePane.setPreferredSize(new Dimension(800, 200));
     }
 
-
     /**
      * Creates a GPanel containing the response JScrollPanes and the button
      * panel.
      */
-    private void setUpQRPanel() { //Rename function (frPanel?)
+    private void setUpQRPanel() { // Rename function (frPanel?)
         qrPanel = new GPanel();
         responsePane.setPreferredSize(new Dimension(300, 20));
         qrPanel.addc(responsePane, 0, 0, 1, 1, 1.0, 1.0,
 
                 GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
 
-             0, 0, 0, 0);
+                0, 0, 0, 0);
     }
 
     /**
@@ -333,15 +335,15 @@ public class MajFunctionView extends UserRequestView implements KeyListener {
         truthTableLabel.setFont(new Font("", Font.BOLD, 14));
         majFunctionLabel = new JLabel("𝑀𝑎𝑗(𝑥,𝑦,𝑧)=(𝑥∧𝑦)⨁(𝑥∧𝑧)⨁(𝑦∧𝑧)");
 
-        Object[] columnNames = {"x", "y", "z", "(𝑥∧𝑦)", "(𝑥∧𝑧)", "(𝑦∧𝑧)", "(𝑥∧𝑦)⨁(𝑥∧𝑧)⨁(𝑦∧𝑧)"};
-        Object[][] data = {{0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 1, 0, 0, 0, 0},
-        {0, 1, 0, 0, 0, 0, 0},
-        {0, 1, 1, 0, 0, 1, 1},
-        {1, 0, 0, 0, 0, 0, 0},
-        {1, 0, 1, 0, 1, 0, 1},
-        {1, 1, 0, 1, 0, 0, 1},
-        {1, 1, 1, 1, 1, 1, 1}};
+        Object[] columnNames = { "x", "y", "z", "(𝑥∧𝑦)", "(𝑥∧𝑧)", "(𝑦∧𝑧)", "(𝑥∧𝑦)⨁(𝑥∧𝑧)⨁(𝑦∧𝑧)" };
+        Object[][] data = { { 0, 0, 0, 0, 0, 0, 0 },
+                { 0, 0, 1, 0, 0, 0, 0 },
+                { 0, 1, 0, 0, 0, 0, 0 },
+                { 0, 1, 1, 0, 0, 1, 1 },
+                { 1, 0, 0, 0, 0, 0, 0 },
+                { 1, 0, 1, 0, 1, 0, 1 },
+                { 1, 1, 0, 1, 0, 0, 1 },
+                { 1, 1, 1, 1, 1, 1, 1 } };
 
         majTruthTable = new JTable(data, columnNames);
         configureChTruthTable();
@@ -351,7 +353,7 @@ public class MajFunctionView extends UserRequestView implements KeyListener {
         majTruthTablePane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         majTruthTablePane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
-        truthTablePanel = new GPanel(); //Separate GPanel info to new function
+        truthTablePanel = new GPanel(); // Separate GPanel info to new function
 
         truthTablePanel.addc(truthTableLabel, 0, 0, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
@@ -385,7 +387,6 @@ public class MajFunctionView extends UserRequestView implements KeyListener {
 
     }
 
-
     @Override
     public void keyTyped(KeyEvent e) {
     }
@@ -411,58 +412,66 @@ public class MajFunctionView extends UserRequestView implements KeyListener {
      * @return A string to be used as an input into the function.
      */
     /*
-    private String generateInputString() { //Try to find a better way to do this?
-        String inputString;
-        String tempString;
-        StringBuilder inputStringBuilder = new StringBuilder();
-        int num;
-
-        switch (problemSize) {
-            case 4:
-                num = random.nextInt();
-                tempString = String.format("%4s", Integer.toBinaryString(num & 0xF)).replace(' ', '0');
-                inputStringBuilder.append(tempString);
-                break;
-            case 8:
-                num = random.nextInt();
-                tempString = String.format("%4s", Integer.toBinaryString(num & 0xF)).replace(' ', '0');
-                inputStringBuilder.append(tempString);
-                
-                inputStringBuilder.append(" ");
-                num = random.nextInt();
-                tempString = String.format("%4s", Integer.toBinaryString(num & 0xF)).replace(' ', '0');
-                inputStringBuilder.append(tempString);
-                break;
-            case 16:
-                num = random.nextInt();
-                tempString = String.format("%4s", Integer.toBinaryString(num & 0xF)).replace(' ', '0');
-                inputStringBuilder.append(tempString);
-                
-                for (int i = 0; i < 3; i++) {
-                    inputStringBuilder.append(" ");
-                    num = random.nextInt();
-                    tempString = String.format("%4s", Integer.toBinaryString(num & 0xF)).replace(' ', '0');
-                    inputStringBuilder.append(tempString);
-                }   break;
-            case 32:
-                num = random.nextInt();
-                tempString = String.format("%4s", Integer.toBinaryString(num & 0xF)).replace(' ', '0');
-                inputStringBuilder.append(tempString);
-                
-                for (int i = 0; i < 7; i++) {
-                    inputStringBuilder.append(" ");
-                    num = random.nextInt();
-                    tempString = String.format("%4s", Integer.toBinaryString(num & 0xF)).replace(' ', '0');
-                    inputStringBuilder.append(tempString);
-                }   break;
-            default:
-                break;
-        }
-        
-        inputString = inputStringBuilder.toString();
-        
-        return inputString;
-    } */
+     * private String generateInputString() { //Try to find a better way to do this?
+     * String inputString;
+     * String tempString;
+     * StringBuilder inputStringBuilder = new StringBuilder();
+     * int num;
+     * 
+     * switch (problemSize) {
+     * case 4:
+     * num = random.nextInt();
+     * tempString = String.format("%4s", Integer.toBinaryString(num &
+     * 0xF)).replace(' ', '0');
+     * inputStringBuilder.append(tempString);
+     * break;
+     * case 8:
+     * num = random.nextInt();
+     * tempString = String.format("%4s", Integer.toBinaryString(num &
+     * 0xF)).replace(' ', '0');
+     * inputStringBuilder.append(tempString);
+     * 
+     * inputStringBuilder.append(" ");
+     * num = random.nextInt();
+     * tempString = String.format("%4s", Integer.toBinaryString(num &
+     * 0xF)).replace(' ', '0');
+     * inputStringBuilder.append(tempString);
+     * break;
+     * case 16:
+     * num = random.nextInt();
+     * tempString = String.format("%4s", Integer.toBinaryString(num &
+     * 0xF)).replace(' ', '0');
+     * inputStringBuilder.append(tempString);
+     * 
+     * for (int i = 0; i < 3; i++) {
+     * inputStringBuilder.append(" ");
+     * num = random.nextInt();
+     * tempString = String.format("%4s", Integer.toBinaryString(num &
+     * 0xF)).replace(' ', '0');
+     * inputStringBuilder.append(tempString);
+     * } break;
+     * case 32:
+     * num = random.nextInt();
+     * tempString = String.format("%4s", Integer.toBinaryString(num &
+     * 0xF)).replace(' ', '0');
+     * inputStringBuilder.append(tempString);
+     * 
+     * for (int i = 0; i < 7; i++) {
+     * inputStringBuilder.append(" ");
+     * num = random.nextInt();
+     * tempString = String.format("%4s", Integer.toBinaryString(num &
+     * 0xF)).replace(' ', '0');
+     * inputStringBuilder.append(tempString);
+     * } break;
+     * default:
+     * break;
+     * }
+     * 
+     * inputString = inputStringBuilder.toString();
+     * 
+     * return inputString;
+     * }
+     */
     /**
      * Formats the result output by the choice function based on the size of the
      * problem.
@@ -472,41 +481,47 @@ public class MajFunctionView extends UserRequestView implements KeyListener {
      * @return the binary string representation of the answer
      */
     /*
-    private String formatResult(long answer) {
-        String finalResult = "";
-        
-        switch (problemSize) {
-            case 4: 
-                finalResult = String.format("%4s", Long.toBinaryString(answer)).replace(' ', '0');
-                break;
-            case 8:
-                finalResult = String.format("%8s", Long.toBinaryString(answer)).replace(' ', '0');
-                break;
-            case 16:
-                finalResult = String.format("%16s", Long.toBinaryString(answer)).replace(' ', '0');
-                break;
-            case 32:
-                finalResult = String.format("%32s", Long.toBinaryString(answer)).replace(' ', '0');   
-                break;
-            default:
-                break;
-        }
-        return finalResult;
-    } */
+     * private String formatResult(long answer) {
+     * String finalResult = "";
+     * 
+     * switch (problemSize) {
+     * case 4:
+     * finalResult = String.format("%4s", Long.toBinaryString(answer)).replace(' ',
+     * '0');
+     * break;
+     * case 8:
+     * finalResult = String.format("%8s", Long.toBinaryString(answer)).replace(' ',
+     * '0');
+     * break;
+     * case 16:
+     * finalResult = String.format("%16s", Long.toBinaryString(answer)).replace(' ',
+     * '0');
+     * break;
+     * case 32:
+     * finalResult = String.format("%32s", Long.toBinaryString(answer)).replace(' ',
+     * '0');
+     * break;
+     * default:
+     * break;
+     * }
+     * return finalResult;
+     * }
+     */
     /**
      * Generates and displays three new input strings.
      *//*
-    private void generateNewQuestion() {   
-        responseTextArea.setText("");
-        
-        stringX = generateInputString();
-        stringY = generateInputString();
-        stringZ = generateInputString();
-        
-        stringXLabel.setText("x: " + stringX);
-        stringYLabel.setText("y: " + stringY);
-        stringZLabel.setText("z: " + stringZ);
-    }*/
+        * private void generateNewQuestion() {
+        * responseTextArea.setText("");
+        * 
+        * stringX = generateInputString();
+        * stringY = generateInputString();
+        * stringZ = generateInputString();
+        * 
+        * stringXLabel.setText("x: " + stringX);
+        * stringYLabel.setText("y: " + stringY);
+        * stringZLabel.setText("z: " + stringZ);
+        * }
+        */
 
     /**
      * Evaluates the maj function maj(x, y, z).
@@ -517,59 +532,63 @@ public class MajFunctionView extends UserRequestView implements KeyListener {
      * @return Binary string result of maj(x, y, z).
      */
     /*
-    private String majorityFunction(String x, String y, String z) {
-        // Convert the binary strings to integer values
-        String tempX = x.replaceAll("\\s", "");
-        String tempY = y.replaceAll("\\s", "");
-        String tempZ = z.replaceAll("\\s", "");
-               
-        long intX = Long.parseLong(tempX, 2);
-        long intY = Long.parseLong(tempY, 2);
-        long intZ = Long.parseLong(tempZ, 2);
-
-        long xy = intX & intY;
-
-        long xz = intX & intZ;
-        
-        long yz = intY & intZ;
-
-        long result = xy ^ xz ^ yz;
-
-        // Convert the result back to binary string
-        String binaryResult = formatResult(result);
-
-        return binaryResult;
-    }*/
+     * private String majorityFunction(String x, String y, String z) {
+     * // Convert the binary strings to integer values
+     * String tempX = x.replaceAll("\\s", "");
+     * String tempY = y.replaceAll("\\s", "");
+     * String tempZ = z.replaceAll("\\s", "");
+     * 
+     * long intX = Long.parseLong(tempX, 2);
+     * long intY = Long.parseLong(tempY, 2);
+     * long intZ = Long.parseLong(tempZ, 2);
+     * 
+     * long xy = intX & intY;
+     * 
+     * long xz = intX & intZ;
+     * 
+     * long yz = intY & intZ;
+     * 
+     * long result = xy ^ xz ^ yz;
+     * 
+     * // Convert the result back to binary string
+     * String binaryResult = formatResult(result);
+     * 
+     * return binaryResult;
+     * }
+     */
     /**
      * Verifies the user's answer against the correct result and shows a message
      * dialog.
      */
     private void verifyAnswer() {/*
-        String correctAnswer = majorityFunction(stringX, stringY, stringZ);
-        String userResponse = responseTextArea.getText();
-        
-        userResponse = userResponse.replaceAll("\\s", "");
-        
-        if (correctAnswer.equals(userResponse)) {
-            JOptionPane.showMessageDialog(this, "Correct!");
-            checkButton.setEnabled(false);
-        } else {
-            JOptionPane.showMessageDialog(this, "Incorrect! Please check your entry and "
-                    + "try again or use the hint feature for help. Correct answer: " + correctAnswer);
-        }*/
+                                  * String correctAnswer = majorityFunction(stringX, stringY, stringZ);
+                                  * String userResponse = responseTextArea.getText();
+                                  * 
+                                  * userResponse = userResponse.replaceAll("\\s", "");
+                                  * 
+                                  * if (correctAnswer.equals(userResponse)) {
+                                  * JOptionPane.showMessageDialog(this, "Correct!");
+                                  * checkButton.setEnabled(false);
+                                  * } else {
+                                  * JOptionPane.showMessageDialog(this, "Incorrect! Please check your entry and "
+                                  * + "try again or use the hint feature for help. Correct answer: " +
+                                  * correctAnswer);
+                                  * }
+                                  */
     }
 
     /**
      * Displays a message dialog indicating the start of the next question.
      */
     private void onNextQuestion() {/*
-        
-        generateNewQuestion();
-        
-        responseTextArea.setText("");
-        JOptionPane.showMessageDialog(this, "New Example Generated");
-        
-        checkButton.setEnabled(true);*/
+                                    * 
+                                    * generateNewQuestion();
+                                    * 
+                                    * responseTextArea.setText("");
+                                    * JOptionPane.showMessageDialog(this, "New Example Generated");
+                                    * 
+                                    * checkButton.setEnabled(true);
+                                    */
     }
 
     /**
@@ -594,8 +613,7 @@ public class MajFunctionView extends UserRequestView implements KeyListener {
     protected void updateView() {
         view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
 
-        switch(view.getCurrentViewType())
-        {
+        switch (view.getCurrentViewType()) {
             case DO_ONE:
                 updatePracticeView();
                 break;
@@ -619,7 +637,8 @@ public class MajFunctionView extends UserRequestView implements KeyListener {
      */
     @Override
     protected void updatePracticeView() {
-        // If check and hint buttons are disabled, reset listenerers and apply those used by this view
+        // If check and hint buttons are disabled, reset listenerers and apply those
+        // used by this view
         if (!checkHintEnabled) {
             resetButtonListeners(); // Clear any listeners applied from other views
         }
@@ -627,11 +646,11 @@ public class MajFunctionView extends UserRequestView implements KeyListener {
         Step step = model.currentTask().getCurrentStep().getStep();
 
         if (step.getSubType() == StepSubType.MAJORITY_FUNCTION) {
-            //Get the data from the model as a RotateStep object
+            // Get the data from the model as a RotateStep object
             MajorityStep example = gson.fromJson(step.getData(), MajorityStep.class);
 
             if (example.getOperandA() == null || example.getOperandA().isEmpty()) {
-                setDefaultPracticeView ();
+                setDefaultPracticeView();
             } else {
                 stringXLabel.setText("x: " + example.getOperandA());
                 stringYLabel.setText("y: " + example.getOperandB());
@@ -659,11 +678,11 @@ public class MajFunctionView extends UserRequestView implements KeyListener {
     protected void updateQuizView() {
 
     }
-    
+
     /**
      * Sets all fields to default values
      */
-    public void setDefaultPracticeView (){
+    public void setDefaultPracticeView() {
         stringXLabel.setText("x: Please");
         stringYLabel.setText("y: click");
         stringZLabel.setText("z: New Example");

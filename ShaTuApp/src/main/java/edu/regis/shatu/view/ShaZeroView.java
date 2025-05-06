@@ -10,17 +10,30 @@
  */
 package edu.regis.shatu.view;
 
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import javax.swing.*;
-import edu.regis.shatu.model.ShaZeroStep;
-import edu.regis.shatu.model.Step;
+
+import javax.swing.ButtonGroup;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
+import edu.regis.shatu.model.steps.ShaZeroStep;
+import edu.regis.shatu.model.steps.Step;
+
 
 /**
  * ShaZero class represents the GUI view for performing the SHA Σ₀ function,
@@ -128,7 +141,7 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
         ex.setExampleType(ProblemType.SHA_ZERO);
 
         ShaZeroStep step = new ShaZeroStep();
-        
+
         step.setBitLength(problemSize);
 
         ex.setData(gson.toJson(step));
@@ -147,7 +160,7 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
 
         ShaZeroStep example = gson.fromJson(currentStep.getData(), ShaZeroStep.class);
 
-        if(example == null) {
+        if (example == null) {
             JOptionPane.showMessageDialog(this, "Please press New Example to generate a question");
             return null;
 
@@ -160,8 +173,8 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
         StepCompletion step = new StepCompletion(currentStep, gson.toJson(example));
 
         step.setStep(currentStep);
-     
-       return step;
+
+        return step;
 
     }
     /**
@@ -201,25 +214,22 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
      * }
      */
 
-
-
     /**
      * Handles events that the user preforms on the UI
      *
      * @param event the event to be processed
      */
-  //  @Override
-  //  public void actionPerformed(ActionEvent event) {
-       // if (event.getSource() == checkButton) {
-          //  onCheckButton();
-       // } else if (event.getSource() == hintButton) {
-       //     onNextHint();
-       // } else if (event.getSource() == nextButton) {
-       //     checkHintEnabled = true;
-       //     onNextQuestion();
-       // }
-   // }
-
+    // @Override
+    // public void actionPerformed(ActionEvent event) {
+    // if (event.getSource() == checkButton) {
+    // onCheckButton();
+    // } else if (event.getSource() == hintButton) {
+    // onNextHint();
+    // } else if (event.getSource() == nextButton) {
+    // checkHintEnabled = true;
+    // onNextQuestion();
+    // }
+    // }
 
     /**
      * Handles key type events
@@ -241,7 +251,7 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
         if (e.getKeyCode() == KeyEvent.VK_ENTER && answerField.getText().equals("")) {
             JOptionPane.showMessageDialog(this, "Please provide an answer");
         } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-            //checkButton.doClick();
+            // checkButton.doClick();
         }
     }
 
@@ -283,7 +293,7 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
     /**
      * Sets the main View title and description of the function
      */
-    private void setupDescription()   {
+    private void setupDescription() {
 
         viewNameLabel = new JLabel("The 𝛴₀ Function");
         viewNameLabel.setFont(new Font("", Font.BOLD, 20));
@@ -314,7 +324,7 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
         descriptionPanel.addc(questionPanel, 0, 2, 1, 1, 0.0, 0.0,
                 GridBagConstraints.SOUTHWEST, GridBagConstraints.NONE,
                 5, 5, 5, 5);
-        
+
         addc(buttonPanel, 0, 3, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
@@ -346,7 +356,6 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
         problemSizeGroup.add(thirtytwoRadioButton);
 
         fourRadioButton.setSelected(true); // Set default radio button to true
-
 
         radioButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         radioButtonPanel.add(fourRadioButton);
@@ -429,21 +438,21 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
      */
     private void setUpButtons() {
 
-/*
-        checkButton = new JButton(StepCompletionAction.instance());
-        checkButton.addActionListener(this);
-
-        hintButton = new JButton(HintAction.instance());
-        hintButton.addActionListener(this);
-
-        nextButton = new JButton(NewExampleAction.instance());
-        nextButton.addActionListener(this);
-
-        buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        buttonPanel.add(checkButton);
-        buttonPanel.add(nextButton);
-        buttonPanel.add(hintButton);
-        */
+        /*
+         * checkButton = new JButton(StepCompletionAction.instance());
+         * checkButton.addActionListener(this);
+         * 
+         * hintButton = new JButton(HintAction.instance());
+         * hintButton.addActionListener(this);
+         * 
+         * nextButton = new JButton(NewExampleAction.instance());
+         * nextButton.addActionListener(this);
+         * 
+         * buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+         * buttonPanel.add(checkButton);
+         * buttonPanel.add(nextButton);
+         * buttonPanel.add(hintButton);
+         */
 
     }
 
@@ -464,7 +473,6 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
                 5, 5, 5, 5);
     }
 
-
     @Override
     /**
      * Updates the description, question, and hints from the model
@@ -472,8 +480,7 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
     protected void updateView() {
         view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
 
-        switch(view.getCurrentViewType())
-        {
+        switch (view.getCurrentViewType()) {
             case DO_ONE:
                 updatePracticeView();
                 break;
@@ -511,8 +518,9 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
     @Override
     protected void updatePracticeView() {
 
-        // If check and hint buttons are disabled, reset listenerers and apply those used by this view
-        if(!checkHintEnabled) {
+        // If check and hint buttons are disabled, reset listenerers and apply those
+        // used by this view
+        if (!checkHintEnabled) {
             resetButtonListeners(); // Clear any listeners applied from other views
 
         }

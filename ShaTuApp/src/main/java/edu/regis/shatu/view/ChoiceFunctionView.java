@@ -10,9 +10,9 @@
  *  software is distributed on an "AS IS" basis without warranties
  *  or conditions of any kind, either expressed or implied.
  */
- /*
- * set responseTextArea enabled/disabled per SHAT-225 John Hennessey 23 Feb 2025
- */
+/*
+* set responseTextArea enabled/disabled per SHAT-225 John Hennessey 23 Feb 2025
+*/
 package edu.regis.shatu.view;
 
 import java.awt.Dimension;
@@ -37,18 +37,21 @@ import javax.swing.table.DefaultTableCellRenderer;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import edu.regis.shatu.model.ChoiceFunctionStep;
-import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
+import edu.regis.shatu.model.steps.ChoiceFunctionStep;
+import edu.regis.shatu.model.steps.Step;
+import java.awt.event.KeyAdapter;
+import javax.swing.JOptionPane;
 
 /**
  * ChoiceFunctionView class represents a GUI view for a choice function Ch(x, y,
- * z). 
+ * z).
  * Given three inputs (variables e, f, g) perform a bitwise if/then/else.
- * If the 𝑥-bit is set (1), the 𝑦 bit is output,otherwise, the 𝑧 bit is output.
+ * If the 𝑥-bit is set (1), the 𝑦 bit is output,otherwise, the 𝑧 bit is
+ * output.
  * Users can input their answers in a JTextField and check correctness.
  * Provides functionality for hints and moving to the next question.
  * Returns a single 32 bit binary value.
@@ -91,7 +94,10 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
     @Override
     public NewExampleRequest newRequest() {
         NewExampleRequest ex = new NewExampleRequest();
-
+        
+        //Clear previous answer
+        responseTextArea.setText("");
+      
         //Set example type to the problem associated with the current view
         ex.setExampleType(ProblemType.CHOICE_FUNCTION);
 
@@ -99,16 +105,17 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
 
         newStep.setBitLength(problemSize);
 
-        //Set the data of the NewExampleRequest to the new RotateStep containing
-        //the desired conditions
+        // Set the data of the NewExampleRequest to the new RotateStep containing
+        // the desired conditions
         ex.setData(gson.toJson(newStep));
 
         return ex;
     }
+
     /*
-    Sends notification to the tutor that this step in the tutoring has been
-    successfully completed and student is ready to move on to the next step.
-    */
+     * Sends notification to the tutor that this step in the tutoring has been
+     * successfully completed and student is ready to move on to the next step.
+     */
     @Override
     public StepCompletion stepCompletion() {
         Step currentStep = model.currentTask().currentStep().getStep();
@@ -154,7 +161,7 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
         addc(qrPanel, 0, 2, 3, 1, 1.0, 1.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
                 5, 5, 5, 5);
-        
+
         addc(buttonPanel, 0, 3, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
@@ -172,8 +179,9 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
         descTextArea.setLineWrap(true);
         descTextArea.setWrapStyleWord(true);
         descTextArea.setOpaque(false);
-        descTextArea.append("""
-                            The Choice function takes three 32-bit words as input and outputs one 32-bit word. This output is necessary to complete the second addition step in the SHA-256 algorithm.""");
+        descTextArea
+                .append("""
+                        The Choice function takes three 32-bit words as input and outputs one 32-bit word. This output is necessary to complete the second addition step in the SHA-256 algorithm.""");
     }
 
     /**
@@ -211,6 +219,7 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
         ActionListener selection = e -> {
             JRadioButton source = (JRadioButton) e.getSource();
             updateProblemSi(source);
+            newExampleButton.doClick();
         };
 
         fourRadioButton.addActionListener(selection);
@@ -224,7 +233,7 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
         problemSizeGroup.add(sixteenRadioButton);
         problemSizeGroup.add(thirtytwoRadioButton);
 
-        fourRadioButton.setSelected(true); //Set default radio button to true
+        fourRadioButton.setSelected(true); // Set default radio button to true
 
         radioButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         radioButtonPanel.add(fourRadioButton);
@@ -300,12 +309,27 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
         responseTextArea = new JTextArea(3, 20);
         responseTextArea.setLineWrap(true);
         responseTextArea.setWrapStyleWord(true);
-        responseTextArea.setEnabled(false);  // Text area disabled at initialization 
+
+        responseTextArea.setEnabled(false); // Text area disabled at initialization
+
+       // responseTextArea.addKeyListener(new KeyAdapter() {
+        //    @Override
+         //   public void keyPressed(KeyEvent e){
+         //       if(e.getKeyCode() == KeyEvent.VK_ENTER){
+          //          e.consume();
+          //          if(responseTextArea.getText().equals("")){
+          //              JOptionPane.showMessageDialog(null, "Please provide an answer");
+           //         }else{
+           //             checkButton.doClick();
+           //         }
+          //      }
+         //   }
+       // });
+
 
         responsePane = new JScrollPane(responseTextArea);
         responsePane.setPreferredSize(new Dimension(800, 200));
     }
-
 
     /**
      * Creates a GPanel containing the response and feedback JScrollPanes and
@@ -319,7 +343,7 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
                 GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
                 5, 5, 5, 5);
     }
- 
+
     /**
      * Sets up the truth table associated with the Choice Function.
      */
@@ -329,15 +353,15 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
         truthTableLabel.setFont(new Font("", Font.BOLD, 14));
         chFunctionLabel = new JLabel("Ch(𝑥,𝑦,𝑧)=(𝑥∧𝑦)⊕(¬𝑥∧𝑧)");
 
-        Object[] columnNames = {"x", "y", "z", "(𝑥∧𝑦)", "(¬𝑥∧𝑧)", "(𝑥∧𝑦)⨁(¬𝑥∧𝑧)"};
-        Object[][] data = {{0, 0, 0, 0, 0, 0},
-        {0, 0, 1, 0, 1, 1},
-        {0, 1, 0, 0, 0, 0},
-        {0, 1, 1, 0, 1, 1},
-        {1, 0, 0, 0, 0, 0},
-        {1, 0, 1, 0, 0, 0},
-        {1, 1, 0, 1, 0, 1},
-        {1, 1, 1, 1, 0, 1}};
+        Object[] columnNames = { "x", "y", "z", "(𝑥∧𝑦)", "(¬𝑥∧𝑧)", "(𝑥∧𝑦)⨁(¬𝑥∧𝑧)" };
+        Object[][] data = { { 0, 0, 0, 0, 0, 0 },
+                { 0, 0, 1, 0, 1, 1 },
+                { 0, 1, 0, 0, 0, 0 },
+                { 0, 1, 1, 0, 1, 1 },
+                { 1, 0, 0, 0, 0, 0 },
+                { 1, 0, 1, 0, 0, 0 },
+                { 1, 1, 0, 1, 0, 1 },
+                { 1, 1, 1, 1, 0, 1 } };
 
         chTruthTable = new JTable(data, columnNames);
         configureChTruthTable();
@@ -389,7 +413,7 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
                 }
             }
         });
-        //start by hiding truth table for practice mode
+        // start by hiding truth table for practice mode
         chTruthTablePane.setVisible(false);
         truthTableLabel.setVisible(false);
         chFunctionLabel.setVisible(false);
@@ -410,7 +434,6 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
         chTruthTable.getColumnModel().getColumn(5).setPreferredWidth(100);
     }
 
-    
     /**
      * Handles the keyTyped event for the view.
      *
@@ -427,9 +450,6 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
      */
     @Override
     public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-            checkButton.doClick();
-        }
     }
 
     /**
@@ -445,8 +465,7 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
     protected void updateView() {
         view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
 
-        switch(view.getCurrentViewType())
-        {
+        switch (view.getCurrentViewType()) {
             case DO_ONE:
                 updatePracticeView();
                 break;
@@ -471,10 +490,10 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
     @Override
     protected void updatePracticeView() {
 
-
-        // If check and hint buttons are disabled, reset listenerers and apply those used by this view
+        // If check and hint buttons are disabled, reset listenerers and apply those
+        // used by this view
         if (!checkHintEnabled) {
-           resetButtonListeners(); // Clear any listeners applied from other views
+            resetButtonListeners(); // Clear any listeners applied from other views
         }
 
         System.out.println("Choice function update view called."); // Error checking

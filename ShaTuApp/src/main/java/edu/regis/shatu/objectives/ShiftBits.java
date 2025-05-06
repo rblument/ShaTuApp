@@ -3,12 +3,9 @@ package edu.regis.shatu.objectives;
 import java.util.Random;
 
 import edu.regis.shatu.err.NonRecoverableException;
-import edu.regis.shatu.model.BitShiftStep;
 import edu.regis.shatu.model.Hint;
 import edu.regis.shatu.model.KnowledgeComponentKind;
-import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
-import edu.regis.shatu.model.StepCompletionReply;
 import edu.regis.shatu.model.Student;
 import edu.regis.shatu.model.StudentModelFieldKind;
 import edu.regis.shatu.model.TutoringSession;
@@ -17,6 +14,9 @@ import edu.regis.shatu.model.aol.PendingStep;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.model.aol.Timeout;
+import edu.regis.shatu.model.steps.BitShiftStep;
+import edu.regis.shatu.model.steps.Step;
+import edu.regis.shatu.model.steps.StepCompletionReply;
 import edu.regis.shatu.svc.ServiceFactory;
 import edu.regis.shatu.svc.StudentModelSvc;
 import edu.regis.shatu.svc.TutorReply;
@@ -127,12 +127,14 @@ public class ShiftBits extends Objective {
     /**
      * Handler for the Shift Bits Step Completion
      * TODO: Refactor so that:
-     *  1.) Steps in the database are actually completed since as of now, none exist
-     *  2.) Steps are completed for Tasks (Task table) in Units (Unit Table)
-     *  3.) Steps are completed for each Unit (See One, Do One, Teach One)
-     *  As of now, this is only logging assessment data (Assessment table) to the database based on the number of
-     *  exposures, successes, and hints the user has completed during the Do One section of the application and it is
-     *  not actually logging anything
+     * 1.) Steps in the database are actually completed since as of now, none exist
+     * 2.) Steps are completed for Tasks (Task table) in Units (Unit Table)
+     * 3.) Steps are completed for each Unit (See One, Do One, Teach One)
+     * As of now, this is only logging assessment data (Assessment table) to the
+     * database based on the number of
+     * exposures, successes, and hints the user has completed during the Do One
+     * section of the application and it is
+     * not actually logging anything
      *
      * @param completion
      * @return
