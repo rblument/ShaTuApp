@@ -19,17 +19,17 @@ import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.nio.charset.Charset;
 
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 
-import edu.regis.shatu.model.CompressRoundStep;
-import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.ProblemType;
+import edu.regis.shatu.model.steps.CompressRoundStep;
+import edu.regis.shatu.model.steps.Step;
 import edu.regis.shatu.svc.SHA_256;
-import java.nio.charset.Charset;
-import javax.swing.JOptionPane;
 
 /**
  * Displays a single round of the SHA-256 compression algorithm.
@@ -39,7 +39,7 @@ import javax.swing.JOptionPane;
  * @author rickb
  */
 public class CompressionCanvasView extends UserRequestView implements ActionListener {
-    
+
     /**
      * Required for access to the current view.
      * Used to access universal buttons (check, hint, new example).
@@ -49,7 +49,7 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
      * There eight working variables 'a' through 'h'.
      */
     private static final int WORKING_VARS_LEN = 8;
-    
+
     /**
      * There are six modulo 256 additions to display.
      */
@@ -109,19 +109,19 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
         nextRoundButton.setText("Next Round");
         newMessageButton.setText("New Message");
         counterButton.setText("Compression Round: " + count);
-      
+
     }
 
     /**
      * The working vars, modulo adds and bit op JLabel child components are
      * painted by the super, then we draw the connection lines.
      * 
-     * @param g 
+     * @param g
      */
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        
+
         Point p;
         Point p2;
         int x, y, x2, y2;
@@ -136,12 +136,12 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
             y = p.y + WorkingVarLabel.SIZE;
 
             g.drawLine(x, y, x, y + 300);
-            
+
             p = outWorkingVars[i + 1].getLocation();
             x2 = p.x + WorkingVarLabel.HALF_SIZE;
             drawArrowLine(g, x, y + 300, x2, p.y, 6, 6);
         }
-        
+
         // Lines going into working variables
         for (int i = 0; i < inWorkingVars.length; i++) {
             p = inWorkingVars[i].getLocation();
@@ -150,10 +150,10 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
             y = p.y + WorkingVarLabel.SIZE;
 
             g.drawLine(x, y, x, y - 60);
-            
-            drawArrowLine(g, x, y -60, x, p.y, 6, 6);
+
+            drawArrowLine(g, x, y - 60, x, p.y, 6, 6);
         }
-        
+
         // Lines going out of working variables at the bottom
         for (int i = 0; i < inWorkingVars.length; i++) {
             p = outWorkingVars[i].getLocation();
@@ -163,130 +163,129 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
 
             drawArrowLine(g, x, y - 60, x, y, 6, 6);
         }
-        
+
         // hide the 'd' to 'e' connection behind the modulo addition
         modAdditions[0].repaint();
-        
+
         // The arrow from 'h' to mod modAdditions[1]
         p = inWorkingVars[7].getLocation();
         x = p.x + WorkingVarLabel.HALF_SIZE;
         y = p.y + WorkingVarLabel.SIZE;
         p = modAdditions[1].getLocation();
         drawArrowLine(g, x, y, p.x, p.y, 6, 6);
-        
+
         // The arrow from 'e' line to Ch
         p = inWorkingVars[4].getLocation();
         p2 = chLabel.getLocation();
         x = p.x + WorkingVarLabel.HALF_SIZE;
         y = p2.y + 5;
         drawArrowLine(g, x, y, p2.x, y, 6, 6);
-        
+
         // The arrow from 'f' line to Ch
         p = inWorkingVars[5].getLocation();
         p2 = chLabel.getLocation();
         x = p.x + WorkingVarLabel.HALF_SIZE;
         y = p2.y + BitOpLabel.HALF_SIZE;
         drawArrowLine(g, x, y, p2.x, y, 6, 6);
-        
+
         // The arrow from 'g' line to Ch
         p = inWorkingVars[6].getLocation();
         p2 = chLabel.getLocation();
         x = p.x + WorkingVarLabel.HALF_SIZE;
         y = p2.y + BitOpLabel.SIZE - 5;
         drawArrowLine(g, x, y, p2.x, y, 6, 6);
-        
+
         // The arrow from 'e' line to Sigma1
         p = inWorkingVars[4].getLocation();
         p2 = sigma1Label.getLocation();
         x = p.x + WorkingVarLabel.HALF_SIZE;
         y = p2.y + BitOpLabel.HALF_SIZE;
         drawArrowLine(g, x, y, p2.x, y, 6, 6);
-        
+
         // The arrow from 'a' line to Maj
         p = inWorkingVars[0].getLocation();
         p2 = majLabel.getLocation();
         x = p.x + WorkingVarLabel.HALF_SIZE;
         y = p2.y + 5;
         drawArrowLine(g, x, y, p2.x, y, 6, 6);
-        
+
         // The arrow from 'b' line to Maj
         p = inWorkingVars[1].getLocation();
         p2 = majLabel.getLocation();
         x = p.x + WorkingVarLabel.HALF_SIZE;
         y = p2.y + BitOpLabel.HALF_SIZE;
         drawArrowLine(g, x, y, p2.x, y, 6, 6);
-        
+
         // The arrow from 'c' line to Maj
         p = inWorkingVars[2].getLocation();
         p2 = majLabel.getLocation();
         x = p.x + WorkingVarLabel.HALF_SIZE;
         y = p2.y + BitOpLabel.SIZE - 5;
         drawArrowLine(g, x, y, p2.x, y, 6, 6);
-        
+
         // The arrow from 'a' line to Sigma0
         p = inWorkingVars[0].getLocation();
         p2 = sigma0Label.getLocation();
         x = p.x + WorkingVarLabel.HALF_SIZE;
         y = p2.y + BitOpLabel.HALF_SIZE;
         drawArrowLine(g, x, y, p2.x, y, 6, 6);
-        
+
         // Arrow from Ch to modAdditions[1]
         p = chLabel.getLocation();
         x = p.x + BitOpLabel.SIZE;
         y = p.y + BitOpLabel.HALF_SIZE;
-        
+
         p = modAdditions[1].getLocation();
         x2 = p.x;
         y2 = p.y + AddMod256Label.HALF_SIZE;
-        
+
         drawArrowLine(g, x, y, x2, y2, 6, 6);
-        
+
         // Arrow from modAddtions[2] to modAddiotions[1]
         p = modAdditions[2].getLocation();
         x = p.x;
         x2 += AddMod256Label.SIZE;
         drawArrowLine(g, x, y, x2, y2, 6, 6);
-        
+
         // Arrow from modAdditions[1] to modAdditions[3]
         p = modAdditions[1].getLocation();
         x = p.x + AddMod256Label.HALF_SIZE;
         y = p.y + AddMod256Label.SIZE;
         p = modAdditions[3].getLocation();
         drawArrowLine(g, x, y, x, p.y, 6, 6);
-        
+
         // Arrow from modAdditions[3] to modAdditions[5]
         p = modAdditions[3].getLocation();
         y = p.y + AddMod256Label.SIZE;
         p = modAdditions[5].getLocation();
         drawArrowLine(g, x, y, x, p.y, 6, 6);
-        
+
         // Arrow from modAdditions[5] to 'a'
         y += AddMod256Label.SIZE;
         y2 = p.y + 40;
         g.drawLine(x, p.y, x, y2);
-        
-        y = y2;        
+
+        y = y2;
         p = outWorkingVars[0].getLocation();
         x2 = p.x + WorkingVarLabel.HALF_SIZE;
         y2 = p.y - 30;
         g.drawLine(x, y, x2, y2);
-        
-        drawArrowLine(g, x2, y2, x2, p.y , 6, 6);
-        
+
+        drawArrowLine(g, x2, y2, x2, p.y, 6, 6);
+
         // Arrow from Wt to modAdditions[2]
         p = modAdditions[2].getLocation();
         x = p.x + AddMod256Label.HALF_SIZE;
         y = p.y;
         g.drawLine(x, y, x, y - 40);
-        drawArrowLine(g, x, y -40, x, p.y, 6, 6);
-        
+        drawArrowLine(g, x, y - 40, x, p.y, 6, 6);
+
         // Arrow from Kt to modAdditions[2]
         p = modAdditions[2].getLocation();
         x = p.x + 60;
         y = p.y + AddMod256Label.HALF_SIZE;
         drawArrowLine(g, x, y, x - 40, y, 6, 6);
-        
-        
+
         // Arrow from Temporary Variable 1 to modAdditions[0]
         p = modAdditions[3].getLocation();
         x = p.x + AddMod256Label.HALF_SIZE;
@@ -294,7 +293,7 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
         x2 = p.x + AddMod256Label.SIZE;
         y = p.y + AddMod256Label.HALF_SIZE;
         drawArrowLine(g, x, y, x2, y, 6, 6);
-        
+
         // Arrow from Sigma0 to modAdditions[4]
         p = sigma0Label.getLocation();
         x = p.x + BitOpLabel.SIZE;
@@ -302,7 +301,7 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
         p = modAdditions[4].getLocation();
         x2 = p.x;
         drawArrowLine(g, x, y, x2, y, 6, 6);
-        
+
         // Arrow from modAdditions[4] to modAdditions[5]
         p = modAdditions[4].getLocation();
         x = p.x + AddMod256Label.SIZE;
@@ -310,7 +309,7 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
         p = modAdditions[5].getLocation();
         x2 = p.x;
         drawArrowLine(g, x, y, x2, y, 6, 6);
-        
+
         // Arrow from Maj to modAdditions[4]
         p = majLabel.getLocation();
         x = p.x + BitOpLabel.SIZE;
@@ -320,7 +319,7 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
         y2 = p.y;
         g.drawLine(x, y, x2, y);
         drawArrowLine(g, x2, y, x2, y2, 6, 6);
-        
+
     }
 
     /**
@@ -341,41 +340,39 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
         for (int i = 0; i < modAdditions.length; i++) {
             modAdditions[i] = new AddMod256Label(String.valueOf(i));
         }
-        
+
         int sigma = 931;
-        sigma1Label = new BitOpLabel((char)sigma + "\u2081");
+        sigma1Label = new BitOpLabel((char) sigma + "\u2081");
         sigma0Label = new BitOpLabel((char) sigma + "\u2080");
         chLabel = new BitOpLabel("Ch");
         majLabel = new BitOpLabel("Maj");
-        
+
         sigma1Label.setFont(new Font("", Font.PLAIN, 16));
         sigma0Label.setFont(new Font("", Font.PLAIN, 16));
-        
+
         wLabel = new VariableLabel("W\u209C");
         kLabel = new VariableLabel("K\u209C");
-        
-        
+
         wLabel.setFont(new Font("", Font.PLAIN, 16));
         kLabel.setFont(new Font("", Font.PLAIN, 16));
-        
+
         temp1Label = new VariableLabel("T\u2081");
         temp2Label = new VariableLabel("T\u2082");
-           
+
         temp1Label.setFont(new Font("", Font.PLAIN, 16));
         temp2Label.setFont(new Font("", Font.PLAIN, 16));
 
         nextRoundButton.addActionListener(this);
         newMessageButton.addActionListener(this);
-        
+
     }
 
     private void layoutComponents() {
-        Color white = new Color(255,255,255);
+        Color white = new Color(255, 255, 255);
         setBackground(white);
         Point p;
         int x, y, newMessageX, roundX, roundY;
-        
-        
+
         for (int i = 0; i < WORKING_VARS_LEN; i++) {
             x = LEFT_INDENT + (29 * i);
 
@@ -386,47 +383,45 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
             add(outWorkingVars[i]);
         }
 
-        
-        // The Bit operations Ch, Simga1, Maj, and Sigma2 are located a few 
+        // The Bit operations Ch, Simga1, Maj, and Sigma2 are located a few
         // pixels to the right of the last working variable 'h', which is
         // inWorkingVars[7] and below the input working variables.
         p = inWorkingVars[7].getLocation();
         x = p.x + WorkingVarLabel.SIZE + 40;
         y = p.y + WorkingVarLabel.SIZE + 40;
-        
+
         chLabel.setLocation(new Point(x, y));
         add(chLabel);
-        
+
         y += WorkingVarLabel.SIZE + 40;
         sigma1Label.setLocation(new Point(x, y));
         add(sigma1Label);
-        
-        
-        // Center the first modulo addtion label in the x axis with the center 
-        // of the 'd' working variable, which is inworkingVars[3] and 
-        // Half way between S1 and Maj in the y axis 
+
+        // Center the first modulo addtion label in the x axis with the center
+        // of the 'd' working variable, which is inworkingVars[3] and
+        // Half way between S1 and Maj in the y axis
         int x2 = inWorkingVars[3].getLocation().x + WorkingVarLabel.HALF_SIZE - AddMod256Label.HALF_SIZE;
         y += WorkingVarLabel.SIZE + 40; // y location of Maj
         modAdditions[0].setLocation(new Point(x2, y - 20));
-        add(modAdditions[0]);    
-       
+        add(modAdditions[0]);
+
         majLabel.setLocation(new Point(x, y));
         add(majLabel);
 
         y += WorkingVarLabel.SIZE + 40;
         sigma0Label.setLocation(new Point(x, y));
         add(sigma0Label);
-        
+
         // Center the second mod addition with the Ch bit operation label
         x = chLabel.getLocation().x + BitOpLabel.HALF_SIZE - AddMod256Label.HALF_SIZE + 150;
         y = chLabel.getLocation().y + BitOpLabel.HALF_SIZE - AddMod256Label.HALF_SIZE;
         modAdditions[1].setLocation(new Point(x, y));
         add(modAdditions[1]);
-        
+
         // Has W and K inputs
-        modAdditions[2].setLocation(new Point(x+ AddMod256Label.SIZE + 100, y));
+        modAdditions[2].setLocation(new Point(x + AddMod256Label.SIZE + 100, y));
         add(modAdditions[2]);
-        
+
         // W input location
         x = modAdditions[2].getLocation().x;
         y = modAdditions[2].getLocation().y;
@@ -434,8 +429,7 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
         y -= VariableLabel.SIZE + 20;
         wLabel.setLocation(x, y);
         add(wLabel);
-        
-        
+
         // K input location
         x = modAdditions[2].getLocation().x;
         y = modAdditions[2].getLocation().y;
@@ -449,24 +443,24 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
         y = sigma1Label.getLocation().y + BitOpLabel.HALF_SIZE - AddMod256Label.HALF_SIZE;
         modAdditions[3].setLocation(new Point(x, y));
         add(modAdditions[3]);
-        
+
         // Temporary Variable 1 location under third mod addition
         x = modAdditions[3].getLocation().x;
         y = modAdditions[0].getLocation().y;
         y -= AddMod256Label.SIZE;
         temp1Label.setLocation(x, y);
         add(temp1Label);
-        
+
         // Has input from sigma0 Centered on Sigma0
         x = sigma0Label.getLocation().x + BitOpLabel.HALF_SIZE - AddMod256Label.HALF_SIZE + 75;
         y = sigma0Label.getLocation().y + BitOpLabel.HALF_SIZE - AddMod256Label.HALF_SIZE;
         modAdditions[4].setLocation(new Point(x, y));
         add(modAdditions[4]);
-        
+
         x = sigma0Label.getLocation().x + BitOpLabel.HALF_SIZE - AddMod256Label.HALF_SIZE + 150;
         modAdditions[5].setLocation(new Point(x, y));
         add(modAdditions[5]);
-        
+
         // Temporary Variable 2 location between fourth and fifth mod addition
         x = modAdditions[4].getLocation().x;
         y = modAdditions[4].getLocation().y;
@@ -474,8 +468,7 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
         y += AddMod256Label.HALF_SIZE - 10;
         temp2Label.setLocation(x, y);
         add(temp2Label);
-        
-        
+
         // Add continueButton to the bottom right corner
         int buttonWidth = 100;
         int messageButtonWidth = 150;
@@ -487,19 +480,19 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
         newMessageX = getWidth() - (messageButtonWidth + buttonWidth) - margin;
         roundX = getWidth() - roundButtonWidth - margin;
         roundY = buttonHeight + margin;
-        
+
         nextRoundButton.setBounds(x, y, buttonWidth, buttonHeight);
         newMessageButton.setBounds(newMessageX, y, messageButtonWidth, buttonHeight);
         counterButton.setBounds(roundX, roundY, roundButtonWidth, buttonHeight);
         add(nextRoundButton);
         add(newMessageButton);
         add(counterButton);
-         
+
     }
 
-    /* 
-    Causes layout to respond dynamically when window is resized.
-    */
+    /*
+     * Causes layout to respond dynamically when window is resized.
+     */
     @Override
     public void doLayout() {
         super.doLayout();
@@ -508,9 +501,12 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
         int roundButtonWidth = 200;
         int buttonHeight = 30;
         int margin = 10;
-        nextRoundButton.setBounds(getWidth() - buttonWidth - margin, getHeight() - buttonHeight - margin, buttonWidth, buttonHeight);
-        newMessageButton.setBounds(getWidth() - (messageButtonWidth + buttonWidth) - margin, getHeight() - (buttonHeight) - margin, messageButtonWidth, buttonHeight);
-        counterButton.setBounds(getWidth() - roundButtonWidth - margin, buttonHeight + margin, roundButtonWidth, buttonHeight);
+        nextRoundButton.setBounds(getWidth() - buttonWidth - margin, getHeight() - buttonHeight - margin, buttonWidth,
+                buttonHeight);
+        newMessageButton.setBounds(getWidth() - (messageButtonWidth + buttonWidth) - margin,
+                getHeight() - (buttonHeight) - margin, messageButtonWidth, buttonHeight);
+        counterButton.setBounds(getWidth() - roundButtonWidth - margin, buttonHeight + margin, roundButtonWidth,
+                buttonHeight);
     }
 
     /**
@@ -518,13 +514,13 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
      * 
      * Author: phibao37 of Stack Overflow
      *
-     * @param g the graphics component.
+     * @param g  the graphics component.
      * @param x1 x-position of first point.
      * @param y1 y-position of first point.
      * @param x2 x-position of second point.
      * @param y2 y-position of second point.
-     * @param d the width of the arrow.
-     * @param h the height of the arrow.
+     * @param d  the width of the arrow.
+     * @param h  the height of the arrow.
      */
     private void drawArrowLine(Graphics g, int x1, int y1, int x2, int y2, int d, int h) {
         int dx = x2 - x1, dy = y2 - y1;
@@ -540,50 +536,48 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
         yn = xn * sin + yn * cos + y1;
         xn = x;
 
-        int[] xpoints = {x2, (int) xm, (int) xn};
-        int[] ypoints = {y2, (int) ym, (int) yn};
+        int[] xpoints = { x2, (int) xm, (int) xn };
+        int[] ypoints = { y2, (int) ym, (int) yn };
 
         g.drawLine(x1, y1, x2, y2);
         g.drawPolygon(xpoints, ypoints, 3); // Rickb
     }
-    
-    
-     @Override
-    public void actionPerformed(ActionEvent event) {
-       
-       if (event.getSource() == newMessageButton){
-           msg = JOptionPane.showInputDialog(this, "Enter a message to hash");
-           count = 0;   
-       }
 
-       //triggers one compression round to be completed.  
-       //asks for new message if all 64 rounds are completed
-       else if (event.getSource() == nextRoundButton){
-       
-           counterButton.setText("Compression Round: " + count);
-           if (count == 0){
-            Charset charset = Charset.forName("ASCII");
-            byte[] asciiEncodeMsg = msg.getBytes(charset);
-            int [] words = SHA_256.instance().initializeMessage(asciiEncodeMsg);
-            
-            SHA_256.instance().enumerateMessageBlocks (count, words);
-            
-            SHA_256.instance().compressionRound (count);
-            count++;
-           }
-           
-           else if (count > 63){
-               JOptionPane.showMessageDialog(null, "Compression of  one message block complete.  "
-                       + "Press new message button to see another SHA_256 hash.", 
-                       "Compression round complete", HEIGHT);
-               count = 0;
-           }
-           else{
-            SHA_256.instance().compressionRound (count);
-            count++; 
-           }
-           
-       }
+    @Override
+    public void actionPerformed(ActionEvent event) {
+
+        if (event.getSource() == newMessageButton) {
+            msg = JOptionPane.showInputDialog(this, "Enter a message to hash");
+            count = 0;
+        }
+
+        // triggers one compression round to be completed.
+        // asks for new message if all 64 rounds are completed
+        else if (event.getSource() == nextRoundButton) {
+
+            counterButton.setText("Compression Round: " + count);
+            if (count == 0) {
+                Charset charset = Charset.forName("ASCII");
+                byte[] asciiEncodeMsg = msg.getBytes(charset);
+                int[] words = SHA_256.instance().initializeMessage(asciiEncodeMsg);
+
+                SHA_256.instance().enumerateMessageBlocks(count, words);
+
+                SHA_256.instance().compressionRound(count);
+                count++;
+            }
+
+            else if (count > 63) {
+                JOptionPane.showMessageDialog(null, "Compression of  one message block complete.  "
+                        + "Press new message button to see another SHA_256 hash.",
+                        "Compression round complete", HEIGHT);
+                count = 0;
+            } else {
+                SHA_256.instance().compressionRound(count);
+                count++;
+            }
+
+        }
     }
 
     @Override
@@ -595,8 +589,7 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
     protected void updateView() {
         view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
 
-        switch(view.getCurrentViewType())
-        {
+        switch (view.getCurrentViewType()) {
             case DO_ONE:
                 updatePracticeView();
                 break;
@@ -648,32 +641,32 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
     protected void updateQuizView() {
 
     }
-    //TO DO:  not implemented at this time
+
+    // TO DO: not implemented at this time
     @Override
     public NewExampleRequest newRequest() {
         NewExampleRequest ex = new NewExampleRequest(); // Will be sent to the tutor.
-        
+
         ex.setExampleType(ProblemType.COMPRESS_ROUND);
-        
-        CompressRoundStep newStep = new CompressRoundStep();       
-                
+
+        CompressRoundStep newStep = new CompressRoundStep();
+
         ex.setData(gson.toJson(newStep));
-        
+
         return ex;
     }
-    
-    //TO DO:  not implemented at this time
+
+    // TO DO: not implemented at this time
     @Override
     public StepCompletion stepCompletion() {
         Step currentStep = model.currentTask().currentStep().getStep();
-        
+
         CompressRoundStep completedStep = gson.fromJson(currentStep.getData(), CompressRoundStep.class);
-                
+
         StepCompletion step = new StepCompletion(currentStep, gson.toJson(completedStep));
-        
+
         step.setStep(currentStep); // Will be sent to the tutor.
-        
+
         return step;
     }
 }
-

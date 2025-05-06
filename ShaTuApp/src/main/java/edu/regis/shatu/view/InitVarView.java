@@ -13,18 +13,20 @@
 package edu.regis.shatu.view;
 
 import java.awt.Color;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+
 import javax.swing.JLabel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import java.awt.GridBagConstraints;
-import java.awt.Font;
-import edu.regis.shatu.model.InitVarStep;
-import edu.regis.shatu.model.Step;
+
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.ProblemType;
+import edu.regis.shatu.model.steps.InitVarStep;
+import edu.regis.shatu.model.steps.Step;
 
 /**
  *
@@ -44,7 +46,7 @@ public class InitVarView extends UserRequestView { // implements ActionListener
     private JTextArea feedbackTextArea;
     private short hintCount;
     private boolean answersVisible, hintsVisible;
-    private JLabel[] answerLabels = new JLabel[8];  // Holds correct answer labels
+    private JLabel[] answerLabels = new JLabel[8]; // Holds correct answer labels
 
     public InitVarView() {
         initializeComponents();
@@ -53,22 +55,22 @@ public class InitVarView extends UserRequestView { // implements ActionListener
     }
 
     /*
-    @Override
-    public void actionPerformed(ActionEvent event) {
-        if (event.getSource() == checkButton) {
-            NewExampleAction.instance().actionPerformed(null);
-            boolean allCorrect = initVarStep.allAnswersCorrect();
-
-            if (allCorrect) {
-                showAnswer();
-                feedbackTextArea.setText("Correct!");
-            } else {
-                feedbackTextArea.setText("Incorrect. Please try again or use a hint.");
-            }
-        } else if (event.getSource() == hintButton) {
-            showHint();
-        }
-    }
+     * @Override
+     * public void actionPerformed(ActionEvent event) {
+     * if (event.getSource() == checkButton) {
+     * NewExampleAction.instance().actionPerformed(null);
+     * boolean allCorrect = initVarStep.allAnswersCorrect();
+     * 
+     * if (allCorrect) {
+     * showAnswer();
+     * feedbackTextArea.setText("Correct!");
+     * } else {
+     * feedbackTextArea.setText("Incorrect. Please try again or use a hint.");
+     * }
+     * } else if (event.getSource() == hintButton) {
+     * showHint();
+     * }
+     * }
      */
     private void initializeComponents() {
         hVars = new JTextField[NUM_VARS];
@@ -121,7 +123,7 @@ public class InitVarView extends UserRequestView { // implements ActionListener
                     GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                     5, 5, 5, 5);
         }
-        
+
         addc(buttonPanel, 0, gridX, 2, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
@@ -137,18 +139,18 @@ public class InitVarView extends UserRequestView { // implements ActionListener
             public void insertUpdate(DocumentEvent e) {
                 checkInput(e);
                 // if (!checkButton.isEnabled() && !hintButton.isEnabled()) {
-                //     view.toggleButton(checkButton);
-                //    view.toggleButton(hintButton);
+                // view.toggleButton(checkButton);
+                // view.toggleButton(hintButton);
                 // } else if (!checkButton.isEnabled()) {
-                //     view.toggleButton(checkButton);
+                // view.toggleButton(checkButton);
                 // }
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
                 checkInput(e);
-                //  if (allFieldsEmpty()) {
-                //      checkButton.setEnabled(false);
+                // if (allFieldsEmpty()) {
+                // checkButton.setEnabled(false);
                 // }
             }
 
@@ -159,7 +161,7 @@ public class InitVarView extends UserRequestView { // implements ActionListener
 
             private void checkInput(DocumentEvent e) {
                 JTextField sourceField = (JTextField) e.getDocument().getProperty("field");
-                String variableName = sourceField.getName();  // Use a unique name or identifier for each JTextField
+                String variableName = sourceField.getName(); // Use a unique name or identifier for each JTextField
                 String userAnswer = sourceField.getText();
 
                 initVarStep.setUserAnswer(variableName, userAnswer);
@@ -224,7 +226,7 @@ public class InitVarView extends UserRequestView { // implements ActionListener
     protected void updatePracticeView() {
         resetButtonListeners(); // Clear any listeners applied from other views
         feedbackTextArea.setText(""); // Resets text feedback area
-        //setupButtons();
+        // setupButtons();
 
         // New example is uniquely hidden for this view, as
         // There are only 8 initial values,
@@ -235,12 +237,14 @@ public class InitVarView extends UserRequestView { // implements ActionListener
             System.out.println("Error: The model is null when switching to Initialize Variables...");
         } else {
             // TODO: Debug statements. Task is not being set properly.
-            // The model's tasks list holds only the first task. It must be populated with each task.
+            // The model's tasks list holds only the first task. It must be populated with
+            // each task.
             // This should originate from a lack of data within the database.
             // Populating it should aid in resolving this error.
             System.out.println("Initialize update view called.");
             System.out.println("----Init Var Task Title-----" + model.currentTask().getTask().getTitle());
-            System.out.println("----Init Var Step Title-----" + model.currentTask().getCurrentStep().getStep().getTitle());
+            System.out.println(
+                    "----Init Var Step Title-----" + model.currentTask().getCurrentStep().getStep().getTitle());
         }
     }
 
@@ -266,7 +270,7 @@ public class InitVarView extends UserRequestView { // implements ActionListener
     public NewExampleRequest newRequest() {
         NewExampleRequest ex = new NewExampleRequest();
 
-        //Set example type to the problem associated with the current view
+        // Set example type to the problem associated with the current view
         ex.setExampleType(ProblemType.INITIALIZE_VARS);
 
         return ex;

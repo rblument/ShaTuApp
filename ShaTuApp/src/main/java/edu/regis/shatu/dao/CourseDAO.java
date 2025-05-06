@@ -29,7 +29,6 @@ import edu.regis.shatu.model.CourseDigest;
 import edu.regis.shatu.model.ExercisingLocation;
 import edu.regis.shatu.model.Hint;
 import edu.regis.shatu.model.KnowledgeComponent;
-import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.Task;
 import edu.regis.shatu.model.TaskSelectionKind;
 import edu.regis.shatu.model.Unit;
@@ -39,6 +38,7 @@ import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.model.aol.TaskKind;
 import edu.regis.shatu.model.aol.Timeout;
+import edu.regis.shatu.model.steps.Step;
 import edu.regis.shatu.svc.CourseSvc;
 
 /**

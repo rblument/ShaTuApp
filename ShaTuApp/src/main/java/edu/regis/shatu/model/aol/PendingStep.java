@@ -16,10 +16,10 @@ import java.util.ArrayList;
 
 import edu.regis.shatu.model.Hint;
 import edu.regis.shatu.model.Model;
-import edu.regis.shatu.model.Step;
+import edu.regis.shatu.model.steps.Step;
 
 /**
- * The current step within a pending task that a student needs to complete as 
+ * The current step within a pending task that a student needs to complete as
  * part of the current tutoring session.
  * 
  * A pending step represents the dynamic information associated with a student
@@ -33,21 +33,21 @@ public class PendingStep {
      * The auto-generated database id for this pending step.
      */
     private int id;
-    
+
     /**
      * The course step associated with this pending step.
      */
     private Step step;
-    
+
     private int currentHintIndex;
-    
-        /**
+
+    /**
      * If true, the GUI immediately notifies the tutor when the student performs
      * this step.
      */
     protected boolean notifyTutor;
-    
-        /**
+
+    /**
      * True, if the student has completed this step, otherwise false.
      * 
      * Note, if this is true and notifyTutor is true, the tutor has been
@@ -56,15 +56,15 @@ public class PendingStep {
      * with this step.
      */
     protected boolean isCompleted;
-    
-    public PendingStep (Step step) {
+
+    public PendingStep(Step step) {
         this(Model.DEFAULT_ID, step);
     }
-    
-    public PendingStep (int id, Step step) {
+
+    public PendingStep(int id, Step step) {
         this.id = id;
         this.step = step;
-        
+
         isCompleted = false;
     }
 
@@ -75,8 +75,6 @@ public class PendingStep {
     public void setId(int id) {
         this.id = id;
     }
-    
-    
 
     public Step getStep() {
         return step;
@@ -93,33 +91,33 @@ public class PendingStep {
     public void setCurrentHintIndex(int currentHintIndex) {
         this.currentHintIndex = currentHintIndex;
     }
-    
+
     public Hint getCurrentHint() {
         ArrayList<Hint> hints = step.getHints();
-        
+
         if (hints.isEmpty()) {
             Hint noHint = new Hint();
             noHint.setText("Sorry, no hints available");
             return noHint;
         }
-        
+
         // Reset the index to 0 if it exceeds the list size
         if (currentHintIndex >= hints.size()) {
             currentHintIndex = 0;
         }
-        
+
         return hints.get(currentHintIndex);
     }
-    
-        public boolean isNotifyTutor() {
+
+    public boolean isNotifyTutor() {
         return notifyTutor;
     }
 
     public void setNotifyTutor(boolean notifyTutor) {
         this.notifyTutor = notifyTutor;
     }
-    
-        public boolean isCompleted() {
+
+    public boolean isCompleted() {
         return isCompleted;
     }
 

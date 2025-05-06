@@ -29,12 +29,12 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-import edu.regis.shatu.model.BitShiftStep;
-import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
+import edu.regis.shatu.model.steps.BitShiftStep;
+import edu.regis.shatu.model.steps.Step;
 
 /**
  * ShiftRightView class represents the GUI view for performing the right shift

@@ -1,12 +1,9 @@
 package edu.regis.shatu.objectives;
 
 import edu.regis.shatu.err.NonRecoverableException;
-import edu.regis.shatu.model.CompressRoundStep;
 import edu.regis.shatu.model.Hint;
 import edu.regis.shatu.model.KnowledgeComponentKind;
-import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
-import edu.regis.shatu.model.StepCompletionReply;
 import edu.regis.shatu.model.Student;
 import edu.regis.shatu.model.StudentModelFieldKind;
 import edu.regis.shatu.model.TutoringSession;
@@ -15,6 +12,9 @@ import edu.regis.shatu.model.aol.PendingStep;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.model.aol.Timeout;
+import edu.regis.shatu.model.steps.CompressRoundStep;
+import edu.regis.shatu.model.steps.Step;
+import edu.regis.shatu.model.steps.StepCompletionReply;
 import edu.regis.shatu.svc.ServiceFactory;
 import edu.regis.shatu.svc.StudentModelSvc;
 import edu.regis.shatu.svc.TutorReply;

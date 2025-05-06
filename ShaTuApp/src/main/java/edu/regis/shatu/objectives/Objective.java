@@ -10,9 +10,7 @@ import com.google.gson.GsonBuilder;
 import edu.regis.shatu.err.NonRecoverableException;
 import edu.regis.shatu.model.Hint;
 import edu.regis.shatu.model.KnowledgeComponentKind;
-import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
-import edu.regis.shatu.model.StepCompletionReply;
 import edu.regis.shatu.model.Student;
 import edu.regis.shatu.model.StudentModelFieldKind;
 import edu.regis.shatu.model.Task;
@@ -26,6 +24,8 @@ import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.model.aol.StudentModel;
 import edu.regis.shatu.model.aol.TaskKind;
 import edu.regis.shatu.model.aol.Timeout;
+import edu.regis.shatu.model.steps.Step;
+import edu.regis.shatu.model.steps.StepCompletionReply;
 import edu.regis.shatu.svc.ServiceFactory;
 import edu.regis.shatu.svc.ShaTuTutor;
 import edu.regis.shatu.svc.StudentModelSvc;
@@ -350,7 +350,7 @@ abstract public class Objective {
             stepReply.setIsNextStep(false);
         }
 
-        Step step = new Step(1, 0, StepSubType.STEP_COMPLETION_REPLY);
+        Step step = new StepCompletionReply();
         // ToDo: fix timeouts
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
         step.setTimeout(timeout);

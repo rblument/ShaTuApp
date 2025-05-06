@@ -11,13 +11,14 @@
  *  or conditions of any kind, either expressed or implied.
  */
 
- /*
- * Set responseTextArea to disabled at initialization per SHAT-225 John hennessey 23 Feb 2025
- */
+/*
+* Set responseTextArea to disabled at initialization per SHAT-225 John hennessey 23 Feb 2025
+*/
 package edu.regis.shatu.view;
 
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
+
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -28,12 +29,13 @@ import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-import edu.regis.shatu.model.AddOneStep;
-import edu.regis.shatu.model.Step;
+
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
+import edu.regis.shatu.model.steps.AddOneStep;
+import edu.regis.shatu.model.steps.Step;
 
 /**
  * A view that requests the student to add a single '1' bit to the byte prompt.
@@ -69,19 +71,19 @@ public class Add1View extends UserRequestView {
      *
      * @param event the event that triggered the action listener
      *
-    @Override
-    public void actionPerformed(ActionEvent event) {
-        if (event.getSource() == checkButton) {
-            submitAnswer();
-        } else if (event.getSource() == nextButton) {
-            checkHintEnabled = true;
-            prepareNextQuestion();
-        } else if (event.getSource() == hintButton) {
-            requestHint();
-        }
-    }
-    */
-    
+     * @Override
+     *           public void actionPerformed(ActionEvent event) {
+     *           if (event.getSource() == checkButton) {
+     *           submitAnswer();
+     *           } else if (event.getSource() == nextButton) {
+     *           checkHintEnabled = true;
+     *           prepareNextQuestion();
+     *           } else if (event.getSource() == hintButton) {
+     *           requestHint();
+     *           }
+     *           }
+     */
+
     /**
      * Initializes all GUI components, setting up their properties and
      * configurations.
@@ -123,7 +125,7 @@ public class Add1View extends UserRequestView {
         addc(feedbackScrollPane, 0, 5, 1, 1,
                 1.0, 1.0, GridBagConstraints.CENTER,
                 GridBagConstraints.BOTH, 5, 5, 5, 5);
-        
+
         addc(buttonPanel, 0, 6, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
@@ -140,7 +142,8 @@ public class Add1View extends UserRequestView {
         if (this.responseTextArea.getText().equals("")) {
             this.feedbackArea.setText("Please provide an answer");
         } else {
-            // Nothing, maybe needed later in development, tutor should be handling things though.
+            // Nothing, maybe needed later in development, tutor should be handling things
+            // though.
 
         }
     }
@@ -188,24 +191,23 @@ public class Add1View extends UserRequestView {
         // TEMPORARY UNTIL WE LOAD THE MODEL DATA DESCRIPTION
         descriptionTextPane.setText(
                 "<html>"
-                + "<body>"
-                + "<h2>Appending the '1' Bit</h2>"
-                + "<p>The second step in SHA-256 preprocessing is appending a "
-                + "single '1' bit to the end of the original message"
-                + " in binary form. This step is crucial as it marks"
-                + " the boundary between the original message and the"
-                + " padding that follows. The '1' bit is added"
-                + " immediately after the last character of the message,"
-                + " before any zero padding. This ensures that the "
-                + " padded message remains unique and distinguishable"
-                + " from the original. Please use the format: "
-                + "######## # or if message length is two: "
-                + "######## ######## # and keep going depending on "
-                + "the message length. The single # would be "
-                + "the 1 you are suppose to add.</p>"
-                + "</body>"
-                + "</html>"
-        );
+                        + "<body>"
+                        + "<h2>Appending the '1' Bit</h2>"
+                        + "<p>The second step in SHA-256 preprocessing is appending a "
+                        + "single '1' bit to the end of the original message"
+                        + " in binary form. This step is crucial as it marks"
+                        + " the boundary between the original message and the"
+                        + " padding that follows. The '1' bit is added"
+                        + " immediately after the last character of the message,"
+                        + " before any zero padding. This ensures that the "
+                        + " padded message remains unique and distinguishable"
+                        + " from the original. Please use the format: "
+                        + "######## # or if message length is two: "
+                        + "######## ######## # and keep going depending on "
+                        + "the message length. The single # would be "
+                        + "the 1 you are suppose to add.</p>"
+                        + "</body>"
+                        + "</html>");
 
         descriptionTextPane.setEditable(false);
         descriptionTextPane.setBackground(null);
@@ -227,9 +229,10 @@ public class Add1View extends UserRequestView {
         responseTextArea = new JTextArea(3, 20);
         responseTextArea.setLineWrap(true); // Enable line wrapping
         responseTextArea.setWrapStyleWord(true); // Wrap lines at word boundaries
-        responseTextArea.setEnabled(false);  // Text area disabled at initialization 
+        responseTextArea.setEnabled(false); // Text area disabled at initialization
         responseScrollPane = new JScrollPane(responseTextArea);
-        responseScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED); // Enable vertical scrolling
+        responseScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED); // Enable vertical
+                                                                                                 // scrolling
     }
 
     /**
@@ -242,9 +245,10 @@ public class Add1View extends UserRequestView {
         feedbackArea.setLineWrap(true); // Enable line wrapping
         feedbackArea.setWrapStyleWord(true); // Wrap lines at word boundaries
         feedbackScrollPane = new JScrollPane(feedbackArea);
-        feedbackScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED); // Enable vertical scrolling
+        feedbackScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED); // Enable vertical
+                                                                                                 // scrolling
     }
-    
+
     /**
      * Initializes the components for inputting the message length. This method
      * creates and configures a JLabel and a JTextField where users can specify
@@ -254,7 +258,7 @@ public class Add1View extends UserRequestView {
      */
     private void setupMessageLengthInput() {
         messageLengthLabel = new JLabel("Message Length:");
-        messageLengthField = new JTextField("1", 5);  // Default length 1, adjust size as needed
+        messageLengthField = new JTextField("1", 5); // Default length 1, adjust size as needed
         messageLengthField.setHorizontalAlignment(JTextField.CENTER);
     }
 
@@ -262,7 +266,7 @@ public class Add1View extends UserRequestView {
      * Creates and returns a JPanel dedicated to setting the message length.
      *
      * @return A JPanel containing components for message length input, arranged
-     * vertically.
+     *         vertically.
      */
     private JPanel createMessageLengthPanel() {
         JPanel messageLengthPanel = new JPanel();
@@ -285,7 +289,7 @@ public class Add1View extends UserRequestView {
      * Initializes the ASCII table and its scroll pane
      */
     private void setupAsciiTable() {
-        DefaultTableModel tableModel = new DefaultTableModel(new Object[]{"Decimal", "Binary", "Symbol"}, 0);
+        DefaultTableModel tableModel = new DefaultTableModel(new Object[] { "Decimal", "Binary", "Symbol" }, 0);
         fillAsciiTable(tableModel); // Method to fill table data
         asciiTable = new JTable(tableModel);
         configureAsciiTable(); // Method to configure table appearance
@@ -301,10 +305,11 @@ public class Add1View extends UserRequestView {
      */
     private void fillAsciiTable(DefaultTableModel tableModel) {
         for (char i = 32; i < 127; i++) {
-            tableModel.addRow(new Object[]{
-                Integer.toString(i), // Decimal representation
-                String.format("%8s", Integer.toBinaryString(i)).replaceAll(" ", "0"), // Binary representation
-                i == 32 ? "<SPACE>" : String.valueOf(i) // Symbol representation, with special handling for the space character
+            tableModel.addRow(new Object[] {
+                    Integer.toString(i), // Decimal representation
+                    String.format("%8s", Integer.toBinaryString(i)).replaceAll(" ", "0"), // Binary representation
+                    i == 32 ? "<SPACE>" : String.valueOf(i) // Symbol representation, with special handling for the
+                                                            // space character
             });
         }
     }
@@ -329,8 +334,7 @@ public class Add1View extends UserRequestView {
     protected void updateView() {
         view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
 
-        switch(view.getCurrentViewType())
-        {
+        switch (view.getCurrentViewType()) {
             case DO_ONE:
                 updatePracticeView();
                 break;
@@ -354,26 +358,29 @@ public class Add1View extends UserRequestView {
      */
     @Override
     protected void updatePracticeView() {
-        // If check and hint buttons are disabled, reset listenerers and apply those used by this view
+        // If check and hint buttons are disabled, reset listenerers and apply those
+        // used by this view
         if (!checkHintEnabled) {
             resetButtonListeners(); // Clear any listeners applied from other views
         }
 
         /*
-        When switching between steps, the current step will be the previous enum
-        that a example was created for.  If that enums related stepobject has
-        similar variables, their may be a conflict causing a error.
+         * When switching between steps, the current step will be the previous enum
+         * that a example was created for. If that enums related stepobject has
+         * similar variables, their may be a conflict causing a error.
          */
         StepSubType type = StepSubType.ADD_ONE_BIT;
 
         System.out.println("Add One Bit update display called"); // Error checking
 
-        Step step = model.currentTask().getCurrentStep().getStep(); // Will be the last subtype a example was created for or empty
+        Step step = model.currentTask().getCurrentStep().getStep(); // Will be the last subtype a example was created
+                                                                    // for or empty
 
         System.out.println("Add 1 View substep from current step: " + step.getSubType()); // Error checking
         System.out.println("add one bit type: " + type); // Error checking
         if (step.getSubType() == StepSubType.ADD_ONE_BIT) {
-            AddOneStep newAddOneBit = gson.fromJson(step.getData(), AddOneStep.class); // Takes data to the class object created from the new example.
+            AddOneStep newAddOneBit = gson.fromJson(step.getData(), AddOneStep.class); // Takes data to the class object
+                                                                                       // created from the new example.
 
             // Clear any existing feedback and response from the previous question.
             feedbackArea.setText("");
@@ -411,14 +418,11 @@ public class Add1View extends UserRequestView {
                 this.repaint();
             }
         }
-        
+
         // Hide feedback panel if not used (fixes grey box visibility issue)
-        if (feedbackArea.getText().trim().isEmpty()) 
-        {
+        if (feedbackArea.getText().trim().isEmpty()) {
             feedbackScrollPane.setVisible(false);
-        } 
-        else 
-        {
+        } else {
             feedbackScrollPane.setVisible(true);
         }
     }
@@ -457,7 +461,9 @@ public class Add1View extends UserRequestView {
 
         AddOneStep newAddOneStep = new AddOneStep(); // New class object.
 
-        newAddOneStep.setMessageLength(Integer.parseInt(messageLengthField.getText().trim())); // Number of characters the question needs to be
+        newAddOneStep.setMessageLength(Integer.parseInt(messageLengthField.getText().trim())); // Number of characters
+                                                                                               // the question needs to
+                                                                                               // be
 
         System.out.println(newAddOneStep);
 
@@ -479,7 +485,9 @@ public class Add1View extends UserRequestView {
 
         Step currentStep = model.currentTask().currentStep().getStep(); // step created from the new example.
 
-        AddOneStep completedAddOneStep = gson.fromJson(currentStep.getData(), AddOneStep.class); // Class object created from the new example.
+        AddOneStep completedAddOneStep = gson.fromJson(currentStep.getData(), AddOneStep.class); // Class object created
+                                                                                                 // from the new
+                                                                                                 // example.
 
         String userResponse = this.responseTextArea.getText(); // Get the user's answer.
 

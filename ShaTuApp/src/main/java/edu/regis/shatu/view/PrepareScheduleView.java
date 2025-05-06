@@ -12,24 +12,32 @@
  */
 package edu.regis.shatu.view;
 
-import java.awt.*;
-import javax.swing.*;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.Random;
-import edu.regis.shatu.model.Step;
+
+import javax.swing.ButtonGroup;
+import javax.swing.JLabel;
+import javax.swing.JRadioButton;
+import javax.swing.SwingConstants;
+
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.ProblemType;
+import edu.regis.shatu.model.steps.Step;
 
 /**
- * This class represents the Prepare Schedule operation step in a multiple-choice format.
+ * This class represents the Prepare Schedule operation step in a
+ * multiple-choice format.
  * Users must select the correct missing step from predefined choices.
  * 
  * @author rickb
  */
-public class PrepareScheduleView extends UserRequestView { //implements ActionListener {
+public class PrepareScheduleView extends UserRequestView { // implements ActionListener {
     private TutoringSessionView view;
     private JLabel titleLabel, stepLabel, feedbackLabel, previousStepsLabel;
     private JRadioButton[] answerOptions;
@@ -40,10 +48,10 @@ public class PrepareScheduleView extends UserRequestView { //implements ActionLi
 
     // Correct Steps (displayed in order)
     private final String[] correctSteps = {
-        "The input message has been padded and divided into 512-bit chunks.",
-        "Each chunk is divided into 32-bit words (initially 16 words).",
-        "The words are expanded to 64 using shifts, rotations, and bitwise operations.",
-        "The expanded words are used in the compression phase."
+            "The input message has been padded and divided into 512-bit chunks.",
+            "Each chunk is divided into 32-bit words (initially 16 words).",
+            "The words are expanded to 64 using shifts, rotations, and bitwise operations.",
+            "The expanded words are used in the compression phase."
     };
 
     /**
@@ -52,10 +60,10 @@ public class PrepareScheduleView extends UserRequestView { //implements ActionLi
     public PrepareScheduleView() {
         initializeComponents();
         initializeLayout();
-        updatePreviousStepsDisplay();  // Ensure previous steps are cleared initially
+        updatePreviousStepsDisplay(); // Ensure previous steps are cleared initially
         loadStep();
-        revalidate();  // Forces UI refresh
-        repaint();  // Ensures the correct question is displayed
+        revalidate(); // Forces UI refresh
+        repaint(); // Ensures the correct question is displayed
     }
 
     /**
@@ -91,66 +99,65 @@ public class PrepareScheduleView extends UserRequestView { //implements ActionLi
         addc(titleLabel, 0, 0, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
-        
+
         addc(stepLabel, 0, 1, 1, 1, 1.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 5, 5, 5, 5);
-        
+
         int gridX = 2;
         for (JRadioButton option : answerOptions) {
             addc(option, 0, gridX++, 1, 1, 1.0, 0.0,
-                GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL,
-                5, 5, 5, 5);
-         }
-        
+                    GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL,
+                    5, 5, 5, 5);
+        }
+
         addc(buttonPanel, 0, ++gridX, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
-        
+
         /*
-        setLayout(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.anchor = GridBagConstraints.CENTER;
-
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.gridwidth = 2;
-        add(titleLabel, gbc);
-
-        gbc.gridy++;
-        add(previousStepsLabel, gbc);
-
-        gbc.gridy++;
-        add(stepLabel, gbc);
-
-        gbc.gridwidth = 1;
-        gbc.gridy++;
-        
-        for (JRadioButton option : answerOptions) {
-            gbc.gridx = 0;
-            gbc.gridwidth = 2;  // Ensure buttons span properly
-            add(option, gbc);
-            gbc.gridy++;
-        }
-
-        gbc.gridwidth = 2;
-        add(feedbackLabel, gbc);
-        gbc.gridy++;
-
-        gbc.gridwidth = 1;
-        gbc.gridy++;
-        add(checkAnswerButton, gbc);
-
-        gbc.gridy++;
-        add(hintButton, gbc);
-
-        gbc.gridy++;
-        add(newExampleButton, gbc);
-        */
+         * setLayout(new GridBagLayout());
+         * GridBagConstraints gbc = new GridBagConstraints();
+         * gbc.insets = new Insets(10, 10, 10, 10);
+         * gbc.fill = GridBagConstraints.HORIZONTAL;
+         * gbc.anchor = GridBagConstraints.CENTER;
+         * 
+         * gbc.gridx = 0;
+         * gbc.gridy = 0;
+         * gbc.gridwidth = 2;
+         * add(titleLabel, gbc);
+         * 
+         * gbc.gridy++;
+         * add(previousStepsLabel, gbc);
+         * 
+         * gbc.gridy++;
+         * add(stepLabel, gbc);
+         * 
+         * gbc.gridwidth = 1;
+         * gbc.gridy++;
+         * 
+         * for (JRadioButton option : answerOptions) {
+         * gbc.gridx = 0;
+         * gbc.gridwidth = 2; // Ensure buttons span properly
+         * add(option, gbc);
+         * gbc.gridy++;
+         * }
+         * 
+         * gbc.gridwidth = 2;
+         * add(feedbackLabel, gbc);
+         * gbc.gridy++;
+         * 
+         * gbc.gridwidth = 1;
+         * gbc.gridy++;
+         * add(checkAnswerButton, gbc);
+         * 
+         * gbc.gridy++;
+         * add(hintButton, gbc);
+         * 
+         * gbc.gridy++;
+         * add(newExampleButton, gbc);
+         */
     }
-
 
     /**
      * Loads the correct step question for the current step.
@@ -160,10 +167,10 @@ public class PrepareScheduleView extends UserRequestView { //implements ActionLi
 
         // More challenging step questions
         String[] stepQuestions = {
-            "Which process ensures the input message conforms to the required block size in SHA-256?",
-            "What transformation is applied to each 512-bit block before processing?",
-            "What technique does SHA-256 use to extend a small set of words into a larger sequence?",
-            "How is the expanded word sequence utilized in the hashing process?"
+                "Which process ensures the input message conforms to the required block size in SHA-256?",
+                "What transformation is applied to each 512-bit block before processing?",
+                "What technique does SHA-256 use to extend a small set of words into a larger sequence?",
+                "How is the expanded word sequence utilized in the hashing process?"
         };
 
         // Ensure the first question always appears correctly
@@ -173,20 +180,21 @@ public class PrepareScheduleView extends UserRequestView { //implements ActionLi
             stepLabel.setText("<html><u>Step " + currentStep + ": " + stepQuestions[currentStep - 1] + "</u></html>");
         }
 
-        // Answer choices with correct answers always in the first position before shuffling
+        // Answer choices with correct answers always in the first position before
+        // shuffling
         String[][] answerChoices = {
-            { "Padding is added to ensure the message is a multiple of 512 bits.",   // Correct answer
-            "SHA-256 automatically adjusts message length without padding.",
-            "Each message is divided into arbitrary-sized chunks before hashing." },
-            { "The block is split into 32-bit segments for further manipulation.",   // Correct answer
-            "A checksum is computed and attached to each block.",
-            "Each chunk remains unaltered until the final hashing step." },
-            { "A series of bitwise operations and shifts increase the number of words.",  // Correct answer
-            "Additional words are appended from external sources.",
-            "Words are kept constant, ensuring stability in the process." },
-            { "The transformed sequence helps derive intermediate hash values.",   // Correct answer
-            "The expanded words are discarded after processing.",
-            "Only a subset of the expanded words contributes to the hash output." }
+                { "Padding is added to ensure the message is a multiple of 512 bits.", // Correct answer
+                        "SHA-256 automatically adjusts message length without padding.",
+                        "Each message is divided into arbitrary-sized chunks before hashing." },
+                { "The block is split into 32-bit segments for further manipulation.", // Correct answer
+                        "A checksum is computed and attached to each block.",
+                        "Each chunk remains unaltered until the final hashing step." },
+                { "A series of bitwise operations and shifts increase the number of words.", // Correct answer
+                        "Additional words are appended from external sources.",
+                        "Words are kept constant, ensuring stability in the process." },
+                { "The transformed sequence helps derive intermediate hash values.", // Correct answer
+                        "The expanded words are discarded after processing.",
+                        "Only a subset of the expanded words contributes to the hash output." }
         };
 
         // Store correct answer before shuffling
@@ -223,7 +231,6 @@ public class PrepareScheduleView extends UserRequestView { //implements ActionLi
         }
     }
 
-
     /**
      * Displays a tailored hint based on the selected answer.
      */
@@ -250,27 +257,26 @@ public class PrepareScheduleView extends UserRequestView { //implements ActionLi
 
         // Tailored hints based on incorrect selection
         String[][] hintMessages = {
-            { "Consider how SHA-256 processes blocks before hashing.", 
-            "Think about why padding is necessary in a cryptographic hash function.", 
-            "Does SHA-256 allow arbitrary block sizes, or does it standardize them?" },
+                { "Consider how SHA-256 processes blocks before hashing.",
+                        "Think about why padding is necessary in a cryptographic hash function.",
+                        "Does SHA-256 allow arbitrary block sizes, or does it standardize them?" },
 
-            { "What is the purpose of dividing blocks into smaller segments?", 
-            "Does adding a checksum affect the internal structure of SHA-256?", 
-            "Why do cryptographic algorithms transform data before applying functions?" },
+                { "What is the purpose of dividing blocks into smaller segments?",
+                        "Does adding a checksum affect the internal structure of SHA-256?",
+                        "Why do cryptographic algorithms transform data before applying functions?" },
 
-            { "Consider how SHA-256 generates new words during expansion.", 
-            "Does SHA-256 add external words, or does it derive them from existing ones?", 
-            "Why would an algorithm need to keep word length constant?" },
+                { "Consider how SHA-256 generates new words during expansion.",
+                        "Does SHA-256 add external words, or does it derive them from existing ones?",
+                        "Why would an algorithm need to keep word length constant?" },
 
-            { "How does SHA-256 use transformed words in its compression phase?", 
-            "Does discarding words make sense in a secure hashing process?", 
-            "Would limiting the words used affect the final hash?" }
+                { "How does SHA-256 use transformed words in its compression phase?",
+                        "Does discarding words make sense in a secure hashing process?",
+                        "Would limiting the words used affect the final hash?" }
         };
 
         // Assign a specific hint for the wrong choice selected
         feedbackLabel.setText(hintMessages[currentStep - 1][selectedIndex]);
     }
-
 
     /**
      * Loads the next example or resets the steps.
@@ -320,8 +326,7 @@ public class PrepareScheduleView extends UserRequestView { //implements ActionLi
     protected void updateView() {
         view = SplashFrame.instance().getTutoringSessionView();
 
-        switch(view.getCurrentViewType())
-        {
+        switch (view.getCurrentViewType()) {
             case DO_ONE:
                 updatePracticeView();
                 break;
@@ -348,7 +353,8 @@ public class PrepareScheduleView extends UserRequestView { //implements ActionLi
 
         resetButtonListeners();
 
-        // Only update label if the step is greater than 1 to prevent overriding first question
+        // Only update label if the step is greater than 1 to prevent overriding first
+        // question
         if (currentStep > 1) {
             stepLabel.setText("<html><u>Step " + currentStep + ": " + correctSteps[currentStep - 1] + "</u></html>");
         }

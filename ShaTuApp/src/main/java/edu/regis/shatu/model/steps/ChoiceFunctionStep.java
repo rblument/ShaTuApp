@@ -10,7 +10,7 @@
  *  software is distributed on an "AS IS" basis without warranties
  *  or conditions of any kind, either expressed or implied.
  */
-package edu.regis.shatu.model;
+package edu.regis.shatu.model.steps;
 
 /**
  * A choice function problem encoded as a step.
@@ -22,9 +22,9 @@ public class ChoiceFunctionStep {
     private String operand2;
     private String operand3;
     private String result;
-    
+
     private boolean isTruthTableVisible;
-    
+
     /**
      * The number of bits to rotate in the given direction.
      */
@@ -69,6 +69,5 @@ public class ChoiceFunctionStep {
     public void setBitLength(int bitLength) {
         this.bitLength = bitLength;
     }
-    
-    
+
 }

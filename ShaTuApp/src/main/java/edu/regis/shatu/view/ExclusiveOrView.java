@@ -25,7 +25,6 @@ import java.awt.event.KeyListener;
 import java.util.Random;
 
 import javax.swing.ButtonGroup;
-import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -37,13 +36,13 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 
-import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.BitOpExample;
 import edu.regis.shatu.model.aol.BitOpStep;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
+import edu.regis.shatu.model.steps.Step;
 
 /**
  * ExclusiveOrView class represents a GUI view for performing Exclusive OR (XOR)
@@ -61,7 +60,7 @@ public class ExclusiveOrView extends UserRequestView implements KeyListener {
     private JTextArea descTextArea, responseTextArea;
     private JScrollPane responsePane;
     private GPanel questionPanel, descriptionPanel, qrPanel;
-    private JPanel  radioButtonPanel;
+    private JPanel radioButtonPanel;
     private ButtonGroup problemSizeGroup;
     private JRadioButton fourRadioButton, eightRadioButton, sixteenRadioButton,
             thirtytwoRadioButton;
@@ -106,7 +105,7 @@ public class ExclusiveOrView extends UserRequestView implements KeyListener {
         addc(qrPanel, 0, 2, 3, 1, 1.0, 1.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
                 5, 5, 5, 5);
-                
+
         addc(buttonPanel, 0, 3, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
@@ -124,7 +123,8 @@ public class ExclusiveOrView extends UserRequestView implements KeyListener {
         descTextArea.setLineWrap(true);
         descTextArea.setWrapStyleWord(true);
         descTextArea.setOpaque(false);
-        descTextArea.append("The exclusive OR compares two n-length binary strings. When comparing the strings, if both bits are the same, the output is 0, else its 1.");
+        descTextArea.append(
+                "The exclusive OR compares two n-length binary strings. When comparing the strings, if both bits are the same, the output is 0, else its 1.");
 
         descTextArea.setPreferredSize(new Dimension(800, 50));
     }
@@ -175,7 +175,7 @@ public class ExclusiveOrView extends UserRequestView implements KeyListener {
         problemSizeGroup.add(sixteenRadioButton);
         problemSizeGroup.add(thirtytwoRadioButton);
 
-        fourRadioButton.setSelected(true); //Set default radio button to true
+        fourRadioButton.setSelected(true); // Set default radio button to true
 
         radioButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         radioButtonPanel.add(fourRadioButton);
@@ -244,13 +244,11 @@ public class ExclusiveOrView extends UserRequestView implements KeyListener {
         responseTextArea = new JTextArea(3, 20);
         responseTextArea.setLineWrap(true);
         responseTextArea.setWrapStyleWord(true);
-        responseTextArea.setEnabled(false);  // Text area disabled at initialization 
+        responseTextArea.setEnabled(false); // Text area disabled at initialization
 
         responsePane = new JScrollPane(responseTextArea);
         responsePane.setPreferredSize(new Dimension(800, 200));
     }
-
-
 
     /**
      * Creates a GPanel containing the response and feedback JScrollPanes and
@@ -258,11 +256,11 @@ public class ExclusiveOrView extends UserRequestView implements KeyListener {
      */
     private void setUpQRPanel() {
         qrPanel = new GPanel();
-        
+
         qrPanel.setMinimumSize(new Dimension(500, 100));
         qrPanel.addc(responsePane, 0, 0, 1, 1, 1.0, 1.0,
-             GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-             0, 0, 0, 0);
+                GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                0, 0, 0, 0);
     }
 
     /**
@@ -412,7 +410,6 @@ public class ExclusiveOrView extends UserRequestView implements KeyListener {
         return paddedBinary.toString();
     }
 
-
     /**
      * Handles the keyTyped event for the view.
      *
@@ -447,7 +444,6 @@ public class ExclusiveOrView extends UserRequestView implements KeyListener {
         // Not used in this context
     }
 
-
     /**
      * XOR Example Request Added
      *
@@ -458,8 +454,7 @@ public class ExclusiveOrView extends UserRequestView implements KeyListener {
     protected void updateView() {
         view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
 
-        switch(view.getCurrentViewType())
-        {
+        switch (view.getCurrentViewType()) {
             case DO_ONE:
                 updatePracticeView();
                 break;
@@ -485,7 +480,8 @@ public class ExclusiveOrView extends UserRequestView implements KeyListener {
     protected void updatePracticeView() {
         responseTextArea.setText("");
 
-        // If check and hint buttons are disabled, reset listenerers and apply those used by this view
+        // If check and hint buttons are disabled, reset listenerers and apply those
+        // used by this view
         if (!checkHintEnabled) {
             resetButtonListeners(); // Clear any listeners applied from other views
         }

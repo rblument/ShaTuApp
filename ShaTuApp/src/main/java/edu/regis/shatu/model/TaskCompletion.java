@@ -14,6 +14,8 @@ package edu.regis.shatu.model;
 
 import java.util.ArrayList;
 
+import edu.regis.shatu.model.steps.Step;
+
 /**
  *
  * @author rickb

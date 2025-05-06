@@ -11,9 +11,9 @@
  *  or conditions of any kind, either expressed or implied.
  */
 
- /*
- * Corrected misspelling per SHAT-218 John Hennessey 23 Feb 2025
- */
+/*
+* Corrected misspelling per SHAT-218 John Hennessey 23 Feb 2025
+*/
 
 package edu.regis.shatu.view.act;
 
@@ -28,13 +28,13 @@ import com.google.gson.GsonBuilder;
 
 import edu.regis.shatu.err.IllegalArgException;
 import edu.regis.shatu.model.Account;
-import edu.regis.shatu.model.Step;
 import edu.regis.shatu.model.StepCompletion;
-import edu.regis.shatu.model.StepCompletionReply;
 import edu.regis.shatu.model.Task;
 import edu.regis.shatu.model.aol.PendingTask;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
+import edu.regis.shatu.model.steps.Step;
+import edu.regis.shatu.model.steps.StepCompletionReply;
 import edu.regis.shatu.svc.ClientRequest;
 import edu.regis.shatu.svc.ServerRequestType;
 import edu.regis.shatu.svc.SvcFacade;
@@ -46,7 +46,7 @@ import edu.regis.shatu.view.StepSelection;
 import edu.regis.shatu.view.UserRequestView;
 
 /**
- * An (MVC) controller handling a GUI gesture representing a user's request to 
+ * An (MVC) controller handling a GUI gesture representing a user's request to
  * completed the current step, which is the finest grained interface gesture
  * a user can perform that is sent to the tutor.
  *
@@ -59,8 +59,7 @@ public class StepCompletionAction extends ShaTuGuiAction {
     /**
      * Exceptions occurring in this class are also logged to this logger.
      */
-    private static final Logger LOGGER
-            = Logger.getLogger(StepCompletionAction.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(StepCompletionAction.class.getName());
 
     /**
      * The single instance of this sign-in action.
@@ -99,7 +98,7 @@ public class StepCompletionAction extends ShaTuGuiAction {
     /**
      * Handle the user's request for a new example by sending it to the tutor.
      *
-     * If successful, the current view is updated with the contents of the new 
+     * If successful, the current view is updated with the contents of the new
      * example (and associated task) in the reply from the tutor.
      *
      * @param evt ignored
@@ -108,37 +107,36 @@ public class StepCompletionAction extends ShaTuGuiAction {
     public void actionPerformed(ActionEvent evt) {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         Account account = SplashFrame.instance().getAccount();
-        //Catches a possible IllegalArgumentException thrown by the 
-        //getUserRequestView() method
-        try{
-            //Get the current view that initiated the StepCompletionRequest
+        // Catches a possible IllegalArgumentException thrown by the
+        // getUserRequestView() method
+        try {
+            // Get the current view that initiated the StepCompletionRequest
             UserRequestView exView = GuiController.instance().getStepView().getUserRequestView();
-            //Call the overridden newRequest() method to generate an appropriate
-            //request to the tutor based on the current view
+            // Call the overridden newRequest() method to generate an appropriate
+            // request to the tutor based on the current view
             StepCompletion ex = exView.stepCompletion();
-            //Construct the request with the users data and NewExampleRequest
-            //returned by the newRequest() method
+            // Construct the request with the users data and NewExampleRequest
+            // returned by the newRequest() method
             ClientRequest request = new ClientRequest(ServerRequestType.COMPLETED_STEP);
             request.setUserId(account.getUserId());
             request.setSecurityToken(MainFrame.instance().getModel().getSecurityToken());
             request.setData(gson.toJson(ex));
-           
-            //Send the request to the tutor and save the reply
+
+            // Send the request to the tutor and save the reply
             TutorReply reply = SvcFacade.instance().tutorRequest(request);
 
-           
             switch (reply.getStatus()) {
                 case ":ERR":
                     // If we get here, there is a coding error in the tutor svc
-                    //frame.displayError("Ooops, an unexpected error occurred: SI_1");
+                    // frame.displayError("Ooops, an unexpected error occurred: SI_1");
                     System.out.println("Coding error  status: " + reply.getStatus());
 
                     break;
 
-                default:    
+                default:
                     PendingTask pendingTask = gson.fromJson(reply.getData(), PendingTask.class);
                     Task task = pendingTask.getTask();
-                   // Task task = gson.fromJson(reply.getData(), Task.class);
+                    // Task task = gson.fromJson(reply.getData(), Task.class);
 
                     if (task.getType() == ProblemType.STEP_COMPLETION_REPLY) {
                         String selection1 = "Move on to Next Task";
@@ -147,21 +145,21 @@ public class StepCompletionAction extends ShaTuGuiAction {
                         String selection4 = "Show the correct Answer";
 
                         Step step = pendingTask.getCurrentStep().getStep();
-                        //Step step = task.getCurrentStep();
+                        // Step step = task.getCurrentStep();
                         if (step.getSubType() == StepSubType.STEP_COMPLETION_REPLY) {
                             StepCompletionReply stepReply = gson.fromJson(step.getData(), StepCompletionReply.class);
 
                             if (stepReply.isCorrect()) {
                                 if (stepReply.isNewTask()) {
                                     String prompt = "Congratulations, the answer you submitted is correct. " +
-                                            "As I believe you've mastered this outcome, I suggest moving on to a different task. " +
+                                            "As I believe you've mastered this outcome, I suggest moving on to a different task. "
+                                            +
                                             "However, if you'd like you can try a similar problem again.";
-                                    String[] options = {selection1, selection3};
+                                    String[] options = { selection1, selection3 };
                                     int choice = JOptionPane.showOptionDialog(MainFrame.instance(),
                                             prompt, "Tutor Reply", 0, 3, null, options, options[0]);
 
-                                    switch (choice)
-                                    {
+                                    switch (choice) {
                                         case 0 -> {
                                             System.out.println("Next Task");
                                             switch (GuiController.instance().getStepView().getSelectedPanel()) {
@@ -232,29 +230,27 @@ public class StepCompletionAction extends ShaTuGuiAction {
                                             NewExampleAction.instance().actionPerformed(null);
                                         }
                                     }
-                                }
-                                else {
-                                    String prompt = "Congratulations, the answer you submitted is correct. " + "Keep up the good work to complete this task!";
-                                    String[] options = {selection3};
+                                } else {
+                                    String prompt = "Congratulations, the answer you submitted is correct. "
+                                            + "Keep up the good work to complete this task!";
+                                    String[] options = { selection3 };
                                     JOptionPane.showOptionDialog(MainFrame.instance(),
                                             prompt, "Tutor Reply", 0, 3, null, options, options[0]);
                                     NewExampleAction.instance().actionPerformed(null);
                                 }
                             }
-                            
+
                             else if (stepReply.getResponse().isEmpty()) {
                                 String prompt = "Please enter an answer";
                                 JOptionPane.showMessageDialog(MainFrame.instance(),
                                         prompt, "Tutor Reply", JOptionPane.INFORMATION_MESSAGE);
-                            } 
-                            else {
+                            } else {
                                 String prompt = "Unfortunately, your answer was incorrect. Please try agian.";
-                                String[] options = {selection2, selection3, selection4};
+                                String[] options = { selection2, selection3, selection4 };
                                 int choice = JOptionPane.showOptionDialog(MainFrame.instance(),
                                         prompt, "Tutor Reply", 0, 3, null, options, options[0]);
 
-                                switch (choice)
-                                {
+                                switch (choice) {
                                     case 1 -> {
                                         System.out.println("try similar problem");
                                         NewExampleAction.instance().actionPerformed(null);
@@ -262,7 +258,8 @@ public class StepCompletionAction extends ShaTuGuiAction {
                                     case 2 -> {
                                         System.out.println("show answer");
                                         JOptionPane.showMessageDialog(MainFrame.instance(),
-                                        stepReply.getCorrectAnswer(), "Tutor Reply", JOptionPane.INFORMATION_MESSAGE);
+                                                stepReply.getCorrectAnswer(), "Tutor Reply",
+                                                JOptionPane.INFORMATION_MESSAGE);
                                         NewExampleAction.instance().actionPerformed(null);
                                     }
                                     default -> System.out.println("try again");
@@ -272,13 +269,11 @@ public class StepCompletionAction extends ShaTuGuiAction {
                         }
                     }
 
-                //exView.setCurrentTask(task);  
-
-
+                    // exView.setCurrentTask(task);
 
             }
-        }catch(IllegalArgException e){
-           System.out.println("Illegal arg exception " + e);
+        } catch (IllegalArgException e) {
+            System.out.println("Illegal arg exception " + e);
         }
     }
 }

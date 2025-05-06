@@ -10,21 +10,35 @@
  */
 package edu.regis.shatu.view;
 
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import edu.regis.shatu.model.ShaOneStep;
 import java.awt.GridBagConstraints;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+
+import javax.swing.ButtonGroup;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JTextField;
-import edu.regis.shatu.model.StepCompletion;
+import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import edu.regis.shatu.model.Step;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+
+import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.PendingTask;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
+
+import edu.regis.shatu.model.steps.MajorityStep;
+import edu.regis.shatu.model.steps.ShaOneStep;
+import edu.regis.shatu.model.steps.Step;
+
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -34,6 +48,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+
 
 /**
  * ShaOne class represents the GUI view for performing the SHA Σ₁ function,
@@ -46,6 +61,7 @@ import javax.swing.JTextArea;
  *
  * @author rickb
  */
+
 public class ShaOneView extends UserRequestView implements KeyListener { //implements KeyListener 
     private TutoringSessionView view;
 
@@ -128,6 +144,7 @@ public class ShaOneView extends UserRequestView implements KeyListener { //imple
      * The panel that contains the question and answer components
      */
     private GPanel qrPanel;
+
     /**
      * Initialize this view including creating and laying out its child components.
      */
@@ -136,7 +153,7 @@ public class ShaOneView extends UserRequestView implements KeyListener { //imple
         initializeLayout();
     }
 
-        /**
+    /**
      * Create and return the server request this view makes when a user selects
      * that they want to practice a new Sha One View example.
      *
@@ -145,19 +162,19 @@ public class ShaOneView extends UserRequestView implements KeyListener { //imple
     @Override
     public NewExampleRequest newRequest() {
         NewExampleRequest ex = new NewExampleRequest();
-        
+
         ex.setExampleType(ProblemType.SHA_ONE);
-        
+
         ShaOneStep step = new ShaOneStep();
-        
+
         step.setBitLength(problemSize);
-      
+
         String shaStepJson = gson.toJson(step);
         ex.setData(shaStepJson);
 
         return ex;
     }
-    
+
     @Override
     public StepCompletion stepCompletion() {
         Step currentStep = model.currentTask().currentStep().getStep();
@@ -169,9 +186,9 @@ public class ShaOneView extends UserRequestView implements KeyListener { //imple
         example.setResult(userResponse);
 
         StepCompletion step = new StepCompletion(currentStep, gson.toJson(example));
-        
+
         step.setStep(currentStep);
-        
+
         return step;
     }
 
@@ -199,11 +216,11 @@ public class ShaOneView extends UserRequestView implements KeyListener { //imple
             verifyAnswer();
         }
     }
+
     /**
      * Sets the main View title and description of the function
      */
-    private void setupDescription()
-    {
+    private void setupDescription() {
         viewNameLabel = new JLabel("The Σ₁ Function");
         viewNameLabel.setFont(new Font("", Font.BOLD, 20));
 
@@ -213,14 +230,14 @@ public class ShaOneView extends UserRequestView implements KeyListener { //imple
         descTextArea.setWrapStyleWord(true);
         descTextArea.setOpaque(false);
         descTextArea.append("""
-                            The Σ₁ function takes a single 32-bit word operand then:
-                            
-                            1) Shift  input value right with n=6
-                            2) Shift  input value right with n=11
-                            3) Shift  input value right with n=25
-                            4) Modulo addition using 3 shift right values.
-                            
-                            Outputs a single 32-bit word.""");
+                The Σ₁ function takes a single 32-bit word operand then:
+
+                1) Shift  input value right with n=6
+                2) Shift  input value right with n=11
+                3) Shift  input value right with n=25
+                4) Modulo addition using 3 shift right values.
+
+                Outputs a single 32-bit word.""");
     }
 
     /**
@@ -241,6 +258,7 @@ public class ShaOneView extends UserRequestView implements KeyListener { //imple
                 GridBagConstraints.SOUTHWEST, GridBagConstraints.NONE,
                 5, 5, 5, 5);
     }
+
     /**
      * Sets up the radio buttons and action listener
      */
@@ -266,7 +284,7 @@ public class ShaOneView extends UserRequestView implements KeyListener { //imple
         problemSizeGroup.add(sixteenRadioButton);
         problemSizeGroup.add(thirtytwoRadioButton);
 
-        fourRadioButton.setSelected(true); //Set default radio button to true
+        fourRadioButton.setSelected(true); // Set default radio button to true
 
         radioButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         radioButtonPanel.add(fourRadioButton);
@@ -300,7 +318,7 @@ public class ShaOneView extends UserRequestView implements KeyListener { //imple
                 5, 5, 5, 5);
         questionPanel.addc(operandALabel, 0, 3, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
-                5, 5, 5, 5);           
+                5, 5, 5, 5);
         addc(buttonPanel, 0, 4, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 5, 5, 5, 5);
@@ -314,24 +332,25 @@ public class ShaOneView extends UserRequestView implements KeyListener { //imple
         responseTextArea = new JTextArea(3, 20);
         responseTextArea.setLineWrap(true);
         responseTextArea.setWrapStyleWord(true);
-        responseTextArea.setEnabled(false); 
+        responseTextArea.setEnabled(false);
 
         responsePane = new JScrollPane(responseTextArea);
         responsePane.setPreferredSize(new Dimension(800, 200));
-        
+
     }
-     /**
+
+    /**
      * Creates a GPanel containing the response JScrollPanes and the button
      * panel.
      */
-        private void setUpQRPanel() {
+    private void setUpQRPanel() {
         qrPanel = new GPanel();
         responsePane.setPreferredSize(new Dimension(300, 20));
         qrPanel.addc(responsePane, 0, 4, 4, 4, 1.0, 0,
                 GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                 5, 5, 5, 5);
     }
-    
+
     /**
      * Create the child GUI components appearing in this frame.
      */
@@ -356,7 +375,7 @@ public class ShaOneView extends UserRequestView implements KeyListener { //imple
         addc(answerLabel, 0, 1, 1, 1, 1.0, 0.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
                 5, 5, 5, 5);
-        
+
         addc(qrPanel, 0, 2, 3, 1, 1.0, 1.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
                 5, 5, 5, 5);
@@ -371,8 +390,7 @@ public class ShaOneView extends UserRequestView implements KeyListener { //imple
     protected void updateView() {
         view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
 
-        switch(view.getCurrentViewType())
-        {
+        switch (view.getCurrentViewType()) {
             case DO_ONE:
                 updatePracticeView();
                 break;
@@ -411,12 +429,13 @@ public class ShaOneView extends UserRequestView implements KeyListener { //imple
     @Override
     protected void updatePracticeView() {
 
-        // If check and hint buttons are disabled, reset listenerers and apply those used by this view
-        if(!checkHintEnabled) {
+        // If check and hint buttons are disabled, reset listenerers and apply those
+        // used by this view
+        if (!checkHintEnabled) {
             resetButtonListeners(); // Clear any listeners applied from other views
         }
-        
-                Step step = model.currentTask().getCurrentStep().getStep();
+
+        Step step = model.currentTask().getCurrentStep().getStep();
 
         if (step.getSubType() == StepSubType.SHA_ONE) {
             //Get the data from the model as a RotateStep object
@@ -452,7 +471,6 @@ public class ShaOneView extends UserRequestView implements KeyListener { //imple
 
     }
 
-
     /**
      * Create and return the server request this view makes when a user selects
      * that they want to practice a new Sha One View example.
@@ -470,23 +488,24 @@ public class ShaOneView extends UserRequestView implements KeyListener { //imple
 
         return Integer.toBinaryString(result);
     }
-    
-    public void keyTyped (KeyEvent e) {
+
+    public void keyTyped(KeyEvent e) {
     }
-  
-    public void keyPressed (KeyEvent e) {
+
+    public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_ENTER && answerField.getText().equals("")) {
             JOptionPane.showMessageDialog(this, "Please provide an answer");
         } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
             checkButton.doClick();
         }
     }
-    
-   public void keyReleased(KeyEvent e) {
-   }
+
+    public void keyReleased(KeyEvent e) {
+    }
 
     /**
-     * Verifies the user's answer by comparing it with the correct result of the right shift operation.
+     * Verifies the user's answer by comparing it with the correct result of the
+     * right shift operation.
      */
     private void verifyAnswer() {
         String correctAnswer = shiftRightString(EXAMPLE_INPUT, X_PLACES);
@@ -499,7 +518,7 @@ public class ShaOneView extends UserRequestView implements KeyListener { //imple
             JOptionPane.showMessageDialog(this, "Incorrect. The correct answer is: " + correctAnswer);
         }
     }
-    
+
     /**
      * Updates the size of the problem to display.
      *
@@ -516,7 +535,7 @@ public class ShaOneView extends UserRequestView implements KeyListener { //imple
             problemSize = 32;
         }
     }
-    
+
     @Override
     public void setCurrentTask(PendingTask task) {
         this.model.addCurrentTask(task);
