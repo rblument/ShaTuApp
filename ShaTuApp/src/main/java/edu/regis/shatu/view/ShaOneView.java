@@ -13,8 +13,6 @@ package edu.regis.shatu.view;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import edu.regis.shatu.model.ShaOneStep;
-import edu.regis.shatu.model.MajorityStep;
-import edu.regis.shatu.model.ShaZeroStep;
 import java.awt.GridBagConstraints;
 import java.awt.event.ActionListener;
 import javax.swing.JLabel;
@@ -31,6 +29,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import javax.swing.ButtonGroup;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -47,7 +46,7 @@ import javax.swing.JTextArea;
  *
  * @author rickb
  */
-public class ShaOneView extends UserRequestView { //implements KeyListener 
+public class ShaOneView extends UserRequestView implements KeyListener { //implements KeyListener 
     private TutoringSessionView view;
 
     /**
@@ -419,9 +418,9 @@ public class ShaOneView extends UserRequestView { //implements KeyListener
         
                 Step step = model.currentTask().getCurrentStep().getStep();
 
-        if (step.getSubType() == StepSubType.SHA_ZERO) {
+        if (step.getSubType() == StepSubType.SHA_ONE) {
             //Get the data from the model as a RotateStep object
-            MajorityStep example = gson.fromJson(step.getData(), MajorityStep.class);
+            ShaOneStep example = gson.fromJson(step.getData(), ShaOneStep.class);
 
             if (example.getOperandA() == null || example.getOperandA().isEmpty()) {
                 operandALabel.setText("x: Please");
