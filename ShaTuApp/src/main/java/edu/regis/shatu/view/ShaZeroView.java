@@ -30,8 +30,10 @@ import javax.swing.JTextField;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.ProblemType;
+import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.model.steps.ShaZeroStep;
 import edu.regis.shatu.model.steps.Step;
+
 
 /**
  * ShaZero class represents the GUI view for performing the SHA Σ₀ function,
@@ -499,7 +501,7 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
 
             Step step = model.currentTask().getCurrentStep().getStep();
 
-            if (step != null) {
+            if (step != null && step.getSubType() == StepSubType.SHA_ZERO) {
                 ShaZeroStep example = gson.fromJson(step.getData(), ShaZeroStep.class);
 
                 if (example != null) {
