@@ -142,22 +142,22 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
             conn = DriverManager.getConnection(URL);
             switch (field) {
                 case ASSESSMENT_LEVEL:
-                    sql = "UPDATE Assessment SET AssessmentLevel = ? WHERE Id = ? ";
+                    sql = "UPDATE Assessment SET AssessmentLevel = ? WHERE KnowledgeComponentId = ? ";
                     stmt = conn.prepareStatement(sql);
                     stmt.setString(1, assessment.getAssessment().title());
                     break;
                 case ATTEMPTS:
-                    sql = "UPDATE Assessment SET Exposures = ? WHERE Id = ?";
+                    sql = "UPDATE Assessment SET Exposures = ? WHERE KnowledgeComponentId = ?";
                     stmt = conn.prepareStatement(sql);
                     stmt.setInt(1, assessment.getExposures());
                     break;
                 case SUCCESSES:
-                    sql = "UPDATE Assessment SET Successes = ? WHERE Id = ?";
+                    sql = "UPDATE Assessment SET Successes = ? WHERE KnowledgeComponentId = ?";
                     stmt = conn.prepareStatement(sql);
                     stmt.setInt(1, assessment.getSuccessess());
                     break;
                 case HINTS:
-                    sql = "UPDATE Assessment SET Hints = ? WHERE Id = ?";
+                    sql = "UPDATE Assessment SET Hints = ? WHERE KnowledgeComponentId = ?";
                     stmt = conn.prepareStatement(sql);
                     stmt.setInt(1, assessment.getHints());
                     break;

@@ -413,25 +413,23 @@ public class MessageLenView extends UserRequestView {
 
         Step currentStep = model.currentTask().currentStep().getStep();
 
-        MessageLenStep completedMessageLenStep = gson.fromJson(currentStep.getData(), MessageLenStep.class); // Assigns
-                                                                                                             // the
-                                                                                                             // class
-                                                                                                             // with the
-                                                                                                             // data
-                                                                                                             // assigned
-                                                                                                             // while
-                                                                                                             // creating
-                                                                                                             // the
-                                                                                                             // example.
+        MessageLenStep completedStep = gson.fromJson(currentStep.getData(), MessageLenStep.class); 
 
-        String userResponse = this.responseTextArea.getText().replaceAll("\\s", ""); // Gets the users answer and
-                                                                                     // removes spaces
+        String studentResponse = this.responseTextArea.getText().replaceAll("\\s", "");
 
-        completedMessageLenStep.setUserAnswer(userResponse);
-
-        StepCompletion step = new StepCompletion(currentStep, gson.toJson(completedMessageLenStep));
+        try {
+            completedStep.setMessageLength(Integer.parseInt(studentResponse));
+        } catch (NumberFormatException e) {
+            // ToDo: Check proper format in the view.
+            System.out.println("Never let this int conversion fail " + studentResponse);
+            completedStep.setMessageLength(-1); // tmp
+        }
+ 
+        StepCompletion step = new StepCompletion(currentStep, gson.toJson(completedStep));
 
         step.setStep(currentStep); // Will be sent to the tutor.
+        
+        
 
         return step;
     }

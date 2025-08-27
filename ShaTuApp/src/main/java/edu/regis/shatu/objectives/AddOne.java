@@ -72,10 +72,11 @@ public class AddOne extends Objective {
     @Override
     public TutorReply completeStep(StepCompletion completion) {
 
-        AddOneStep completedAddOneStep = gson.fromJson(completion.getData(), AddOneStep.class);
+        AddOneStep completedStep = gson.fromJson(completion.getData(), AddOneStep.class);
 
-        String userAnswer = completedAddOneStep.getUserAnswer(); // What the user submitted as the answer.
-        String correctAnswer = completedAddOneStep.getResult();
+        String userAnswer = String.valueOf(completedStep.getMessageLength());
+        
+        String correctAnswer = completedStep.getResult();
 
         System.out.println("Correct Answer: " + correctAnswer); // Error checking
         System.out.println("User Answer: " + userAnswer); // Error checking

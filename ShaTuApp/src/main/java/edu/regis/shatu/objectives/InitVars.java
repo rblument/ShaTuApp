@@ -164,7 +164,7 @@ public class InitVars extends Objective {
         stepReply
                 .setCorrectAnswer(correctAnswers.toString().replaceAll("[{}]", "").replaceAll("@\\w{2}=|,", "").trim());
 
-        stepReply.setResponse(userAnswers.toString().replaceAll("[{}]", "").replaceAll("@\\w{2}=|,", "").trim());
+        stepReply.setStudentAnswer(userAnswers.toString().replaceAll("[{}]", "").replaceAll("@\\w{2}=|,", "").trim());
 
         // Update the student model
         int dbId = KnowledgeComponentKind.fromString("Initialize Variables").dbId();

@@ -68,7 +68,7 @@ public class AddMsgLen extends Objective {
     public TutorReply completeStep(StepCompletion completion) {
         MessageLenStep completedMessageLenStep = gson.fromJson(completion.getData(), MessageLenStep.class);
 
-        String userAnswer = completedMessageLenStep.getUserAnswer();
+        String userAnswer = String.valueOf(completedMessageLenStep.getMessageLength());
         String correctAnswer = completedMessageLenStep.getResult();
 
         System.out.println("user answer: " + userAnswer); // Error checking

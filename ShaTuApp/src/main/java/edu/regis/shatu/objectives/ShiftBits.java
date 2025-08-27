@@ -45,7 +45,8 @@ public class ShiftBits extends Objective {
 
         StepCompletionReply stepReply = new StepCompletionReply();
         stepReply.setCorrectAnswer(expectedResult);
-        stepReply.setResponse(result);
+        // ToDo: What is this?
+        //stepReply.setResponse(result);
 
         stepReply.setIsCorrect(false);
         stepReply.setIsRepeatStep(true);

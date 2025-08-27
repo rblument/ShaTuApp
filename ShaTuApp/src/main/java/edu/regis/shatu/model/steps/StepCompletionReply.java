@@ -55,11 +55,11 @@ public class StepCompletionReply extends Step {
      * If true, data contains a Json encoded Step object.
      */
     private boolean isNextStep;
-
+    
     /**
-     * A JSon encoded Task or Step object (see above flags for the type).
+     * Answer given by the student. Checked against inherited correctAnswer
      */
-    private String data;
+    private String studentAnswer;
 
     public StepCompletionReply() {
         super(1, 0, StepSubType.STEP_COMPLETION_REPLY);
@@ -133,20 +133,11 @@ public class StepCompletionReply extends Step {
         this.setResult(correctAnswer);
     }
 
-    public String getResponse() {
-        return this.getUserAnswer();
+    public String getStudentAnswer() {
+        return studentAnswer;
     }
 
-    public void setResponse(String response) {
-        this.setUserAnswer(response);
-        ;
-    }
-
-    public String getData() {
-        return data;
-    }
-
-    public void setData(String data) {
-        this.data = data;
+    public void setStudentAnswer(String studentAnswer) {
+        this.studentAnswer = studentAnswer;
     }
 }

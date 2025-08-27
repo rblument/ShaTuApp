@@ -112,9 +112,9 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
         return ex;
     }
 
-    /*
-     * Sends notification to the tutor that this step in the tutoring has been
-     * successfully completed and student is ready to move on to the next step.
+
+    /**
+     * {@inheritDoc}
      */
     @Override
     public StepCompletion stepCompletion() {

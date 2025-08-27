@@ -145,10 +145,11 @@ public class StepCompletionAction extends ShaTuGuiAction {
                         String selection4 = "Show the correct Answer";
 
                         Step step = pendingTask.getCurrentStep().getStep();
-                        // Step step = task.getCurrentStep();
+                       
                         if (step.getSubType() == StepSubType.STEP_COMPLETION_REPLY) {
+                            System.out.println("StepData: " + step.getData());
                             StepCompletionReply stepReply = gson.fromJson(step.getData(), StepCompletionReply.class);
-
+  
                             if (stepReply.isCorrect()) {
                                 if (stepReply.isNewTask()) {
                                     String prompt = "Congratulations, the answer you submitted is correct. " +
@@ -238,12 +239,12 @@ public class StepCompletionAction extends ShaTuGuiAction {
                                             prompt, "Tutor Reply", 0, 3, null, options, options[0]);
                                     NewExampleAction.instance().actionPerformed(null);
                                 }
-                            }
-
-                            else if (stepReply.getResponse().isEmpty()) {
-                                String prompt = "Please enter an answer";
-                                JOptionPane.showMessageDialog(MainFrame.instance(),
-                                        prompt, "Tutor Reply", JOptionPane.INFORMATION_MESSAGE);
+                          //  }
+                            // ToDO: what is this
+                          //  else if (stepReply.getResponse().isEmpty()) {
+                          //      String prompt = "Please enter an answer";
+                            //    JOptionPane.showMessageDialog(MainFrame.instance(),
+                             //           prompt, "Tutor Reply", JOptionPane.INFORMATION_MESSAGE);
                             } else {
                                 String prompt = "Unfortunately, your answer was incorrect. Please try agian.";
                                 String[] options = { selection2, selection3, selection4 };

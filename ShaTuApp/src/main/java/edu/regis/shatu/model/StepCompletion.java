@@ -15,7 +15,8 @@ package edu.regis.shatu.model;
 import edu.regis.shatu.model.steps.Step;
 
 /**
- *
+ * Contains a student's solution to a problem in a task step.
+ * 
  * @author rickb
  */
 public class StepCompletion {
@@ -40,7 +41,12 @@ public class StepCompletion {
     private int hintsGiven;
 
     /**
-     * A JSon encoded objects corresponding to the example step type.
+     * A JSon object corresponding to the step type, which contains the 
+     * students answer to the problem in the step.
+     * 
+     * For example, if the step.getSubType() == StepSubType.CHOICE_FUNCTION,
+     * the data is a Json encoding of a ChoiceFunctionStep object. The student's
+     * answer is the result field of this ChoiceFunctionStep.
      */
     private String data;
 
@@ -63,7 +69,7 @@ public class StepCompletion {
     }
 
     public void setData(String data) {
-        this.data = data;
+       this.data = data;
     }
 
     /**

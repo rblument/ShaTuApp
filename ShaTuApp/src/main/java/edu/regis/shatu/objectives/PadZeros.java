@@ -70,7 +70,10 @@ public class PadZeros extends Objective {
 
         Pad0Step completedPadZeroStep = gson.fromJson(completion.getData(), Pad0Step.class);
 
-        String userAnswer = completedPadZeroStep.getUserAnswer();
+        // ToDo: perhaps this should be how many zeroes to add and not the
+        // actual number of zeros
+        String userAnswer = "";
+       // String userAnswer = completedPadZeroStep.getUserAnswer();
         String correctAnswer = completedPadZeroStep.getResult();
 
         System.out.println("user answer: " + userAnswer); // Error checking

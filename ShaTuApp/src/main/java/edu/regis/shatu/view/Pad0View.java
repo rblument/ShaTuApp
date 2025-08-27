@@ -470,16 +470,20 @@ public class Pad0View extends UserRequestView {
 
         Step currentStep = model.currentTask().currentStep().getStep();
 
-        Pad0Step completedPadZeroStep = gson.fromJson(currentStep.getData(), Pad0Step.class); // Assigns the class with
-                                                                                              // the data assigned while
-                                                                                              // creating the example.
+        Pad0Step completedStep = gson.fromJson(currentStep.getData(), Pad0Step.class); 
 
-        String userResponse = this.responseTextArea.getText().replaceAll("\\s", ""); // Gets the users answer and
-                                                                                     // removes spaces
+        String studentResponse = this.responseTextArea.getText().replaceAll("\\s", "");
+        // ToDO perhaps this should be the number of zeros added.
+        try {
+        completedStep.setMessageLength(Integer.parseInt(studentResponse));
+        } catch (NumberFormatException e) {
+            // ToDo UI should not allow us to get here.
+            completedStep.setMessageLength(-1); // tmp
+            System.out.println("Should never get here: " + studentResponse);
+              
+        }
 
-        completedPadZeroStep.setUserAnswer(userResponse);
-
-        StepCompletion step = new StepCompletion(currentStep, gson.toJson(completedPadZeroStep));
+        StepCompletion step = new StepCompletion(currentStep, gson.toJson(completedStep));
 
         step.setStep(currentStep); // Will be sent to the tutor.
 

@@ -483,17 +483,21 @@ public class Add1View extends UserRequestView {
     @Override
     public StepCompletion stepCompletion() {
 
-        Step currentStep = model.currentTask().currentStep().getStep(); // step created from the new example.
+        Step currentStep = model.currentTask().currentStep().getStep();
 
-        AddOneStep completedAddOneStep = gson.fromJson(currentStep.getData(), AddOneStep.class); // Class object created
-                                                                                                 // from the new
-                                                                                                 // example.
+        AddOneStep completedStep = gson.fromJson(currentStep.getData(), AddOneStep.class); 
 
-        String userResponse = this.responseTextArea.getText(); // Get the user's answer.
+        String studentResponse = this.responseTextArea.getText();
 
-        completedAddOneStep.setUserAnswer(userResponse); // User answer in the response area
+        try {
+            completedStep.setMessageLength(Integer.parseInt(studentResponse));
+        } catch (NumberFormatException e) {
+            // ToDo: Check proper format in the view.
+            System.out.println("Never let this int conversion fail " + studentResponse);
+            completedStep.setMessageLength(-1); // tmp
+        }
 
-        StepCompletion step = new StepCompletion(currentStep, gson.toJson(completedAddOneStep));
+        StepCompletion step = new StepCompletion(currentStep, gson.toJson(completedStep));
 
         step.setStep(currentStep); // Will be sent to the tutor.
 
