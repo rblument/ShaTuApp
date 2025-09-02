@@ -293,17 +293,20 @@ abstract public class Objective {
      * Generic Step completion function again covering the repetitive aspects of
      * marking a step as completed.
      * 
-     * @param correctAnswer
-     * @param userAnswer
+     * @param correctAnswer the correct answer to the problem in the task step
+     * @param studentAnswer the answer given by the student
      * @param stepName
-     * @return
+     * @return a TutorReply whose data is a PendingTask with a PendingSept with
+     * an associated StepCompletionReply
      */
-    public TutorReply genericComplete(String correctAnswer, String userAnswer, KnowledgeComponentKind stepName) {
+    public TutorReply genericComplete(String correctAnswer, String studentAnswer, KnowledgeComponentKind stepName) {
+        // TODO: The id and the sequence are incorrect in this reply
         StepCompletionReply stepReply = new StepCompletionReply();
+        stepReply.setSubType(StepSubType.STEP_COMPLETION_REPLY);
         stepReply.setCorrectAnswer(correctAnswer);
-        stepReply.setResponse(userAnswer);
+        stepReply.setStudentAnswer(studentAnswer);
 
-        if (userAnswer.equals(correctAnswer)) { // User was correct
+        if (studentAnswer.equals(correctAnswer)) { // User was correct
             System.out.println("Answer was correct, correct if branch taken."); // Error checking
             stepReply.setIsCorrect(true);
             stepReply.setIsRepeatStep(false);
@@ -342,7 +345,7 @@ abstract public class Objective {
             }
 
         } else { // User was wrong
-            System.out.println("Answer was not correct, correct if branch taken."); // Error checking
+            System.out.println("Answer was not correct, else branch taken."); // Error checking
             stepReply.setIsCorrect(false);
             stepReply.setIsRepeatStep(true);
             stepReply.setIsNewStep(false);
@@ -350,10 +353,12 @@ abstract public class Objective {
             stepReply.setIsNextStep(false);
         }
 
-        Step step = new StepCompletionReply();
+        
+        // To Do, how to handle id's and sequence for StempCompletion reply steps
+        Step step = new Step(-1, -1, StepSubType.STEP_COMPLETION_REPLY);
         // ToDo: fix timeouts
         Timeout timeout = new Timeout("Complete Step", 0, ":No-Op", "Exceed time");
-        step.setTimeout(timeout);
+        stepReply.setTimeout(timeout);
         step.setData(gson.toJson(stepReply));
 
         Task task = new Task();
@@ -362,6 +367,7 @@ abstract public class Objective {
         task.setDescription("Choose your next action");
         task.addStep(step);
 
+        
         PendingStep pendingStep = new PendingStep(step);
         pendingStep.setCurrentHintIndex(0);
         pendingStep.setNotifyTutor(true);

@@ -19,8 +19,12 @@ import edu.regis.shatu.model.aol.StepSubType;
  * @author rickb
  */
 public class EncodeAsciiStep extends Step {
-
+    
+    /**
+     * The length of the message to encode.
+     */
     private int messageLength;
+    private String ascii;
 
     /**
      * Constructor
@@ -35,6 +39,25 @@ public class EncodeAsciiStep extends Step {
     /**
      * Setter method for message length
      * 
+     * @param ascii
+     */
+    public void setAscii(String ascii) {
+        this.ascii = ascii;
+    }
+
+    /**
+     * Getter method for message length
+     * 
+     * @return
+     */
+    public String getAscii() {
+        return ascii;
+    }
+    
+    
+    /**
+     * Setter method for message length
+     * 
      * @param messageLength
      */
     public void setMessageLength(int messageLength) {
@@ -44,7 +67,7 @@ public class EncodeAsciiStep extends Step {
     /**
      * Getter method for message length
      * 
-     * @return
+     * @return Integer
      */
     public int getMessageLength() {
         return this.messageLength;

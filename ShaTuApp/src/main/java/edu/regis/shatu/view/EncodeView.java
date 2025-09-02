@@ -467,19 +467,13 @@ public class EncodeView extends UserRequestView {
 
         Step currentStep = model.currentTask().currentStep().getStep(); // step created from the new example.
 
-        EncodeAsciiStep completedEncodeAsciiStep = gson.fromJson(currentStep.getData(), EncodeAsciiStep.class); // Class
-                                                                                                                // object
-                                                                                                                // created
-                                                                                                                // from
-                                                                                                                // the
-                                                                                                                // new
-                                                                                                                // example.
+        EncodeAsciiStep completedStep = gson.fromJson(currentStep.getData(), EncodeAsciiStep.class); 
 
         String userResponse = this.responseTextArea.getText().replaceAll(" ", ""); // Get the user's answer.
 
-        completedEncodeAsciiStep.setUserAnswer(userResponse); // User answer in the response area
+        completedStep.setAscii(userResponse);
 
-        StepCompletion step = new StepCompletion(currentStep, gson.toJson(completedEncodeAsciiStep));
+        StepCompletion step = new StepCompletion(currentStep, gson.toJson(completedStep));
 
         step.setStep(currentStep); // Will be sent to the tutor.
 

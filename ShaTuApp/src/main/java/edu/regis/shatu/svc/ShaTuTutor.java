@@ -133,7 +133,7 @@ public class ShaTuTutor implements TutorSvc {
         switch (methodName) {
             case "completedStep":
             case "completedTask":
-            case "getTask":
+            //case "getTask":
             case "newExample":
             case "requestHint":
             case "resetPassword":
@@ -392,6 +392,7 @@ public class ShaTuTutor implements TutorSvc {
         }
     }
 
+    /*
     public TutorReply getTask(String jsonObj) {
         System.out.println("get task method");
 
@@ -474,6 +475,7 @@ public class ShaTuTutor implements TutorSvc {
         reply.setData(gson.toJson(task));
         return reply;
     }
+    */
 
     /**
      * Returns a hint to the GUI client, if any

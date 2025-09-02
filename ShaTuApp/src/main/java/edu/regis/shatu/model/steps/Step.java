@@ -73,11 +73,6 @@ public class Step extends TitledModel {
     private String correctAnswer;
 
     /**
-     * Answer given by the student. Checked against correctAnswer
-     */
-    private String userAnswer;
-
-    /**
      * Instantiate this step with the given information.
      * 
      * @param id
@@ -203,16 +198,16 @@ public class Step extends TitledModel {
      * 
      * @param userResponse
      */
-    public void setUserAnswer(String userResponse) {
-        this.userAnswer = userResponse;
-    }
+   // public void setUserAnswer(String userResponse) {
+   //     this.userAnswer = userResponse;
+   // }
 
     /**
      * Getter method for the user's answer
      * 
      * @return
      */
-    public String getUserAnswer() {
-        return this.userAnswer;
-    }
+   // public String getUserAnswer() {
+   //     return this.userAnswer;
+   // }
 }

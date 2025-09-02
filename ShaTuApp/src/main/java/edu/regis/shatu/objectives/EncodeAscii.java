@@ -135,13 +135,13 @@ public class EncodeAscii extends Objective {
         // EncodeAsciiStep from the StepCompletion function in the Encode Ascii View
         EncodeAsciiStep completedEncodeAsciiStep = gson.fromJson(completion.getData(), EncodeAsciiStep.class);
 
-        String userAnswer = completedEncodeAsciiStep.getUserAnswer(); // What the user submitted as the answer.
+        String studentAnswer = completedEncodeAsciiStep.getAscii(); // What the user submitted as the answer.
         String correctAnswer = completedEncodeAsciiStep.getResult();
 
         System.out.println("Correct Answer: " + correctAnswer); // Error checking
-        System.out.println("User Answer: " + userAnswer); // Error checking
+        System.out.println("User Answer: " + studentAnswer); // Error checking
 
-        return genericComplete(correctAnswer, userAnswer, KnowledgeComponentKind.ASCII_ENCODE);
+        return genericComplete(correctAnswer, studentAnswer, KnowledgeComponentKind.ASCII_ENCODE);
     }
 
     /**

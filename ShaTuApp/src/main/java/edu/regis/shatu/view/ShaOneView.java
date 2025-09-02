@@ -10,23 +10,11 @@
  */
 package edu.regis.shatu.view;
 
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import edu.regis.shatu.model.ShaOneStep;
 import java.awt.GridBagConstraints;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-
-import javax.swing.ButtonGroup;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import edu.regis.shatu.model.StepCompletion;
@@ -35,7 +23,6 @@ import edu.regis.shatu.model.aol.PendingTask;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
 
-import edu.regis.shatu.model.steps.MajorityStep;
 import edu.regis.shatu.model.steps.ShaOneStep;
 import edu.regis.shatu.model.steps.Step;
 
