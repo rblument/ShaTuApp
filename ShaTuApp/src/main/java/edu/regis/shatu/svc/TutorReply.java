@@ -36,7 +36,11 @@ public class TutorReply {
      * A reply from the tutor with an ERR status.
      */
     public TutorReply() {
+<<<<<<< HEAD
         this("ERR");
+=======
+        this(":ERR");
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
     }
     
     /**

@@ -12,22 +12,38 @@
  */
 package edu.regis.shatu.util;
 
+<<<<<<< HEAD
 import edu.regis.shatu.err.MissingPropertyException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
+=======
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 import java.util.Locale;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+<<<<<<< HEAD
 /**
  * A utility Decorator wrapping the application's properties and resource 
  * bundle associated with the current locale, which is specified in the 
  * DICE.properties file on the CLASSPATH (see PROPERTY_FILE_PATH).
  * 
+=======
+import edu.regis.shatu.err.MissingPropertyException;
+
+/**
+ * A Decorator wrapping the application's properties and resource bundle.
+ * 
+ * The PROPERTY_FILE_PATH specifies the properties file to load from the
+ * CLASSPATH (default: ShaTu.properties in the /resources/ directory).
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
  * @author Rickb
  */
 public class ResourceMgr {
@@ -61,7 +77,10 @@ public class ResourceMgr {
     /**
      * Location of the UI text resources for a given locale (on CLASSPATH).
      */
+<<<<<<< HEAD
    // private static final String UI_RESOURCE_PATH = "edu.regis.shatu.resources.Msgs";
+=======
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
     private static final String UI_RESOURCE_PATH = "Msgs";
     
     /**
@@ -109,9 +128,15 @@ public class ResourceMgr {
 
         try {
             locale = new Locale(getProp(LANGUAGE_PROP), getProp(COUNTRY_PROP));
+<<<<<<< HEAD
   // System.out.println("HERE");
             msgs =  ResourceBundle.getBundle(UI_RESOURCE_PATH, locale);
        
+=======
+
+            msgs =  ResourceBundle.getBundle(UI_RESOURCE_PATH, locale);
+   
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
         } catch (MissingPropertyException e) {
             LOGGER.log(Level.SEVERE, "Missing Property", e);
         }
@@ -164,6 +189,7 @@ public class ResourceMgr {
 		throw new FileNotFoundException("property file '" + 
 						path +
 						"' not found in the classpath");
+<<<<<<< HEAD
 
 	    properties.load(strm);
 
@@ -175,6 +201,9 @@ public class ResourceMgr {
             
             
 
+=======
+	    properties.load(strm);
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 	} catch (FileNotFoundException e) {
 	    LOGGER.log(Level.ALL, "PropertyMgr-ERR_100: {0}", e.toString());
 	} catch (IOException e) {

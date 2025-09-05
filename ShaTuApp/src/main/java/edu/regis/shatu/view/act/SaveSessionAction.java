@@ -12,12 +12,22 @@
  */
 package edu.regis.shatu.view.act;
 
+<<<<<<< HEAD
 import edu.regis.shatu.util.ImgFactory;
 import edu.regis.shatu.view.GuiController;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import javax.swing.KeyStroke;
 
+=======
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+
+import javax.swing.KeyStroke;
+
+import edu.regis.shatu.util.ImgFactory;
+
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 /**
  * Handler for GUI gestures requesting to save the current session.
  * 
@@ -67,6 +77,9 @@ public class SaveSessionAction extends ShaTuGuiAction {
     public void actionPerformed(ActionEvent evt) {
         // ToDo: what happens on a save
         System.out.println("Save not implemented");
+<<<<<<< HEAD
        // GuiController.instance().getStepView().selectPanel("RotateView");
+=======
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
     }
 }

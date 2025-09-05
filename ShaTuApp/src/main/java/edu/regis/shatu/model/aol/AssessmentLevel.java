@@ -54,7 +54,16 @@ public enum AssessmentLevel {
     /**
      * Indicates a student has completed an Outcome.
      */
+<<<<<<< HEAD
     COMPLETED("Completed");
+=======
+    COMPLETED("Completed"),
+    
+    /**
+     * Indicates the student hasn't seen the associated outcome (knowledge component).
+     */
+    NOT_STARTED("Not Started");
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
     
     /**
      * A GUI displayable string identifying this assessment level.
@@ -68,4 +77,21 @@ public enum AssessmentLevel {
     public String title() {
         return title;
     }
+<<<<<<< HEAD
+=======
+    
+    /**
+     * Return the corresponding enum value for the given title
+     * @param title
+     * @return the matching enum value (If null is returned, you called
+     *   this method with an unknown title, fix the call).
+     */
+    public static AssessmentLevel fromString(String title) {
+        for (AssessmentLevel enumVal : AssessmentLevel.values())
+            if (enumVal.title().equalsIgnoreCase(title))
+                return enumVal;
+            
+        return null;
+    }
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 }

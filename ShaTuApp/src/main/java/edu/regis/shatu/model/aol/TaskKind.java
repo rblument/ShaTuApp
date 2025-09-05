@@ -19,9 +19,29 @@ package edu.regis.shatu.model.aol;
  */
 public enum TaskKind {
     /**
+<<<<<<< HEAD
      * A task requiring a Student to complete a Problem.
      */
     PROBLEM("Problem");
+=======
+     * A message from the tutor that must be acknowledged, such as, an 
+     * indication that the tutor is still waiting (this is not a USAGE).
+     */
+    MESSAGE("Message"),
+    
+    /**
+     * A task requiring a Student to complete a domain Problem.
+     */
+    PROBLEM("Problem"),
+    
+    /**
+     * A message from the tutor that needs to be acknowledge, which describes
+     * how to use the tutor.
+     */
+    USAGE("Usage"),
+    
+    ERROR("Error");
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
     
     /**
      * A GUI displayable string identifying this task kind.
@@ -45,5 +65,23 @@ public enum TaskKind {
     public String title() {
         return title;
     }
+<<<<<<< HEAD
+=======
+    
+       /**
+     * Return the enum value for the given title.
+     * 
+     * @param aTitle
+     * @return 
+     */
+    public static TaskKind findValue(String aTitle) {
+        for (TaskKind kind : values()) {
+            if (kind.title().equalsIgnoreCase(aTitle))
+                return kind;
+        }
+        
+        return ERROR;
+    }
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 }
     

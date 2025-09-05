@@ -12,12 +12,22 @@
  */
 package edu.regis.shatu.model;
 
+<<<<<<< HEAD
 import edu.regis.shatu.model.aol.ExampleType;
 import edu.regis.shatu.model.aol.Problem;
 import edu.regis.shatu.model.aol.ScaffoldLevel;
 import edu.regis.shatu.model.aol.TaskKind;
 import edu.regis.shatu.model.aol.TaskState;
 import java.util.ArrayList;
+=======
+import java.util.ArrayList;
+
+import edu.regis.shatu.model.aol.Problem;
+import edu.regis.shatu.model.aol.ProblemType;
+import edu.regis.shatu.model.aol.TaskKind;
+import edu.regis.shatu.model.aol.TaskState;
+import edu.regis.shatu.model.steps.Step;
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 
 /**
  * A multi-minute activity that can be skipped or interchanged with other tasks,
@@ -35,6 +45,7 @@ public class Task extends TitledModel {
      * Indicates the type of task the student trying to complete.
      */
     private TaskKind kind = TaskKind.PROBLEM;
+<<<<<<< HEAD
     
     /**
      * The type of this task, which can be used to determine the appropriate
@@ -58,35 +69,74 @@ public class Task extends TitledModel {
      */
     private int sequenceId;
     
+=======
+
+    /**
+     * If the kind of this task is PROBLEM, then this is the type of problem
+     * being presented in this task, which can be used to determin the view
+     * to display.
+     */
+    private ProblemType type;
+
+    /**
+     * The sequence in which this task is performed in its problem.
+     */
+    private int sequenceIndex;
+
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
     /**
      * The current step (in index into steps).
      */
     private int currentStepIndex = 0;
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
     /**
      * The steps that must be completed in this task.
      */
     private ArrayList<Step> steps;
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
     /**
      * Convenience reference to the Problem to which this task belongs
      */
     private Problem problem;
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
     /**
      * ToDo: the tasks already completed in this task???
      */
     private TaskState state;
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
     /**
      * The knowledge component outcomes demonstrated/exercised by this step.
      */
     protected ArrayList<Integer> exercisedComponentIds;
+<<<<<<< HEAD
  
     public Task() {
         this(Model.DEFAULT_ID);
     }
     
+=======
+
+    public Task() {
+        this(Model.DEFAULT_ID);
+    }
+
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
     /**
      * Instantiate this task with the given id.
      * 
@@ -94,6 +144,7 @@ public class Task extends TitledModel {
      */
     public Task(int id) {
         super(id);
+<<<<<<< HEAD
         
         this.steps = new ArrayList<>();
         
@@ -102,6 +153,16 @@ public class Task extends TitledModel {
         state = new TaskState();
     }
     
+=======
+
+        this.steps = new ArrayList<>();
+
+        exercisedComponentIds = new ArrayList<>();
+
+        state = new TaskState();
+    }
+
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
     public TaskKind getKind() {
         return kind;
     }
@@ -110,6 +171,7 @@ public class Task extends TitledModel {
         this.kind = kind;
     }
 
+<<<<<<< HEAD
     public ExampleType getType() {
         return type;
     }
@@ -128,17 +190,32 @@ public class Task extends TitledModel {
     
     
     
+=======
+    public ProblemType getType() {
+        return type;
+    }
+
+    public void setType(ProblemType type) {
+        this.type = type;
+    }
+
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
     public TaskState getState() {
         return state;
     }
 
     public void setState(TaskState state) {
         this.state = state;
+<<<<<<< HEAD
     } 
+=======
+    }
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 
     public void addStep(Step step) {
         steps.add(step);
     }
+<<<<<<< HEAD
     
     public ArrayList<Step> getSteps() {
         System.out.println("Task.getStepts: " + steps.size());
@@ -162,17 +239,62 @@ public class Task extends TitledModel {
         System.out.println("*** Task.currentStep: " + steps.size());
         for (Step step : steps)
             if (step.getSequenceId() == currentStepIndex)
+=======
+
+    public ArrayList<Step> getSteps() {
+        System.out.println("Task.getSteps: " + steps.size());
+        return steps;
+    }
+
+    public void setSteps(ArrayList<Step> steps) {
+        System.out.println("Task.setSteps: " + steps);
+        this.steps = steps;
+    }
+
+    public Step getStep(int index) {
+        return steps.get(index);
+    }
+
+    public Step lastStep() {
+        return steps.get(steps.size() - 1);
+    }
+
+    public Step currentStep() {
+        System.out.println("*** Task.currentStep: " + steps.size());
+        for (Step step : steps)
+            if (step.getSequenceIndex() == currentStepIndex)
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
                 return step;
 
         return null;
     }
+<<<<<<< HEAD
     
     /**
      * Locally update the task state to note that the given step has been 
+=======
+
+    /**
+     * 
+     * @param stepId the database id of the step to find.
+     * @return
+     */
+    public Step findStepById(int stepId) {
+        for (Step step : steps)
+            if (step.getId() == stepId)
+                return step;
+
+        return null;
+    }
+
+    /**
+     * Locally update the task state to note that the given step has been
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
      * performed by the student (this doesn't notify the tutor).
      * 
      * @param completion the Step that was completed by the student.
      */
+<<<<<<< HEAD
     public void completedStep(StepCompletion completion) { 
         completion.getStep().setIsCompleted(true);
         
@@ -192,6 +314,13 @@ public class Task extends TitledModel {
         
         return true;
     }
+=======
+    public void completedStep(StepCompletion completion) {
+        // completion.getStep().setIsCompleted(true);
+
+        state.addStepCompletion(completion);
+    }
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 
     public Problem getProblem() {
         return problem;
@@ -199,12 +328,25 @@ public class Task extends TitledModel {
 
     public void setProblem(Problem problem) {
         this.problem = problem;
+<<<<<<< HEAD
     }  
 
     public int getSequenceId() {
         return sequenceId;
     }
     
+=======
+    }
+
+    public int getSequenceIndex() {
+        return sequenceIndex;
+    }
+
+    public void setSequenceIndex(int sequenceIndex) {
+        this.sequenceIndex = sequenceIndex;
+    }
+
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
     public Step getCurrentStep() {
         return steps.get(currentStepIndex);
     }
@@ -216,11 +358,19 @@ public class Task extends TitledModel {
     public void setCurrentStepIndex(int currentStepIndex) {
         this.currentStepIndex = currentStepIndex;
     }
+<<<<<<< HEAD
     
     public void addExercisedComponentId(int componentId) {
         exercisedComponentIds.add(componentId);
     }
     
+=======
+
+    public void addExercisedComponentId(int componentId) {
+        exercisedComponentIds.add(componentId);
+    }
+
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
     public ArrayList<Integer> getExercisedComponentIds() {
         return exercisedComponentIds;
     }
@@ -229,4 +379,7 @@ public class Task extends TitledModel {
         this.exercisedComponentIds = componentIds;
     }
 }
+<<<<<<< HEAD
 
+=======
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3

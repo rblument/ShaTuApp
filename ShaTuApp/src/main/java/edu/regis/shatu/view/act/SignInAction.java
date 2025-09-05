@@ -12,22 +12,38 @@
  */
 package edu.regis.shatu.view.act;
 
+<<<<<<< HEAD
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import edu.regis.shatu.model.User;
 import edu.regis.shatu.model.TutoringSession;
 import edu.regis.shatu.model.Step;
+=======
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.util.logging.Logger;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import edu.regis.shatu.model.Account;
+import edu.regis.shatu.model.TutoringSession;
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 import edu.regis.shatu.svc.ClientRequest;
 import edu.regis.shatu.svc.ServerRequestType;
 import edu.regis.shatu.svc.SvcFacade;
 import edu.regis.shatu.svc.TutorReply;
 import edu.regis.shatu.view.MainFrame;
 import edu.regis.shatu.view.SplashFrame;
+<<<<<<< HEAD
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.util.logging.Logger;
 import static javax.swing.Action.MNEMONIC_KEY;
 import static javax.swing.Action.SHORT_DESCRIPTION;
+=======
+
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 
 /**
  * An (MVC) controller handling a GUI gesture representing a user's request to
@@ -39,6 +55,13 @@ import static javax.swing.Action.SHORT_DESCRIPTION;
  * @author rickb
  */
 public class SignInAction extends ShaTuGuiAction {
+<<<<<<< HEAD
+=======
+    
+    private final InactivityManager inactivityManager
+            = new InactivityManager();
+
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 
     /**
      * Exceptions occurring in this class are also logged to this logger.
@@ -75,9 +98,13 @@ public class SignInAction extends ShaTuGuiAction {
      */
     private SignInAction() {
         super("Sign In");
+<<<<<<< HEAD
 
         putValue(SHORT_DESCRIPTION, "Sign-in to the tutor");
 
+=======
+        putValue(SHORT_DESCRIPTION, "Sign-in to the tutor");
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
         putValue(MNEMONIC_KEY, KeyEvent.VK_S);
         //putValue(ACCELERATOR_KEY, getAcceleratorKeyStroke());
     }
@@ -85,23 +112,34 @@ public class SignInAction extends ShaTuGuiAction {
     /**
      * Handle the user's request to sign-in by sending it to the DICE tutor.
      *
+<<<<<<< HEAD
      * If successful, the MaingFrame with the Courtroom View is displayed.
+=======
+     * If successful, the MainFrame with the Courtroom View is displayed.
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
      *
      * @param evt ignored
      */
     @Override
     public void actionPerformed(ActionEvent evt) {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
+<<<<<<< HEAD
 
         User user = SplashFrame.instance().getUser();
 
         ClientRequest request = new ClientRequest(ServerRequestType.SIGN_IN);
         request.setData(gson.toJson(user));
 
+=======
+        Account account = SplashFrame.instance().getAccount();
+        ClientRequest request = new ClientRequest(ServerRequestType.SIGN_IN);
+        request.setData(gson.toJson(account));
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
         TutorReply reply = SvcFacade.instance().tutorRequest(request);
 
         switch (reply.getStatus()) {
             case "Authenticated":
+<<<<<<< HEAD
                 MainFrame frame = MainFrame.instance();
 
                 TutoringSession session = gson.fromJson(reply.getData(), TutoringSession.class);
@@ -125,6 +163,31 @@ public class SignInAction extends ShaTuGuiAction {
             default:
                 // If we get here, there is a coding error in the tutor svc
                 //frame.displayError("Ooops, an unexpected error occurred: SI_1");
+=======
+                TutoringSession session = gson.fromJson(reply.getData(), TutoringSession.class);
+                
+                // Initialize main frame instance.
+                // This is used after selecting a mode from the dashboard.
+                MainFrame frame = MainFrame.instance();
+                //frame.setVisible(true);
+                frame.setModel(session);
+                
+                // Transition to dashboard
+                SplashFrame.instance().selectDashboard(session);
+                SplashFrame.instance().setVisible(true); // Hide the SplashFrame
+                
+                // Start tracking user inactivity
+                inactivityManager.startTracking();
+                
+                break;
+            case "InvalidPassword":
+                SplashFrame.instance().invalidPass();
+                break;
+            case "UnknownUser":
+                SplashFrame.instance().unknownUser();
+                break;
+            default:
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
                 System.out.println("Coding error  status: " + reply.getStatus());
         }
     }

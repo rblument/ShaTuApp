@@ -12,9 +12,12 @@
  */
 package edu.regis.shatu.util;
 
+<<<<<<< HEAD
 import edu.regis.shatu.err.ObjNotFoundException;
 import edu.regis.shatu.err.ShaTuException;
 import edu.regis.shatu.err.XmlException;
+=======
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -29,15 +32,30 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+<<<<<<< HEAD
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+=======
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+<<<<<<< HEAD
+=======
+import edu.regis.shatu.err.ObjNotFoundException;
+import edu.regis.shatu.err.ShaTuException;
+import edu.regis.shatu.err.XmlException;
+
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 /**
  * Utility for reading XML files located in a NetBeans project data directory.
  * 

@@ -21,10 +21,13 @@ public class CompleteTaskStep {
     public CompleteTaskStep() {
 
     }
+<<<<<<< HEAD
 
    // @Override
    // public String getType() {
    //     return "CompleteTaskStep";
    // }
+=======
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 }
 

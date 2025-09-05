@@ -12,7 +12,10 @@
  */
 package edu.regis.shatu.svc;
 
+<<<<<<< HEAD
 import com.google.gson.Gson;
+=======
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -22,6 +25,11 @@ import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+<<<<<<< HEAD
+=======
+import com.google.gson.Gson;
+
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 /**
  * A socket-based server providing client access to the ShaTu tutor.
  *

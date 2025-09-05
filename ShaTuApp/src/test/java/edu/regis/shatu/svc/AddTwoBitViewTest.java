@@ -12,16 +12,24 @@
  */
 package edu.regis.shatu.svc;
 
+<<<<<<< HEAD
 import edu.regis.shatu.view.AddTwoBitView;
 import java.awt.event.KeyEvent;
 import javax.swing.JTextField;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+=======
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 import org.junit.jupiter.api.BeforeAll;
 //import org.mockito.Mockito;
 //import static org.mockito.Mockito.when;
 
+<<<<<<< HEAD
+=======
+import edu.regis.shatu.view.AddTwoBitView;
+
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 /**
  *
  * @author damianmichalec

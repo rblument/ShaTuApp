@@ -1,0 +1,30 @@
+Relevant files:
+CourseDAO.java (..shatu.dao)
+StudentDAO.java (..shatu.dao)
+CourseSvc.java (..shatu.svc)
+StudentSvc.java (..shatu.svc)
+Course.java (..shatu.model)
+Student.java (..shatu.model)
+setup.sql (base project file, same as pom.xml)
+
+1. First setup database, see setup.sql for commands/table names.
+   OR -> Log in to your DB: MySQL -u username -p
+	 USE your_db_name;           
+	 SOURCE /path/to/your/setup.sql;  (replace source path with yours to setup.sql)
+	 
+
+2. In CourseDAO.java and StudentDAO.java make sure the following variables are set to your environment.
+
+    private static final String URL = "jdbc:mysql://localhost:3306/student_db"; // database name based on commands in setup.sql
+    private static final String USER = "ABCD";            // Your DB details - needs full privileges 
+    private static final String PASSWORD = "###";         // Your DB details
+
+
+3. In NetBeans > Projects window, right click on main project title > Properties
+
+   Left side/Categories > Run section > Select either TestCourseDAO.java or TestStudentDAO.java
+
+   OK and Close.
+
+   When you click Run Project, it will now run main class from one of the respective classes previously mentioned. This will run a CRUD test for that particular table.
+

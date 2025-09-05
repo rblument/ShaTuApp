@@ -69,4 +69,21 @@ public enum ScaffoldLevel {
     public String title() {
         return title;
     }
+<<<<<<< HEAD
+=======
+    
+     /**
+     * Return the corresponding enum value for the given title
+     * @param title
+     * @return the matching enum value (If null is returned, you called
+     *   this method with an unknown title, fix the call).
+     */
+    public static ScaffoldLevel fromString(String title) {
+        for (ScaffoldLevel enumVal : ScaffoldLevel.values())
+            if (enumVal.title().equalsIgnoreCase(title))
+                return enumVal;
+            
+        return null;
+    }
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 }

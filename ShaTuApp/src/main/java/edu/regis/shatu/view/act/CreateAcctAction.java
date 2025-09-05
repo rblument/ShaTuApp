@@ -12,19 +12,33 @@
  */
 package edu.regis.shatu.view.act;
 
+<<<<<<< HEAD
 import com.google.gson.Gson;
+=======
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.util.logging.Logger;
+
+import javax.swing.JOptionPane;
+
+import com.google.gson.Gson;
+
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 import edu.regis.shatu.model.Account;
 import edu.regis.shatu.svc.ClientRequest;
 import edu.regis.shatu.svc.ServerRequestType;
 import edu.regis.shatu.svc.SvcFacade;
 import edu.regis.shatu.svc.TutorReply;
 import edu.regis.shatu.view.SplashFrame;
+<<<<<<< HEAD
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.util.logging.Logger;
 import static javax.swing.Action.MNEMONIC_KEY;
 import static javax.swing.Action.SHORT_DESCRIPTION;
 import javax.swing.JOptionPane;
+=======
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 
 /**
  * An MVC controller handling a user GUI gesture requesting the creation of a
@@ -71,6 +85,7 @@ public class CreateAcctAction extends ShaTuGuiAction {
 
         putValue(SHORT_DESCRIPTION, "Create a new user");
         putValue(MNEMONIC_KEY, KeyEvent.VK_A);
+<<<<<<< HEAD
         //putValue(ACCELERATOR_KEY, getAcceleratorKeyStroke());
     }
 
@@ -86,6 +101,11 @@ public class CreateAcctAction extends ShaTuGuiAction {
    // }
 
     /**
+=======
+    }
+
+    /**
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
      * Handle the user's request to create a new student user account by
      * forwarding the account information in the NewAccountPanel to the tutor.
      *
@@ -108,6 +128,7 @@ public class CreateAcctAction extends ShaTuGuiAction {
         switch (reply.getStatus()) {
             case "Created":
                 frame.clearNewAccountPanel();
+<<<<<<< HEAD
                 
                 msg = "Student user account successfully created\n\n" +
                         "Press okay and we'll return you to the sign-in screen\n\n" +
@@ -118,12 +139,24 @@ public class CreateAcctAction extends ShaTuGuiAction {
                 frame.selectSplash();
                 break;
                 
+=======
+                msg = "Student user account successfully created\n\n" +
+                        "Press okay and we'll return you to the sign-in screen\n\n" +
+                        "Then, please sign-in to the tutor using this account.";
+                JOptionPane.showMessageDialog(SplashFrame.instance(), msg);
+                frame.selectSplash();
+                break;
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
             case "IllegalUserId":
                 msg = "User id already exists: " + account.getUserId();
                 JOptionPane.showMessageDialog(null, msg, "Information",
                                               JOptionPane.INFORMATION_MESSAGE);
+<<<<<<< HEAD
             break;
             
+=======
+                break;
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
             default: // "ERR" Error should have been logged in tutor.
                 msg = "An unexpected error occurred. Please contact ShaTu support";
                 JOptionPane.showMessageDialog(null, msg, "Error",

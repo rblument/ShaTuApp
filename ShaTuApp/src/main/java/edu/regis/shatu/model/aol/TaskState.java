@@ -12,9 +12,16 @@
  */
 package edu.regis.shatu.model.aol;
 
+<<<<<<< HEAD
 import edu.regis.shatu.model.StepCompletion;
 import java.util.LinkedList;
 
+=======
+import java.util.LinkedList;
+
+import edu.regis.shatu.model.StepCompletion;
+
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 /**
  * To provide appropriate hints to the student, we need to keep track of 
  * what task steps they've already performed.

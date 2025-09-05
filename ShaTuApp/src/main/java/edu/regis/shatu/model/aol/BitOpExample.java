@@ -30,47 +30,84 @@ public class BitOpExample {
     /**
      * The bit-level operation demonstrated in this example.
      */
+<<<<<<< HEAD
     private ExampleType operation = ExampleType.XOR_BITS;
     
+=======
+    private ProblemType operation;
+
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
     /**
      * The number of bits in this example's initial operands.
      */
     private int preSize;
+<<<<<<< HEAD
     
     /**
      *Operand 1, as a bit string.
      */
     private String operand1;
     
+=======
+
+    /**
+     * Operand 1, as a bit string.
+     */
+    private String operand1;
+
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
     /**
      * Operand 1, as an int value.
      */
     private long operand1Val;
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
     /**
      * Operand 2, as a bit string.
      */
     private String operand2;
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
     /**
      * Operand 2, as an int value.
      */
     private long operand2Val;
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
     /**
      * The size of the answer string, which my be greater than the pre-size.
      */
     private int postSize;
+<<<<<<< HEAD
     
     /**
      * The answer after the operation is performed on the operand(s), as a bit string.
      */
     private String result;
     
+=======
+
+    /**
+     * The answer after the operation is performed on the operand(s), as a bit
+     * string.
+     */
+    private String result;
+
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
     /**
      * The answer after the operation is performed, as a long value.
      */
     private long resultVal;
+<<<<<<< HEAD
     
     /**
      * If non-zero, the number of seconds the student has to complete the
@@ -87,6 +124,24 @@ public class BitOpExample {
     }
 
     public void setOperation(ExampleType operation) {
+=======
+
+    /**
+     * If non-zero, the number of seconds the student has to complete the
+     * example.
+     */
+    private int timeOut;
+
+    public BitOpExample() {
+
+    }
+
+    public ProblemType getOperation() {
+        return operation;
+    }
+
+    public void setOperation(ProblemType operation) {
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
         this.operation = operation;
     }
 
@@ -116,9 +171,15 @@ public class BitOpExample {
 
     public void setOperand1Val(long operand1Val) {
         this.operand1Val = operand1Val;
+<<<<<<< HEAD
         
         operand1 = padLeftZeros(Long.toBinaryString(operand1Val), preSize);
     } 
+=======
+
+        operand1 = padLeftZeros(Long.toBinaryString(operand1Val), preSize);
+    }
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 
     public String getOperand2() {
         return operand2;
@@ -131,14 +192,22 @@ public class BitOpExample {
      */
     public void setOperand2(String operand2) {
     }
+<<<<<<< HEAD
      
+=======
+
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
     public long getOperand2Val() {
         return operand2Val;
     }
 
     public void setOperand2Val(long operand2Val) {
         this.operand2Val = operand2Val;
+<<<<<<< HEAD
         
+=======
+
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
         operand2 = padLeftZeros(Long.toBinaryString(operand2Val), preSize);
     }
 
@@ -160,6 +229,10 @@ public class BitOpExample {
      * @param result ignored
      */
     public void setResult(String result) {
+<<<<<<< HEAD
+=======
+        this.result = result;
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
     }
 
     public long getResultVal() {
@@ -168,7 +241,11 @@ public class BitOpExample {
 
     public void setResultVal(long resultVal) {
         this.resultVal = resultVal;
+<<<<<<< HEAD
         
+=======
+
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
         result = padLeftZeros(Long.toBinaryString(resultVal), postSize);
     }
 
@@ -179,7 +256,11 @@ public class BitOpExample {
     public void setTimeOut(int timeOut) {
         this.timeOut = timeOut;
     }
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
     /**
      * Generates two random operand bit strings and associated values.
      * 
@@ -187,21 +268,35 @@ public class BitOpExample {
      */
     public void generatedRandomOperands(int bitSize) {
         Random rnd = new Random();
+<<<<<<< HEAD
         
         preSize = preSize;
         
+=======
+
+        preSize = bitSize;
+
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
         int maxOperandVal = (int) Math.pow(2.0d, preSize) - 1; // e.g., 2^8 - 1 = 255
 
         setOperand1Val(rnd.nextInt((maxOperandVal - 1) + 1));
 
         setOperand2Val(rnd.nextInt((maxOperandVal - 1) + 1));
     }
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
     private String padLeftZeros(String inputString, int length) {
         if (inputString.length() >= length) {
             return inputString;
         }
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
         StringBuilder sb = new StringBuilder();
         while (sb.length() < length - inputString.length()) {
             sb.append('0');
@@ -210,10 +305,17 @@ public class BitOpExample {
 
         return sb.toString();
     }
+<<<<<<< HEAD
     
     @Override
     public String toString() {
         return operand1 + ":" + operand1Val + 
+=======
+
+    @Override
+    public String toString() {
+        return operand1 + ":" + operand1Val +
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
                 "\n" + operand2 + ":" + operand2Val +
                 "\n" + result + ":" + resultVal;
     }

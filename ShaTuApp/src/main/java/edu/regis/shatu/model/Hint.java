@@ -12,8 +12,11 @@
  */
 package edu.regis.shatu.model;
 
+<<<<<<< HEAD
 import edu.regis.shatu.model.Model;
 
+=======
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 /**
  * A suggestion as to the next Step the Student should perform in the tutor.
  * 
@@ -31,7 +34,11 @@ public class Hint extends Model {
      * The order in which this hint should be displayed (when multiple hints
      * are available).
      */
+<<<<<<< HEAD
     private int sequenceId = 1;
+=======
+    private int sequenceIndex = 1;
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 
     /**
      * Initialize this hint with a default id.
@@ -57,11 +64,20 @@ public class Hint extends Model {
         this.text = text;
     }   
 
+<<<<<<< HEAD
     public int getSequenceId() {
         return sequenceId;
     }
 
     public void setSequenceId(int sequenceId) {
         this.sequenceId = sequenceId;
+=======
+    public int getSequenceIndex() {
+        return sequenceIndex;
+    }
+
+    public void setSequenceIndex(int sequenceIindex) {
+        this.sequenceIndex = sequenceIndex;
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
     }
 }

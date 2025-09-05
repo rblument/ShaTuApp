@@ -12,11 +12,18 @@
  */
 package edu.regis.shatu.view.act;
 
+<<<<<<< HEAD
 import edu.regis.shatu.view.SplashFrame;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import static javax.swing.Action.MNEMONIC_KEY;
 import static javax.swing.Action.SHORT_DESCRIPTION;
+=======
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+
+import edu.regis.shatu.view.SplashFrame;
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 
 /**
  * An MVC controller handling a user GUI gesture requesting to create a 
@@ -55,13 +62,19 @@ public class NewUserAction extends ShaTuGuiAction {
      */
     private NewUserAction() {
         super("New User");
+<<<<<<< HEAD
         
+=======
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
         putValue(SHORT_DESCRIPTION, "Request to create a new user");
         putValue(MNEMONIC_KEY, KeyEvent.VK_U);
        // putValue(ACCELERATOR_KEY, getAcceleratorKeyStroke());
     }
     
+<<<<<<< HEAD
 
+=======
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
     /**
      * Handle the user's request to create a new user by displaying the new
      * user panel.

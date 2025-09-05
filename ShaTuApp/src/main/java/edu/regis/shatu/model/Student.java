@@ -15,6 +15,7 @@ package edu.regis.shatu.model;
 import edu.regis.shatu.model.aol.StudentModel;
 
 /**
+<<<<<<< HEAD
  * A Student user who is being tutored by the ShaTu tutor.
  * 
  * @author rickb
@@ -29,12 +30,25 @@ public class Student extends User {
      * The last name of this student user.
      */
     protected String lastName;
+=======
+ * A Student is a user who is being tutored by the ShaTu tutor and
+ * consequently has an associated student model.
+ * 
+ * @author rickb
+ */
+public class Student {    
+    /**
+     * The account associated with this student.
+     */
+    private final Account account;
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
     
     /**
      * Convenience reference to this Student's student model.
      */
     private StudentModel studentModel;
     
+<<<<<<< HEAD
     public Student() {
         this("test@regis.edu", "HelloWorld");
     }
@@ -82,6 +96,25 @@ public class Student extends User {
      */
     public void setLastName(String lastName) {
         this.lastName = lastName;
+=======
+    /**
+     * Initialize this student with the given account information.
+     * 
+     * @param account the account associated with this student.
+     */
+    public Student(Account account) {
+        this.account = account;
+        studentModel = new StudentModel(account.getUserId());
+    }
+    
+    /**
+     * Return the account associated with this student
+     * 
+     * @return the Account associated with this student
+     */
+    public Account getAccount() {
+        return account;
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
     }
     
     /**
@@ -93,12 +126,24 @@ public class Student extends User {
         return studentModel;
     }
 
+<<<<<<< HEAD
+=======
+    /**
+     * Return this student's student model.
+     * 
+     * @param studentModel the StudentModel for this student.
+     */
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
     public void setStudentModel(StudentModel studentModel) {
         this.studentModel = studentModel;
     }
 
     @Override
     public String toString() {
+<<<<<<< HEAD
         return "Student: " + userId;
+=======
+        return "Student: " + account.getUserId();
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
     }
 }

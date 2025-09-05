@@ -12,9 +12,16 @@
  */
 package edu.regis.shatu.model;
 
+<<<<<<< HEAD
 import edu.regis.shatu.err.ObjNotFoundException;
 import java.util.ArrayList;
 
+=======
+import java.util.ArrayList;
+
+import edu.regis.shatu.err.ObjNotFoundException;
+
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 /**
  * A course that may be taught by the ShaTu tutor.
  * 
@@ -43,6 +50,15 @@ public class Course extends TitledModel {
     protected ArrayList<KnowledgeComponent> outcomes;
     
     /**
+<<<<<<< HEAD
+=======
+     * A convenience list of mappings between outcomes and the locations (tasks
+     * and step) within this course where these outcomes are addressed.
+     */
+    protected ArrayList<ExercisingLocation> exercisingLocations;
+    
+    /**
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
      * Initialize this course with a default id, empty units, and outcomes
      */
     public Course() {
@@ -59,6 +75,10 @@ public class Course extends TitledModel {
         
         units = new ArrayList<>();
         outcomes = new ArrayList<>();
+<<<<<<< HEAD
+=======
+        exercisingLocations = new ArrayList<>();
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
     }
 
     public TaskSelectionKind getPrimaryPedagogy() {
@@ -135,6 +155,17 @@ public class Course extends TitledModel {
         this.outcomes = outcomes;
     }
     
+<<<<<<< HEAD
+=======
+    public KnowledgeComponent findOutcome(int knowledgeComponentId) {
+        for (KnowledgeComponent outcome : outcomes) 
+            if (outcome.getId() == knowledgeComponentId)
+                return outcome;
+        
+        return null;
+    }
+    
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
     /**
      * Return the knowledge component, if any, in this entity with the given
      * component id.
@@ -150,4 +181,29 @@ public class Course extends TitledModel {
     
         throw new ObjNotFoundException("KnowledgeComponent: " + componentId);
     }
+<<<<<<< HEAD
+=======
+
+    public ArrayList<ExercisingLocation> getExercisingLocations() {
+        return exercisingLocations;
+    }
+
+    public void setExercisingLocations(ArrayList<ExercisingLocation> exercisingLocations) {
+        this.exercisingLocations = exercisingLocations;
+    }
+    
+    /**
+     * Return the exercising location, if any, in this course with the given id.
+     * 
+     * @param id the id of an exercising location
+     * @return an ExercisingLocation or null
+     */
+    public ExercisingLocation findLocation(int id) {
+        for (ExercisingLocation location : exercisingLocations)
+            if (location.getId() == id)
+                return location;
+        
+        return null;
+    }
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 }

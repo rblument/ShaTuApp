@@ -12,7 +12,10 @@
  */
 package edu.regis.shatu.model.aol;
 
+<<<<<<< HEAD
 import edu.regis.shatu.model.Model;
+=======
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 import java.util.HashMap;
 
 /**
@@ -21,7 +24,11 @@ import java.util.HashMap;
  * 
  * @author rickb
  */
+<<<<<<< HEAD
 public class StudentModel extends Model {
+=======
+public class StudentModel {
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
     /**
      * Convenience reference to the user id (email) of the student associated
      * with this student model.
@@ -40,12 +47,23 @@ public class StudentModel extends Model {
     private ScaffoldLevel scaffoldLevel = ScaffoldLevel.EXTREME;
     
     /**
+<<<<<<< HEAD
      * Instantiate this student model with default information.
      */
     public StudentModel() {
         super(DEFAULT_ID);
         
         assessments = new HashMap<>();
+=======
+     * Create a student model for the given user id and with default information.
+     * 
+     * @param userId the user id of the student whose model is being created.
+     */
+    public StudentModel(String userId) {
+        this.userId = userId;
+        
+        assessments = new HashMap<>();   
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
     }
 
     public String getUserId() {
@@ -57,8 +75,18 @@ public class StudentModel extends Model {
     }
     
     public void addAssessment(int knowledgeComponentId, Assessment assessment) {
+<<<<<<< HEAD
         assessments.put(knowledgeComponentId, assessment);
     }
+=======
+        System.out.println("***** StuMod.addAssess: id: " + knowledgeComponentId);
+        assessments.put(knowledgeComponentId, assessment);
+    }
+    
+    public void addAssessment(Assessment assessment) {
+        addAssessment(assessment.getOutcome().getId(), assessment);
+    }
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 
     /**
      * Return whether this student has an assessment for the given outcome.
@@ -81,6 +109,13 @@ public class StudentModel extends Model {
         return assessments.get(knowledgeComponentId);
     }
     
+<<<<<<< HEAD
+=======
+    public HashMap<Integer, Assessment> getAssessments() {
+        return assessments;
+    }
+    
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
     /**
      * Return the current scaffolding level being used to support the student.
      * 

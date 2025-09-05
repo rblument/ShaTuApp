@@ -48,6 +48,15 @@
             <artifactId>gson</artifactId>
             <version>2.8.6</version>
         </dependency>
+<<<<<<< HEAD
+=======
+        <!-- https://mvnrepository.com/artifact/com.mysql/mysql-connector-j -->
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <version>9.0.0</version>
+        </dependency>
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 
         <dependency>
             <groupId>org.junit.jupiter</groupId>

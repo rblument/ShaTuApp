@@ -24,16 +24,21 @@ public enum BloomLevel {
      * The student is expected to know,
      */
      KNOWLEDGE("Knowledge"),
+<<<<<<< HEAD
 
      /**
       *  
       */
      COMPREHENSION("Comprehension"),
 
+=======
+     COMPREHENSION("Comprehension"),
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
      /**
       *  Student is expected to apply the associated concept.
       */
      APPLICATION("Application"),
+<<<<<<< HEAD
 
      /**
       * 
@@ -49,6 +54,12 @@ public enum BloomLevel {
       * 
       */
      EVALUATION("Evaluation");
+=======
+     ANALYSIS("Analysis"),
+     SYNTHESIS("Synthesis"),
+     EVALUATION("Evaluation"),
+     ERROR("Error");
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
      
     /**
      * A GUI displayable string identifying this taxonomy level.
@@ -67,4 +78,22 @@ public enum BloomLevel {
     public String title() {
         return title;
     }
+<<<<<<< HEAD
+=======
+    
+    /**
+     * Return the enum value for the given title.
+     * 
+     * @param aTitle
+     * @return 
+     */
+    public static BloomLevel findValue(String aTitle) {
+        for (BloomLevel kind : values()) {
+            if (kind.title().equalsIgnoreCase(aTitle))
+                return kind;
+        }
+        
+        return ERROR;
+    }
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 }

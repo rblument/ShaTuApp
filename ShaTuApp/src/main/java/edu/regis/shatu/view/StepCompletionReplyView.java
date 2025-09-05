@@ -16,17 +16,31 @@ import java.awt.CardLayout;
 import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+<<<<<<< HEAD
+=======
+
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 
+<<<<<<< HEAD
+=======
+import edu.regis.shatu.model.StepCompletion;
+import edu.regis.shatu.model.aol.NewExampleRequest;
+
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 /**
  * Displays the result of a student completing a step, which gives the student
  * a suggestion as to what to do next, but allows alternative choices.
  * 
  * @author rickb
  */
+<<<<<<< HEAD
 public class StepCompletionReplyView extends GPanel implements ActionListener {
+=======
+public class StepCompletionReplyView extends UserRequestView implements ActionListener {
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
     /**
      * Message displayed to the student.
      */
@@ -58,13 +72,20 @@ public class StepCompletionReplyView extends GPanel implements ActionListener {
     private JButton correctAnswerBut;
     
     public StepCompletionReplyView() {
+<<<<<<< HEAD
         
+=======
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
         initializeComponents();
         layoutComponents();
         
         selectPanel("ButtonPanel_3");
+<<<<<<< HEAD
         
                 System.out.println("Size: " + correctAnswerBut.getSize());
+=======
+        System.out.println("Size: " + correctAnswerBut.getSize());
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
     }
     
     @Override
@@ -72,15 +93,22 @@ public class StepCompletionReplyView extends GPanel implements ActionListener {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
     
+<<<<<<< HEAD
     
         /**
+=======
+    /**
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
      * Display the child view with the given name.
      * 
      * @param name a StepSelection
      */
     private void selectPanel(String name) {
         CardLayout cl = (CardLayout) buttonPanel.getLayout();
+<<<<<<< HEAD
        
+=======
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
         cl.show(buttonPanel, name);
     }
     
@@ -89,6 +117,7 @@ public class StepCompletionReplyView extends GPanel implements ActionListener {
      */
     private void initializeComponents() {
         msg = new JTextArea(5,80);
+<<<<<<< HEAD
         
         nextTaskBut = new JButton("Move on to Next Task");
     
@@ -96,6 +125,11 @@ public class StepCompletionReplyView extends GPanel implements ActionListener {
     
         similarProblemBut = new JButton("Try a Similar Problem");
     
+=======
+        nextTaskBut = new JButton("Move on to Next Task");
+        sameProblemBut = new JButton("Try Same problem Again");
+        similarProblemBut = new JButton("Try a Similar Problem");
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
         correctAnswerBut = new JButton("Show the Correct Answer");
         
         buttonPanel = new JPanel();
@@ -104,7 +138,10 @@ public class StepCompletionReplyView extends GPanel implements ActionListener {
         buttonPanel.add(initButtonPanel1(), "ButtonPanel_1");
         buttonPanel.add(initButtonPanel2(), "ButtonPanel_2");
         buttonPanel.add(initButtonPanel3(), "ButtonPanel_3");
+<<<<<<< HEAD
   
+=======
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
     }
     
     /**
@@ -118,6 +155,7 @@ public class StepCompletionReplyView extends GPanel implements ActionListener {
         panel.addc(nextTaskBut, 0, 0, 1, 1, 0.0, 0.0,
                     GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
                     5, 5, 5, 5);
+<<<<<<< HEAD
         
         panel.addc(sameProblemBut, 1, 0, 1, 1, 0.0, 0.0,
                     GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
@@ -127,6 +165,14 @@ public class StepCompletionReplyView extends GPanel implements ActionListener {
                     GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
                     5, 5, 5, 5);
         
+=======
+        panel.addc(sameProblemBut, 1, 0, 1, 1, 0.0, 0.0,
+                    GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
+                    5, 5, 5, 5);
+        panel.addc(similarProblemBut, 2, 0, 1, 1, 0.0, 0.0,
+                    GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
+                    5, 5, 5, 5);
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
         return panel;
     }
     
@@ -141,11 +187,17 @@ public class StepCompletionReplyView extends GPanel implements ActionListener {
         panel.addc(sameProblemBut, 0, 0, 1, 1, 0.0, 0.0,
                     GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
                     5, 5, 5, 5);
+<<<<<<< HEAD
         
         panel.addc(similarProblemBut, 1, 0, 1, 1, 0.0, 0.0,
                     GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
                     5, 5, 5, 5);
         
+=======
+        panel.addc(similarProblemBut, 1, 0, 1, 1, 0.0, 0.0,
+                    GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
+                    5, 5, 5, 5);
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
         return panel;
     }
     
@@ -160,6 +212,7 @@ public class StepCompletionReplyView extends GPanel implements ActionListener {
         panel.addc(correctAnswerBut, 0, 0, 1, 1, 0.0, 0.0,
                     GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
                     5, 5, 5, 5);
+<<<<<<< HEAD
         
         panel.addc(sameProblemBut, 1, 0, 1, 1, 0.0, 0.0,
                     GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
@@ -169,6 +222,14 @@ public class StepCompletionReplyView extends GPanel implements ActionListener {
                     GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
                     5, 5, 5, 5);
         
+=======
+        panel.addc(sameProblemBut, 1, 0, 1, 1, 0.0, 0.0,
+                    GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
+                    5, 5, 5, 5);
+        panel.addc(similarProblemBut, 2, 0, 1, 1, 0.0, 0.0,
+                    GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
+                    5, 5, 5, 5);
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
         return panel;
     }
     
@@ -179,9 +240,65 @@ public class StepCompletionReplyView extends GPanel implements ActionListener {
         addc(msg, 0, 0, 1, 1, 0.0, 0.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
                 5, 5, 20, 5);
+<<<<<<< HEAD
         
         addc(buttonPanel, 0, 1, 1, 1, 0.0, 0.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
                 5, 5, 5, 5);
     } 
+=======
+        addc(buttonPanel, 0, 1, 1, 1, 0.0, 0.0,
+                GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
+                5, 5, 5, 5);
+    }
+    
+    @Override
+    /**
+     * Updates the description, question, and hints from the model
+     * 
+     * TODO: THIS IS A PLACEHOLDER UNTIl WE HAVE HAVE THE MODEL CODE COMPLETED
+     */
+    protected void updateView() {
+        if (model != null) {
+            // ****TO-DO*****
+            // Update the view's information from the model
+            // Debugging dynamic updates to the model can be done here.
+            System.out.println("StepCompletionReplyView");
+        }
+    }
+
+    /**
+     * Defines each view classes' standard method for updating in the Practice View
+     */
+    @Override
+    protected void updatePracticeView() {
+
+    }
+
+    /**
+     * Defines each view classes' standard method for updating in the Teach Me View
+     */
+    @Override
+    protected void updateTeachView() {
+
+    }
+
+    /**
+     * Defines each view classes' standard method for updating in the Teach Me View
+     */
+    @Override
+    protected void updateQuizView() {
+
+    }
+
+    @Override
+    public NewExampleRequest newRequest() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public StepCompletion stepCompletion() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 }

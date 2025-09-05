@@ -141,7 +141,10 @@ public class HintTextField extends JTextField {
 		if (!Character.isLetter(str.charAt(i)) &&
 		    (str.charAt(i) != '-'))
 		    return false;
+<<<<<<< HEAD
 
+=======
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 	    return true;
 	}
         
@@ -157,7 +160,10 @@ public class HintTextField extends JTextField {
                     (ch != '.'))
 		    return false;
             }
+<<<<<<< HEAD
 
+=======
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 	    return true;
         }
 
@@ -202,6 +208,7 @@ public class HintTextField extends JTextField {
 
 			setForeground(hintColor);
 			isFirstEdit = true;
+<<<<<<< HEAD
 
 			setCaretPosition(0);
 
@@ -209,6 +216,12 @@ public class HintTextField extends JTextField {
 			super.replace(fb,offs,len,str,s);
 		    }
 
+=======
+			setCaretPosition(0);
+		    } else {
+			super.replace(fb,offs,len,str,s);
+		    }
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 		} else {
 		    if (isLetterOrHyphen(str) ||
                         (isEmailAddr && isEmailChar(str)))
@@ -217,8 +230,11 @@ public class HintTextField extends JTextField {
 	    }
 	}
 
+<<<<<<< HEAD
 	
 
+=======
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 	public void remove(DocumentFilter.FilterBypass fb, int offs, int len) 
 	    throws BadLocationException
 	{
@@ -254,5 +270,8 @@ public class HintTextField extends JTextField {
 		);
 	}
     }
+<<<<<<< HEAD
 
+=======
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 }

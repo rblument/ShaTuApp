@@ -32,9 +32,15 @@ public class ClientRequest {
     private String userId;
     
     /**
+<<<<<<< HEAD
      * The sing-in session id associated with the user making this request.
      */
     private String sessionId;
+=======
+     * The sing-in security token associated with the user making this request.
+     */
+    private String securityToken;
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
     
     /**
      * A JSon encoded object whose format depends on the associated request.
@@ -51,7 +57,11 @@ public class ClientRequest {
         this.requestType = requestType;
         
         userId = "";
+<<<<<<< HEAD
         sessionId = "";
+=======
+        securityToken = "";
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
         data = "";
     }
 
@@ -71,12 +81,21 @@ public class ClientRequest {
         this.userId = userId;
     }
 
+<<<<<<< HEAD
     public String getSessionId() {
         return sessionId;
     }
 
     public void setSessionId(String sessionId) {
         this.sessionId = sessionId;
+=======
+    public String getSecurityToken() {
+        return securityToken;
+    }
+
+    public void setSecurityToken(String sessionId) {
+        this.securityToken = sessionId;
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
     }
 
     /**

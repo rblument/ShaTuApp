@@ -22,7 +22,11 @@ public class NewExampleRequest {
     /**
      * Specifies the type of example being requested.
      */
+<<<<<<< HEAD
     private ExampleType exampleType;
+=======
+    private ProblemType exampleType;
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
      
     /**
      * A JSon encoded object specific to our example type.
@@ -33,16 +37,28 @@ public class NewExampleRequest {
      * Initialize with default values
      */
     public NewExampleRequest() {
+<<<<<<< HEAD
         exampleType = ExampleType.DEFAULT;
+=======
+        exampleType = ProblemType.DEFAULT;
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 
         data = "";
     }
 
+<<<<<<< HEAD
     public ExampleType getExampleType() {
         return exampleType;
     }
 
     public void setExampleType(ExampleType exampleType) {
+=======
+    public ProblemType getExampleType() {
+        return exampleType;
+    }
+
+    public void setExampleType(ProblemType exampleType) {
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
         this.exampleType = exampleType;
     }
 

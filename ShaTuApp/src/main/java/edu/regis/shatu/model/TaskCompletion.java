@@ -14,6 +14,11 @@ package edu.regis.shatu.model;
 
 import java.util.ArrayList;
 
+<<<<<<< HEAD
+=======
+import edu.regis.shatu.model.steps.Step;
+
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 /**
  *
  * @author rickb

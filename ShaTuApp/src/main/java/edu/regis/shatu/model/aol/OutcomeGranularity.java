@@ -20,9 +20,52 @@ package edu.regis.shatu.model.aol;
  * @author rickb
  */
 public enum OutcomeGranularity {
+<<<<<<< HEAD
     COURSE,
     
     KNOWLEDGE_COMPONENT,
     
     UNIT;
+=======
+    COURSE("Course"),
+    
+    KNOWLEDGE_COMPONENT("Knowledge Component"),
+    
+    UNIT("Unit"),
+    
+    ERROR("Error");
+    
+    /**
+     * A GUI displayable string identifying this granularity.
+     */
+    private final String title;
+    
+    OutcomeGranularity(String title) {
+        this.title = title;
+    }
+     
+    /**
+     * Return the granularity
+     * 
+     * @return aString
+     */
+    public String title() {
+        return title;
+    }
+    
+    /**
+     * Return the enum value for the given title.
+     * 
+     * @param aTitle
+     * @return 
+     */
+    public static OutcomeGranularity findValue(String aTitle) {
+        for (OutcomeGranularity kind : values()) {
+            if (kind.title().equalsIgnoreCase(aTitle))
+                return kind;
+        }
+        
+        return ERROR;
+    }
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 }

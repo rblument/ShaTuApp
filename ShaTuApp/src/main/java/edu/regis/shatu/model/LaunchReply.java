@@ -30,7 +30,11 @@ public class LaunchReply {
     
     
     public LaunchReply() {
+<<<<<<< HEAD
         status = "ERR";
+=======
+        status = ":ERR";
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
     }
 
     public String getStatus() {
@@ -56,7 +60,10 @@ public class LaunchReply {
     public void setSession(TutoringSession session) {
         this.session = session;
     }
+<<<<<<< HEAD
     
     
+=======
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 }
 

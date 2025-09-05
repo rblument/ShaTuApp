@@ -12,9 +12,16 @@
  */
 package edu.regis.shatu.model;
 
+<<<<<<< HEAD
 import edu.regis.shatu.model.aol.OutcomeGranularity;
 import java.util.ArrayList;
 
+=======
+import java.util.ArrayList;
+
+import edu.regis.shatu.model.aol.OutcomeGranularity;
+
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
 /**
  * Per VanLehn (2006), a component of knowledge (concept, rule, procedure, 
  * fact) possessed by a student representing a fragment of task-specific 
@@ -25,6 +32,11 @@ import java.util.ArrayList;
  * @author rickb
  */
 public class KnowledgeComponent extends TitledModel {
+<<<<<<< HEAD
+=======
+    
+    
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
     /**
      * The Bloom Level associated with this outcome.
      */
