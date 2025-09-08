@@ -2,3 +2,9 @@ ShaTuApp/target
 .DS_Store
 /ShaTuApp/nbproject/
 /ShaTuApp/src/main/java/resources/Data/
+<<<<<<< HEAD
+=======
+.vscode
+.settings
+>>>>>>> e729936a04f120488f7da9a1bd02ddd370b85ec3
+/target/
