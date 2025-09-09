@@ -368,7 +368,7 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
     }
 
     private void layoutComponents() {
-        Color white = new Color(255, 255, 255);
+        Color white = Color.WHITE;
         setBackground(white);
         Point p;
         int x, y, newMessageX, roundX, roundY;
