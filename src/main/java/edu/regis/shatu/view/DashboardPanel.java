@@ -129,9 +129,9 @@ public class DashboardPanel extends JPanel {
         welcomeLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
         // Study mode buttons
-        teachMeButton = new JButton("Teach Me");
-        practiceButton = new JButton("Practice");
-        quizMeButton = new JButton("Quiz Me");
+        teachMeButton = new JButton("See One");
+        practiceButton = new JButton("Do One");
+        quizMeButton = new JButton("Teach One");
 
         // Set button actions and update scaffold level based on chosen study mode.
         logOutButton.addActionListener(evt -> logOut());
@@ -139,10 +139,14 @@ public class DashboardPanel extends JPanel {
 
         teachMeButton.addActionListener(evt -> {
             // Set scaffold level to EXTREME when in Teach Me mode.
+            // Only teachMeButton enabled
             try {
                 ServiceFactory.findStudentModelSvc().updateScaffoldLevel(
                         model.getStudent().getAccount().getUserId(),
                         ScaffoldLevel.EXTREME);
+                        teachMeButton.setEnabled(true);
+                        practiceButton.setEnabled(false);
+                        quizMeButton.setEnabled(false);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -151,11 +155,15 @@ public class DashboardPanel extends JPanel {
         });
 
         practiceButton.addActionListener(evt -> {
-            // Set scaffold level to HIGH when in Practice mode.
+            // Set scaffold level to MEDIUM when in Practice mode.
+            // practiceButton and teachMeButton enabled
             try {
                 ServiceFactory.findStudentModelSvc().updateScaffoldLevel(
                         model.getStudent().getAccount().getUserId(),
                         ScaffoldLevel.MEDIUM);
+                        teachMeButton.setEnabled(true);
+                        practiceButton.setEnabled(true);
+                        quizMeButton.setEnabled(false);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -164,11 +172,15 @@ public class DashboardPanel extends JPanel {
         });
 
         quizMeButton.addActionListener(evt -> {
-            // Set scaffold level to MEDIUM when in Quiz Me mode.
+            // Set scaffold level to NONE when in Quiz Me mode.
+            // All buttons enabled
             try {
                 ServiceFactory.findStudentModelSvc().updateScaffoldLevel(
                         model.getStudent().getAccount().getUserId(),
                         ScaffoldLevel.NONE);
+                        teachMeButton.setEnabled(true);
+                        practiceButton.setEnabled(true);
+                        quizMeButton.setEnabled(true);
             } catch (Exception e) {
                 e.printStackTrace();
             }
