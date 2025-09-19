@@ -50,6 +50,9 @@ public class SplashPanel extends GPanel {
      */
     private static final Logger LOGGER = Logger.getLogger(SplashPanel.class.getName());
     
+    private static final Color PRIMARY_COLOR = new Color(102, 153, 204); // pastel blue
+    private static final Color ACCENT_COLOR = new Color(255, 223, 128);  // pastel yellow
+    
      /**
      * The user model displayed in this view.
      */
@@ -226,7 +229,7 @@ public class SplashPanel extends GPanel {
      * Layout the child components used in this view.
      */
     private void layoutComponents() {
-        setBackground(new Color(0, 43, 73));
+        setBackground(PRIMARY_COLOR);
 	addc(createHeader(), 0,0, 2,1, 1.0,0.0,
 	     GridBagConstraints.NORTHWEST,  GridBagConstraints.HORIZONTAL,
 	     5,5,5,5);	
@@ -241,7 +244,7 @@ public class SplashPanel extends GPanel {
             5,5,5,5);
         
         JLabel copyright = new JLabel("(C) 2019-2025 Johanna and Richard Blumenthal. All Rights Reserved");
-        copyright.setForeground(new Color(241,196,0));
+        copyright.setForeground(ACCENT_COLOR);
         copyright.setFont(new Font("Dialog", Font.PLAIN, 10));
         addc(copyright, 0,3, 2,1, 1.0,1.0,
 		GridBagConstraints.NORTH,  GridBagConstraints.CENTER,
