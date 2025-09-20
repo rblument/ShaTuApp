@@ -16,7 +16,7 @@ package edu.regis.shatu.model.aol;
 /**
  * Enumerates the different view types for the See One, Do One, and Teach One views
  */
-public enum ViewType
+public enum TutoringMode
 {
     SEE_ONE,
     DO_ONE,

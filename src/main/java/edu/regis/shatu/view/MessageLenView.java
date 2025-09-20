@@ -262,33 +262,7 @@ public class MessageLenView extends UserRequestView {
      */
     @Override
     protected void updateView() {
-        view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
-
-        switch (view.getCurrentViewType()) {
-            case DO_ONE:
-                updatePracticeView();
-                break;
-
-            case SEE_ONE:
-                updateTeachView();
-                break;
-
-            case TEACH_ONE:
-                updateQuizView();
-                break;
-
-            default:
-                throw new UnsupportedOperationException("Unknown Update Operation for view type: "
-                        + view.getCurrentViewType());
-        }
-    }
-
-    /**
-     * Defines each view classes' standard method for updating in the Practice View
-     */
-    @Override
-    protected void updatePracticeView() {
-
+        
         // If check and hint buttons are disabled, reset listenerers and apply those
         // used by this view
         if (!checkHintEnabled) {
@@ -349,23 +323,11 @@ public class MessageLenView extends UserRequestView {
         } else {
             feedbackScrollPane.setVisible(true);
         }
+        
+   
+ 
     }
 
-    /**
-     * Defines each view classes' standard method for updating in the Teach Me View
-     */
-    @Override
-    protected void updateTeachView() {
-
-    }
-
-    /**
-     * Defines each view classes' standard method for updating in the Teach Me View
-     */
-    @Override
-    protected void updateQuizView() {
-
-    }
 
     /**
      * This method is suppose to be called when the new example button is

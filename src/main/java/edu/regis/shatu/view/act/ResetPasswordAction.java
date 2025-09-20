@@ -25,7 +25,7 @@ import edu.regis.shatu.svc.ClientRequest;
 import edu.regis.shatu.svc.ServerRequestType;
 import edu.regis.shatu.svc.SvcFacade;
 import edu.regis.shatu.svc.TutorReply;
-import edu.regis.shatu.view.SplashFrame;
+import edu.regis.shatu.view.MainFrame;
 
 /**
  * An MVC controller handling a user GUI gesture requesting to reset their
@@ -78,18 +78,11 @@ public class ResetPasswordAction extends ShaTuGuiAction {
     public void actionPerformed(ActionEvent evt) {
         Gson gson = new Gson();
         
-        SplashFrame frame = SplashFrame.instance();
+        MainFrame mainFrame = MainFrame.instance();
         
-        Account account = frame.getAccount();
+        Account account = mainFrame.getAccount();
         
-        // Find the ResetPasswordPanel instance
-        String token = null;
-        for (Component comp : frame.getContentPane().getComponents()) {
-            if (comp instanceof edu.regis.shatu.view.ResetPasswordPanel) {
-                token = ((edu.regis.shatu.view.ResetPasswordPanel) comp).getSecurityToken();
-                break;
-            }
-        }
+        String token = mainFrame.getModel().getSecurityToken();
 
         ClientRequest request = new ClientRequest(ServerRequestType.RESET_PASSWORD);
         request.setUserId(account.getUserId());
@@ -118,12 +111,12 @@ public class ResetPasswordAction extends ShaTuGuiAction {
 
         switch (status) {
             case "PasswordReset":
-                frame.clearNewAccountPanel();
+                mainFrame.clearNewAccountPanel();
                 msg = "Student user account password successfully reset\n\n" +
                     "Press OK and we'll return you to the sign-in screen\n\n" +
                     "Then, please sign-in to the tutor using this account.";
-                JOptionPane.showMessageDialog(SplashFrame.instance(), msg);
-                frame.selectSplash();
+                JOptionPane.showMessageDialog(mainFrame, msg);
+                mainFrame.displayView(MainFrame.ViewName.SPLASH);
                 break;
 
             case "IllegalUserId":

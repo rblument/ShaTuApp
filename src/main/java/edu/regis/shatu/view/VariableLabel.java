@@ -102,8 +102,7 @@ public class VariableLabel extends JLabel implements MouseListener {
     }
     
     public void select() {
-        //GuiController.instance().getStepSelectorView().displayStep(stepSelection);
-        SplashFrame.instance().getTutoringSessionView().displayStep(stepSelection);
+        MainFrame.instance().displayStep(stepSelection);
         isSelected = true;
         //setBackground(SELECTED_BACKGROUND);
     }

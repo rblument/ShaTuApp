@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.GregorianCalendar;
 
 import edu.regis.shatu.model.aol.PendingTask;
+import edu.regis.shatu.model.aol.TutoringMode;
 
 /**
  * A SHA tutoring session, which is displayed in the tutor.
@@ -27,6 +28,11 @@ public class TutoringSession {
      * The id of this session in the database.
      */
     private int id;
+    
+    /**
+     * The current tutoring mode for this session.
+     */
+    private TutoringMode tutoringMode;
     
     /**
      * An SHA-256 encrypted security token that must be communicated to the
@@ -76,6 +82,7 @@ public class TutoringSession {
      */
     public TutoringSession(Student student) {
         this.student = student;
+        tutoringMode = TutoringMode.SEE_ONE;
         tasks = new ArrayList<>();
     }
 

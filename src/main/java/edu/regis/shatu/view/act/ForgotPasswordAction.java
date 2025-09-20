@@ -12,10 +12,9 @@
  */
 package edu.regis.shatu.view.act;
 
+import edu.regis.shatu.view.MainFrame;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-
-import edu.regis.shatu.view.SplashFrame;
 
 /**
  * An MVC controller handling a user GUI gesture that they forgot their password, 
@@ -67,6 +66,6 @@ public class ForgotPasswordAction extends ShaTuGuiAction {
      */
     @Override
     public void actionPerformed(ActionEvent evt) {      
-        SplashFrame.instance().selectForgotPassword();
+        MainFrame.instance().displayView(MainFrame.ViewName.FORGOT_PASSWORD);
     }
 }

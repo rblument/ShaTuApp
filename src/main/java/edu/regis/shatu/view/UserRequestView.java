@@ -27,7 +27,6 @@ import edu.regis.shatu.view.act.StepCompletionAction;
 import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 
@@ -86,21 +85,6 @@ public abstract class UserRequestView extends GPanel {
      * Update this (subclass) view to display the current tutoring session model.
      */
     protected abstract void updateView();
-
-    /**
-     * Defines each view classes' standard method for updating in the Practice View
-     */
-    protected abstract void updatePracticeView();
-
-    /**
-     * Defines each view classes' standard method for updating in the Teach Me View
-     */
-    protected abstract void updateTeachView();
-
-    /**
-     * Defines each view classes' standard method for updating in the Teach Me View
-     */
-    protected abstract void updateQuizView();
 
     /**
      * Create and return a new step completion request, which indicates the

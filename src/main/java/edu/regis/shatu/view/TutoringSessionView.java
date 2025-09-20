@@ -24,34 +24,20 @@ import edu.regis.shatu.model.TutoringSession;
 import edu.regis.shatu.model.aol.PendingStep;
 import edu.regis.shatu.model.aol.PendingTask;
 import edu.regis.shatu.model.aol.StepSubType;
-import edu.regis.shatu.model.aol.ViewType;
-
 
 /**
- * Displays a tutoring session that allows a student to practice.
+ * Displays a tutoring session.
  *
- * The "Do One" view that allows either a student to select a task to practice 
- * or the tutor selects a task based on the current student model.
- * 
- * Various aspects of the tutoring session are displayed in the child components
- * of this view.
+ * Different aspects of the tutoring session are displayed in the child 
+ * components, while the types of actions allowed are constrained by the 
+ * tutoring mode (e.g., SEE_ONE) within the model tutoring sessions.
  *
  * @author rickb
  */
 public class TutoringSessionView extends GPanel {
     /**
-     * Universal button for returning to the dashboard.
-     */
-    private JButton dashboardButton;
-    
-    /*
-     * Universal button for logging off. 
-     */    
-    private JButton logoutButton;
-    /**
      * The tutoring session model displayed in this view.
      */
-    
     private TutoringSession model;
 
     /**
@@ -82,65 +68,24 @@ public class TutoringSessionView extends GPanel {
     /**
      * Add panel for the dashboard button
      */
-    private JPanel dashboardPanel;
-
+    private JPanel controlPanel;
+    
     /**
-     * Tracks the current view type so child views can implement logic based on view
+     * Triggers returning to the dashboard.
      */
-    private ViewType currentViewType;
+    private JButton dashboardButton;
+    
+    /*
+     * Triggers a sign out. 
+     */    
+    private JButton logoutButton;
 
     /**
      * Initialize this view including creating and laying out its child components.
      */
-    public TutoringSessionView(ViewType viewType) {
-
-        this.currentViewType = viewType;
-
-        //Call to initialize and layout components used across all views to avoid code duplication
-        initializeUniversalComponents();
-        layoutUniversalComponents();
-
-        switch(viewType)
-        {
-            case DO_ONE:
-                setupPracticeView();
-                break;
-
-            case SEE_ONE:
-                setupTeachView();
-                break;
-
-            case TEACH_ONE:
-                setupQuizView();
-                break;
-
-            default:
-                throw new IllegalArgumentException("No View of type: " + viewType.toString());
-        }
-
-    }
-
-    /**
-     * Set up the Practice View screen
-     */
-    private void setupPracticeView() {
-        layoutPracticeComponents();
-    }
-
-    /**
-     * Set up the Teach View screen
-     */
-    private void setupTeachView() {
-        initializeTeachComponents();
-        layoutTeachComponents();
-    }
-
-    /**
-     * Set up the Quiz Me View
-     */
-    private void setupQuizView() {
-        initializeQuizComponents();
-        layoutQuizComponents();
+    public TutoringSessionView() {
+        initializeComponents();
+        layoutComponents();  
     }
 
     /**
@@ -155,17 +100,20 @@ public class TutoringSessionView extends GPanel {
     /**
      * Display the given model in this view.
      *
-     * @param model a TutoringSession.
+     * @param model a TutoringSession or null when signing out.
      */
     public void setModel(TutoringSession model) {
         this.model = model;
         
-        PendingTask pTask = model.currentTask();
-        PendingStep pStep = pTask.getCurrentStep();
-        StepSubType subType = pStep.getStep().getSubType();
-        displayStep(subType.getViewName());
+        if (model != null) {
+            PendingTask pTask = model.currentTask();
+            PendingStep pStep = pTask.getCurrentStep();
+            StepSubType subType = pStep.getStep().getSubType();
+            
+            displayStep(subType.getViewName());
 
-        stepView.setModel(model);
+            stepView.setModel(model);
+        }
     }
     
     /**
@@ -180,43 +128,35 @@ public class TutoringSessionView extends GPanel {
     }
 
     /**
-     * Setup components that will be used across all views
+     * Setup components
      */
-    private void initializeUniversalComponents() {
-
+    private void initializeComponents() {
         // StepView must be created before StepSelectorView since the later
         // references the EncodeView in StepView by selecting it.
         stepView = new StepView();
         stepSelectorView = new StepSelectorView();
 
-        //Button for going back to dashboard
         dashboardButton = new JButton("Go to Dashboard");
         dashboardButton.addActionListener(e -> navigateToDashboard());
 
-        //Button for logging out
         logoutButton = new JButton("Logout");
         logoutButton.addActionListener(e -> logout());
 
-        // Wrap StepSelectorView in a JScrollPane
         scrollPane = new JScrollPane(stepSelectorView);
 
-        // Wrap stepView in a panel with BorderLayout to position buttons at the bottom
         stepViewContainer = new JPanel(new BorderLayout());
 
-        // Create a button panel for Check and Hint buttons
-       // buttonPanel = new JPanel(); // Default FlowLayout
-
-        // Create a JSplitPane to allow resizing of the left panel
         splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, scrollPane, stepViewContainer);
 
-        // Add a JPanel for the dashboard button at the bottom
-        dashboardPanel = new JPanel(new BorderLayout());
+        controlPanel = new JPanel(new BorderLayout());
+        
+        //ToDo: Are there any special components that depend on the Tutoring Mode?
     }
 
     /**
-     * Layout the components used for all views
+     * Layout the components
      */
-    private void layoutUniversalComponents() {
+    private void layoutComponents() {
 
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -234,66 +174,10 @@ public class TutoringSessionView extends GPanel {
         setLayout(new BorderLayout());
         add(splitPane, BorderLayout.CENTER);
 
-        dashboardPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 0)); // Adds padding
-        dashboardPanel.add(dashboardButton, BorderLayout.WEST);
+        controlPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 0)); // Adds padding
+        controlPanel.add(dashboardButton, BorderLayout.WEST);
         dashboardButton.setPreferredSize(new Dimension(150, 25)); // Adjustable initial size
-        add(dashboardPanel, BorderLayout.SOUTH);
-    }
-
-    /**
-    * Layout the child components in this view
-    */
-   private void layoutPracticeComponents() {
-
-       // Add buttons to the button panel
-     //  buttonPanel.add(checkButton);
-     //  buttonPanel.add(newExampleButton);
-      // buttonPanel.add(hintButton);
-
-       // Add the button panel to the bottom of the stepViewContainer
-     //  stepViewContainer.add(buttonPanel, BorderLayout.SOUTH);
-   }
-
-    /**
-     * Initialize Teach Me View specific components
-     */
-   private void initializeTeachComponents() {
-       //TODO: Setup Teach Me View specific components here
-   }
-
-    /**
-     * Set up the layout for Teach Me View components
-     */
-   private void layoutTeachComponents() {
-      // buttonPanel.removeAll();
-       stepViewContainer.removeAll();
-
-       // Add the button panel to the bottom of the stepViewContainer
-      // stepViewContainer.add(buttonPanel, BorderLayout.SOUTH);
-
-
-       //TODO: Layout Teach Me View specific components here
-   }
-
-    /**
-     * Initialize Quiz Me View specific components
-     */
-    private void initializeQuizComponents() {
-        //TODO: Setup Teach Me View specific components here
-    }
-
-    /**
-     * Set up the layout for Quiz Me View components
-     */
-    private void layoutQuizComponents() {
-       // buttonPanel.removeAll();
-        stepViewContainer.removeAll();
-
-        // Add the button panel to the bottom of the stepViewContainer
-       // stepViewContainer.add(buttonPanel, BorderLayout.SOUTH);
-
-
-        //TODO: Layout Teach Me View specific components here
+        add(controlPanel, BorderLayout.SOUTH);
     }
 
     /**
@@ -305,21 +189,18 @@ public class TutoringSessionView extends GPanel {
         button.repaint();
         button.revalidate();
     }
-
-    public ViewType getCurrentViewType() {
-        return this.currentViewType;
-    }
     
     /**
      * A class called by dashboardButton to return to dashboard.
      */
     public void navigateToDashboard() {
-        SplashFrame.instance().selectDashboard(this.getModel());
+        MainFrame.instance().displayView(MainFrame.ViewName.DASHBOARD);
     }
     /**
-     * A class called by logout Button to logout
+     * Handle the user's request to sign out.
      */
     public void logout() {
-        SplashFrame.instance().logout();
+        MainFrame.instance().setModel(null);
     }
+    
 }

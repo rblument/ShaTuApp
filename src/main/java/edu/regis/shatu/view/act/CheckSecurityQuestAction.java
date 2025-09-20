@@ -24,7 +24,7 @@ import edu.regis.shatu.svc.ClientRequest;
 import edu.regis.shatu.svc.ServerRequestType;
 import edu.regis.shatu.svc.SvcFacade;
 import edu.regis.shatu.svc.TutorReply;
-import edu.regis.shatu.view.SplashFrame;
+import edu.regis.shatu.view.MainFrame;
 
 /**
  * An MVC controller handling a user GUI gesture requesting to verify the user, 
@@ -80,7 +80,7 @@ public class CheckSecurityQuestAction extends ShaTuGuiAction {
     public void actionPerformed(ActionEvent evt) { 
         Gson gson = new Gson();
         
-        SplashFrame frame = SplashFrame.instance();
+        MainFrame frame = MainFrame.instance();
         Account account = frame.getAccount();
         
 
@@ -95,8 +95,9 @@ public class CheckSecurityQuestAction extends ShaTuGuiAction {
             // Extract token from reply data
             String token = gson.fromJson(reply.getData(), String.class);
     
-            frame.initializeResetPassword(account.getUserId(), token);
-            frame.selectResetPassword(account.getUserId());
+           // frame.initializeResetPassword(account.getUserId(), token);
+           // frame.selectResetPassword(account.getUserId());
+            frame.displayView(MainFrame.ViewName.RESET_PASSWORD);
 
             msg = "Success!\n\n" +
                 "Press OK to create a new password\n\n";
