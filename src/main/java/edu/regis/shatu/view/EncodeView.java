@@ -310,6 +310,7 @@ public class EncodeView extends UserRequestView {
     @Override
     protected void updateView() {
         // Ensure 'view' is only initialized when SplashFrame.instance() is non-null
+        /*
         if (view == null) {
             MainFrame mainFrame = MainFrame.instance();
             if (mainFrame != null) {
@@ -320,7 +321,7 @@ public class EncodeView extends UserRequestView {
                 return; // Exit updateView if the view cannot be initialized
             }
         }
-
+*/
         if (this.model == null) { // Currently in development, Encode Ascii starts first when loaded, which model
                                   // can be null initially.
             questionLabel.setText("Please click new example button to get started");
@@ -395,29 +396,7 @@ public class EncodeView extends UserRequestView {
         System.out.println("UpdateView logic continues...");
     }
 
-    /**
-     * Defines each view classes' standard method for updating in the Practice View
-     */
-    @Override
-    protected void updatePracticeView() {
 
-    }
-
-    /**
-     * Defines each view classes' standard method for updating in the Teach Me View
-     */
-    @Override
-    protected void updateTeachView() {
-
-    }
-
-    /**
-     * Defines each view classes' standard method for updating in the Teach Me View
-     */
-    @Override
-    protected void updateQuizView() {
-
-    }
 
     /**
      * This method is suppose to be called when the new example button is

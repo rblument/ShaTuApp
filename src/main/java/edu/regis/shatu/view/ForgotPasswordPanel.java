@@ -174,7 +174,7 @@ public class ForgotPasswordPanel extends GPanel{
         verifyBut = new JButton(CheckSecurityQuestAction.instance());
 
         verifyBut.setEnabled(false);
-        MainFrame.instance().getRootPane().setDefaultButton(verifyBut);
+        //MainFrame.instance().getRootPane().setDefaultButton(verifyBut);
 
         backBut = new JButton(BackToLogin.instance());
         backBut.setEnabled(true);

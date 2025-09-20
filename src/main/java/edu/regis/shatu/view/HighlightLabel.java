@@ -108,7 +108,7 @@ public class HighlightLabel extends JLabel implements MouseListener {
      * Select this label and display its associated step view
      */
     public void select() {
-        SplashFrame.instance().getTutoringSessionView().displayStep(StepSelection.valueOf(viewName));
+        MainFrame.instance().displayStep(StepSelection.valueOf(viewName));
         isSelected = true;
         setBackground(SELECTED_BACKGROUND);
         setBorder(SELECTED_BORDER);

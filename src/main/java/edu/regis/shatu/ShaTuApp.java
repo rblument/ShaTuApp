@@ -22,7 +22,6 @@ import java.util.logging.Logger;
 import edu.regis.shatu.svc.ShaTuServer;
 import edu.regis.shatu.util.ResourceMgr;
 import edu.regis.shatu.view.MainFrame;
-import edu.regis.shatu.view.SplashFrame;
 
 /**
  * A standalone implementation of the SHA-256 intelligent tutoring application.
@@ -102,14 +101,10 @@ public class ShaTuApp {
                 
             LOGGER.info(" Starting Client GUI...");
 
-            // Force the creation of the MainFrame singleton, which is not
-            // made visible to the user until after they sign-in.
-            MainFrame.instance();
-
-            // Force the creation of the SplashFrame, which is displayed and
-            // allows the user to sign-in or create a new student account.
-            // If sign-in is successful the MainFrame is displayed.
-            SplashFrame.instance();            
+            // Forces the creation of the MainFrame singleton, which has the
+            // side-effect of displaying the SplashPanel allowing the user to
+            // sign-in.
+            MainFrame.instance();      
                 
             LOGGER.info("ShaTu Initialization successful.");
                 

@@ -12,10 +12,9 @@
  */
 package edu.regis.shatu.view.act;
 
+import edu.regis.shatu.view.MainFrame;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-
-import edu.regis.shatu.view.SplashFrame;
 
 /**
  * An MVC controller handling a user GUI gesture requesting to create a 
@@ -66,7 +65,8 @@ public class NewUserAction extends ShaTuGuiAction {
      * @param evt ignored
      */
     @Override
-    public void actionPerformed(ActionEvent evt) {      
-        SplashFrame.instance().selectNewUser();       
+    public void actionPerformed(ActionEvent evt) {  
+        
+        MainFrame.instance().displayView(MainFrame.ViewName.NEW_ACCOUNT);
     }
 }

@@ -122,12 +122,14 @@ public class SplashPanel extends GPanel {
      * Display the given user (id) in this view, but the encrypted password
      * is not displayed. 
      * 
-     * @param model the user (id) to display
+     * @param model the account to display
      */
     public void setModel(Account model) {
 	this.model = model;
 
-	userId.setText(model.getUserId());
+        clearFields();
+
+        userId.setText(model.getUserId());
     }
     
     /**

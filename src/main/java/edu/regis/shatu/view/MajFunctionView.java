@@ -611,33 +611,7 @@ public class MajFunctionView extends UserRequestView implements KeyListener {
 
     @Override
     protected void updateView() {
-        view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
-
-        switch (view.getCurrentViewType()) {
-            case DO_ONE:
-                updatePracticeView();
-                break;
-
-            case SEE_ONE:
-                updateTeachView();
-                break;
-
-            case TEACH_ONE:
-                updateQuizView();
-                break;
-
-            default:
-                throw new UnsupportedOperationException("Unknown Update Operation for view type: "
-                        + view.getCurrentViewType());
-        }
-    }
-
-    /**
-     * Defines each view classes' standard method for updating in the Practice View
-     */
-    @Override
-    protected void updatePracticeView() {
-        // If check and hint buttons are disabled, reset listenerers and apply those
+                // If check and hint buttons are disabled, reset listenerers and apply those
         // used by this view
         if (!checkHintEnabled) {
             resetButtonListeners(); // Clear any listeners applied from other views
@@ -661,23 +635,9 @@ public class MajFunctionView extends UserRequestView implements KeyListener {
                 responseTextArea.setEnabled(true);
             }
         }
+       
     }
 
-    /**
-     * Defines each view classes' standard method for updating in the Teach Me View
-     */
-    @Override
-    protected void updateTeachView() {
-
-    }
-
-    /**
-     * Defines each view classes' standard method for updating in the Teach Me View
-     */
-    @Override
-    protected void updateQuizView() {
-
-    }
 
     /**
      * Sets all fields to default values

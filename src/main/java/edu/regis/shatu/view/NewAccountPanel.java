@@ -198,7 +198,7 @@ public class NewAccountPanel extends GPanel {
         createAcctBut = new JButton(CreateAcctAction.instance());
 
         createAcctBut.setEnabled(false);
-        MainFrame.instance().getRootPane().setDefaultButton(createAcctBut);
+        //MainFrame.instance().getRootPane().setDefaultButton(createAcctBut);
 
         backBut = new JButton(BackToLogin.instance());
         backBut.setEnabled(true);
@@ -562,7 +562,7 @@ public class NewAccountPanel extends GPanel {
          */
         @Override
         public void insertUpdate(DocumentEvent e) {
-            Component comp = SplashFrame.instance().getFocusOwner();
+            Component comp = MainFrame.instance().getFocusOwner();
             if (comp == pass1) {
                 checkStrength();
             }

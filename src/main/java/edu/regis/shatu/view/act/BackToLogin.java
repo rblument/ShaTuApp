@@ -12,11 +12,10 @@
  */
 package edu.regis.shatu.view.act;
 
+import edu.regis.shatu.view.MainFrame;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.util.logging.Logger;
-
-import edu.regis.shatu.view.SplashFrame;
 
 /**
  * An MVC controller handling a user GUI gesture requesting to return to the
@@ -73,6 +72,6 @@ public class BackToLogin extends ShaTuGuiAction {
      */
     @Override
     public void actionPerformed(ActionEvent evt) {
-        SplashFrame.instance().logout();
+        MainFrame.instance().setModel(null); // logout
     }
 }
