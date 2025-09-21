@@ -37,8 +37,7 @@ import javax.swing.border.LineBorder;
 
 import edu.regis.shatu.model.TutoringSession;
 import edu.regis.shatu.model.aol.AssessmentLevel;
-import edu.regis.shatu.model.aol.ScaffoldLevel;
-import edu.regis.shatu.model.aol.ViewType;
+import edu.regis.shatu.model.aol.TutoringMode;
 import edu.regis.shatu.svc.ServiceFactory;
 import edu.regis.shatu.svc.StudentModelSvc;
 
@@ -56,9 +55,9 @@ public class DashboardPanel extends JPanel {
 
     private JButton logOutButton;
     private JButton settingsButton;
-    private JButton teachMeButton;
-    private JButton practiceButton;
-    private JButton quizMeButton;
+    private JButton seeOneButton;
+    private JButton doOneButton;
+    private JButton teachOneButton;
     private JLabel welcomeLabel;
 
     // Panels to hold progress bars for each study mode (will be added to scroll
@@ -88,19 +87,7 @@ public class DashboardPanel extends JPanel {
      *
      * @param tutoringSession the current tutoring session.
      */
-    public DashboardPanel(TutoringSession tutoringSession) {
-        this.model = tutoringSession;
-
-        if (welcome == false) {
-            welcome = true;
-            String welcomeMessage = "Welcome, "
-                    + tutoringSession.getStudent().getAccount().getFirstName()
-                    + "! Your session has successfully started.";
-            JOptionPane.showMessageDialog(null, welcomeMessage, "Welcome", JOptionPane.INFORMATION_MESSAGE);
-        }
-
-        // Load lessons and set up UI components
-        loadAllLessons();
+    public DashboardPanel() {
         initializeComponents();
         layoutComponents();
     }
@@ -112,6 +99,25 @@ public class DashboardPanel extends JPanel {
      */
     public void setModel(TutoringSession model) {
         this.model = model;
+        
+        if (model != null) {
+            switch (model.getStudent().getStudentModel().getTutoringMode()) {
+                case SEE_ONE:
+                    enableModeButtons(true, false, false);
+                    break;
+                    
+                case DO_ONE:
+                    enableModeButtons(false, true, false);
+                    break;
+                    
+                case TEACH_ONE:
+                    enableModeButtons(false, false, true);
+            }
+            
+            welcomeLabel.setText("Welcome, " + model.getStudent().getAccount().getFirstName() + "!");
+        }
+        
+        // ToDo: update progress bars
     }
 
     /**
@@ -129,51 +135,26 @@ public class DashboardPanel extends JPanel {
         welcomeLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
         // Study mode buttons
-        teachMeButton = new JButton("Teach Me");
-        practiceButton = new JButton("Practice");
-        quizMeButton = new JButton("Quiz Me");
+        seeOneButton = new JButton("See One");
+        doOneButton = new JButton("Do One");
+        teachOneButton = new JButton("Teach One");
+        enableModeButtons(true, false, false);
 
-        // Set button actions and update scaffold level based on chosen study mode.
+        // ToDo, since the logout button now appears in several places,
+        // should be a Logout Java Action Or better yet, only one logout?
         logOutButton.addActionListener(evt -> logOut());
-        settingsButton.setVerticalAlignment(SwingConstants.TOP);
-
-        teachMeButton.addActionListener(evt -> {
-            // Set scaffold level to EXTREME when in Teach Me mode.
-            try {
-                ServiceFactory.findStudentModelSvc().updateScaffoldLevel(
-                        model.getStudent().getAccount().getUserId(),
-                        ScaffoldLevel.EXTREME);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            // Navigate to the view for Teach Me mode using ViewType.SEE_ONE
-            SplashFrame.instance().selectScreen(ViewType.SEE_ONE);
+        settingsButton.setVerticalAlignment(SwingConstants.TOP);  
+        
+        seeOneButton.addActionListener(evt -> {
+            MainFrame.instance().displayView(MainFrame.ViewName.SPLASH);
         });
-
-        practiceButton.addActionListener(evt -> {
-            // Set scaffold level to HIGH when in Practice mode.
-            try {
-                ServiceFactory.findStudentModelSvc().updateScaffoldLevel(
-                        model.getStudent().getAccount().getUserId(),
-                        ScaffoldLevel.MEDIUM);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            // Navigate to the view for Practice mode using ViewType.DO_ONE
-            SplashFrame.instance().selectScreen(ViewType.DO_ONE);
+        
+        doOneButton.addActionListener(evt -> {
+            MainFrame.instance().displayView(MainFrame.ViewName.SPLASH);
         });
-
-        quizMeButton.addActionListener(evt -> {
-            // Set scaffold level to MEDIUM when in Quiz Me mode.
-            try {
-                ServiceFactory.findStudentModelSvc().updateScaffoldLevel(
-                        model.getStudent().getAccount().getUserId(),
-                        ScaffoldLevel.NONE);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            // Navigate to the view for Quiz Me mode using ViewType.TEACH_ONE
-            SplashFrame.instance().selectScreen(ViewType.TEACH_ONE);
+        
+        teachOneButton.addActionListener(evt -> {
+            MainFrame.instance().displayView(MainFrame.ViewName.SPLASH);
         });
 
         // Initialize progress bar maps and panels
@@ -196,7 +177,7 @@ public class DashboardPanel extends JPanel {
         // Header panel
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.add(settingsButton, BorderLayout.LINE_START);
-        welcomeLabel.setText("Welcome, " + model.getStudent().getAccount().getFirstName() + "!");
+        welcomeLabel.setText("");
         headerPanel.add(welcomeLabel, BorderLayout.CENTER);
         headerPanel.add(logOutButton, BorderLayout.LINE_END);
         add(headerPanel, BorderLayout.NORTH);
@@ -236,30 +217,28 @@ public class DashboardPanel extends JPanel {
         gbc.weighty = 0.0;
         gbc.weightx = 0.0;
         gbc.gridx = 0;
-        contentPanel.add(teachMeButton, gbc);
+        contentPanel.add(seeOneButton, gbc);
         gbc.gridx = 1;
-        contentPanel.add(practiceButton, gbc);
+        contentPanel.add(doOneButton, gbc);
         gbc.gridx = 2;
-        contentPanel.add(quizMeButton, gbc);
+        contentPanel.add(teachOneButton, gbc);
 
         add(contentPanel, BorderLayout.CENTER);
     }
-
+    
     /**
-     * Loads lesson titles from the service layer (excludes lessons with IDs 0, 10,
-     * 20).
+     * Enable/disable the three teaching mode buttons.
+     * 
+     * @param seeOne 
+     * @param doOne
+     * @param teachOne 
      */
-    private void loadAllLessons() {
-        try {
-            String userId = model.getStudent().getAccount().getUserId();
-            StudentModelSvc studentModelService = ServiceFactory.findStudentModelSvc();
-            // allLessons = studentModelService.retrieveAllLessons(userId);
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error loading lessons: " + e.getMessage(), "Error",
-                    JOptionPane.ERROR_MESSAGE);
-            allLessons = new ArrayList<>();
-        }
+    private void enableModeButtons(boolean seeOne, boolean doOne, boolean teachOne) {
+        seeOneButton.setEnabled(seeOne);
+        doOneButton.setEnabled(doOne);
+        teachOneButton.setEnabled(teachOne);
     }
+    
 
     /**
      * Shortens a lesson title to a maximum of 20 characters.
@@ -505,6 +484,7 @@ public class DashboardPanel extends JPanel {
      * Logs out the current user.
      */
     private void logOut() {
-        SplashFrame.instance().logout();
+        // ToDo, move this to a Logout Java Action 
+        MainFrame.instance().setModel(null);
     }
 }

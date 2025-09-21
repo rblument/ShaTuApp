@@ -375,53 +375,12 @@ public class ShaOneView extends UserRequestView implements KeyListener { //imple
      * TODO: THIS IS A PLACEHOLDER UNTIl WE HAVE HAVE THE MODEL CODE COMPLETED
      */
     protected void updateView() {
-        view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
 
-        switch (view.getCurrentViewType()) {
-            case DO_ONE:
-                updatePracticeView();
-                break;
 
-            case SEE_ONE:
-                updateTeachView();
-                break;
-
-            case TEACH_ONE:
-                updateQuizView();
-                break;
-
-            default:
-                throw new UnsupportedOperationException("Unknown Update Operation for view type: "
-                        + view.getCurrentViewType());
-        }
-        if (model != null) {
-
-            Step step = model.currentTask().getCurrentStep().getStep();
-
-            if (step != null) {
-                ShaOneStep example = gson.fromJson(step.getData(), ShaOneStep.class);
-
-                if (example != null) {
-                    operandAValue = example.getOperandA();
-                    operandALabel.setText("Operand A: " + operandAValue);
-                }
-
-            }
-        }
-    }
-
-    /**
-     * Defines each view classes' standard method for updating in the Practice View
-     */
-    @Override
-    protected void updatePracticeView() {
-
-        // If check and hint buttons are disabled, reset listenerers and apply those
-        // used by this view
-        if (!checkHintEnabled) {
-            resetButtonListeners(); // Clear any listeners applied from other views
-        }
-
+        if (!checkHintEnabled)
+            resetButtonListeners();
+        
+            
         Step step = model.currentTask().getCurrentStep().getStep();
         if (step != null && step.getSubType() == StepSubType.SHA_ONE) {
             //Get the data from the model as a RotateStep object
@@ -439,23 +398,23 @@ public class ShaOneView extends UserRequestView implements KeyListener { //imple
                 responseTextArea.setEnabled(true);
             }
         }
+
+        if (model != null) {
+
+             step = model.currentTask().getCurrentStep().getStep();
+
+            if (step != null) {
+                ShaOneStep example = gson.fromJson(step.getData(), ShaOneStep.class);
+
+                if (example != null) {
+                    operandAValue = example.getOperandA();
+                    operandALabel.setText("Operand A: " + operandAValue);
+                }
+
+            }
+        }
     }
 
-    /**
-     * Defines each view classes' standard method for updating in the Teach Me View
-     */
-    @Override
-    protected void updateTeachView() {
-
-    }
-
-    /**
-     * Defines each view classes' standard method for updating in the Teach Me View
-     */
-    @Override
-    protected void updateQuizView() {
-
-    }
 
     /**
      * Create and return the server request this view makes when a user selects

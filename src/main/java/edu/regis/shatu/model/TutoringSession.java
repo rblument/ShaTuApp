@@ -31,6 +31,11 @@ public class TutoringSession {
     private int id;
     
     /**
+     * The current tutoring mode for this session.
+     */
+    private TutoringMode tutoringMode;
+    
+    /**
      * An SHA-256 encrypted security token that must be communicated to the
      * tutor/server in all subsequent requests after signing in.
      */
@@ -83,6 +88,7 @@ public class TutoringSession {
      */
     public TutoringSession(Student student) {
         this.student = student;
+        tutoringMode = TutoringMode.SEE_ONE;
         tasks = new ArrayList<>();
     }
 

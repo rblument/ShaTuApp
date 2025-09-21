@@ -298,31 +298,28 @@ public class ShiftRightView extends UserRequestView implements KeyListener {
      */
     @Override
     protected void updateView() {
-        view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
+        //view = SplashFrame.instance().getTutoringSessionView(); // Accessing view to use universal buttons
 
-        switch (view.getCurrentViewType()) {
-            case DO_ONE:
+       // switch (view.getCurrentViewType()) {
+         //   case DO_ONE:
                 updatePracticeView();
-                break;
+          //      break;
 
-            case SEE_ONE:
-                updateTeachView();
-                break;
+          //  case SEE_ONE:
+          //      updateTeachView();
+           //     break;
 
-            case TEACH_ONE:
-                updateQuizView();
-                break;
+           // case TEACH_ONE:
+           //     updateQuizView();
+           //     break;
 
-            default:
-                throw new UnsupportedOperationException("Unknown Update Operation for view type: "
-                        + view.getCurrentViewType());
-        }
+           // default:
+           //     throw new UnsupportedOperationException("Unknown Update Operation for view type: "
+            //            + view.getCurrentViewType());
+        //}
     }
 
-    /**
-     * Defines each view classes' standard method for updating in the Practice View
-     */
-    @Override
+
     protected void updatePracticeView() {
         responseTextArea.setText("");
         feedbackTextArea.setText("");
@@ -364,7 +361,6 @@ public class ShiftRightView extends UserRequestView implements KeyListener {
     /**
      * Defines each view classes' standard method for updating in the Teach Me View
      */
-    @Override
     protected void updateTeachView() {
 
     }
@@ -372,7 +368,6 @@ public class ShiftRightView extends UserRequestView implements KeyListener {
     /**
      * Defines each view classes' standard method for updating in the Teach Me View
      */
-    @Override
     protected void updateQuizView() {
 
     }

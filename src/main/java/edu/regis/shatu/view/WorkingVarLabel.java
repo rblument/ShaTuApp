@@ -17,7 +17,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import static java.awt.image.ImageObserver.HEIGHT;
 
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
@@ -98,8 +97,7 @@ public class WorkingVarLabel extends JLabel implements MouseListener {
     }
     
     public void select() {
-        //GuiController.instance().getStepSelectorView().displayStep(stepSelection);
-        SplashFrame.instance().getTutoringSessionView().displayStep(stepSelection);
+        MainFrame.instance().displayStep(stepSelection);
         isSelected = true;
         setBackground(SELECTED_BACKGROUND);
     }

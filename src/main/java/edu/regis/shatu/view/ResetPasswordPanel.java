@@ -86,11 +86,11 @@ public class ResetPasswordPanel extends GPanel{
     protected JButton resetBut;
     protected JButton backBut;
 
-    public ResetPasswordPanel(String email) {
+    public ResetPasswordPanel() {
         super();
 
         model = new Account();
-        userEmail = email;
+        userEmail = "test@regis.edu";
         initComponents();
         layoutPanel();
 
@@ -118,6 +118,10 @@ public class ResetPasswordPanel extends GPanel{
         this.model = model;
 
         updateDisplay();
+    }
+    
+    public void setUserEmail(String userEmail) {
+        this.userEmail = userEmail;
     }
 
     public JTextField getUserIdComp() {
@@ -172,7 +176,7 @@ public class ResetPasswordPanel extends GPanel{
         resetBut = new JButton(ResetPasswordAction.instance());
 
         resetBut.setEnabled(false);
-        MainFrame.instance().getRootPane().setDefaultButton(resetBut);
+        //MainFrame.instance().getRootPane().setDefaultButton(resetBut);
 
         backBut = new JButton(BackToLogin.instance());
         backBut.setEnabled(true);
@@ -472,7 +476,7 @@ public class ResetPasswordPanel extends GPanel{
          */
         @Override
         public void insertUpdate(DocumentEvent e) {
-            Component comp = SplashFrame.instance().getFocusOwner();
+            Component comp = MainFrame.instance().getFocusOwner();
             if (comp == pass1) {
                 checkStrength();
             }

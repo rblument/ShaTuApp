@@ -25,7 +25,7 @@ import edu.regis.shatu.svc.ClientRequest;
 import edu.regis.shatu.svc.ServerRequestType;
 import edu.regis.shatu.svc.SvcFacade;
 import edu.regis.shatu.svc.TutorReply;
-import edu.regis.shatu.view.SplashFrame;
+import edu.regis.shatu.view.MainFrame;
 
 /**
  * An MVC controller handling a user GUI gesture requesting the creation of a
@@ -84,7 +84,7 @@ public class CreateAcctAction extends ShaTuGuiAction {
     public void actionPerformed(ActionEvent evt) {
         Gson gson = new Gson();
         
-        SplashFrame frame = SplashFrame.instance();
+        MainFrame frame = MainFrame.instance();
         
         Account account = frame.getAccount();
 
@@ -100,8 +100,8 @@ public class CreateAcctAction extends ShaTuGuiAction {
                 msg = "Student user account successfully created\n\n" +
                         "Press okay and we'll return you to the sign-in screen\n\n" +
                         "Then, please sign-in to the tutor using this account.";
-                JOptionPane.showMessageDialog(SplashFrame.instance(), msg);
-                frame.selectSplash();
+                JOptionPane.showMessageDialog(frame, msg);
+                frame.displayView(MainFrame.ViewName.SPLASH);
                 break;
             case "IllegalUserId":
                 msg = "User id already exists: " + account.getUserId();

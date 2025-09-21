@@ -54,6 +54,21 @@ public class ForgotPasswordPanel extends GPanel{
             = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
 
     /**
+     * The initial color used for warnings, errors, or invalid input (dark red).
+     */
+    private static final Color init_Color = new Color(173,7,1);
+    
+    /**
+     * The primary foreground color used for text and labels (dark blue).
+     */
+    private static final Color Foreground_Color = new Color(0, 43, 73);
+    
+    /**
+     * The primary background color used for panels and highlights (gold/yellow).
+     */
+    private static final Color Background_Color = new Color(241,196,0);
+
+    /**
      * The account being created and displayed in this panel.
      */
     private Account model;
@@ -159,18 +174,18 @@ public class ForgotPasswordPanel extends GPanel{
         verifyBut = new JButton(CheckSecurityQuestAction.instance());
 
         verifyBut.setEnabled(false);
-        MainFrame.instance().getRootPane().setDefaultButton(verifyBut);
+        //MainFrame.instance().getRootPane().setDefaultButton(verifyBut);
 
         backBut = new JButton(BackToLogin.instance());
         backBut.setEnabled(true);
         
         strength = new JLabel("(Strength: very poor)");
-        strength.setForeground(new Color(173,7,1));
+        strength.setForeground(init_Color);
         strength.setFont(new Font("Dialog", Font.PLAIN, 10));
     }
 
     private void layoutPanel() {
-        setBackground(new Color(0, 43, 73));
+        setBackground(Foreground_Color);
 
         setPreferredSize(new Dimension(300, 400));
 
@@ -188,7 +203,7 @@ public class ForgotPasswordPanel extends GPanel{
 
         JLabel copyright = new JLabel("(C) 2019-2024 Johanna and Richard Blumenthal. All Rights Reserved");
         copyright.setFont(new Font("Dialog", Font.PLAIN, 10));
-        copyright.setForeground(new Color(241,196,0));
+        copyright.setForeground(Background_Color);
         addc(copyright, 0, 2, 2, 1, 1.0, 1.0,
                 GridBagConstraints.NORTH, GridBagConstraints.CENTER,
                 5, 5, 5, 5);
@@ -198,11 +213,11 @@ public class ForgotPasswordPanel extends GPanel{
 
     private GPanel createHeader() {
         GPanel panel = new GPanel();
-        panel.setBackground(new Color(241,196,0));
+        panel.setBackground(Background_Color);
 
         JLabel ccis = new JLabel("Regis University Department of Computer and Cyber Sciences");
         ccis.setFont(new Font("Dialog", Font.PLAIN, 20));
-        ccis.setForeground(new Color(0, 43, 73));
+        ccis.setForeground(Foreground_Color);
 
         panel.addc(ccis, 0, 0, 1, 1, 1.0, 1.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL,
@@ -213,14 +228,14 @@ public class ForgotPasswordPanel extends GPanel{
 
     private GPanel createOverview() {
         GPanel panel = new GPanel();
-        panel.setBackground(new Color(241,196,0));
+        panel.setBackground(Background_Color);
 
         panel.setSize(300, 400);
         panel.setPreferredSize(new Dimension(300, 400));
 
         JLabel logo = new JLabel("ShaTu");
         logo.setFont(new Font("Dialog", Font.PLAIN, 20));
-        logo.setForeground(new Color(0, 43, 73));
+        logo.setForeground(Foreground_Color);
 
         panel.addc(logo, 0, 0, 1, 1, 0.0, 0.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
@@ -236,7 +251,7 @@ public class ForgotPasswordPanel extends GPanel{
         descr.setEditable(false);
         descr.setLineWrap(true);
         descr.setWrapStyleWord(true);
-        descr.setBackground(new Color(241,196,0));
+        descr.setBackground(Background_Color);
         descr.setFont(new Font("Dialog", Font.PLAIN, 12));
 	descr.append("ShaTu provides individualized tutoring practice focused ");
 	descr.append("on understanding the SHA-256 digest algorithm and the");
@@ -266,7 +281,7 @@ public class ForgotPasswordPanel extends GPanel{
 
     private GPanel createVerify() {
         GPanel panel = new GPanel();
-        panel.setBackground(new Color(241,196,0));
+        panel.setBackground(Background_Color);
 
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 5, 5));
 
@@ -311,7 +326,7 @@ public class ForgotPasswordPanel extends GPanel{
         msg = new JLabel("");
         msg.setLabelFor(verifyBut);
         msg.setFont(new Font("Dialog", Font.PLAIN, 10));
-        msg.setForeground(new Color(173,7,1));
+        msg.setForeground(init_Color);
 
         panel.addc(msg, 0, 12, 2, 1, 0.0, 0.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
@@ -324,7 +339,7 @@ public class ForgotPasswordPanel extends GPanel{
         msg = new JLabel("");
         msg.setLabelFor(backBut);
         msg.setFont(new Font("Dialog", Font.PLAIN, 10));
-        msg.setForeground(new Color(173,7,1));
+        msg.setForeground(init_Color);
 
         panel.addc(msg, 0, 12, 2, 1, 0.0, 0.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
@@ -353,13 +368,13 @@ public class ForgotPasswordPanel extends GPanel{
                 if (isValidUserId) {
                     userId.setBorder(BorderFactory.createLineBorder(Color.BLACK));
                 } else {
-                    userId.setBorder(BorderFactory.createLineBorder(new Color(173,7,1)));
+                    userId.setBorder(BorderFactory.createLineBorder(init_Color));
                 }
             } catch (BadLocationException er) {
                 // Cannot happen since 0 to length
             }
         } else {
-            userId.setBorder(BorderFactory.createLineBorder(new Color(173,7,1)));
+            userId.setBorder(BorderFactory.createLineBorder(init_Color));
         }
         
         boolean isValidAnswer = false;

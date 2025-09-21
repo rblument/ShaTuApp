@@ -36,7 +36,12 @@ public class StudentModel {
     /**
      * The current scaffolding being used to support the student.
      */
-    private ScaffoldLevel scaffoldLevel = ScaffoldLevel.EXTREME;
+    private ScaffoldLevel scaffoldLevel;
+    
+    /**
+     * The current tutoring mode, which is derived from the scaffold level.
+     */
+    private TutoringMode tutoringMode;
     
     /**
      * Create a student model for the given user id and with default information.
@@ -45,6 +50,9 @@ public class StudentModel {
      */
     public StudentModel(String userId) {
         this.userId = userId;
+        
+        scaffoldLevel = ScaffoldLevel.EXTREME;
+        tutoringMode = TutoringMode.SEE_ONE;
         
         assessments = new HashMap<>();   
     }
@@ -102,5 +110,13 @@ public class StudentModel {
 
     public void setScaffoldLevel(ScaffoldLevel scaffoldLevel) {
         this.scaffoldLevel = scaffoldLevel;
+    }
+
+    public TutoringMode getTutoringMode() {
+        return tutoringMode;
+    }
+
+    public void setTutoringMode(TutoringMode tutoringMode) {
+        this.tutoringMode = tutoringMode;
     }
 }

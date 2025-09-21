@@ -29,7 +29,6 @@ import edu.regis.shatu.svc.SvcFacade;
 import edu.regis.shatu.svc.TutorReply;
 import edu.regis.shatu.view.GuiController;
 import edu.regis.shatu.view.MainFrame;
-import edu.regis.shatu.view.SplashFrame;
 import edu.regis.shatu.view.UserRequestView;
 
 /**
@@ -98,7 +97,7 @@ public class NewExampleAction extends ShaTuGuiAction {
         System.out.println("actionPerformed");
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-        Account account = SplashFrame.instance().getAccount();
+        Account account = MainFrame.instance().getAccount();
 
         //Catches a possible IllegalArgumentException thrown by the 
         try {
