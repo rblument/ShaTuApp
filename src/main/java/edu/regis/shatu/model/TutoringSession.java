@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.GregorianCalendar;
 
 import edu.regis.shatu.model.aol.PendingTask;
+import edu.regis.shatu.model.aol.TutoringMode;
+import edu.regis.shatu.model.aol.Problem;
 
 /**
  * A SHA tutoring session, which is displayed in the tutor.
@@ -59,6 +61,11 @@ public class TutoringSession {
      * The date and time when this session was initially created.
      */
     private GregorianCalendar startDate;
+    
+    /**
+     * The overall problem being solved in this session.
+     */
+    private Problem problem;
  
      /**
      * The current task list.
@@ -137,6 +144,14 @@ public class TutoringSession {
 
     public void setStartDate(GregorianCalendar startDate) {
         this.startDate = startDate;
+    }
+    
+    public Problem getProblem(){
+        return problem;
+    }
+    
+    public void setProblem(Problem problem){
+        this.problem = problem;
     }
     
     public PendingTask currentTask() {
