@@ -115,6 +115,25 @@ public class ShaTuServer implements Runnable {
             tutor = new ShaTuTutor();
         }
 
+        private StudentDao studentDao = new StudentDao();
+
+    public void notifyLogin(Student student) {
+        LocalDateTime now = LocalDateTime.now();
+        student.setLastLogin(now);
+        studentDao.recordLoginEvent(student.getId(), now);
+
+        // Notify tutor system (log, push message, etc.)
+        LOGGER.info("Student " + student.getUsername() + " logged in at " + now);
+    }
+
+    public void notifyLogout(Student student) {
+        LocalDateTime now = LocalDateTime.now();
+        student.setLastLogout(now);
+        studentDao.recordLogoutEvent(student.getId(), now);
+
+        LOGGER.info("Student " + student.getUsername() + " logged out at " + now);
+    }
+
         /**
          * Read a JSon encoded request from the client to the ShaTu tutor.
          */
