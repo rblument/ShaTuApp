@@ -15,7 +15,7 @@ DROP DATABASE IF EXISTS ShaTuDB;
 CREATE DATABASE ShaTuDB;
 
 -- Create user representing the DICE tutor.
-CREATE USER 'ShaTuTs'@'localhost' IDENTIFIED BY 'ShaTu2023';
+CREATE USER IF NOT EXISTS 'ShaTuTs'@'localhost' IDENTIFIED BY 'ShaTu2023';
 
 -- Give the ShaTu tutor the following priveledges.
 GRANT SELECT,INSERT,UPDATE,DELETE,CREATE,DROP ON ShaTuDB.* TO 'ShaTuTs'@'localhost';
@@ -34,14 +34,25 @@ CREATE TABLE Account (
    PRIMARY KEY (UserId)
 );
 
+CREATE TABLE Problem (
+	ProblemId INT AUTO_INCREMENT PRIMARY KEY,
+    Title VARCHAR(256) NOT NULL,
+    Description VARCHAR(256) NOT NULL,
+    Message VARCHAR(512) NOT NULL
+);
+
 CREATE TABLE TutoringSession (
-    Id int NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    UserId varchar(256) NOT NULL,
-    SecurityToken varchar(256) NOT NULL,
-    IsActive tinyint DEFAULT 0,
+    Id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    UserId VARCHAR(256) NOT NULL,
+    SecurityToken VARCHAR(256) NOT NULL,
+    IsActive TINYINT DEFAULT 0,
     StartDate TIMESTAMP NOT NULL,
-    CourseId int NOT NULL,
-    UnitId int NOT NULL
+    CourseId INT NOT NULL,
+    UnitId INT NOT NULL,
+    ProblemId INT,
+    CONSTRAINT fk_tutoringsession_problemid
+		FOREIGN KEY (ProblemId)
+        REFERENCES Problem(ProblemId)
 );
 
 CREATE TABLE PendingTask (
@@ -91,16 +102,20 @@ CREATE TABLE Unit (
 
 # A static description of a task to complete within a course unit.
 CREATE TABLE Task (
-  TaskId int NOT NULL DEFAULT 0,
-  CourseId int NOT NULL DEFAULT 1,
-  UnitId int DEFAULT NULL,
-  Title varchar(256) NOT NULL,
-  Description varchar(256) NOT NULL,
-  Kind varChar(256) NOT NULL,
-  SequenceIndex int,
-  ExampleType varchar(256) DEFAULT NULL,
-  ProblemId int,
-  PRIMARY KEY (TaskId));
+	TaskId INT NOT NULL DEFAULT 0,
+    CourseId INT NOT NULL DEFAULT 1,
+    UnitId INT DEFAULT NULL,
+    Title VARCHAR(256) NOT NULL,
+    Description VARCHAR(256) NOT NULL,
+    Kind ENUM('PROBLEM', 'MESSAGE') NOT NULL,
+    SequenceIndex INT,
+    ExampleType VARCHAR(256) DEFAULT NULL,
+    ProblemId INT,
+    PRIMARY KEY (TaskId),
+    CONSTRAINT fk_task_problemid
+		FOREIGN KEY (ProblemId)
+        REFERENCES Problem(ProblemId)
+);
 
 CREATE TABLE Step (
   Id int NOT NULL,
@@ -181,6 +196,14 @@ VALUES
   'Familiarizes students with the operation of the SHA-256 message digest
         algorithm along with its underlying bitwise operations and encodings.');
 
+-- This problem will be referenced by the first row in task
+INSERT INTO Problem (Title, Description, Message)
+VALUES (
+	'Introductory Problem',
+    'Introduces the student to the tutor.',
+    'Regis Computer Science Rocks!'
+);
+
 INSERT INTO Unit
 (UnitId,
 CourseId,
@@ -195,7 +218,7 @@ VALUES
             student to the general operation of the ShaTu application.', 
     0, 'Fixed Sequence');
 
-
+-- The first task directly references the first row in Problem with ProblemId = 1
 INSERT INTO Task
 (TaskId,
 CourseId,
@@ -207,7 +230,7 @@ SequenceIndex,
 ExampleType,
 ProblemId)
 VALUES
-(0, 1, 0, 'Welcome', 'Let''s get started', 'Usage', 0, 'N/A', -1);
+(0, 1, 0, 'Welcome', 'Let''s get started', 'PROBLEM', 0, 'N/A', 1);
 
 
 INSERT INTO Step
@@ -417,46 +440,46 @@ VALUES
      'Application', 0, 'Other', '0', 'Knowledge Component');
 
 INSERT INTO task (TaskId, CourseId, UnitId, Title, Description, Kind, SequenceIndex, ExampleType, ProblemId)
-VALUES (10, 1, 0, 'Encode ASCII', 'Convert an English Text String into its ASCII equivalent.', 'Usage', 1, 'N/A', -1);
+VALUES (10, 1, 0, 'Encode ASCII', 'Convert an English Text String into its ASCII equivalent.', 'PROBLEM', 1, 'N/A', NULL);
 
 INSERT INTO task (TaskId, CourseId, UnitId, Title, Description, Kind, SequenceIndex, ExampleType, ProblemId)
-VALUES (20, 1, 0, 'Add One Bit', 'Add a single bit to the end of a bit string.', 'Usage', 2, 'N/A', -1);
+VALUES (20, 1, 0, 'Add One Bit', 'Add a single bit to the end of a bit string.', 'PROBLEM', 2, 'N/A', NULL);
 
 INSERT INTO task (TaskId, CourseId, UnitId, Title, Description, Kind, SequenceIndex, ExampleType, ProblemId)
-VALUES (30, 1, 0, 'Pad with Zeroes', 'Pad a bit string to the appropriate length with zeroes', 'Usage', 3, 'N/A', -1);
+VALUES (30, 1, 0, 'Pad with Zeroes', 'Pad a bit string to the appropriate length with zeroes', 'PROBLEM', 3, 'N/A', NULL);
 
 INSERT INTO task (TaskId, CourseId, UnitId, Title, Description, Kind, SequenceIndex, ExampleType, ProblemId)
-VALUES (40, 1, 0, 'Add a msg length to the bit string', 'Add the appropriate message length to the bit string', 'Usage', 4, 'N/A', -1);
+VALUES (40, 1, 0, 'Add a msg length to the bit string', 'Add the appropriate message length to the bit string', 'PROBLEM', 4, 'N/A', NULL);
 
 INSERT INTO task (TaskId, CourseId, UnitId, Title, Description, Kind, SequenceIndex, ExampleType, ProblemId)
-VALUES (50, 1, 0, 'Prepare Schedue', 'Prepare the schedule', 'Usage', 5, 'N/A', -1);
+VALUES (50, 1, 0, 'Prepare Schedule', 'Prepare the schedule', 'PROBLEM', 5, 'N/A', NULL);
 
 INSERT INTO task (TaskId, CourseId, UnitId, Title, Description, Kind, SequenceIndex, ExampleType, ProblemId)
-VALUES (60, 1, 0, 'Initialize Variables', 'Initialize the compression round variables.', 'Usage', 6, 'N/A', -1);
+VALUES (60, 1, 0, 'Initialize Variables', 'Initialize the compression round variables.', 'PROBLEM', 6, 'N/A', NULL);
 
 INSERT INTO task (TaskId, CourseId, UnitId, Title, Description, Kind, SequenceIndex, ExampleType, ProblemId)
-VALUES (70, 1, 0, 'Compression Round', 'Sequence the Compression Round.', 'Usage', 7, 'N/A', -1);
+VALUES (70, 1, 0, 'Compression Round', 'Sequence the Compression Round.', 'PROBLEM', 7, 'N/A', NULL);
 
 INSERT INTO task (TaskId, CourseId, UnitId, Title, Description, Kind, SequenceIndex, ExampleType, ProblemId)
-VALUES (80, 1, 0, 'Rotate BIts', 'Rotate a bit string.', 'Usage', 8, 'N/A', -1);
+VALUES (80, 1, 0, 'Rotate BIts', 'Rotate a bit string.', 'PROBLEM', 8, 'N/A', NULL);
 
 INSERT INTO task (TaskId, CourseId, UnitId, Title, Description, Kind, SequenceIndex, ExampleType, ProblemId)
-VALUES (90, 1, 0, 'Shift Bits', 'Shift a bit string.', 'Usage', 9, 'N/A', -1);
+VALUES (90, 1, 0, 'Shift Bits', 'Shift a bit string.', 'PROBLEM', 9, 'N/A', NULL);
 
 INSERT INTO task (TaskId, CourseId, UnitId, Title, Description, Kind, SequenceIndex, ExampleType, ProblemId)
-VALUES (100, 1, 0, 'XOR Bits', 'XOR a bit string.', 'Usage', 10, 'N/A', -1);
+VALUES (100, 1, 0, 'XOR Bits', 'XOR a bit string.', 'PROBLEM', 10, 'N/A', NULL);
 
 INSERT INTO task (TaskId, CourseId, UnitId, Title, Description, Kind, SequenceIndex, ExampleType, ProblemId)
-VALUES (110, 1, 0, 'Choice Function', 'Demonstrate the choice function on appropriate bit strings.', 'Usage', 11, 'N/A', -1);
+VALUES (110, 1, 0, 'Choice Function', 'Demonstrate the choice function on appropriate bit strings.', 'PROBLEM', 11, 'N/A', NULL);
 
 INSERT INTO task (TaskId, CourseId, UnitId, Title, Description, Kind, SequenceIndex, ExampleType, ProblemId)
-VALUES (120, 1, 0, 'Majority Function', 'Use the majority function on appropriate bit strings.', 'Usage', 12, 'N/A', -1);
+VALUES (120, 1, 0, 'Majority Function', 'Use the majority function on appropriate bit strings.', 'PROBLEM', 12, 'N/A', NULL);
 
 INSERT INTO task (TaskId, CourseId, UnitId, Title, Description, Kind, SequenceIndex, ExampleType, ProblemId)
-VALUES (130, 1, 0, 'Encode ASCII', 'Convert an English Text String into its ASCII equivalent.', 'Usage', 13, 'N/A', -1);
+VALUES (130, 1, 0, 'Encode ASCII', 'Convert an English Text String into its ASCII equivalent.', 'PROBLEM', 13, 'N/A', NULL);
 
 INSERT INTO task (TaskId, CourseId, UnitId, Title, Description, Kind, SequenceIndex, ExampleType, ProblemId)
-VALUES (140, 1, 0, 'SHA Sum 0 Function', 'Use the Sigma0 function.', 'Usage', 14, 'N/A', -1);
+VALUES (140, 1, 0, 'SHA Sum 0 Function', 'Use the Sigma0 function.', 'PROBLEM', 14, 'N/A', NULL);
 
 INSERT INTO ExercisingLocation
 (Id, CourseId, UnitId, TaskId, StepId)
