@@ -60,6 +60,8 @@ public class Problem extends TitledModel {
 
     @Override
     public String toString() {
-        return getTitle();
+        return "Title: " + getTitle() + 
+                " Description: " + getDescription() + 
+                " Message: " + this.messageToHash;
     }
 }
