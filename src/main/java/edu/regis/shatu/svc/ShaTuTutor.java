@@ -22,7 +22,6 @@ import java.util.logging.Logger;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import edu.regis.shatu.dao.AccountDAO;
 import edu.regis.shatu.err.NonRecoverableException;
 import edu.regis.shatu.err.ObjDuplicateException;
 import edu.regis.shatu.err.ObjNotFoundException;
@@ -39,6 +38,7 @@ import edu.regis.shatu.model.aol.AssessmentLevel;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.PendingStep;
 import edu.regis.shatu.model.aol.PendingTask;
+import edu.regis.shatu.model.aol.Problem;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.model.aol.StudentModel;
@@ -648,7 +648,7 @@ public class ShaTuTutor implements TutorSvc {
      * @throws NonRecoverableException
      * @return the new TutoringSession
      */
-    private TutoringSession createSession(Student student, Course course) throws NonRecoverableException {
+    private TutoringSession createSession(Student student, Course course) throws NonRecoverableException, ObjNotFoundException {
         Account account = student.getAccount();
 
         TutoringSession tSession = new TutoringSession(student);
@@ -660,12 +660,19 @@ public class ShaTuTutor implements TutorSvc {
         PendingTask pendingTask = new PendingTask(task);
         pendingTask.setCurrentStep(new PendingStep(task.getCurrentStep()));
         tSession.addTask(pendingTask);
+        
+//        Eventually, this should be the implementation (but task is currently empty)
+//        tSession.setProblem(task.getProblem());
+        // Kludge: Until then, retrieve the problem directly from DB, and manually set it in the session
+        ProblemSvc problemSvc = ServiceFactory.findProblemSvc();
+        Problem problem = problemSvc.retrieve(1);   // 1 = first record in Problem table
+        tSession.setProblem(problem);
 
         // Generate the security token for this tutoring session.
         Random rnd = new Random();
         String clearToken = "Session" + account.getUserId() + Integer.toString(rnd.nextInt());
         tSession.setSecurityToken(SHA_256.instance().sha256(clearToken));
-
+        
         try {
             ServiceFactory.findSessionSvc().create(tSession);
 
