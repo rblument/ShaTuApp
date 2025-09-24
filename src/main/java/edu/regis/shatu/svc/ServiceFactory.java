@@ -14,6 +14,7 @@ package edu.regis.shatu.svc;
 
 import edu.regis.shatu.dao.AccountDAO;
 import edu.regis.shatu.dao.CourseDAO;
+import edu.regis.shatu.dao.ProblemDAO;
 import edu.regis.shatu.dao.SessionDAO;
 import edu.regis.shatu.dao.StudentModelDAO;
 
@@ -44,6 +45,15 @@ public class ServiceFactory {
      */
     public static CourseSvc findCourseSvc() {
         return new CourseDAO();
+    }
+    
+    /**
+     * Return a reference to the problem service.
+     * 
+     * @return ProblemSvc
+     */
+    public static ProblemSvc findProblemSvc(){
+        return new ProblemDAO();
     }
 
     /**
