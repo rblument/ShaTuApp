@@ -92,7 +92,7 @@ public class SignInAction extends ShaTuGuiAction {
      */
     @Override
     public void actionPerformed(ActionEvent evt) {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        Gson gson = getGsonPretty();
         Account account = MainFrame.instance().getAccount();
         
         ClientRequest request = new ClientRequest(ServerRequestType.SIGN_IN);

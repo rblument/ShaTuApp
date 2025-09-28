@@ -76,7 +76,7 @@ public class ResetPasswordAction extends ShaTuGuiAction {
      */
     @Override
     public void actionPerformed(ActionEvent evt) {
-        Gson gson = new Gson();
+        Gson gson = getGson();
         
         MainFrame mainFrame = MainFrame.instance();
         
@@ -87,7 +87,7 @@ public class ResetPasswordAction extends ShaTuGuiAction {
         ClientRequest request = new ClientRequest(ServerRequestType.RESET_PASSWORD);
         request.setUserId(account.getUserId());
         request.setSecurityToken(token);
-        request.setData(new Gson().toJson(account));
+        request.setData(gson.toJson(account));
 
         request.setUserId(account.getUserId()); //required for session tracking
         request.setData(gson.toJson(account));

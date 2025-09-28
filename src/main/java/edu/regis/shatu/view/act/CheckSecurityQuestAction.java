@@ -78,7 +78,7 @@ public class CheckSecurityQuestAction extends ShaTuGuiAction {
      */
     @Override
     public void actionPerformed(ActionEvent evt) { 
-        Gson gson = new Gson();
+        Gson gson = getGson();
         
         MainFrame frame = MainFrame.instance();
         Account account = frame.getAccount();

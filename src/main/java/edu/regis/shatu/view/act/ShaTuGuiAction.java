@@ -17,6 +17,9 @@ import java.awt.Image;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import edu.regis.shatu.util.ImgFactory;
 
 /**
@@ -27,6 +30,9 @@ import edu.regis.shatu.util.ImgFactory;
  * @author rickb
  */
 public abstract class ShaTuGuiAction extends AbstractAction {
+    private static final Gson gson = new Gson();
+    private static final Gson gsonPretty = new GsonBuilder().setPrettyPrinting().create();
+
     public ShaTuGuiAction(String name) {
         super(name);
     }
@@ -44,5 +50,27 @@ public abstract class ShaTuGuiAction extends AbstractAction {
         // ToDo: Better error reporting
         Image img = ImgFactory.createImage(imageFileName);
         return new ImageIcon(img, altText);
+    }
+    
+    /**
+     * Return the normal Gson instance
+     * 
+     * This instance is used by ResetPasswordAction, CreateAcctAction, and CheckSecurityQuestAction
+     *
+     * @return gson = new Gson()
+     */
+    protected static final Gson getGson() {
+        return gson;
+    }
+
+    /**
+     * Return the pretty Gson instance
+     * 
+     * This instance is used by SignInAction, StepCompletionAction, NewExampleAction, and HintAction
+     *
+     * @return gsonPretty = new GsonBuilder().setPrettyPrinting().create()
+     */
+    protected static final Gson getGsonPretty() {
+        return gsonPretty;
     }
 }
