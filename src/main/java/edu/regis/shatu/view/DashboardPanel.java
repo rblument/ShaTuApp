@@ -38,6 +38,8 @@ import javax.swing.border.LineBorder;
 import edu.regis.shatu.model.TutoringSession;
 import edu.regis.shatu.model.aol.AssessmentLevel;
 import edu.regis.shatu.model.aol.TutoringMode;
+import edu.regis.shatu.model.aol.Assessment;
+import edu.regis.shatu.model.aol.StudentModel;
 import edu.regis.shatu.svc.ServiceFactory;
 import edu.regis.shatu.svc.StudentModelSvc;
 
@@ -70,6 +72,10 @@ public class DashboardPanel extends JPanel {
     private HashMap<String, JProgressBar> teachMeProgressBars;
     private HashMap<String, JProgressBar> practiceProgressBars;
     private HashMap<String, JProgressBar> quizMeProgressBars;
+    
+    private JProgressBar teachMeOverallBar;
+    private JProgressBar practiceOverallBar;
+    private JProgressBar quizMeOverallBar;
 
     // List of all lesson titles from the DB (excluding IDs 0, 10, 20)
     private List<String> allLessons = new ArrayList<>();
@@ -117,7 +123,8 @@ public class DashboardPanel extends JPanel {
             welcomeLabel.setText("Welcome, " + model.getStudent().getAccount().getFirstName() + "!");
         }
         
-        // ToDo: update progress bars
+        //update progress bars
+        updateAllProgressBars();
     }
 
     /**
@@ -164,8 +171,110 @@ public class DashboardPanel extends JPanel {
         teachMePanel = new JPanel(new GridBagLayout());
         practicePanel = new JPanel(new GridBagLayout());
         quizMePanel = new JPanel(new GridBagLayout());
+        
+        //todo load lesson data
     }
-
+    
+    //Loads the lesson names from database
+    private void loadAllLessons(){
+        try {
+            if (model != null){
+                String userId = model.getStudent().getAccount().getUserId();
+                StudentModelSvc studentModelService = ServiceFactory.findStudentModelSvc();
+                
+                //get lessons by checking assessments in student model
+                StudentModel studentModel = model.getStudent().getStudentModel();
+                
+                for(Assessment assessment : studentModel.getAssessments().values()) {
+                    String lessonTitle = assessment.getOutcome().getTitle();
+                    
+                    //exclude lessons with 0, 10,20 for IDs to prevent duplicates
+                    if(!allLessons.contains(lessonTitle)) {
+                        allLessons.add(lessonTitle);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error Loading Lessons: " + e.getMessage());
+        }
+    }
+    
+    //Updates all progress bars when model changes
+    private void updateAllProgressBars() {
+        if (model == null) {
+            return;
+        }
+        
+        //update teach me progress bar
+        if(teachMeProgressBars != null) {
+            for (String lesson : teachMeProgressBars.keySet()) {
+                
+                JProgressBar bar = teachMeProgressBars.get(lesson);
+                int progress = getProgressForLesson("Teach Me", lesson);
+                bar.setValue(progress);
+                bar.setString(progress + "%");
+            }
+        }
+        
+        //Update Practice Progress Bars
+        if(practiceProgressBars != null) {
+            for(String lesson : practiceProgressBars.keySet()) {
+                JProgressBar bar = practiceProgressBars.get(lesson);
+                int progress = getProgressForLesson("Practice", lesson);
+                bar.setValue(progress);
+                bar.setString(progress + "%");
+            }
+        }
+        
+        //Update Quiz Me Progress Bar
+        if(quizMeProgressBars != null) {
+            for(String lesson : quizMeProgressBars.keySet()) {
+                JProgressBar bar = quizMeProgressBars.get(lesson);
+                int progress = getProgressForLesson("Quiz Me", lesson);
+                bar.setValue(progress);
+                bar.setString(progress + "%");
+            }
+        }
+        
+        
+        int teachMeSum = 0;
+        for (String lesson : allLessons) {
+            teachMeSum += getProgressForLesson("Teach Me",lesson);
+        }
+        int teachMeOverall = allLessons.isEmpty()? 0 : teachMeSum / allLessons.size();
+        if (teachMeOverallBar != null) {
+            teachMeOverallBar.setValue(teachMeOverall);
+            teachMeOverallBar.setString(teachMeOverall + "%");
+        }
+        
+        
+        int practiceSum = 0;
+        for (String lesson : allLessons) {
+            practiceSum += getProgressForLesson("Practice",lesson);
+        }
+        int practiceOverall = allLessons.isEmpty()? 0 : practiceSum / allLessons.size();
+        if (practiceOverallBar != null) {
+            practiceOverallBar.setValue(practiceOverall);
+            practiceOverallBar.setString(practiceOverall + "%");
+        }
+        
+        int quizMeSum = 0;
+        for (String lesson : allLessons) {
+            quizMeSum += getProgressForLesson("Quiz Me",lesson);
+        }
+        int quizMeOverall = allLessons.isEmpty()? 0 : quizMeSum / allLessons.size();
+        if (quizMeOverallBar != null) {
+            quizMeOverallBar.setValue(quizMeOverall);
+            quizMeOverallBar.setString(quizMeOverall + "%");
+        }
+        
+        
+        //repaint panel to reflect updates
+        revalidate();
+        repaint();
+        
+    }
+    
     /**
      * Lays out all UI components on the panel.
      */
@@ -411,6 +520,25 @@ public class DashboardPanel extends JPanel {
         filler.setBackground(REGIS_YELLOW);
         panel.add(filler, gbc);
 
+        //Save Reference to Overall Bar
+        if(null != category) 
+                switch (category) {
+                    case "Teach Me":
+                        teachMeOverallBar = overallBar;
+                        break;
+                    case "Practice":
+                        practiceOverallBar = overallBar;
+                        break;
+                    case "Quiz Me":
+                        quizMeOverallBar = overallBar;
+                        break;
+                    default:
+                        System.err.println("Unknown category: " + category);
+                        break;
+                }
+        
+        
+        
         panel.revalidate();
         panel.repaint();
         return panel;
@@ -473,6 +601,23 @@ public class DashboardPanel extends JPanel {
                 bar.setBackground(Color.WHITE);
                 bar.setString(progress + "%");
                 panel.add(bar, gbc);
+            
+                //Store Progress Bar in the Hashmap for later updates
+                if(null != studyMode) 
+                switch (studyMode) {
+                    case "Teach Me":
+                        teachMeProgressBars.put(lesson, bar);
+                        break;
+                    case "Practice":
+                        practiceProgressBars.put(lesson, bar);
+                        break;
+                    case "Quiz Me":
+                        quizMeProgressBars.put(lesson, bar);
+                        break;
+                    default:
+                        System.err.println("Unknown Study Mode: " + studyMode);
+                        break;
+                }
             }
             row++;
         }
