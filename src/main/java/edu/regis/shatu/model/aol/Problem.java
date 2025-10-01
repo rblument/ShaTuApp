@@ -12,7 +12,7 @@
  */
 package edu.regis.shatu.model.aol;
 
-import edu.regis.shatu.model.Model;
+import edu.regis.shatu.model.TitledModel;
 
 /**
  * The primary task that a student is attempting to solve, as part of a unit 
@@ -25,52 +25,43 @@ import edu.regis.shatu.model.Model;
  * 
  * @author rickb
  */
-public abstract class Problem extends Model {
-    protected int problemId;
-    
-    /**
-     * A brief informative description of this problem, which may be displayed 
-     * in the GUI.
-     */
-    protected String title;
-    
-    /**
-     * An informative overview of this problem.
-     */
-    protected String description;
+public class Problem extends TitledModel {
+    // Inherited: id, title, description
+    private String messageToHash;
     
     // ToDo:
     //public abstract ArrayList<Task> getTasks();
     
     public Problem() {
-        this(DEFAULT_ID);
+        super();
     }
     
     public Problem(int id) {
         super(id);
-        
-        title = "";
-        description = "";
     }
-
-    public String getTitle() {
-        return title;
+    
+    /**
+     * Retrieves the message that will be hashed for the problem.
+     * 
+     * @return the message to be hashed
+     */
+    public String getMessageToHash(){
+        return messageToHash;
     }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
+    
+    /**
+     * Sets the message that will be hashed in the problem.
+     * 
+     * @param messageToHash a String representing a message
+     */
+    public void setMessageToHash(String messageToHash){
+        this.messageToHash = messageToHash;
     }
 
     @Override
     public String toString() {
-        return title;
+        return "Title: " + getTitle() + 
+                " Description: " + getDescription() + 
+                " Message: " + this.messageToHash;
     }
 }
