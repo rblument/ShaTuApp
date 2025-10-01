@@ -104,7 +104,7 @@ public class StepCompletionAction extends ShaTuGuiAction {
      */
     @Override
     public void actionPerformed(ActionEvent evt) {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        Gson gson = getGsonPretty();
         Account account = MainFrame.instance().getAccount();
         // Catches a possible IllegalArgumentException thrown by the
         // getUserRequestView() method

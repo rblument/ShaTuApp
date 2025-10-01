@@ -96,7 +96,7 @@ public class HintAction extends ShaTuGuiAction {
      */
     @Override
     public void actionPerformed(ActionEvent evt) {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        Gson gson = getGsonPretty();
 
         Account account = MainFrame.instance().getAccount();
 

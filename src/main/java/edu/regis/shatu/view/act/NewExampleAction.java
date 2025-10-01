@@ -95,7 +95,7 @@ public class NewExampleAction extends ShaTuGuiAction {
     @Override
     public void actionPerformed(ActionEvent evt) {
         System.out.println("actionPerformed");
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        Gson gson = getGsonPretty();
 
         Account account = MainFrame.instance().getAccount();
 
