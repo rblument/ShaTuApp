@@ -95,9 +95,6 @@ public class MainFrame extends JFrame implements WindowListener {
 
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE); // see windowClosing()
 
-
-        // Calls on successful logout
-        // shaTuServer.notifyLogout(currentStudent);
     }
   
     /**

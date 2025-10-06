@@ -426,14 +426,6 @@ public class SplashFrame extends JFrame {
         this.cards.add(dashboardPanel, DASHBOARD);
         this.selectPanel(DASHBOARD);  // Display the dashboard
 
-
-        // Calls here on successful login
-        /*
-        if (authenticated) {
-            shaTuServer.notifyLogin(student);
-            MainFrame.instance().show();
-        }
-        *\
     }
     
     /**
