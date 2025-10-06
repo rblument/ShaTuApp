@@ -74,11 +74,6 @@ public class TutoringSessionView extends GPanel {
      * Triggers returning to the dashboard.
      */
     private JButton dashboardButton;
-    
-    /*
-     * Triggers a sign out. 
-     */    
-    private JButton logoutButton;
 
     /**
      * Initialize this view including creating and laying out its child components.
@@ -139,9 +134,6 @@ public class TutoringSessionView extends GPanel {
         dashboardButton = new JButton("Go to Dashboard");
         dashboardButton.addActionListener(e -> navigateToDashboard());
 
-        logoutButton = new JButton("Logout");
-        logoutButton.addActionListener(e -> logout());
-
         scrollPane = new JScrollPane(stepSelectorView);
 
         stepViewContainer = new JPanel(new BorderLayout());
@@ -196,11 +188,4 @@ public class TutoringSessionView extends GPanel {
     public void navigateToDashboard() {
         MainFrame.instance().displayView(MainFrame.ViewName.DASHBOARD);
     }
-    /**
-     * Handle the user's request to sign out.
-     */
-    public void logout() {
-        MainFrame.instance().setModel(null);
-    }
-    
 }

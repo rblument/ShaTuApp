@@ -55,7 +55,6 @@ public class DashboardPanel extends JPanel {
     private TutoringSession model; // Reference to current tutoringSession
     private static boolean welcome = false;
 
-    private JButton logOutButton;
     private JButton settingsButton;
     private JButton seeOneButton;
     private JButton doOneButton;
@@ -132,7 +131,6 @@ public class DashboardPanel extends JPanel {
      */
     private void initializeComponents() {
         // Header components
-        logOutButton = new JButton("Log Out");
         settingsButton = new JButton("Settings");
         welcomeLabel = new JLabel();
         welcomeLabel.setBackground(REGIS_BLUE);
@@ -147,9 +145,6 @@ public class DashboardPanel extends JPanel {
         teachOneButton = new JButton("Teach One");
         enableModeButtons(true, false, false);
 
-        // ToDo, since the logout button now appears in several places,
-        // should be a Logout Java Action Or better yet, only one logout?
-        logOutButton.addActionListener(evt -> logOut());
         settingsButton.setVerticalAlignment(SwingConstants.TOP);  
         
         seeOneButton.addActionListener(evt -> {
@@ -288,7 +283,6 @@ public class DashboardPanel extends JPanel {
         headerPanel.add(settingsButton, BorderLayout.LINE_START);
         welcomeLabel.setText("");
         headerPanel.add(welcomeLabel, BorderLayout.CENTER);
-        headerPanel.add(logOutButton, BorderLayout.LINE_END);
         add(headerPanel, BorderLayout.NORTH);
 
         // Content panel
@@ -623,13 +617,5 @@ public class DashboardPanel extends JPanel {
         }
 
         return row;
-    }
-
-    /**
-     * Logs out the current user.
-     */
-    private void logOut() {
-        // ToDo, move this to a Logout Java Action 
-        MainFrame.instance().setModel(null);
     }
 }
