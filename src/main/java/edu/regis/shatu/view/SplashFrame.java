@@ -425,7 +425,6 @@ public class SplashFrame extends JFrame {
         this.dashboardPanel = new DashboardPanel(session);  // Pass session to DashboardPanel
         this.cards.add(dashboardPanel, DASHBOARD);
         this.selectPanel(DASHBOARD);  // Display the dashboard
-
     }
     
     /**
