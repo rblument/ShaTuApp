@@ -43,6 +43,7 @@ import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.model.steps.Step;
+import edu.regis.shatu.model.aol.TutoringMode;
 
 /**
  * ExclusiveOrView class represents a GUI view for performing Exclusive OR (XOR)
@@ -496,7 +497,38 @@ public class ExclusiveOrView extends UserRequestView implements KeyListener {
         }
     }
         
+    /**
+     * Configure UI components based on the current tutoring mode
+     * Disables fields not available for SEE_ONE mode for passive viewing.
+     * 
+     */
+    
+    @Override
+    protected void configureModeSpecificUI() {
+        super.configureModeSpecificUI();//call parent to handle buttons
         
+        if(model == null) {
+            return;
+        }
+        
+        TutoringMode mode = model.getTutoringMode();
+        
+        if (mode == TutoringMode.SEE_ONE) {
+            fourRadioButton.setEnabled(false);
+            eightRadioButton.setEnabled(false);
+            sixteenRadioButton.setEnabled(false);
+            thirtytwoRadioButton.setEnabled(false);
+            responseTextArea.setEnabled(false);
+        }
+        // DO_ONE & TEACH_ONE
+        else {
+            fourRadioButton.setEnabled(true);
+            eightRadioButton.setEnabled(true);
+            sixteenRadioButton.setEnabled(true);
+            thirtytwoRadioButton.setEnabled(true);
+            responseTextArea.setEnabled(true);
+        }
+    }    
        
     @Override
     public NewExampleRequest newRequest() {

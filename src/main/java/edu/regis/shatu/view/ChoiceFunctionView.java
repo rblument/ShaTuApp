@@ -45,6 +45,7 @@ import edu.regis.shatu.model.steps.ChoiceFunctionStep;
 import edu.regis.shatu.model.steps.Step;
 import java.awt.event.KeyAdapter;
 import javax.swing.JOptionPane;
+import edu.regis.shatu.model.aol.TutoringMode;
 
 /**
  * ChoiceFunctionView class represents a GUI view for a choice function Ch(x, y,
@@ -499,5 +500,38 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
         }
        
     }
+    
+    /**
+     * Configure UI components based on the current tutoring mode
+     * Disables fields not available for SEE_ONE mode for passive viewing.
+     * 
+     */
+    
+    @Override
+    protected void configureModeSpecificUI() {
+        super.configureModeSpecificUI();//call parent to handle buttons
+        
+        if(model == null) {
+            return;
+        }
+        
+        TutoringMode mode = model.getTutoringMode();
+        
+        if (mode == TutoringMode.SEE_ONE) {
+            fourRadioButton.setEnabled(false);
+            eightRadioButton.setEnabled(false);
+            sixteenRadioButton.setEnabled(false);
+            thirtytwoRadioButton.setEnabled(false);
+            responseTextArea.setEnabled(false);
+        }
+        // DO_ONE & TEACH_ONE
+        else {
+            fourRadioButton.setEnabled(true);
+            eightRadioButton.setEnabled(true);
+            sixteenRadioButton.setEnabled(true);
+            thirtytwoRadioButton.setEnabled(true);
+            responseTextArea.setEnabled(true);
+        }
+    } 
 
 }

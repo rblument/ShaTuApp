@@ -64,6 +64,10 @@ public class NewAccountPanel extends GPanel {
      * The account being created and displayed in this panel.
      */
     private Account model;
+    
+    //Background Colors
+    private static final Color REGIS_BLUE = new Color(0, 43, 73);
+    private static final Color REGIS_YELLOW = new Color(241, 196, 0);
 
     /**
      * The editable fields appearing in this dialog.
@@ -82,7 +86,7 @@ public class NewAccountPanel extends GPanel {
     protected JButton signInBut;
     protected JButton createAcctBut;
     protected JButton backBut;
-
+    
     public NewAccountPanel() {
         super();
 
@@ -227,7 +231,7 @@ public class NewAccountPanel extends GPanel {
 
         JLabel copyright = new JLabel("(C) 2019-2025 Johanna and Richard Blumenthal. All Rights Reserved");
         copyright.setFont(new Font("Dialog", Font.PLAIN, 10));
-        copyright.setForeground(new Color(241,196,0));
+        copyright.setForeground(REGIS_YELLOW);
         addc(copyright, 0, 2, 2, 1, 1.0, 1.0,
                 GridBagConstraints.NORTH, GridBagConstraints.CENTER,
                 5, 5, 5, 5);
@@ -241,7 +245,7 @@ public class NewAccountPanel extends GPanel {
 
         JLabel ccis = new JLabel("Regis University Department of Computer and Cyber Sciences");
         ccis.setFont(new Font("Dialog", Font.PLAIN, 20));
-        ccis.setForeground(new Color(0, 43, 73));
+        ccis.setForeground(REGIS_BLUE);
 
         panel.addc(ccis, 0, 0, 1, 1, 1.0, 1.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL,
@@ -252,7 +256,7 @@ public class NewAccountPanel extends GPanel {
 
     private GPanel createOverview() {
         GPanel panel = new GPanel();
-        panel.setBackground(new Color(241,196,0));
+        panel.setBackground(REGIS_YELLOW);
 
         panel.setSize(300, 400);
         panel.setPreferredSize(new Dimension(300, 400));
@@ -275,7 +279,7 @@ public class NewAccountPanel extends GPanel {
         descr.setEditable(false);
         descr.setLineWrap(true);
         descr.setWrapStyleWord(true);
-        descr.setBackground(new Color(241,196,0));
+        descr.setBackground(REGIS_YELLOW);
         descr.setFont(new Font("Dialog", Font.PLAIN, 12));
 	descr.append("ShaTu provides individualized tutoring practice focused ");
 	descr.append("on understanding the SHA-256 digest algorithm and the");
@@ -305,7 +309,7 @@ public class NewAccountPanel extends GPanel {
 
     private GPanel createLogin() {
         GPanel panel = new GPanel();
-        panel.setBackground(new Color(241,196,0));
+        panel.setBackground(REGIS_YELLOW);
 
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 5, 5));
 
@@ -456,7 +460,7 @@ public class NewAccountPanel extends GPanel {
                 break;
             case 2:
                 strength.setText("(Strength: Moderate)");
-                strength.setForeground(new Color(255,255,0));
+                strength.setForeground(Color.YELLOW);
                 break;
             default:
                 strength.setText("(Strength: Good)");

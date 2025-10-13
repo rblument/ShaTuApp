@@ -24,6 +24,7 @@ import edu.regis.shatu.model.aol.PendingTask;
 import edu.regis.shatu.view.act.HintAction;
 import edu.regis.shatu.view.act.NewExampleAction;
 import edu.regis.shatu.view.act.StepCompletionAction;
+import edu.regis.shatu.model.aol.TutoringMode;
 import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -106,8 +107,38 @@ public abstract class UserRequestView extends GPanel {
     public void setModel(TutoringSession model) {
         random = new Random();
         this.model = model;
+        configureModeSpecificUI();
         updateView();
     }
+    
+    /**
+     * Configure UI components based on the current tutoring mode. 
+     * Disables fields not available for SEE_ONE mode for passive viewing.
+     */
+    protected void configureModeSpecificUI(){
+        if (model == null) {
+            return;
+        }
+        
+        TutoringMode mode = model.getTutoringMode();
+        
+        if (mode == TutoringMode.SEE_ONE) {
+            checkButton.setEnabled(false);
+            hintButton.setEnabled(false);
+            newExampleButton.setEnabled(false);
+        } else if (mode == TutoringMode.DO_ONE) {
+            checkButton.setEnabled(true);
+            hintButton.setEnabled(true);
+            newExampleButton.setEnabled(true);
+        } else if (mode == TutoringMode.TEACH_ONE) {
+            checkButton.setEnabled(true);
+            hintButton.setEnabled(true);
+            newExampleButton.setEnabled(true);
+        }
+        
+    }
+    
+    
     
     /**
      * Assign the given task as the current task in our tutoring session model

@@ -42,23 +42,9 @@ import edu.regis.shatu.model.aol.Problem;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.model.aol.StudentModel;
+import edu.regis.shatu.model.aol.TutoringMode;
 import edu.regis.shatu.model.steps.Step;
-import edu.regis.shatu.objectives.AddBits;
-import edu.regis.shatu.objectives.AddMsgLen;
-import edu.regis.shatu.objectives.AddOne;
-import edu.regis.shatu.objectives.ChoiceFunction;
-import edu.regis.shatu.objectives.CompressRound;
-import edu.regis.shatu.objectives.EncodeAscii;
-import edu.regis.shatu.objectives.InitVars;
-import edu.regis.shatu.objectives.MajorityFunction;
-import edu.regis.shatu.objectives.Objective;
-import edu.regis.shatu.objectives.PadZeros;
-import edu.regis.shatu.objectives.PrepareSchedule;
-import edu.regis.shatu.objectives.RotateBits;
-import edu.regis.shatu.objectives.ShaOne;
-import edu.regis.shatu.objectives.ShaZero;
-import edu.regis.shatu.objectives.ShiftBits;
-import edu.regis.shatu.objectives.XorBits;
+import edu.regis.shatu.objectives.*;
 
 /**
  * The ShaTu tutor, which implements the tutoring service.
@@ -656,6 +642,10 @@ public class ShaTuTutor implements TutorSvc {
         tSession.setCourse(course.getDigest());
         tSession.setUnit(course.currentUnit().getDigest());
 
+        //set tutoringmode to SEE_ONE or Unit 0
+        tSession.setTutoringMode(TutoringMode.SEE_ONE);
+        
+        
         Task task = getFirstTask(course);
         PendingTask pendingTask = new PendingTask(task);
         pendingTask.setCurrentStep(new PendingStep(task.getCurrentStep()));

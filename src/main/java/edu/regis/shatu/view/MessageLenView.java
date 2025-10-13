@@ -31,6 +31,8 @@ import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.model.steps.MessageLenStep;
 import edu.regis.shatu.model.steps.Step;
+import edu.regis.shatu.model.aol.TutoringMode;
+
 
 /**
  * A view that requests the student to figure out the number of bits their
@@ -326,6 +328,32 @@ public class MessageLenView extends UserRequestView {
         
    
  
+    }
+    
+    
+    /**
+     * Configures UI components based on current tutoring mode
+     * Disables fields not available for SEE_ONE mode for passive viewing.
+     */
+    @Override
+    protected void configureModeSpecificUI() {
+        super.configureModeSpecificUI();//calls parent to handle the buttons
+        
+        if (model == null) {
+            return;
+        }
+        
+        TutoringMode mode = model.getTutoringMode();
+        
+        if (mode == TutoringMode.SEE_ONE) {
+            messageLengthField.setEnabled(false);
+            responseTextArea.setEnabled(false);
+        }
+        // DO_ONE & TEACH_ONE
+        else {
+            messageLengthField.setEnabled(true);
+            responseTextArea.setEnabled(true);
+        }
     }
 
 

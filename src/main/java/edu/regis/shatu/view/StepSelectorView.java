@@ -40,13 +40,17 @@ public class StepSelectorView extends GPanel {
      */
     private Map<String, String> stepAssessmentLevels = new HashMap<>();
     
+    //Background Colors
+    private static final Color REGIS_BLUE = new Color(0, 43, 73);
+    private static final Color REGIS_YELLOW = new Color(241, 196, 0);
+    
     /**
      * Initialize this view including creating and laying out its child components.
      */
     public StepSelectorView() {
         GuiController.instance().setStepSelectorView(this);
  
-        setBackground(new Color(241,196,0));
+        setBackground(REGIS_YELLOW);
         setBorder(BorderFactory.createLineBorder(Color.WHITE));
         stepAssessmentLevels = fetchStepAssessments();
         initializeComponents();
@@ -105,7 +109,7 @@ public class StepSelectorView extends GPanel {
     private GPanel createPreprocessingPanel() {
         GPanel panel = new GPanel();
         
-        panel.setBackground(new Color(0, 43, 73)); // Blue
+        panel.setBackground(REGIS_BLUE);
         panel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         
         JLabel label = new JLabel("Message Preprocessing");
@@ -136,7 +140,7 @@ public class StepSelectorView extends GPanel {
     private GPanel createHashCompPanel() {
         GPanel panel = new GPanel();
         
-        panel.setBackground(new Color(0, 43, 73)); // Dark Regis Blue
+        panel.setBackground(REGIS_BLUE); 
         panel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         
         JLabel label = new JLabel("Hash Computation");
