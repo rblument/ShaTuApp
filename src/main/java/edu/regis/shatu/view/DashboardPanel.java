@@ -42,6 +42,7 @@ import edu.regis.shatu.model.aol.Assessment;
 import edu.regis.shatu.model.aol.StudentModel;
 import edu.regis.shatu.svc.ServiceFactory;
 import edu.regis.shatu.svc.StudentModelSvc;
+import edu.regis.shatu.view.style.ColorScheme;
 
 /**
  * The dashboard screen to be displayed upon user sign in. Enables user to
@@ -83,8 +84,8 @@ public class DashboardPanel extends JPanel {
     private static final String URL = "jdbc:mysql://localhost:3306/shatudb?serverTimezone=UTC";
 
     //Background Colors
-    private static final Color REGIS_BLUE = new Color(0, 43, 73);
-    private static final Color REGIS_YELLOW = new Color(241, 196, 0);
+//    private static final Color REGIS_BLUE = new Color(0, 43, 73);
+//    private static final Color REGIS_YELLOW = new Color(241, 196, 0);
     
     
     /**
@@ -133,10 +134,10 @@ public class DashboardPanel extends JPanel {
         // Header components
         settingsButton = new JButton("Settings");
         welcomeLabel = new JLabel();
-        welcomeLabel.setBackground(REGIS_BLUE);
+        welcomeLabel.setBackground(ColorScheme.REGIS_BLUE);
         welcomeLabel.setOpaque(true);
         welcomeLabel.setFont(new Font("Segoe UI", Font.PLAIN, 18));
-        welcomeLabel.setForeground(REGIS_YELLOW);
+        welcomeLabel.setForeground(ColorScheme.REGIS_YELLOW);
         welcomeLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
         // Study mode buttons
@@ -148,7 +149,7 @@ public class DashboardPanel extends JPanel {
         settingsButton.setVerticalAlignment(SwingConstants.TOP);  
         
         seeOneButton.addActionListener(evt -> {
-            MainFrame.instance().displayView(MainFrame.ViewName.SPLASH);
+            MainFrame.instance().displayView(MainFrame.ViewName.TUTOR);
         });
         
         doOneButton.addActionListener(evt -> {
@@ -287,7 +288,7 @@ public class DashboardPanel extends JPanel {
 
         // Content panel
         JPanel contentPanel = new JPanel(new GridBagLayout());
-        contentPanel.setBackground(REGIS_BLUE);
+        contentPanel.setBackground(ColorScheme.REGIS_BLUE);
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.BOTH;
         gbc.insets = new Insets(5, 5, 5, 5);
@@ -461,7 +462,7 @@ public class DashboardPanel extends JPanel {
         }
 
         JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBackground(REGIS_YELLOW); // Yellow background
+        panel.setBackground(ColorScheme.REGIS_YELLOW); // Yellow background
         panel.setBorder(new CompoundBorder(new LineBorder(Color.BLACK), new EmptyBorder(5, 5, 5, 5)));
 
         GridBagConstraints gbc = new GridBagConstraints();
@@ -491,7 +492,7 @@ public class DashboardPanel extends JPanel {
         overallBar.setStringPainted(true);
         overallBar.setPreferredSize(new Dimension(70, 35));
         overallBar.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        overallBar.setForeground(REGIS_BLUE);
+        overallBar.setForeground(ColorScheme.REGIS_BLUE);
         overallBar.setBackground(Color.WHITE);
         overallBar.setString(overall + "%");
         gbc.gridy = 1;
@@ -511,7 +512,7 @@ public class DashboardPanel extends JPanel {
         gbc.gridwidth = 2;
         gbc.weighty = 1.0;
         JPanel filler = new JPanel();
-        filler.setBackground(REGIS_YELLOW);
+        filler.setBackground(ColorScheme.REGIS_YELLOW);
         panel.add(filler, gbc);
 
         //Save Reference to Overall Bar
@@ -591,7 +592,7 @@ public class DashboardPanel extends JPanel {
                 bar.setStringPainted(true);
                 bar.setPreferredSize(new Dimension(35, 25));
                 bar.setFont(new Font("Segoe UI", Font.BOLD, 16));
-                bar.setForeground(REGIS_BLUE);
+                bar.setForeground(ColorScheme.REGIS_BLUE);
                 bar.setBackground(Color.WHITE);
                 bar.setString(progress + "%");
                 panel.add(bar, gbc);
