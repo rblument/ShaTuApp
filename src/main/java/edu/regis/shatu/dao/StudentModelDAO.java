@@ -397,4 +397,14 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
     public void delete(String userId) throws NonRecoverableException {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
+
+    public void recordLoginEvent(int studentId, LocalDateTime timestamp) {
+        String sql = "UPDATE students SET last_login = ? WHERE id = ?";
+        // execute with JDBC/SQLite/whatever DB is used
+}
+
+    public void recordLogoutEvent(int studentId, LocalDateTime timestamp) {
+        String sql = "UPDATE students SET last_logout = ? WHERE id = ?";
+        // execute DB update here
+}
 }
