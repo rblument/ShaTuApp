@@ -31,6 +31,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,10 +42,7 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
     }
 
     /**
-     * Creates a new student model and its associated assessment records.
-     *
-     * @param student the student for whom the model is created.
-     * @throws NonRecoverableException if an error occurs during creation.
+     * {@inheritDoc}
      */
     @Override
     public void create(Student student) throws NonRecoverableException {
@@ -88,12 +86,7 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
     }
 
     /**
-     * Retrieves the student model along with its assessment records.
-     *
-     * @param userId the user id.
-     * @return the student model.
-     * @throws ObjNotFoundException if the student model is not found.
-     * @throws NonRecoverableException if an error occurs during retrieval.
+     * {@inheritDoc}
      */
     @Override
     public StudentModel retrieve(String userId) throws ObjNotFoundException, NonRecoverableException {
@@ -123,12 +116,7 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
     }
 
     /**
-     * Updates a specific field in an assessment.
-     *
-     * @param model the student model.
-     * @param assessment the assessment to update.
-     * @param field the field to update.
-     * @throws NonRecoverableException if an error occurs during the update.
+     * {@inheritDoc}
      */
     @Override
     public void updateAssessment(StudentModel model, Assessment assessment, StudentModelFieldKind field)
@@ -176,23 +164,7 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
     }
 
     /**
-     * Retrieves a list of unfinished lessons for a student in a specific learning
-     * category.
-     * 
-     * The category is inferred from `AssessmentLevel`:
-     * - "Not Started" → Teach Me
-     * - "In Progress" → Practice
-     * - "Completed", "Very Low", "Low", "Medium", "High", "Very High" → Quiz Me
-     *
-     * If a lesson is not yet completed in a **previous category**, it will indicate
-     * that.
-     *
-     * @param userId           The unique identifier of the student.
-     * @param learningCategory The learning category ("Teach Me", "Practice", "Quiz
-     *                         Me").
-     * @return A list of unfinished lesson names, formatted accordingly.
-     * @throws ObjNotFoundException    If the student record is not found.
-     * @throws NonRecoverableException If a database error occurs.
+     * {@inheritDoc}
      */
     @Override
     public List<String> retrieveIncompleteLessons(String userId, String learningCategory)
@@ -292,13 +264,7 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
     }
 
     /**
-     * Retrieves the assessment level for a given lesson.
-     *
-     * @param userId the user id.
-     * @param lesson the lesson title.
-     * @return the assessment level.
-     * @throws ObjNotFoundException if the assessment record is not found.
-     * @throws NonRecoverableException if an error occurs during retrieval.
+     * {@inheritDoc}
      */
     @Override
     public AssessmentLevel retrieveAssessmentLevel(String userId, String lesson)
@@ -329,7 +295,10 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
         }
     }
 
-     @Override
+   /**
+     * {@inheritDoc}
+     */
+    @Override
     public void updateScaffoldLevel(String userId, ScaffoldLevel level)
             throws ObjNotFoundException, NonRecoverableException {
         final String sql = "UPDATE StudentModel SET ScaffoldLevel = ? WHERE UserId = ?";
@@ -383,28 +352,39 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
         return assessments;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean exists(String userId) throws NonRecoverableException {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
-    @Override
-    public StudentModel findModelById(String userId) throws ObjNotFoundException, NonRecoverableException {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void delete(String userId) throws NonRecoverableException {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
-    public void recordLoginEvent(int studentId, LocalDateTime timestamp) {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void recordLoginEvent(String userId, long timestamp) {
         String sql = "UPDATE students SET last_login = ? WHERE id = ?";
+        // ToDo: Write this code
         // execute with JDBC/SQLite/whatever DB is used
-}
-
-    public void recordLogoutEvent(int studentId, LocalDateTime timestamp) {
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void recordLogoutEvent(String userId, long timestamp) {
         String sql = "UPDATE students SET last_logout = ? WHERE id = ?";
+        // ToDo Write this code
         // execute DB update here
-}
+    }
 }
