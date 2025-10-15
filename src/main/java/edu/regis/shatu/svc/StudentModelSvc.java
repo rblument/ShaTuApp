@@ -54,7 +54,7 @@ public interface StudentModelSvc {
     boolean exists(String userId) throws NonRecoverableException;
     
     /**
-     * Return the {@link Student} with the given user id.
+     * Return the {@link StudentModel} with the given user id.
      * 
      * See exists(String) for a faster check as to whether a student exists.
      * 
@@ -65,17 +65,6 @@ public interface StudentModelSvc {
      */
     StudentModel retrieve(String userId) throws ObjNotFoundException, NonRecoverableException;
     
-    /**
-     * Return the {@link StudentModel} for the given user id.
-     * 
-     * @param userId the student's user id (email: user@university.edu)
-     * @return the StudentModel for the Student with the given user id
-     * @throws ObjNotFoundException No student with the given user id exists
-
-     * @throws NonRecoverableException perhaps see getCause().getErrorCode()
-     */
-    StudentModel findModelById(String userId) throws ObjNotFoundException, 
-            NonRecoverableException;
     
     /**
      * Delete the student from the database including the student's account,
@@ -97,8 +86,16 @@ public interface StudentModelSvc {
     void updateAssessment(StudentModel model, Assessment assessment, StudentModelFieldKind field)
             throws NonRecoverableException;
     
-       /**
+    /**
     * Retrieve a list of unfinished lessons for a student in a specific learning mode.
+    * 
+    * The category is inferred from `AssessmentLevel`:
+    * - "Not Started" → Teach Me
+    * - "In Progress" → Practice
+    * - "Completed", "Very Low", "Low", "Medium", "High", "Very High" → Quiz Me
+    *
+    * If a lesson is not yet completed in a **previous category**, it will indicate
+    * that.
     * 
     * @param userId the unique identifier for the student.
     * @param learningCategory the category of learning (e.g., "Teach Me", "Practice", "Quiz Me").
@@ -130,5 +127,27 @@ public interface StudentModelSvc {
      * @throws ObjNotFoundException if no student model is found.
      */
     void updateScaffoldLevel(String userId, ScaffoldLevel level)
+            throws ObjNotFoundException, NonRecoverableException;
+    
+    /**
+     * Record the fact that the given student signed into the tutor.
+     * 
+     * @param userId the user id of the student
+     * @param timestamp time in milliseconds 
+     * @throws ObjNotFoundException
+     * @throws NonRecoverableException 
+     */
+    void recordLoginEvent(String userId, long timestamp)
+            throws ObjNotFoundException, NonRecoverableException;
+    
+    /**
+     * Record the fact that the given student signed out of the tutor.
+     * 
+     * @param userId the user id of the student
+     * @param timestamp time in milliseconds (see comments on this field)
+     * @throws ObjNotFoundException
+     * @throws NonRecoverableException 
+     */
+    void recordLogoutEvent(String userId, long timestamp)
             throws ObjNotFoundException, NonRecoverableException;
 }

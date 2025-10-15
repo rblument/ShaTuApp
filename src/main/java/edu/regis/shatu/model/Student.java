@@ -31,6 +31,17 @@ public class Student {
      */
     private StudentModel studentModel;
     
+    // ToDo: What are these being used for. If it's for the purpose of 
+    // tutoring assessment, then they should be in the studentModel???
+    // These are time in milliseonces
+    //  Date date = new Date(milliseconds);
+    // SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS z", Locale.US);
+    // Optional: Set the time zone if you need a specific one (e.g., UTC)
+    // sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+    // String formattedDate = sdf.format(date);
+    private long lastLogin;
+    private long lastLogout;
+    
     /**
      * Initialize this student with the given account information.
      * 
@@ -68,18 +79,40 @@ public class Student {
         this.studentModel = studentModel;
     }
 
+    /**
+     * 
+     * @return time in milliseconds (see comments on this field)
+     */
+    public long getLastLogin() { 
+        return lastLogin; 
+    }
+    
+    /**
+     * 
+     * @param lastLogin time in milliseconds (see comments on this field)
+     */
+    public void setLastLogin(long lastLogin) { 
+        this.lastLogin = lastLogin; 
+    }
+
+    /**
+     * 
+     * @return time in milliseconds (see comments on this field)
+     */
+    public long getLastLogout() { 
+        return lastLogout; 
+    }
+    
+    /**
+     * 
+     * @param lastLogout time in milliseconds (see comments on this field)
+     */
+    public void setLastLogout(long lastLogout) { 
+        this.lastLogout = lastLogout; 
+    }
+    
     @Override
     public String toString() {
         return "Student: " + account.getUserId();
     }
-
-    private LocalDateTime lastLogin;
-    private LocalDateTime lastLogout;
-
-    // Getters and setters
-    public LocalDateTime getLastLogin() { return lastLogin; }
-    public void setLastLogin(LocalDateTime lastLogin) { this.lastLogin = lastLogin; }
-
-    public LocalDateTime getLastLogout() { return lastLogout; }
-    public void setLastLogout(LocalDateTime lastLogout) { this.lastLogout = lastLogout; }
 }

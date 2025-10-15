@@ -45,6 +45,7 @@ import edu.regis.shatu.model.aol.StudentModel;
 import edu.regis.shatu.model.aol.TutoringMode;
 import edu.regis.shatu.model.steps.Step;
 import edu.regis.shatu.objectives.*;
+import java.util.Date;
 
 /**
  * The ShaTu tutor, which implements the tutoring service.
@@ -796,23 +797,44 @@ public class ShaTuTutor implements TutorSvc {
         return sb.toString();
     }
 
-    private StudentDao studentDao = new StudentDao();
+    /**
+     * Update the database to record the fact the student logged in.
+     * 
+     * @param student the student who logged in.
+     * @throws ObjNotFoundException
+     * @throws NonRecoverableException 
+     */
+    public void notifyLogin(Student student) throws ObjNotFoundException, NonRecoverableException {
+        // ToDo: This needs to be called suring a sign in. 
+        StudentModelSvc stuModelSvc = ServiceFactory.findStudentModelSvc();
+        
+                Date now = new Date();
+        long milliseconds = now.getTime();
+        student.setLastLogin(milliseconds);
 
-    public void notifyLogin(Student student) {
-        LocalDateTime now = LocalDateTime.now();
-        student.setLastLogin(now);
-        studentDao.recordLoginEvent(student.getId(), now);
+        stuModelSvc.recordLoginEvent(student.getAccount().getUserId(), milliseconds);
 
-        // Notify tutor system (log, push message, etc.)
-        LOGGER.info("Student " + student.getUsername() + " logged in at " + now);
+       // LOGGER.log(Level.INFO, "Student {0} logged in at {1}", new Object[]{student.getAccount().getUserId(), milliseconds});
     }
 
-    public void notifyLogout(Student student) {
-        LocalDateTime now = LocalDateTime.now();
-        student.setLastLogout(now);
-        studentDao.recordLogoutEvent(student.getId(), now);
+    /**
+     * Update the database to record the fact the student signed out.
+     * 
+     * @param student the student who logged out.
+     * @throws ObjNotFoundException
+     * @throws NonRecoverableException 
+     */
+    public void notifyLogout(Student student) throws ObjNotFoundException, NonRecoverableException {
+        // ToDo: This needs to be called during a signout.
+        StudentModelSvc stuModelSvc = ServiceFactory.findStudentModelSvc();
+        
+        Date now = new Date();
+        long milliseconds = now.getTime();
+        
+        student.setLastLogout(now.getTime());
+        stuModelSvc.recordLogoutEvent(student.getAccount().getUserId(), milliseconds);
 
-        LOGGER.info("Student " + student.getUsername() + " logged out at " + now);
+       // LOGGER.log(Level.INFO, "Student {0} logged out at {1}", new Object[]{student.getAccount().getUserId(), milliseconds});
     }
 
 
