@@ -31,6 +31,7 @@ import edu.regis.shatu.model.aol.TutoringMode;
 import edu.regis.shatu.model.steps.CompressRoundStep;
 import edu.regis.shatu.model.steps.Step;
 import edu.regis.shatu.svc.SHA_256;
+import edu.regis.shatu.view.style.ColorScheme;
 
 /**
  * Displays a single round of the SHA-256 compression algorithm.
@@ -369,8 +370,7 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
     }
 
     private void layoutComponents() {
-        Color white = Color.WHITE;
-        setBackground(white);
+        setBackground(ColorScheme.WHITE);
         Point p;
         int x, y, newMessageX, roundX, roundY;
 

@@ -41,6 +41,7 @@ import edu.regis.shatu.model.Account;
 import edu.regis.shatu.view.act.BackToLogin;
 import edu.regis.shatu.view.act.CreateAcctAction;
 import edu.regis.shatu.view.act.SignInAction;
+import edu.regis.shatu.view.style.ColorScheme;
 
 /**
  * New user screen that also allows the student to create an IRBt account
@@ -213,7 +214,7 @@ public class NewAccountPanel extends GPanel {
     }
 
     private void layoutPanel() {
-        setBackground(new Color(0, 43, 73));
+        setBackground(ColorScheme.REGIS_BLUE);
 
         setPreferredSize(new Dimension(300, 400));
 
@@ -231,7 +232,9 @@ public class NewAccountPanel extends GPanel {
 
         JLabel copyright = new JLabel("(C) 2019-2025 Johanna and Richard Blumenthal. All Rights Reserved");
         copyright.setFont(new Font("Dialog", Font.PLAIN, 10));
-        copyright.setForeground(REGIS_YELLOW);
+
+        copyright.setForeground(ColorScheme.REGIS_YELLOW);
+
         addc(copyright, 0, 2, 2, 1, 1.0, 1.0,
                 GridBagConstraints.NORTH, GridBagConstraints.CENTER,
                 5, 5, 5, 5);
@@ -241,11 +244,11 @@ public class NewAccountPanel extends GPanel {
 
     private GPanel createHeader() {
         GPanel panel = new GPanel();
-        panel.setBackground(new Color(241,196,0));
+        panel.setBackground(ColorScheme.REGIS_YELLOW);
 
         JLabel ccis = new JLabel("Regis University Department of Computer and Cyber Sciences");
         ccis.setFont(new Font("Dialog", Font.PLAIN, 20));
-        ccis.setForeground(REGIS_BLUE);
+        ccis.setForeground(ColorScheme.REGIS_BLUE);
 
         panel.addc(ccis, 0, 0, 1, 1, 1.0, 1.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL,
@@ -256,14 +259,14 @@ public class NewAccountPanel extends GPanel {
 
     private GPanel createOverview() {
         GPanel panel = new GPanel();
-        panel.setBackground(REGIS_YELLOW);
+        panel.setBackground(ColorScheme.REGIS_YELLOW);
 
         panel.setSize(300, 400);
         panel.setPreferredSize(new Dimension(300, 400));
 
         JLabel logo = new JLabel("ShaTu");
         logo.setFont(new Font("Dialog", Font.PLAIN, 20));
-        logo.setForeground(new Color(0, 43, 73));
+        logo.setForeground(ColorScheme.REGIS_BLUE);
 
         panel.addc(logo, 0, 0, 1, 1, 0.0, 0.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
@@ -279,10 +282,11 @@ public class NewAccountPanel extends GPanel {
         descr.setEditable(false);
         descr.setLineWrap(true);
         descr.setWrapStyleWord(true);
-        descr.setBackground(REGIS_YELLOW);
+        descr.setBackground(ColorScheme.REGIS_YELLOW);
+
         descr.setFont(new Font("Dialog", Font.PLAIN, 12));
-	descr.append("ShaTu provides individualized tutoring practice focused ");
-	descr.append("on understanding the SHA-256 digest algorithm and the");
+	      descr.append("ShaTu provides individualized tutoring practice focused ");
+	      descr.append("on understanding the SHA-256 digest algorithm and the");
         descr.append("underlying computer science concepts upon which it is ");
         descr.append("based.\n\n");
         descr.append("Please sign in or use 'New User' to create a student account.");
@@ -309,8 +313,8 @@ public class NewAccountPanel extends GPanel {
 
     private GPanel createLogin() {
         GPanel panel = new GPanel();
-        panel.setBackground(REGIS_YELLOW);
 
+        panel.setBackground(ColorScheme.REGIS_YELLOW);
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 5, 5));
 
         JLabel label = new JLabel("Name");

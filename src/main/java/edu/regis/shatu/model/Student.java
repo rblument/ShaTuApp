@@ -72,4 +72,14 @@ public class Student {
     public String toString() {
         return "Student: " + account.getUserId();
     }
+
+    private LocalDateTime lastLogin;
+    private LocalDateTime lastLogout;
+
+    // Getters and setters
+    public LocalDateTime getLastLogin() { return lastLogin; }
+    public void setLastLogin(LocalDateTime lastLogin) { this.lastLogin = lastLogin; }
+
+    public LocalDateTime getLastLogout() { return lastLogout; }
+    public void setLastLogout(LocalDateTime lastLogout) { this.lastLogout = lastLogout; }
 }

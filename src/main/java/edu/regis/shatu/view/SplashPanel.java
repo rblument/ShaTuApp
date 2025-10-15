@@ -35,6 +35,7 @@ import edu.regis.shatu.svc.SHA_256;
 import edu.regis.shatu.view.act.ForgotPasswordAction;
 import edu.regis.shatu.view.act.NewUserAction;
 import edu.regis.shatu.view.act.SignInAction;
+import edu.regis.shatu.view.style.ColorScheme;
 
 /**
  * A splash panel introducing the ShaTut tutor, which also allows the user to 
@@ -49,13 +50,6 @@ public class SplashPanel extends GPanel {
      * Events of interest occurring in this class are logged to this logger.
      */
     private static final Logger LOGGER = Logger.getLogger(SplashPanel.class.getName());
-    
-    private static final Color PRIMARY_COLOR = new Color(102, 153, 204); // pastel blue
-    private static final Color ACCENT_COLOR = new Color(255, 223, 128);  // pastel yellow
-    
-    //Background Colors
-    private static final Color REGIS_BLUE = new Color(0, 43, 73);
-    private static final Color REGIS_YELLOW = new Color(241, 196, 0);
     
      /**
      * The user model displayed in this view.
@@ -235,7 +229,7 @@ public class SplashPanel extends GPanel {
      * Layout the child components used in this view.
      */
     private void layoutComponents() {
-        setBackground(PRIMARY_COLOR);
+        setBackground(ColorScheme.REGIS_BLUE_PASTEL);
 	addc(createHeader(), 0,0, 2,1, 1.0,0.0,
 	     GridBagConstraints.NORTHWEST,  GridBagConstraints.HORIZONTAL,
 	     5,5,5,5);	
@@ -250,7 +244,7 @@ public class SplashPanel extends GPanel {
             5,5,5,5);
         
         JLabel copyright = new JLabel("(C) 2019-2025 Johanna and Richard Blumenthal. All Rights Reserved");
-        copyright.setForeground(ACCENT_COLOR);
+        copyright.setForeground(ColorScheme.REGIS_YELLOW_PASTEL);
         copyright.setFont(new Font("Dialog", Font.PLAIN, 10));
         addc(copyright, 0,3, 2,1, 1.0,1.0,
 		GridBagConstraints.NORTH,  GridBagConstraints.CENTER,
@@ -261,11 +255,11 @@ public class SplashPanel extends GPanel {
     
     private GPanel createHeader() {
 	GPanel panel = new GPanel();
-	panel.setBackground(new Color(241,196,0));
+	panel.setBackground(ColorScheme.REGIS_YELLOW); 
 
 	JLabel ccis = new JLabel("Regis University Department of Computer and Cyber Sciences Product");
 	ccis.setFont(new Font("Dialog", Font.PLAIN, 20));
-	ccis.setForeground(REGIS_BLUE);
+	ccis.setForeground(ColorScheme.REGIS_BLUE);
 	
 	panel.addc(ccis , 0,0, 1,1, 1.0,1.0,
 	     GridBagConstraints.NORTHWEST,  GridBagConstraints.HORIZONTAL,
@@ -287,7 +281,7 @@ public class SplashPanel extends GPanel {
     
      private GPanel createLogin() {
 	GPanel panel = new GPanel();
-	panel.setBackground(REGIS_YELLOW);
+	panel.setBackground(ColorScheme.REGIS_YELLOW);
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 5, 5));
 
         JLabel label = new JLabel("Sign in");
@@ -325,14 +319,14 @@ public class SplashPanel extends GPanel {
 
     private GPanel createOverview() {
 	GPanel panel = new GPanel();
-	panel.setBackground(REGIS_YELLOW);
+	panel.setBackground(ColorScheme.REGIS_YELLOW);
 
 	panel.setSize(300, 400);
 	panel.setPreferredSize(new Dimension(300,400));
 
 	JLabel logo = new JLabel("ShaTu: SHA-256 Tutor");
 	logo.setFont(new Font("Dialog", Font.PLAIN, 20));
-	logo.setForeground(REGIS_BLUE);
+	logo.setForeground(ColorScheme.REGIS_BLUE);
 
 	panel.addc(logo, 0,0, 1,1, 0.0,0.0,
 		   GridBagConstraints.NORTHWEST,  GridBagConstraints.NONE,
@@ -355,7 +349,7 @@ public class SplashPanel extends GPanel {
         descr.append("based.\n\n");
         descr.append("Please sign in or use 'New User' to create a student account.");
         descr.append("\n\n");
-        descr.setBackground(REGIS_YELLOW);
+        descr.setBackground(ColorScheme.REGIS_YELLOW);
         
 	panel.addc(descr, 0,2, 1,1, 1.0,1.0,
 		   GridBagConstraints.NORTHWEST,  GridBagConstraints.BOTH,
