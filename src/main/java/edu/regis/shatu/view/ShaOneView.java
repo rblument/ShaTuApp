@@ -22,6 +22,7 @@ import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.PendingTask;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
+import edu.regis.shatu.model.aol.TutoringMode;
 
 import edu.regis.shatu.model.steps.ShaOneStep;
 import edu.regis.shatu.model.steps.Step;
@@ -414,6 +415,39 @@ public class ShaOneView extends UserRequestView implements KeyListener { //imple
             }
         }
     }
+    
+    /**
+     * Configure UI components based on the current tutoring mode
+     * Disables fields not available for SEE_ONE mode for passive viewing.
+     * 
+     */
+    
+    @Override
+    protected void configureModeSpecificUI() {
+        super.configureModeSpecificUI();//call parent to handle buttons
+        
+        if(model == null) {
+            return;
+        }
+        
+        TutoringMode mode = model.getTutoringMode();
+        
+        if (mode == TutoringMode.SEE_ONE) {
+            fourRadioButton.setEnabled(false);
+            eightRadioButton.setEnabled(false);
+            sixteenRadioButton.setEnabled(false);
+            thirtytwoRadioButton.setEnabled(false);
+            responseTextArea.setEnabled(false);
+        }
+        // DO_ONE & TEACH_ONE
+        else {
+            fourRadioButton.setEnabled(true);
+            eightRadioButton.setEnabled(true);
+            sixteenRadioButton.setEnabled(true);
+            thirtytwoRadioButton.setEnabled(true);
+            responseTextArea.setEnabled(true);
+        }
+    } 
 
 
     /**

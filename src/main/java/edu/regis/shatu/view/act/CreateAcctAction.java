@@ -21,11 +21,13 @@ import javax.swing.JOptionPane;
 import com.google.gson.Gson;
 
 import edu.regis.shatu.model.Account;
+import edu.regis.shatu.model.TutoringSession;
 import edu.regis.shatu.svc.ClientRequest;
 import edu.regis.shatu.svc.ServerRequestType;
 import edu.regis.shatu.svc.SvcFacade;
 import edu.regis.shatu.svc.TutorReply;
 import edu.regis.shatu.view.MainFrame;
+
 
 /**
  * An MVC controller handling a user GUI gesture requesting the creation of a
@@ -97,11 +99,26 @@ public class CreateAcctAction extends ShaTuGuiAction {
         switch (reply.getStatus()) {
             case "Created":
                 frame.clearNewAccountPanel();
-                msg = "Student user account successfully created\n\n" +
-                        "Press okay and we'll return you to the sign-in screen\n\n" +
-                        "Then, please sign-in to the tutor using this account.";
-                JOptionPane.showMessageDialog(frame, msg);
-                frame.displayView(MainFrame.ViewName.SPLASH);
+                
+                //AutoLogin Transition to tutoring sesh
+                try {
+                    TutoringSession session = gson.fromJson(reply.getData(), TutoringSession.class);
+                    frame.setModel(session);
+                    
+                    msg = "Welcome to ShaTu!\n\n" +
+                          "Your account has been created successfully.\n" +
+                          "Let's begin with 'See One' mode where you'll observe\n" +
+                          "how the SHA-256 algorithm works.";
+                    JOptionPane.showMessageDialog(frame, msg, "Welcome", 
+                                                  JOptionPane.INFORMATION_MESSAGE);
+                } catch (Exception e) {
+                    // If auto-login fails, fall back to manual sign-in
+                    LOGGER.severe("Failed to auto-login after account creation: " + e.getMessage());
+                    msg = "Account created successfully!\n\n" +
+                          "Please sign in to begin.";
+                    JOptionPane.showMessageDialog(frame, msg);
+                    frame.displayView(MainFrame.ViewName.SPLASH);
+                }
                 break;
             case "IllegalUserId":
                 msg = "User id already exists: " + account.getUserId();

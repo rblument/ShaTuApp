@@ -144,6 +144,16 @@ public class TutoringSession {
         this.isActive = isActive;
     }
 
+    
+    public TutoringMode getTutoringMode() {
+    return tutoringMode;
+    }
+
+    public void setTutoringMode(TutoringMode tutoringMode) {
+        this.tutoringMode = tutoringMode;
+    }
+    
+    
     public GregorianCalendar getStartDate() {
         return startDate;
     }
@@ -183,10 +193,9 @@ public class TutoringSession {
     public void removeTask(PendingTask task) {
         tasks.remove(task);
     }
-    
+    //Updated method to remove task by taskId to prevent ConcurrentModificationException
+
     public void removeTask(int taskId) {
-        for (PendingTask pendingTask : tasks) 
-            if (pendingTask.getTask().getId() == taskId)
-                removeTask(pendingTask);
+        tasks.removeIf(pendingTask -> pendingTask.getTask().getId() == taskId);
     }
 }

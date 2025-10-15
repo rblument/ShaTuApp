@@ -76,7 +76,14 @@ public class HighlightLabel extends JLabel implements MouseListener {
     private String viewName;
     
     private boolean isSelected;
-
+    
+    
+    /**
+     * When disabled, the label will not respond to mouse clicks or show hover effects
+     */
+    private boolean isEnabled = true;
+    
+    
     /**
      * Initialize this label with the given text and a size that was determined
      * empirically.
@@ -122,9 +129,41 @@ public class HighlightLabel extends JLabel implements MouseListener {
         setBackground(NORMAL_BACKGROUND);
         setBorder(NORMAL_BORDER);
     }
+    
+    /**
+     * Set whether this label is enables and can respond to user interactions.
+     * @param enabled true to enable interactions, false to disable
+     */
+    @Override
+    public void setEnabled(boolean enabled) {
+        this.isEnabled = enabled;
+        
+        //update visual appearance based on enabled status
+        if(enabled) {
+            setForeground(Color.BLACK);//restore normal text color
+        } else{
+            setForeground(Color.GRAY); //gray out to show its disabled
+        }
+        
+    }
+    
+    
+    /**
+     * Check if label is currently enabled.
+     * @return true if enabled, false if disabled
+     */
+    @Override
+    public boolean isEnabled() {
+        return isEnabled;
+    }
 
     @Override
     public void mouseClicked(MouseEvent evt) {
+        //Do not respond to clicks if label is disabled
+        if(!isEnabled()) {
+            return;
+        }
+        
         if (!isSelected) {
             select();
         }
@@ -145,6 +184,11 @@ public class HighlightLabel extends JLabel implements MouseListener {
      */
     @Override
     public void mouseEntered(MouseEvent e) {
+        //Don't show hover effects if label is disabled
+        if(!isEnabled()) {
+            return;
+        }
+        
         if (!isSelected) {
             setBorder(HIGHLIGHT_BORDER);
             setBackground(HIGHLIGHT_BACKGROUND);
@@ -158,6 +202,11 @@ public class HighlightLabel extends JLabel implements MouseListener {
      */
     @Override
     public void mouseExited(MouseEvent e) {
+        //Don't change the appearance if label is disabled
+        if(!isEnabled()) {
+            return;
+        }
+        
         if (!isSelected) {
             setBorder(NORMAL_BORDER);
             setBackground(NORMAL_BACKGROUND);

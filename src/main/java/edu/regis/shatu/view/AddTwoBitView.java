@@ -35,6 +35,7 @@ import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.model.steps.Step;
+import edu.regis.shatu.model.aol.TutoringMode;
 
 /**
  * AddTwoBitView class represents a GUI view for adding two binary numbers
@@ -331,8 +332,31 @@ public class AddTwoBitView extends UserRequestView implements KeyListener {
                 stringLabel2.setText("binary number2: " + binary2);
             }
         }
-        
-    
     }
-
+    
+    /**
+     * Configure UI components based on the current tutoring mode
+     *Disables fields not available for SEE_ONE mode for passive viewing.
+     * 
+     */
+    
+    @Override
+    protected void configureModeSpecificUI() {
+        super.configureModeSpecificUI();//call parent to handle buttons
+        
+        if(model == null) {
+            return;
+        }
+        
+        TutoringMode mode = model.getTutoringMode();
+        
+        if (mode == TutoringMode.SEE_ONE) {
+            responseTextArea.setEnabled(false);
+        }
+        // DO_ONE & TEACH_ONE
+        else {
+            responseTextArea.setEnabled(true);
+        }
+    }
+    
 }

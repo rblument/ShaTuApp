@@ -25,6 +25,7 @@ import javax.swing.event.DocumentListener;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.ProblemType;
+import edu.regis.shatu.model.aol.TutoringMode;
 import edu.regis.shatu.model.steps.InitVarStep;
 import edu.regis.shatu.model.steps.Step;
 
@@ -221,6 +222,45 @@ public class InitVarView extends UserRequestView { // implements ActionListener
         }
       
     }
+    
+    /**
+     * Configure UI components based on the current tutoring mode
+     *Disables fields not available for SEE_ONE mode for passive viewing.
+     * 
+     */
+    
+    @Override
+    protected void configureModeSpecificUI() {
+        super.configureModeSpecificUI();//call parent to handle buttons
+        
+        if(model == null) {
+            return;
+        }
+        
+        TutoringMode mode = model.getTutoringMode();
+        
+        if (mode == TutoringMode.SEE_ONE) {
+            //disable all 8 hash var text fields
+            for (int i = 0; i <NUM_VARS; i++) {
+                hVars[i].setEnabled(false);
+            }
+            
+            //disable feedback area
+            
+            feedbackTextArea.setEnabled(false);
+        }
+        // DO_ONE & TEACH_ONE
+        else {
+            //enable all 8 hash var text fields
+            for (int i = 0; i <NUM_VARS; i++) {
+                hVars[i].setEnabled(false);
+            }
+            
+            //enable feedback area
+            
+            feedbackTextArea.setEnabled(false);
+        }
+    } 
 
     @Override
     public NewExampleRequest newRequest() {

@@ -32,6 +32,7 @@ import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.model.steps.EncodeAsciiStep;
 import edu.regis.shatu.model.steps.Step;
+import edu.regis.shatu.model.aol.TutoringMode;
 
 /**
  * A view that requests the student to add a single '1' bit to the byte prompt.
@@ -396,7 +397,32 @@ public class EncodeView extends UserRequestView {
         System.out.println("UpdateView logic continues...");
     }
 
+    /**
+     * Configure UI components based on the current tutoring mode
+     * Disables fields not available for SEE_ONE mode for passive viewing.
+     */
+    @Override
+    protected void configureModeSpecificUI() {
+        super.configureModeSpecificUI(); // Call parent to handle buttons
+        
+        // Check if model exists
+        if (model == null) {
+            return;
+        }
 
+        TutoringMode mode = model.getTutoringMode();
+
+        if (mode == TutoringMode.SEE_ONE) {
+            messageLengthField.setEnabled(false);
+            setQuestionField.setEnabled(false);
+            responseTextArea.setEnabled(false);
+        } else {
+            // DO_ONE and TEACH_ONE both have enabled the fields
+            messageLengthField.setEnabled(true);
+            setQuestionField.setEnabled(true);
+            responseTextArea.setEnabled(true);
+        }
+    }
 
     /**
      * This method is suppose to be called when the new example button is

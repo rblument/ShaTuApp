@@ -24,6 +24,7 @@ import edu.regis.shatu.model.TutoringSession;
 import edu.regis.shatu.model.aol.PendingStep;
 import edu.regis.shatu.model.aol.PendingTask;
 import edu.regis.shatu.model.aol.StepSubType;
+import edu.regis.shatu.model.aol.TutoringMode;
 
 /**
  * Displays a tutoring session.
@@ -109,6 +110,8 @@ public class TutoringSessionView extends GPanel {
 
             stepView.setModel(model);
         }
+        
+        configureModeSpecificUI();
     }
     
     /**
@@ -145,6 +148,45 @@ public class TutoringSessionView extends GPanel {
         //ToDo: Are there any special components that depend on the Tutoring Mode?
     }
 
+    /**
+     * New Method to
+     */
+    private void configureModeSpecificUI() {
+        
+        //Check if no model, nothing to configure
+        if (model == null) {
+            return;
+        }
+        
+        
+        TutoringMode mode = model.getTutoringMode();
+        
+        switch (mode) {
+            case SEE_ONE:
+                for (StepSelection step : StepSelection.values()) {
+                    HighlightLabel label = step.getLabel();
+                    label.setEnabled(false);
+                }
+                break;
+            
+            //Separated just in case logic later requires separate behavior    
+            case DO_ONE: {
+                for (StepSelection step : StepSelection.values()) {
+                    HighlightLabel label = step.getLabel();
+                    label.setEnabled(true);
+                }
+                break;
+            }
+            case TEACH_ONE:
+                for (StepSelection step : StepSelection.values()) {
+                    HighlightLabel label = step.getLabel();
+                    label.setEnabled(true);
+                }
+                break;
+        }
+    }
+    
+    
     /**
      * Layout the components
      */

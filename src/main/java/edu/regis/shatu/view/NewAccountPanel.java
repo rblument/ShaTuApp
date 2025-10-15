@@ -65,6 +65,10 @@ public class NewAccountPanel extends GPanel {
      * The account being created and displayed in this panel.
      */
     private Account model;
+    
+    //Background Colors
+    private static final Color REGIS_BLUE = new Color(0, 43, 73);
+    private static final Color REGIS_YELLOW = new Color(241, 196, 0);
 
     /**
      * The editable fields appearing in this dialog.
@@ -83,7 +87,7 @@ public class NewAccountPanel extends GPanel {
     protected JButton signInBut;
     protected JButton createAcctBut;
     protected JButton backBut;
-
+    
     public NewAccountPanel() {
         super();
 
@@ -228,7 +232,9 @@ public class NewAccountPanel extends GPanel {
 
         JLabel copyright = new JLabel("(C) 2019-2025 Johanna and Richard Blumenthal. All Rights Reserved");
         copyright.setFont(new Font("Dialog", Font.PLAIN, 10));
+
         copyright.setForeground(ColorScheme.REGIS_YELLOW);
+
         addc(copyright, 0, 2, 2, 1, 1.0, 1.0,
                 GridBagConstraints.NORTH, GridBagConstraints.CENTER,
                 5, 5, 5, 5);
@@ -277,9 +283,10 @@ public class NewAccountPanel extends GPanel {
         descr.setLineWrap(true);
         descr.setWrapStyleWord(true);
         descr.setBackground(ColorScheme.REGIS_YELLOW);
+
         descr.setFont(new Font("Dialog", Font.PLAIN, 12));
-	descr.append("ShaTu provides individualized tutoring practice focused ");
-	descr.append("on understanding the SHA-256 digest algorithm and the");
+	      descr.append("ShaTu provides individualized tutoring practice focused ");
+	      descr.append("on understanding the SHA-256 digest algorithm and the");
         descr.append("underlying computer science concepts upon which it is ");
         descr.append("based.\n\n");
         descr.append("Please sign in or use 'New User' to create a student account.");
@@ -306,8 +313,8 @@ public class NewAccountPanel extends GPanel {
 
     private GPanel createLogin() {
         GPanel panel = new GPanel();
-        panel.setBackground(ColorScheme.REGIS_YELLOW);
 
+        panel.setBackground(ColorScheme.REGIS_YELLOW);
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 5, 5));
 
         JLabel label = new JLabel("Name");
@@ -457,7 +464,7 @@ public class NewAccountPanel extends GPanel {
                 break;
             case 2:
                 strength.setText("(Strength: Moderate)");
-                strength.setForeground(new Color(255,255,0));
+                strength.setForeground(Color.YELLOW);
                 break;
             default:
                 strength.setText("(Strength: Good)");

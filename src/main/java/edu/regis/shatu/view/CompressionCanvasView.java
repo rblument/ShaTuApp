@@ -27,6 +27,7 @@ import javax.swing.JOptionPane;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.ProblemType;
+import edu.regis.shatu.model.aol.TutoringMode;
 import edu.regis.shatu.model.steps.CompressRoundStep;
 import edu.regis.shatu.model.steps.Step;
 import edu.regis.shatu.svc.SHA_256;
@@ -593,6 +594,33 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
         newExampleButton.setEnabled(false);
     
     }
+    
+    /**
+     * Configure UI components based on the current tutoring mode
+     * Disables fields not available for SEE_ONE mode for passive viewing.
+     * 
+     */
+    
+    @Override
+    protected void configureModeSpecificUI() {
+        super.configureModeSpecificUI();//call parent to handle buttons
+        
+        if(model == null) {
+            return;
+        }
+        
+        TutoringMode mode = model.getTutoringMode();
+        
+        if (mode == TutoringMode.SEE_ONE) {
+            nextRoundButton.setEnabled(false);
+            newMessageButton.setEnabled(false);
+        }
+        // DO_ONE & TEACH_ONE
+        else {
+            nextRoundButton.setEnabled(true);
+            newMessageButton.setEnabled(true);
+        }
+    } 
 
 
     // TO DO: not implemented at this time

@@ -30,6 +30,7 @@ import edu.regis.shatu.model.aol.PendingTask;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.RotateStep;
 import edu.regis.shatu.model.aol.StepSubType;
+import edu.regis.shatu.model.aol.TutoringMode;
 import edu.regis.shatu.model.steps.Step;
 
 /**
@@ -292,6 +293,57 @@ public class RotateView extends UserRequestView implements KeyListener {
         
  
     }
+    
+    /**
+     * Configure UI components based on the current tutoring mode
+     * Disables fields not available for SEE_ONE mode for passive viewing.
+     * 
+     */
+    
+    @Override
+    protected void configureModeSpecificUI() {
+        super.configureModeSpecificUI();//call parent to handle buttons
+        
+        if(model == null) {
+            return;
+        }
+        
+        TutoringMode mode = model.getTutoringMode();
+        
+        if (mode == TutoringMode.SEE_ONE) {
+            //Legnth Buttons
+            shortProblem.setEnabled(false);
+            longProblem.setEnabled(false);
+            
+            //Rotation type buttons
+            rightRotate.setEnabled(false);
+            leftRotate.setEnabled(false);
+            
+            //rotation amount buttons
+            rotate7Bits.setEnabled(false);
+            rotate16Bits.setEnabled(false);
+            
+            //Field answer
+            answerField.setEnabled(false);
+        }
+        // DO_ONE & TEACH_ONE
+        else {
+            //Legnth Buttons
+            shortProblem.setEnabled(true);
+            longProblem.setEnabled(true);
+            
+            //Rotation type buttons
+            rightRotate.setEnabled(true);
+            leftRotate.setEnabled(true);
+            
+            //rotation amount buttons
+            rotate7Bits.setEnabled(true);
+            rotate16Bits.setEnabled(true);
+            
+            //Field answer
+            answerField.setEnabled(true);
+        }
+    } 
 
 
     @Override
