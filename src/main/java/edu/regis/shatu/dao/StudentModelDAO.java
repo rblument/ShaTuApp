@@ -31,7 +31,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,7 +46,11 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
     @Override
     public void create(Student student) throws NonRecoverableException {
         final String sql1 = "INSERT INTO StudentModel (UserId, ScaffoldLevel) VALUES (?,?)";
-        final String sql2 = "INSERT INTO Assessment (UserId, KnowledgeComponentId, AssessmentLevel, Exposures, Successes, Hints) VALUES (?,?,?,?,?,?)";
+        final String sql2 = 
+                "INSERT INTO Assessment " +
+                "(UserId, KnowledgeComponentId, AssessmentLevel, Exposures, Successes, Hints) " +
+                "VALUES (?,?,?,?,?,?)";
+        
         String userId = student.getAccount().getUserId();
         StudentModel studentModel = student.getStudentModel();
 
@@ -91,6 +94,7 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
     @Override
     public StudentModel retrieve(String userId) throws ObjNotFoundException, NonRecoverableException {
         final String sql = "SELECT ScaffoldLevel FROM StudentModel WHERE UserId = ?";
+        
         Connection conn = null;
         PreparedStatement stmt = null;
         try {
@@ -176,7 +180,7 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
         final String sql = """
                     SELECT kc.Title, a.AssessmentLevel
                     FROM Assessment a
-                    JOIN KnowledgeComponent kc ON a.KnowledgeComponentId = kc.Id
+                    JOIN KnowledgeComponent kc ON a.KnowledgeComponentId = kc.KnowledgeComponentId
                     WHERE a.UserId = ?
                 """;
 
@@ -244,11 +248,13 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
     //@Override
     public List<String> retrieveAllLessons(String userId) throws NonRecoverableException {
         List<String> lessons = new ArrayList<>();
-        final String sql = "SELECT kc.Title " +
-                           "FROM Assessment a " +
-                           "JOIN KnowledgeComponent kc ON a.KnowledgeComponentId = kc.Id " +
-                           "WHERE a.UserId = ? AND kc.Id NOT IN (0, 10, 20) " +
-                           "ORDER BY kc.Id";
+        final String sql = 
+                "SELECT kc.Title " +
+                "FROM Assessment a " +
+                "JOIN KnowledgeComponent kc ON a.KnowledgeComponentId = kc.KnowledgeComponentId " +
+                "WHERE a.UserId = ? AND kc.KnowledgeComponentId NOT IN (0, 10, 20) " +
+                "ORDER BY kc.KnowledgeComponentId";
+        
         try (Connection conn = DriverManager.getConnection(URL);
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, userId);
@@ -269,12 +275,14 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
     @Override
     public AssessmentLevel retrieveAssessmentLevel(String userId, String lesson)
             throws ObjNotFoundException, NonRecoverableException {
-        final String sql = "SELECT a.AssessmentLevel " +
-                           "FROM Assessment a " +
-                           "JOIN KnowledgeComponent kc ON a.KnowledgeComponentId = kc.Id " +
-                           "WHERE a.UserId = ? AND kc.Title = ?";
+        final String sql = 
+                "SELECT a.AssessmentLevel " +
+                "FROM Assessment a " +
+                "JOIN KnowledgeComponent kc ON a.KnowledgeComponentId = kc.KnowledgeComponentId " +
+                "WHERE a.UserId = ? AND kc.Title = ?";
+        
         try (Connection conn = DriverManager.getConnection(URL);
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, userId);
             stmt.setString(2, lesson);
             try (ResultSet rs = stmt.executeQuery()) {
@@ -301,7 +309,9 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
     @Override
     public void updateScaffoldLevel(String userId, ScaffoldLevel level)
             throws ObjNotFoundException, NonRecoverableException {
+        
         final String sql = "UPDATE StudentModel SET ScaffoldLevel = ? WHERE UserId = ?";
+        
         try (Connection conn = DriverManager.getConnection(URL);
              PreparedStatement stmt = conn.prepareStatement(sql)) {
              stmt.setString(1, level.toString());
@@ -328,7 +338,9 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
     private ArrayList<Assessment> retrieveAssessments(String userId, Connection conn)
             throws ObjNotFoundException, SQLException, NonRecoverableException {
 
-        final String sql = "SELECT Id,KnowledgeComponentId,AssessmentLevel,Exposures,Successes,Hints FROM Assessment WHERE UserId = ?";
+        final String sql =
+                "SELECT AssessmentId, KnowledgeComponentId, AssessmentLevel, Exposures, Successes, Hints " +
+                "FROM Assessment WHERE UserId = ?";
 
         CourseSvc courseSvc = ServiceFactory.findCourseSvc();
         Course course = courseSvc.retrieve(1); // Note only one course possible.
