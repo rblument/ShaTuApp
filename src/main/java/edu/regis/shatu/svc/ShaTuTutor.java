@@ -522,17 +522,26 @@ public class ShaTuTutor implements TutorSvc {
 
     /**
      * Handles :NewExample requests from the client.
+     * Returns a new problem for the student, either specified or adaptively chosen.
      *
-     * @param json a JSon String encoding a NewExampleRequest object
-     * @return TutorReply
+     * @param json JSon encoding a NewExampleRequest; may specify ProblemType
+     * @return TutorReply with the generated Problem
      */
     public TutorReply newExample(String json) {
-        System.out.println("nexExample()");
+        NewExampleRequest request;
+        if (json != null && !json.isEmpty()) {
+            request = gson.fromJson(json, NewExampleRequest.class);
+        } else {
+            request = new NewExampleRequest(); // default request
+        }
 
-        NewExampleRequest request = gson.fromJson(json, NewExampleRequest.class);
+        ProblemType type = (request.getExampleType() != null)
+                ? request.getExampleType()
+                : determineNextProblemType(studentModel);
 
-        currObjective = getCurrentObjectiveByProbelmType(request.getExampleType());
+        currObjective = getCurrentObjectiveByProbelmType(type);
 
+        // Use the existing method in Objective subclasses
         return currObjective.example(session, request.getData());
     }
 
@@ -836,6 +845,25 @@ public class ShaTuTutor implements TutorSvc {
 
        // LOGGER.log(Level.INFO, "Student {0} logged out at {1}", new Object[]{student.getAccount().getUserId(), milliseconds});
     }
+
+
+    /**
+     * Determines the next problem type to suggest for the student
+     * based on their progress and performance.
+     *
+     * @param student the Student whose model is used
+     * @return the suggested next ProblemType
+     */
+    private ProblemType determineNextProblemType(StudentModel model) {
+        for (ProblemType type : ProblemType.values()) {
+            if (!model.hasCompleted(type)) {
+                return type;
+            }
+        }
+        return model.getWeakestProblemType();
+    }
+
+
 
 
 }

@@ -14,17 +14,24 @@ package edu.regis.shatu.view;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import java.awt.FlowLayout;
 
 import edu.regis.shatu.model.TutoringSession;
 import edu.regis.shatu.model.aol.PendingStep;
 import edu.regis.shatu.model.aol.PendingTask;
 import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.model.aol.TutoringMode;
+import edu.regis.shatu.svc.ClientRequest;
+import edu.regis.shatu.svc.ServerRequestType;
+import edu.regis.shatu.svc.ServiceFactory;
+import edu.regis.shatu.svc.TutorReply;
+import edu.regis.shatu.svc.TutorSvc;
 
 /**
  * Displays a tutoring session.
@@ -75,6 +82,11 @@ public class TutoringSessionView extends GPanel {
      * Triggers returning to the dashboard.
      */
     private JButton dashboardButton;
+
+    /**
+     * Triggers requesting a new problem.
+     */
+    private JButton requestProblemButton;
 
     /**
      * Initialize this view including creating and laying out its child components.
@@ -136,6 +148,10 @@ public class TutoringSessionView extends GPanel {
 
         dashboardButton = new JButton("Go to Dashboard");
         dashboardButton.addActionListener(e -> navigateToDashboard());
+
+        requestProblemButton = new JButton("Request Problem");
+        requestProblemButton.addActionListener(e -> requestProblem());
+
 
         scrollPane = new JScrollPane(stepSelectorView);
 
@@ -209,7 +225,10 @@ public class TutoringSessionView extends GPanel {
         add(splitPane, BorderLayout.CENTER);
 
         controlPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 0)); // Adds padding
-        controlPanel.add(dashboardButton, BorderLayout.WEST);
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        buttonPanel.add(dashboardButton);
+        buttonPanel.add(requestProblemButton);
+        controlPanel.add(buttonPanel, BorderLayout.WEST);
         dashboardButton.setPreferredSize(new Dimension(150, 25)); // Adjustable initial size
         add(controlPanel, BorderLayout.SOUTH);
     }
@@ -230,4 +249,39 @@ public class TutoringSessionView extends GPanel {
     public void navigateToDashboard() {
         MainFrame.instance().displayView(MainFrame.ViewName.DASHBOARD);
     }
+
+    /**
+     * Requests a new suggested problem from the tutor based on the student's progress.
+     */
+    private void requestProblem() {
+        if (model == null) return;
+
+        try {
+            // Get the tutor service
+            TutorSvc tutor = ServiceFactory.findTutorSvc();
+
+            // Get the user ID from the current session model
+            String userId = model.getStudent().getAccount().getUserId();
+
+            // Build a client request to ask for suggested problem
+            ClientRequest req = new ClientRequest(ServerRequestType.NEW_EXAMPLE);
+            req.setUserId(userId);
+            req.setSecurityToken(model.getSecurityToken());
+            req.setData("{}"); // Empty JSON can include additional info if needed
+
+            // Send request to tutor
+            TutorReply reply = tutor.request(req);
+
+            if (reply.getStatus().equals(":ERR")) {
+                System.err.println("Error requesting problem: " + reply.getData());
+            } else {
+                // update UI to display the new suggested problem
+                System.out.println("Suggested problem received: " + reply.getData());
+            }
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
 }
