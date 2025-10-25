@@ -428,7 +428,6 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
         setUpRadioButtons();
         setUpQuestionArea();
         setUpResponseArea();
-        setUpButtons();
         setUpDescriptionPanel();
         setUpQRPanel();
     }
@@ -480,22 +479,30 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
      */
     protected void updateView() {
         
-        if (!checkHintEnabled)
+        if(!checkHintEnabled){
             resetButtonListeners(); // Clear any listeners applied from other views
+        }
         
-
-        if (model != null) {
-
-            Step step = model.currentTask().getCurrentStep().getStep();
-
-            if (step != null && step.getSubType() == StepSubType.SHA_ZERO) {
-                ShaZeroStep example = gson.fromJson(step.getData(), ShaZeroStep.class);
-
-                if (example != null) {
-                    operandAValue = example.getOperandA();
-                    operandALabel.setText("Operand A: " + operandAValue);
-                }
-            }
+        if(model == null){ return; }
+        
+        Step step = model.currentTask().getCurrentStep().getStep();
+        
+        if(step == null || step.getSubType() != StepSubType.SHA_ZERO){
+            return;
+        }
+        
+        ShaZeroStep example = gson.fromJson(step.getData(), ShaZeroStep.class);
+        
+        if(example == null){ return; }
+        
+        String operandA = example.getOperandA();        
+        
+        if (operandA != null && !operandA.isEmpty()) {
+            operandAValue = operandA;
+            operandALabel.setText("Operand A: " + operandAValue);
+            hintButton.setEnabled(true);
+            checkButton.setEnabled(true);
+            responseTextArea.setEnabled(true);
         }
     }
 
