@@ -34,12 +34,15 @@ import edu.regis.shatu.model.TaskSelectionKind;
 import edu.regis.shatu.model.Unit;
 import edu.regis.shatu.model.UnitDigest;
 import edu.regis.shatu.model.aol.OutcomeGranularity;
+import edu.regis.shatu.model.aol.Problem;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.model.aol.TaskKind;
 import edu.regis.shatu.model.aol.Timeout;
 import edu.regis.shatu.model.steps.Step;
 import edu.regis.shatu.svc.CourseSvc;
+import edu.regis.shatu.svc.ProblemSvc;
+import edu.regis.shatu.svc.ServiceFactory;
 
 /**
  * An XML-based Data Access Object implementing CourseSvc behaviors.
@@ -52,7 +55,7 @@ public class CourseDAO extends MySqlDAO implements CourseSvc {
      * Instantiate this Course DAO with default values.
      */
     public CourseDAO() {
-        super("Course", "Id");
+        super("Course", "CourseId");
     }
 
     /**
@@ -60,7 +63,8 @@ public class CourseDAO extends MySqlDAO implements CourseSvc {
      */
     @Override
     public Course retrieve(int courseId) throws ObjNotFoundException, NonRecoverableException {
-        final String sql = "SELECT Title,PrimaryPedagogy,Description FROM Course WHERE Id = ?";
+        final String sql = "SELECT Title, PrimaryPedagogy, Description " + 
+                            "FROM Course WHERE CourseId = ?";
 
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -102,7 +106,8 @@ public class CourseDAO extends MySqlDAO implements CourseSvc {
     public CourseDigest retrieveDigest(int courseId, Connection conn)
             throws ObjNotFoundException, NonRecoverableException {
 
-        final String sql = "SELECT Title,Description FROM Course WHERE Id = ?";
+        final String sql = "SELECT Title, Description " +
+                           "FROM Course WHERE CourseId = ?";
 
         PreparedStatement stmt = null;
 
@@ -138,7 +143,8 @@ public class CourseDAO extends MySqlDAO implements CourseSvc {
     public UnitDigest retrieveUnitDigest(int courseId, int unitId, Connection conn)
             throws ObjNotFoundException, NonRecoverableException {
 
-        final String sql = "SELECT Title,Description FROM Unit WHERE CourseId = ? AND UnitId = ?";
+        final String sql = "SELECT Title, Description " + 
+                           "FROM Unit WHERE CourseId = ? AND UnitId = ?";
 
         PreparedStatement stmt = null;
 
@@ -174,7 +180,9 @@ public class CourseDAO extends MySqlDAO implements CourseSvc {
     @Override
     public Task retrieveTask(int courseId, int taskId, Connection conn)
             throws ObjNotFoundException, NonRecoverableException {
-        final String sql = "SELECT Title,Description,Kind,SequenceIndex,ExampleType,ProblemId FROM Task WHERE CourseId = ? AND TaskId = ?";
+        final String sql = 
+                "SELECT Title, Description, Kind, SequenceIndex, ExampleType, ProblemId " + 
+                "FROM Task WHERE CourseId = ? AND TaskId = ?";
 
         PreparedStatement stmt = null;
 
@@ -224,7 +232,10 @@ public class CourseDAO extends MySqlDAO implements CourseSvc {
     private ArrayList<KnowledgeComponent> retrieveKnowledgeComponents(Course course, Connection conn)
             throws NonRecoverableException {
 
-        final String sql = "SELECT Id, Title, Description, BloomLevel, IsDomainFocus, Pedagogy, ExercisingLocations, Granularity FROM KnowledgeComponent WHERE CourseId = ?";
+        final String sql =
+                "SELECT KnowledgeComponentId, Title, Description, BloomLevel, " +
+                        "IsDomainFocus, Pedagogy, ExercisingLocations, Granularity " +
+                "FROM KnowledgeComponent WHERE CourseId = ?";
 
         ArrayList<KnowledgeComponent> outcomes = new ArrayList<>();
 
@@ -275,7 +286,8 @@ public class CourseDAO extends MySqlDAO implements CourseSvc {
      * @throws NonRecoverableException
      */
     private ArrayList<Unit> retrieveUnits(Course course, Connection conn) throws NonRecoverableException {
-        final String sql = "SELECT UnitId,Title,Description,SequenceIndex,Pedagogy FROM Unit WHERE CourseId = ?";
+        final String sql = "SELECT UnitId, Title, Description, SequenceIndex, Pedagogy " +
+                           "FROM Unit WHERE CourseId = ?";
 
         ArrayList<Unit> units = new ArrayList<>();
 
@@ -315,7 +327,10 @@ public class CourseDAO extends MySqlDAO implements CourseSvc {
      */
     private ArrayList<Task> retrieveTasks(Course course, Unit unit, Connection conn)
             throws NonRecoverableException {
-        final String sql = "SELECT TaskId,Title,Description,Kind,SequenceIndex,ExampleType,ProblemId FROM Task WHERE CourseId = ? AND UnitId = ?";
+        
+        final String sql = 
+                "SELECT TaskId, Title, Description, Kind, SequenceIndex, ExampleType, ProblemId " +
+                "FROM Task WHERE CourseId = ? AND UnitId = ?";
 
         ArrayList<Task> tasks = new ArrayList<>();
 
@@ -337,14 +352,33 @@ public class CourseDAO extends MySqlDAO implements CourseSvc {
                 task.setDescription(rs.getString(3));
                 task.setKind(TaskKind.findValue(rs.getString(4)));
                 task.setSequenceIndex(rs.getInt(5));
+                task.setType(ProblemType.valueOf(rs.getString(6)));
 
-                if (task.getKind() == TaskKind.PROBLEM) {
-                    task.setType(ProblemType.findValue(rs.getString(6)));
-                    // ToDo: What about problem id? (this is example type)
+                switch(task.getKind()){
+                    case MESSAGE:
+                        // ToDo: Handle MESSAGE kind tasks
+                        break;
+                    case PROBLEM:
+                        int problemId = rs.getInt(7);   // Returns 0 when NULL in DB
+                        
+                        if(!rs.wasNull()){
+                            ProblemSvc problemSvc = ServiceFactory.findProblemSvc();
+                            try {
+                                Problem problem = problemSvc.retrieve(problemId);
+                                task.setProblem(problem);
+                            }
+                            catch(ObjNotFoundException e){
+                                System.err.println("WARNING: ProblemId: " + problemId +
+                                        " not found for Task with TaskId: " + task.getId());
+                            }
+                        }
+                        break;
+                    default:
+                        break;
                 }
 
-                tasks.add(task);
-
+                tasks.add(task);    // Should this line go after task.setSteps()?
+                
                 task.setSteps(retrieveSteps(courseId, task.getId(), conn));
 
                 // ToDo: retrieve exercising locations
@@ -370,7 +404,10 @@ public class CourseDAO extends MySqlDAO implements CourseSvc {
      */
     private ArrayList<Step> retrieveSteps(int courseId, int taskId, Connection conn)
             throws NonRecoverableException {
-        final String sql = "SELECT Id,Title,Description,SequenceIndex,StepSubType,SubTypeId,TimeoutId FROM Step WHERE CourseId = ? AND TaskId = ?";
+        
+        final String sql =
+                "SELECT StepId, Title, Description, SequenceIndex, StepSubType, SubTypeId, TimeoutId " +
+                "FROM Step WHERE CourseId = ? AND TaskId = ?";
 
         ArrayList<Step> steps = new ArrayList<>();
 
@@ -420,7 +457,8 @@ public class CourseDAO extends MySqlDAO implements CourseSvc {
     private ArrayList<Hint> retrieveHints(int stepId, Connection conn)
             throws NonRecoverableException {
 
-        final String sql = "SELECT Id,Text,SequenceIndex FROM Hint WHERE StepId = ?";
+        final String sql = "SELECT HintId, Text, SequenceIndex " +
+                           "FROM Hint WHERE StepId = ?";
 
         ArrayList<Hint> hints = new ArrayList<>();
 
@@ -534,9 +572,9 @@ public class CourseDAO extends MySqlDAO implements CourseSvc {
         }
     }
 
-    private Timeout retrieveTimeout(int timeoutId, Connection conn)
-            throws NonRecoverableException {
-        final String sql = "SELECT TimeoutType,Seconds,Event,Msg FROM Timeout WHERE Id = ?";
+    private Timeout retrieveTimeout(int timeoutId, Connection conn) throws NonRecoverableException {
+        final String sql = "SELECT TimeoutType, Seconds, Event, Msg " +
+                           "FROM Timeout WHERE TimeoutId = ?";
 
         PreparedStatement stmt = null;
 
@@ -574,7 +612,8 @@ public class CourseDAO extends MySqlDAO implements CourseSvc {
     private ArrayList<ExercisingLocation> retrieveExercisingLocations(int courseId, Connection conn)
             throws NonRecoverableException {
 
-        final String sql = "SELECT Id, UnitId, TaskId, StepId FROM ExercisingLocation WHERE CourseId = ?";
+        final String sql = "SELECT ExercisingLocationId, UnitId, TaskId, StepId " +
+                           "FROM ExercisingLocation WHERE CourseId = ?";
 
         ArrayList<ExercisingLocation> locations = new ArrayList<>();
 

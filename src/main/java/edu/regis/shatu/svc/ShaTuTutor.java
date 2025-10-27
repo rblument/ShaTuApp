@@ -38,7 +38,6 @@ import edu.regis.shatu.model.aol.AssessmentLevel;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.PendingStep;
 import edu.regis.shatu.model.aol.PendingTask;
-import edu.regis.shatu.model.aol.Problem;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.model.aol.StudentModel;
@@ -651,13 +650,7 @@ public class ShaTuTutor implements TutorSvc {
         PendingTask pendingTask = new PendingTask(task);
         pendingTask.setCurrentStep(new PendingStep(task.getCurrentStep()));
         tSession.addTask(pendingTask);
-        
-//        Eventually, this should be the implementation (but task is currently empty)
-//        tSession.setProblem(task.getProblem());
-        // Kludge: Until then, retrieve the problem directly from DB, and manually set it in the session
-        ProblemSvc problemSvc = ServiceFactory.findProblemSvc();
-        Problem problem = problemSvc.retrieve(1);   // 1 = first record in Problem table
-        tSession.setProblem(problem);
+        tSession.setProblem(task.getProblem());
 
         // Generate the security token for this tutoring session.
         Random rnd = new Random();
