@@ -46,6 +46,7 @@ import edu.regis.shatu.model.aol.TutoringMode;
 import edu.regis.shatu.model.steps.Step;
 import edu.regis.shatu.objectives.*;
 import java.util.Date;
+import edu.regis.shatu.model.steps.EncodeAsciiStep;
 
 /**
  * The ShaTu tutor, which implements the tutoring service.
@@ -379,7 +380,7 @@ public class ShaTuTutor implements TutorSvc {
         }
     }
 
-    /*
+    /* TO-DO: The logic for test sequencing will need to refactor later.
     public TutorReply getTask(String jsonObj) {
         System.out.println("get task method");
 
@@ -510,10 +511,45 @@ public class ShaTuTutor implements TutorSvc {
         }
     }
 
-    public TutorReply completeInfoMsgStep(StepCompletion completion) {
-        TutorReply reply = new TutorReply(":StepCompletionReply");
 
-        return reply;
+    /**
+     * Handles the INFO_MESSAGE step completion
+     * @param completion
+     * @return
+     */
+    public TutorReply completeInfoMsgStep(StepCompletion completion) {
+        TutoringMode mode = session.getTutoringMode();
+        ProblemType firstProblemType;
+        
+        switch (mode) {
+            case SEE_ONE:
+                // First demonstration: ASCII Encoding
+                firstProblemType = ProblemType.ASCII_ENCODE;
+                break;
+            case DO_ONE:
+                // First practice: typically starts with ASCII_ENCODE as well
+                firstProblemType = ProblemType.ASCII_ENCODE;
+                break;
+            case TEACH_ONE:
+                // Teaching mode: starts with ASCII_ENCODE
+                firstProblemType = ProblemType.ASCII_ENCODE;
+                break;
+            default:
+                firstProblemType = ProblemType.ASCII_ENCODE;
+        }
+    
+        // Get the objective for the first task
+        currObjective = getCurrentObjectiveByProbelmType(firstProblemType);
+        
+        // Generate an example for this task
+        // Use the message from the current problem in the session
+        String messageToHash = session.getProblem().getMessageToHash();
+        
+        EncodeAsciiStep encodeStep = new EncodeAsciiStep();
+        encodeStep.setQuestion(messageToHash);
+        String jsonData = gson.toJson(encodeStep);
+
+        return currObjective.example(session, jsonData);
     }
 
     public TutorReply completedTask(String taskInfo) {

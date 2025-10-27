@@ -19,6 +19,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
+import com.google.gson.Gson;
+
 import edu.regis.shatu.err.InconsistentDBException;
 import edu.regis.shatu.err.NonRecoverableException;
 import edu.regis.shatu.err.ObjNotFoundException;
@@ -38,6 +40,7 @@ import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.model.aol.TaskKind;
 import edu.regis.shatu.model.aol.Timeout;
+import edu.regis.shatu.model.steps.InformationStep;
 import edu.regis.shatu.model.steps.Step;
 import edu.regis.shatu.svc.CourseSvc;
 
@@ -48,12 +51,19 @@ import edu.regis.shatu.svc.CourseSvc;
  */
 public class CourseDAO extends MySqlDAO implements CourseSvc {
 
+
+    /**
+     * GSON instance for JSON serialization/deserialization.
+     */
+    private static final Gson gson = new Gson();
+
     /**
      * Instantiate this Course DAO with default values.
      */
     public CourseDAO() {
         super("Course", "Id");
     }
+
 
     /**
      * {@inheritDoc}
@@ -213,7 +223,7 @@ public class CourseDAO extends MySqlDAO implements CourseSvc {
     }
 
     /**
-     * Extract child &lt;Outcome> elements from given XML DOM parent element
+     * Extract child &lt; Outcome> elements from given XML DOM parent element
      * adding each as a Outcome to the given Course.
      *
      * @param parent an XML DOM Element containing one or more child
@@ -248,12 +258,17 @@ public class CourseDAO extends MySqlDAO implements CourseSvc {
                 comp.setGranularity(OutcomeGranularity.findValue(rs.getString(8)));
 
                 // Link the exercising locations in this outcome to those in the course.
-                ArrayList<ExercisingLocation> locations = new ArrayList<>();
-                String[] ids = rs.getString(7).split(",");
-                for (int i = 0; i < ids.length; i++)
-                    locations.add(course.findLocation(i));
+                String exLocations = rs.getString(7);
+                if (!exLocations.isEmpty()) {
+                    ArrayList<ExercisingLocation> locations = course.getExercisingLocations();
 
-                comp.setExercisingLocations(locations);
+                    // Find the exercising locations for this outcome
+                    String[] locArray = exLocations.split(",");
+                    for (int i = 0; i < locArray.length; i++) {
+                        int locId = Integer.parseInt(locArray[i]);
+                        comp.addExercisingLocation(locations.get(locId));
+                    }
+                }
 
                 outcomes.add(comp);
             }
@@ -386,19 +401,26 @@ public class CourseDAO extends MySqlDAO implements CourseSvc {
 
             while (rs.next()) {
                 StepSubType subType = StepSubType.findValue(rs.getString(5));
-
+                int subTypeId = rs.getInt(6);
+                
                 Step step = new Step(rs.getInt(1), rs.getInt(4), subType);
-
-                step.setTitle(rs.getString(1));
-                step.setDescription(rs.getString(2));
+                
+                step.setTitle(rs.getString(2));           
+                step.setDescription(rs.getString(3));      
                 step.setTimeout(retrieveTimeout(rs.getInt(7), conn));
-
-                extractStepSubTypeData(subType, rs.getInt(6), conn);
-
-                // ToDo retrieve exercising locations
-
+                
+                String stepData = extractStepSubTypeData(subType, subTypeId, conn);
+                
+                // Convert raw text to JSON for INFO_MESSAGE
+                if (subType == StepSubType.INFO_MESSAGE && stepData != null && !stepData.isEmpty()) {
+                    InformationStep infoStep = new InformationStep();
+                    infoStep.setMsg(stepData);
+                    stepData = gson.toJson(infoStep);
+                    System.out.println("INFO_MESSAGE data: " + stepData);
+                }
+                
+                step.setData(stepData); 
                 steps.add(step);
-
                 step.setHints(retrieveHints(step.getId(), conn));
             }
 
