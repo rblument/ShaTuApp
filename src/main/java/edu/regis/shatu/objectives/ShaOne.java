@@ -23,7 +23,7 @@ public class ShaOne extends Objective {
      */
     @Override
     public TutorReply hint(StepCompletion completion) {
-        return genericHint(completion, KnowledgeComponentKind.SHA_ZERO,
+        return genericHint(completion, KnowledgeComponentKind.SHA_ONE,
                 "The Σ₁ function involves three ROTR operations XOR'd together ");
     }
 
@@ -63,7 +63,7 @@ public class ShaOne extends Objective {
      * @return Returns a TutorReply which tells which tasks the user has left
      */
     @Override
-      public TutorReply completeStep(StepCompletion completion) {
+    public TutorReply completeStep(StepCompletion completion) {
         ShaOneStep example = gson.fromJson(completion.getData(), ShaOneStep.class);
         String operand1 = example.getOperandA();
         int bitLength = example.getBitLength();

@@ -302,6 +302,11 @@ INSERT INTO KnowledgeComponent (
 VALUES (
     230, 1, 'SHA Sum 0 Function', 'Use the Sigma0 function.', 'Application', 0, 'Other', '0', 'Knowledge Component');
 
+INSERT INTO KnowledgeComponent (
+    KnowledgeComponentId, CourseId, Title, Description, BloomLevel, IsDomainFocus, Pedagogy, ExercisingLocations, Granularity)
+VALUES
+    (240, 1, 'SHA Sum 1 Function', 'Use the Sigma1 function.', 'Application', 0, 'Other', '0', 'Knowledge Component');
+
 -- This problem will be referenced by the Encode as ASCII task
 INSERT INTO Problem (ProblemId, Title, Description, Message)
 VALUES (1, 'Introductory Problem', 'Introduces the student to the tutor.', 'Regis Computer Science Rocks!');
