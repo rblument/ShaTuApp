@@ -87,6 +87,8 @@ public class MajFunctionView extends UserRequestView implements KeyListener {
     }
 
     /**
+     * I think this could be done by ShaTuTutor but removing it breaks the class
+     * 
      * Create and return the server request this view makes when a user selects
      * that they want to practice a new choice function example.
      *
@@ -473,6 +475,7 @@ public class MajFunctionView extends UserRequestView implements KeyListener {
      * return inputString;
      * }
      */
+
     /**
      * Formats the result output by the choice function based on the size of the
      * problem.
@@ -481,6 +484,7 @@ public class MajFunctionView extends UserRequestView implements KeyListener {
      *
      * @return the binary string representation of the answer
      */
+
     /*
      * private String formatResult(long answer) {
      * String finalResult = "";
@@ -508,9 +512,9 @@ public class MajFunctionView extends UserRequestView implements KeyListener {
      * return finalResult;
      * }
      */
+
     /**
      * Generates and displays three new input strings.
-     *//*
         * private void generateNewQuestion() {
         * responseTextArea.setText("");
         * 
@@ -557,11 +561,11 @@ public class MajFunctionView extends UserRequestView implements KeyListener {
      * return binaryResult;
      * }
      */
+
     /**
      * Verifies the user's answer against the correct result and shows a message
      * dialog.
-     */
-    private void verifyAnswer() {/*
+     * private void verifyAnswer() {
                                   * String correctAnswer = majorityFunction(stringX, stringY, stringZ);
                                   * String userResponse = responseTextArea.getText();
                                   * 
@@ -575,13 +579,12 @@ public class MajFunctionView extends UserRequestView implements KeyListener {
                                   * + "try again or use the hint feature for help. Correct answer: " +
                                   * correctAnswer);
                                   * }
-                                  */
-    }
+     * }
+     */
 
     /**
      * Displays a message dialog indicating the start of the next question.
-     */
-    private void onNextQuestion() {/*
+    private void onNextQuestion() {
                                     * 
                                     * generateNewQuestion();
                                     * 
@@ -589,26 +592,31 @@ public class MajFunctionView extends UserRequestView implements KeyListener {
                                     * JOptionPane.showMessageDialog(this, "New Example Generated");
                                     * 
                                     * checkButton.setEnabled(true);
-                                    */
+                                    
     }
+     */
 
     /**
+     * NO LONGER NEEDED KEPT FOR REFRENCE
+     * 
      * Displays a message dialog indicating the provision of a hint.
-     */
-    private void onNextHint() {
+     * private void onNextHint() {
         truthTablePanel.setVisible(true);
     }
+     */
 
     /**
+     * NO LONGER NEEDED KEPT FOR REFRENCE
+     * 
      * Handles the click event of the check button, verifying the user's answer.
-     */
-    private void onCheckButton() {
+     * private void onCheckButton() {
         if (responseTextArea.getText().equals("")) {
             JOptionPane.showMessageDialog(this, "Please provide an answer");
         } else {
             verifyAnswer();
         }
     }
+     */
 
     @Override
     protected void updateView() {

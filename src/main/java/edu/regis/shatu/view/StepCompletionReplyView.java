@@ -23,6 +23,7 @@ import javax.swing.JTextArea;
 
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.NewExampleRequest;
+import edu.regis.shatu.svc.ShaTuTutor;
 
 /**
  * Displays the result of a student completing a step, which gives the student
@@ -186,11 +187,13 @@ public class StepCompletionReplyView extends UserRequestView implements ActionLi
         }
     }
 
+    // I think this could be done by ShaTuTutor but removing it breaks the class
     @Override
     public NewExampleRequest newRequest() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
+    // I think this could be done by ShaTuTutor but removing it breaks the class
     @Override
     public StepCompletion stepCompletion() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody

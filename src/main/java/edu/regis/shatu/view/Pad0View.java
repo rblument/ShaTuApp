@@ -113,12 +113,13 @@ public class Pad0View extends UserRequestView {
     }
 
     /**
+     * NO LONGER NEEDED KEPT FOR REFRENCE
+     * 
      * Submit the student's answer to the tutor. Currently is suppose to just do
      * a error check, when the check button is clicked, its suppose to call
      * the stepCompletion method that calls to the tutor and lets the tutor
      * handle checking the answer. This method may be removed later in development.
-     */
-    public void submitAnswer() {
+     * public void submitAnswer() {
 
         if (this.responseTextArea.getText().equals("")) {
             this.feedbackArea.setText("Please provide an answer");
@@ -127,24 +128,26 @@ public class Pad0View extends UserRequestView {
             // can be found in development.
         }
     }
+     */
 
     /**
      * This method use to be called when the new example button is clicked,
      * the tutor is suppose to handle creating a new example/question so this
      * method may be outdated, leaving in-case a use can be found in development,
      * but may no longer be needed.
-     */
-    private void prepareNextQuestion() {
+     * private void prepareNextQuestion() {
         // Do nothing, tutor should be handling things, will leave incase a use
         // could be found during development.
     }
+     */
 
     /**
+     * NO LONGER NEEDED KEPT FOR REFRENCE
+     * 
      * Gives the student a hint and adds the ASCII table to the view, rest
      * should be handles by the tutor, maybe all of it should? Adjust as development
      * continues.
-     */
-    public void requestHint() {
+     * public void requestHint() {
 
         // Adjust the hint as needed
         this.feedbackArea.setText("Hint: Remember, the message must be padded to"
@@ -168,6 +171,7 @@ public class Pad0View extends UserRequestView {
         this.revalidate(); // refreshes the view
         this.repaint(); // refreshes the view
     }
+     */
 
     /**
      * Sets up the description section of the view, explaining the purpose of
@@ -418,6 +422,8 @@ public class Pad0View extends UserRequestView {
     
     
     /**
+     * I think this could be done by ShaTuTutor but removing it breaks the class
+     * 
      * This method is suppose to be called when the new example button is clicked,
      * it will assign related data pertaining to this step to the related class,
      * then send that class to the tutor to handle generating a question and answer.

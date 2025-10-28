@@ -208,8 +208,9 @@ public class AddTwoBitView extends UserRequestView implements KeyListener {
     }
 
     /**
+     * NO LONGER NEEDED KEPT FOR REFRENCE
      * Verifies the user's answer against the correct answer.
-     */
+
     private void verifyAnswer() {
         String correctAnswer = calculateModulo(binary1, binary2);
         // Get the text from the responseTextArea when the checkButton is clicked
@@ -221,29 +222,33 @@ public class AddTwoBitView extends UserRequestView implements KeyListener {
             JOptionPane.showMessageDialog(this, "Incorrect. The correct answer is: " + correctAnswer);
         }
     }
+     */
 
     /**
+     * NO LONGER NEEDED KEPT FOR REFRENCE
      * Handles the action for the Next Question button.
-     */
     private void onNextQuestion() {
         // JOptionPane.showMessageDialog(this, "Next Question");
     }
+     */
 
     /**
+     * NO LONGER NEEDED KEPT FOR REFRENCE
      * Handles the action for the Hint button.
-     */
     private void onNextHint() {
         JOptionPane.showMessageDialog(this, "Hint");
     }
+     */
 
     /**
+     * NO LONGER NEEDED KEPT FOR REFRENCE
      * Handles the action for the Check button.
-     */
     private void onCheckButton() {
         if (responseTextArea.getText().equals("")) {
             JOptionPane.showMessageDialog(this, "Please provide an answer");
         }
     }
+     */
 
     /**
      * Create and return the server request this view makes when a user selects
