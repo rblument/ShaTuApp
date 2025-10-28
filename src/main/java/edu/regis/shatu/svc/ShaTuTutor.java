@@ -43,6 +43,7 @@ import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.model.aol.StudentModel;
 import edu.regis.shatu.model.aol.TutoringMode;
 import edu.regis.shatu.model.steps.Step;
+import edu.regis.shatu.model.steps.EncodeAsciiStep;
 import edu.regis.shatu.objectives.*;
 import java.util.Date;
 
@@ -509,10 +510,51 @@ public class ShaTuTutor implements TutorSvc {
         }
     }
 
-    public TutorReply completeInfoMsgStep(StepCompletion completion) {
-        TutorReply reply = new TutorReply(":StepCompletionReply");
 
-        return reply;
+    /**
+     * Handles the INFO_MESSAGE step completion
+     * @param completion
+     * @return
+     */
+    public TutorReply completeInfoMsgStep(StepCompletion completion) {
+        TutoringMode mode = session.getTutoringMode();
+        ProblemType firstProblemType;
+        
+        switch (mode) {
+            case SEE_ONE:
+                // First demonstration: ASCII Encoding
+                firstProblemType = ProblemType.ASCII_ENCODE;
+                break;
+            case DO_ONE:
+                // First practice: typically starts with ASCII_ENCODE as well
+                firstProblemType = ProblemType.ASCII_ENCODE;
+                break;
+            case TEACH_ONE:
+                // Teaching mode: starts with ASCII_ENCODE
+                firstProblemType = ProblemType.ASCII_ENCODE;
+                break;
+            default:
+                firstProblemType = ProblemType.ASCII_ENCODE;
+        }
+    
+        // Get the objective for the first task
+        currObjective = getCurrentObjectiveByProbelmType(firstProblemType);
+        
+        // Generate an example for this task
+        // Use the message from the current problem in the session, or a default message
+        String messageToHash;
+        if (session.getProblem() != null && session.getProblem().getMessageToHash() != null) {
+            messageToHash = session.getProblem().getMessageToHash();
+        } else {
+            // Default message for demonstration
+            messageToHash = "Regis Computer Science Rocks!";
+        }
+        
+        EncodeAsciiStep encodeStep = new EncodeAsciiStep();
+        encodeStep.setQuestion(messageToHash);
+        String jsonData = gson.toJson(encodeStep);
+
+        return currObjective.example(session, jsonData);
     }
 
     public TutorReply completedTask(String taskInfo) {
@@ -829,6 +871,6 @@ public class ShaTuTutor implements TutorSvc {
 
        // LOGGER.log(Level.INFO, "Student {0} logged out at {1}", new Object[]{student.getAccount().getUserId(), milliseconds});
     }
-
-
 }
+
+
