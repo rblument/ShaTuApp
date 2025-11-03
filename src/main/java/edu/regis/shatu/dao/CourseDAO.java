@@ -36,6 +36,7 @@ import edu.regis.shatu.model.TaskSelectionKind;
 import edu.regis.shatu.model.Unit;
 import edu.regis.shatu.model.UnitDigest;
 import edu.regis.shatu.model.aol.OutcomeGranularity;
+import edu.regis.shatu.model.aol.Problem;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.model.aol.TaskKind;
@@ -354,20 +355,39 @@ public class CourseDAO extends MySqlDAO implements CourseSvc {
 
             ResultSet rs = stmt.executeQuery();
 
-            while (rs.next()) {
+             while (rs.next()) {
                 Task task = new Task(rs.getInt(1));
                 task.setTitle(rs.getString(2));
                 task.setDescription(rs.getString(3));
                 task.setKind(TaskKind.findValue(rs.getString(4)));
                 task.setSequenceIndex(rs.getInt(5));
+                task.setType(ProblemType.valueOf(rs.getString(6)));
 
-                if (task.getKind() == TaskKind.PROBLEM) {
-                    task.setType(ProblemType.findValue(rs.getString(6)));
-                    // ToDo: What about problem id? (this is example type)
+                switch(task.getKind()){
+                    case MESSAGE:
+                        // ToDo: Handle MESSAGE kind tasks
+                        break;
+                    case PROBLEM:
+                        int problemId = rs.getInt(7);   // Returns 0 when NULL in DB
+                        
+                        if(!rs.wasNull()){
+                            ProblemSvc problemSvc = ServiceFactory.findProblemSvc();
+                            try {
+                                Problem problem = problemSvc.retrieve(problemId);
+                                task.setProblem(problem);
+                            }
+                            catch(ObjNotFoundException e){
+                                System.err.println("WARNING: ProblemId: " + problemId +
+                                        " not found for Task with TaskId: " + task.getId());
+                            }
+                        }
+                        break;
+                    default:
+                        break;
                 }
 
-                tasks.add(task);
-
+                tasks.add(task);    // Should this line go after task.setSteps()?
+                
                 task.setSteps(retrieveSteps(courseId, task.getId(), conn));
 
                 // ToDo: retrieve exercising locations
