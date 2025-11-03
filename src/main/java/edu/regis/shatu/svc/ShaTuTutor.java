@@ -520,6 +520,7 @@ public class ShaTuTutor implements TutorSvc {
         TutoringMode mode = session.getTutoringMode();
         ProblemType firstProblemType;
         
+        //Does this need to be updated to display where they last where for DO_ONE,  TEACH_ONE?? Will they always start with ASCII?
         switch (mode) {
             case SEE_ONE:
                 // First demonstration: ASCII Encoding
