@@ -19,6 +19,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
+import com.google.gson.Gson;
+
 import edu.regis.shatu.err.InconsistentDBException;
 import edu.regis.shatu.err.NonRecoverableException;
 import edu.regis.shatu.err.ObjNotFoundException;
@@ -39,6 +41,7 @@ import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.model.aol.TaskKind;
 import edu.regis.shatu.model.aol.Timeout;
+import edu.regis.shatu.model.steps.InformationStep;
 import edu.regis.shatu.model.steps.Step;
 import edu.regis.shatu.svc.CourseSvc;
 import edu.regis.shatu.svc.ProblemSvc;
@@ -51,12 +54,19 @@ import edu.regis.shatu.svc.ServiceFactory;
  */
 public class CourseDAO extends MySqlDAO implements CourseSvc {
 
+
+    /**
+     * GSON instance for JSON serialization/deserialization.
+     */
+    private static final Gson gson = new Gson();
+
     /**
      * Instantiate this Course DAO with default values.
      */
     public CourseDAO() {
         super("Course", "CourseId");
     }
+
 
     /**
      * {@inheritDoc}
@@ -221,7 +231,7 @@ public class CourseDAO extends MySqlDAO implements CourseSvc {
     }
 
     /**
-     * Extract child &lt;Outcome> elements from given XML DOM parent element
+     * Extract child &lt; Outcome> elements from given XML DOM parent element
      * adding each as a Outcome to the given Course.
      *
      * @param parent an XML DOM Element containing one or more child
@@ -327,7 +337,6 @@ public class CourseDAO extends MySqlDAO implements CourseSvc {
      */
     private ArrayList<Task> retrieveTasks(Course course, Unit unit, Connection conn)
             throws NonRecoverableException {
-        
         final String sql = 
                 "SELECT TaskId, Title, Description, Kind, SequenceIndex, ExampleType, ProblemId " +
                 "FROM Task WHERE CourseId = ? AND UnitId = ?";
@@ -346,7 +355,7 @@ public class CourseDAO extends MySqlDAO implements CourseSvc {
 
             ResultSet rs = stmt.executeQuery();
 
-            while (rs.next()) {
+             while (rs.next()) {
                 Task task = new Task(rs.getInt(1));
                 task.setTitle(rs.getString(2));
                 task.setDescription(rs.getString(3));
@@ -404,7 +413,6 @@ public class CourseDAO extends MySqlDAO implements CourseSvc {
      */
     private ArrayList<Step> retrieveSteps(int courseId, int taskId, Connection conn)
             throws NonRecoverableException {
-        
         final String sql =
                 "SELECT StepId, Title, Description, SequenceIndex, StepSubType, SubTypeId, TimeoutId " +
                 "FROM Step WHERE CourseId = ? AND TaskId = ?";
@@ -423,19 +431,26 @@ public class CourseDAO extends MySqlDAO implements CourseSvc {
 
             while (rs.next()) {
                 StepSubType subType = StepSubType.findValue(rs.getString(5));
-
+                int subTypeId = rs.getInt(6);
+                
                 Step step = new Step(rs.getInt(1), rs.getInt(4), subType);
-
-                step.setTitle(rs.getString(1));
-                step.setDescription(rs.getString(2));
+                
+                step.setTitle(rs.getString(2));           
+                step.setDescription(rs.getString(3));      
                 step.setTimeout(retrieveTimeout(rs.getInt(7), conn));
-
-                extractStepSubTypeData(subType, rs.getInt(6), conn);
-
-                // ToDo retrieve exercising locations
-
+                
+                String stepData = extractStepSubTypeData(subType, subTypeId, conn);
+                
+                // Convert raw text to JSON for INFO_MESSAGE
+                if (subType == StepSubType.INFO_MESSAGE && stepData != null && !stepData.isEmpty()) {
+                    InformationStep infoStep = new InformationStep();
+                    infoStep.setMsg(stepData);
+                    stepData = gson.toJson(infoStep);
+                    System.out.println("INFO_MESSAGE data: " + stepData);
+                }
+                
+                step.setData(stepData); 
                 steps.add(step);
-
                 step.setHints(retrieveHints(step.getId(), conn));
             }
 
@@ -575,7 +590,7 @@ public class CourseDAO extends MySqlDAO implements CourseSvc {
     private Timeout retrieveTimeout(int timeoutId, Connection conn) throws NonRecoverableException {
         final String sql = "SELECT TimeoutType, Seconds, Event, Msg " +
                            "FROM Timeout WHERE TimeoutId = ?";
-
+                           
         PreparedStatement stmt = null;
 
         try {
