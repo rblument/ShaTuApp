@@ -100,25 +100,14 @@ public class CreateAcctAction extends ShaTuGuiAction {
             case "Created":
                 frame.clearNewAccountPanel();
                 
-                //AutoLogin Transition to tutoring sesh
-                try {
-                    TutoringSession session = gson.fromJson(reply.getData(), TutoringSession.class);
-                    frame.setModel(session);
-                    
-                    msg = "Welcome to ShaTu!\n\n" +
-                          "Your account has been created successfully.\n" +
-                          "Let's begin with 'See One' mode where you'll observe\n" +
-                          "how the SHA-256 algorithm works.";
-                    JOptionPane.showMessageDialog(frame, msg, "Welcome", 
-                                                  JOptionPane.INFORMATION_MESSAGE);
-                } catch (Exception e) {
-                    // If auto-login fails, fall back to manual sign-in
-                    LOGGER.severe("Failed to auto-login after account creation: " + e.getMessage());
-                    msg = "Account created successfully!\n\n" +
-                          "Please sign in to begin.";
-                    JOptionPane.showMessageDialog(frame, msg);
-                    frame.displayView(MainFrame.ViewName.SPLASH);
-                }
+                msg = "Welcome to ShaTu!\n\n" +
+                      "Your account has been created successfully.\n" +
+                      "Please sign in to begin.";
+                JOptionPane.showMessageDialog(frame, msg, "Welcome", 
+                                              JOptionPane.INFORMATION_MESSAGE);
+                
+                // Return to splash/login screen
+                frame.displayView(MainFrame.ViewName.SPLASH);
                 break;
             case "IllegalUserId":
                 msg = "User id already exists: " + account.getUserId();

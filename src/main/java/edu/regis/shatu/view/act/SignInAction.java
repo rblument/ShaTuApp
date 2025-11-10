@@ -105,16 +105,11 @@ public class SignInAction extends ShaTuGuiAction {
                 
                 MainFrame frame = MainFrame.instance();
 
+                // Set the model 
                 frame.setModel(session);
                 
                 // Start tracking user inactivity
                 inactivityManager.startTracking();
-                
-                String welcomeMessage = "Welcome, "
-                    + session.getStudent().getAccount().getFirstName()
-                    + "! Your session has successfully started.";
-                JOptionPane.showMessageDialog(null, welcomeMessage, "Welcome", JOptionPane.INFORMATION_MESSAGE);
-
                 
                 break;
                 
