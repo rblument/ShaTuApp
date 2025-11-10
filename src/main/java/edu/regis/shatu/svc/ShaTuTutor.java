@@ -14,6 +14,7 @@ package edu.regis.shatu.svc;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Random;
 import java.util.logging.Level;
@@ -44,7 +45,6 @@ import edu.regis.shatu.model.aol.StudentModel;
 import edu.regis.shatu.model.aol.TutoringMode;
 import edu.regis.shatu.model.steps.Step;
 import edu.regis.shatu.objectives.*;
-import java.util.Date;
 
 /**
  * The ShaTu tutor, which implements the tutoring service.
@@ -185,7 +185,7 @@ public class ShaTuTutor implements TutorSvc {
     }
 
     /**
-     * Creates a new student account
+     * Creates a new student account.
      *
      * This method handles ":CreateAccount" requests from the GUI client.
      *
@@ -232,7 +232,7 @@ public class ShaTuTutor implements TutorSvc {
      * This method handles ":VerifyUser" requests from the GUI client.
      *
      * @param jsonAcct a JSon encoded Account object
-     * @return a TutorReply if successful the status is "Created", otherwise the
+     * @return a TutorReply if successful the status is "Verified", otherwise the
      *         status is ":ERR".
      * @throws edu.regis.shatu.err.NonRecoverableException
      */
@@ -262,7 +262,6 @@ public class ShaTuTutor implements TutorSvc {
 
                 // Check if session already exists before creating
                 SessionSvc sessionSvc = ServiceFactory.findSessionSvc();
-                TutoringSession session;
 
                 try {
                     session = sessionSvc.retrieve(dbAcct.getUserId()); // already exists
@@ -288,12 +287,12 @@ public class ShaTuTutor implements TutorSvc {
     }
 
     /**
-     * Resets password for user currently in database
+     * Resets password for user currently in database.
      *
      * This method handles ":ResetPassword" requests from the GUI client.
      *
      * @param jsonAcct a JSon encoded Account object
-     * @return a TutorReply if successful the status is "Created", otherwise the
+     * @return a TutorReply if successful the status is "PasswordReset", otherwise the
      *         status is ":ERR".
      * @throws edu.regis.shatu.err.NonRecoverableException
      */
@@ -349,15 +348,15 @@ public class ShaTuTutor implements TutorSvc {
                     StudentModelSvc stuModSvc = ServiceFactory.findStudentModelSvc();
                     studentModel = stuModSvc.retrieve(userId);
                     student.setStudentModel(studentModel);
-
+                    notifyLogin(student);
                 } catch (ObjNotFoundException ex) {
                     TutorReply reply = new TutorReply(":ERR");
-                    reply.setData("Student model not found in sign in for: " + userId);
+                    reply.setData("Student model not found for: " + userId);
                     return reply;
                 }
 
                 SessionSvc svc = ServiceFactory.findSessionSvc();
-                TutoringSession session = svc.retrieve(student.getAccount().getUserId());
+                session = svc.retrieve(student.getAccount().getUserId());
 
                 TutorReply reply = new TutorReply("Authenticated");
 
@@ -375,6 +374,40 @@ public class ShaTuTutor implements TutorSvc {
             Logger.getLogger(ShaTuTutor.class
                     .getName()).log(Level.SEVERE, null, ex);
             return new TutorReply();
+        }
+    }
+    
+    /**
+     * Attempts to sign a student out.
+     * 
+     * This method handles ":SignOut" requests from the GUI client.
+     * 
+     * It is invoked indirectly as a reflection from within request().
+     *
+     * @param jsonUser a JSON encoded User object
+     * @return a TutorReply indicating "SIGN_OUT" for success or ":ERR" for failure
+     */
+    public TutorReply signOut(String jsonUser) {
+        System.out.println("Received sign out: " + jsonUser);
+        Account requestAcct = gson.fromJson(jsonUser, Account.class);
+
+        try {
+            student = new Student(requestAcct);
+            notifyLogout(student);
+            TutorReply reply = new TutorReply("SIGN_OUT");
+            reply.setData(gson.toJson(session));
+            return reply;
+        }
+        catch (ObjNotFoundException ex) {
+            TutorReply reply = new TutorReply(":ERR");
+            reply.setData("Student model not found for: " + requestAcct.getUserId());
+            return reply;
+        }
+        catch (NonRecoverableException ex) {
+            Logger.getLogger(ShaTuTutor.class.getName()).log(Level.SEVERE, null, ex);
+            TutorReply reply = new TutorReply(":ERR");
+            reply.setData("NonRecoverableException occured during sign-out");
+            return reply;
         }
     }
 
@@ -464,7 +497,7 @@ public class ShaTuTutor implements TutorSvc {
     */
 
     /**
-     * Returns a hint to the GUI client, if any
+     * Returns a hint to the GUI client, if any.
      *
      * This method handles ":RequestHint" requests from the GUI client.
      *
@@ -797,34 +830,32 @@ public class ShaTuTutor implements TutorSvc {
      * @throws ObjNotFoundException
      * @throws NonRecoverableException 
      */
-    public void notifyLogin(Student student) throws ObjNotFoundException, NonRecoverableException {
-        // ToDo: This needs to be called suring a sign in. 
+    private void notifyLogin(Student student) throws ObjNotFoundException, NonRecoverableException {
         StudentModelSvc stuModelSvc = ServiceFactory.findStudentModelSvc();
         
-                Date now = new Date();
+        Date now = new Date();
         long milliseconds = now.getTime();
+        
         student.setLastLogin(milliseconds);
-
         stuModelSvc.recordLoginEvent(student.getAccount().getUserId(), milliseconds);
 
        // LOGGER.log(Level.INFO, "Student {0} logged in at {1}", new Object[]{student.getAccount().getUserId(), milliseconds});
     }
 
     /**
-     * Update the database to record the fact the student signed out.
+     * Update the database to record the fact the student logged out.
      * 
      * @param student the student who logged out.
      * @throws ObjNotFoundException
      * @throws NonRecoverableException 
      */
-    public void notifyLogout(Student student) throws ObjNotFoundException, NonRecoverableException {
-        // ToDo: This needs to be called during a signout.
+    private void notifyLogout(Student student) throws ObjNotFoundException, NonRecoverableException {
         StudentModelSvc stuModelSvc = ServiceFactory.findStudentModelSvc();
         
         Date now = new Date();
         long milliseconds = now.getTime();
         
-        student.setLastLogout(now.getTime());
+        student.setLastLogout(milliseconds);
         stuModelSvc.recordLogoutEvent(student.getAccount().getUserId(), milliseconds);
 
        // LOGGER.log(Level.INFO, "Student {0} logged out at {1}", new Object[]{student.getAccount().getUserId(), milliseconds});

@@ -30,7 +30,7 @@ public class ShaTuMenuBar extends JMenuBar {
     }
  
     /**
-     * Create the File menu appearing in the menubar
+     * Create the File menu appearing in the menu bar.
      */
     private void createFileMenu() {
         JMenu menu = new JMenu("File");
@@ -39,7 +39,7 @@ public class ShaTuMenuBar extends JMenuBar {
         
         menu.addSeparator();
         
-        menu.add(new JMenuItem(new SignOutAction()));
+        menu.add(new JMenuItem(SignOutAction.instance()));
         
         add(menu);
     }
