@@ -123,7 +123,9 @@ CREATE TABLE Step (
 CREATE TABLE Student (
     UserId VARCHAR(255),
     FirstName VARCHAR(30) NOT NULL,
-    LastName VARCHAR(255) NOT NULL
+    LastName VARCHAR(255) NOT NULL,
+    LastLogin TIMESTAMP,
+    LastLogout TIMESTAMP
 );
 
 CREATE TABLE StudentModel (
