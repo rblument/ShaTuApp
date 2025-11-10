@@ -14,7 +14,7 @@ package edu.regis.shatu.svc;
 
 /**
  * A decorator that wraps a user interface request being sent to the tutor
- * (sever), which includes the type of request being mad.
+ * (server), which includes the type of request being made.
  * 
  * The request type specifies how to interpret the JSon encoded data.
  * 
@@ -32,7 +32,7 @@ public class ClientRequest {
     private String userId;
     
     /**
-     * The sing-in security token associated with the user making this request.
+     * The sign-in security token associated with the user making this request.
      */
     private String securityToken;
     
@@ -97,5 +97,11 @@ public class ClientRequest {
      */
     public void setData(String data) {
         this.data = data;
+    }
+    
+    @Override
+    public String toString(){
+        return "{ \nUser Id: " + this.userId + " \nSecurity Token: " + this.securityToken +
+                " \nJSON data: " + this.data + " \nServer Request Type: " + this.requestType + " }";
     }
 }
