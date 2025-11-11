@@ -249,10 +249,10 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
      */
     @Override
     public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_ENTER && answerField.getText().equals("")) {
+        if (e.getKeyCode() == KeyEvent.VK_ENTER && responseTextArea.getText().equals("")) {
             JOptionPane.showMessageDialog(this, "Please provide an answer");
         } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-            // checkButton.doClick();
+            checkButton.doClick();
         }
     }
 
@@ -401,6 +401,7 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
         responseTextArea = new JTextArea(3, 20);
         responseTextArea.setLineWrap(true);
         responseTextArea.setWrapStyleWord(true);
+        responseTextArea.addKeyListener(this);  
 
         responsePane = new JScrollPane(responseTextArea);
         responsePane.setPreferredSize(new Dimension(800, 200));
