@@ -335,7 +335,6 @@ public class ShaTuTutor implements TutorSvc {
      *         data being a JSon encoded TutoringSession object.
      */
     public TutorReply signIn(String jsonUser) {
-        System.out.println("Received sign in: " + jsonUser);
         Account requestAcct = gson.fromJson(jsonUser, Account.class);
 
         try {
@@ -389,7 +388,6 @@ public class ShaTuTutor implements TutorSvc {
      * @return a TutorReply indicating "SIGN_OUT" for success or ":ERR" for failure
      */
     public TutorReply signOut(String jsonUser) {
-        System.out.println("Received sign out: " + jsonUser);
         Account requestAcct = gson.fromJson(jsonUser, Account.class);
 
         try {
