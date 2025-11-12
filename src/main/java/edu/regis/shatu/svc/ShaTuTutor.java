@@ -393,9 +393,7 @@ public class ShaTuTutor implements TutorSvc {
         try {
             student = new Student(requestAcct);
             notifyLogout(student);
-            TutorReply reply = new TutorReply("SIGN_OUT");
-            reply.setData(gson.toJson(session));
-            return reply;
+            return new TutorReply("SIGN_OUT");
         }
         catch (ObjNotFoundException ex) {
             TutorReply reply = new TutorReply(":ERR");
