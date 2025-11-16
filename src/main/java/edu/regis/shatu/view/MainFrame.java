@@ -315,6 +315,7 @@ public class MainFrame extends JFrame implements WindowListener {
         cardPanel.add(forgotPasswordPanel, ViewName.FORGOT_PASSWORD.toString());
         cardPanel.add(dashboardPanel, ViewName.DASHBOARD.toString());
 
+
         setContentPane(cardPanel);
     }
 

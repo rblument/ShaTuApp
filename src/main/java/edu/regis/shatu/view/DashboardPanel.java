@@ -157,8 +157,33 @@ public class DashboardPanel extends JPanel {
         });
         
         teachOneButton.addActionListener(evt -> {
-            MainFrame.instance().displayView(MainFrame.ViewName.SPLASH);
+            // Load all lessons from the model
+            loadAllLessons();
+
+            // Refresh the Teach Me panel to show lessons
+            JPanel teachMeCategoryPanel = createCategoryPanel("Teach Me");
+            JScrollPane teachMeScroll = new JScrollPane(teachMeCategoryPanel);
+            teachMeScroll.setPreferredSize(new Dimension(350, 300));
+
+            // Replace old Teach Me panel in content panel
+            GridBagLayout layout = (GridBagLayout) getLayout();
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.fill = GridBagConstraints.BOTH;
+            gbc.insets = new Insets(5, 5, 5, 5);
+            gbc.anchor = GridBagConstraints.NORTH;
+            gbc.weightx = 1.0;
+            gbc.weighty = 1.0;
+            gbc.gridx = 0;
+            gbc.gridy = 0;
+
+            remove(teachMePanel);
+            teachMePanel = teachMeCategoryPanel;
+            add(teachMeScroll, gbc);
+
+            revalidate();
+            repaint();
         });
+
 
         // Initialize progress bar maps and panels
         teachMeProgressBars = new HashMap<>();
@@ -172,20 +197,16 @@ public class DashboardPanel extends JPanel {
     }
     
     //Loads the lesson names from database
-    private void loadAllLessons(){
+    private void loadAllLessons() {
+        allLessons.clear(); // prevent duplicates
         try {
-            if (model != null){
-                String userId = model.getStudent().getAccount().getUserId();
-                StudentModelSvc studentModelService = ServiceFactory.findStudentModelSvc();
-                
-                //get lessons by checking assessments in student model
+            if (model != null) {
                 StudentModel studentModel = model.getStudent().getStudentModel();
-                
-                for(Assessment assessment : studentModel.getAssessments().values()) {
+
+                for (Assessment assessment : studentModel.getAssessments().values()) {
                     String lessonTitle = assessment.getOutcome().getTitle();
-                    
-                    //exclude lessons with 0, 10,20 for IDs to prevent duplicates
-                    if(!allLessons.contains(lessonTitle)) {
+
+                    if (!allLessons.contains(lessonTitle)) {
                         allLessons.add(lessonTitle);
                     }
                 }
@@ -194,6 +215,7 @@ public class DashboardPanel extends JPanel {
             System.err.println("Error Loading Lessons: " + e.getMessage());
         }
     }
+
     
     //Updates all progress bars when model changes
     private void updateAllProgressBars() {
