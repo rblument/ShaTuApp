@@ -50,7 +50,7 @@ import edu.regis.shatu.svc.SessionSvc;
 public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSession> {
 
     public SessionDAO() {
-        super("TutoringSession", "Id");
+        super("TutoringSession", "TutoringSessionId");
     }
 
     /**
@@ -97,13 +97,11 @@ public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSes
             ResultSet rs = stmt.getGeneratedKeys();
             if (rs.next()) {
                 session.setId(rs.getInt(1));
-                
                 createPendingTasks(session, conn);
             }
 
         } catch (SQLException e) {
             throw new NonRecoverableException("SessionDAO-ERR-1", e);
-
         } finally {
             close(conn, stmt);
         }
@@ -114,8 +112,10 @@ public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSes
      */
     @Override
     public TutoringSession retrieve(String userId) throws ObjNotFoundException, NonRecoverableException {
-        final String sql = "SELECT Id, SecurityToken, IsActive, StartDate, CourseId, UnitId, ProblemId " +
-                           "FROM TutoringSession WHERE UserId = ?";
+        final String sql =
+                "SELECT TutoringSessionId, SecurityToken, IsActive, StartDate, " +
+                        "CourseId, UnitId, ProblemId " +
+                "FROM TutoringSession WHERE UserId = ?";
 
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -212,7 +212,6 @@ public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSes
 
             if (rs.next()) {
                 return rs.getString(1);
-
             } else {
                 throw new ObjNotFoundException("User Id:" + userId);
             }
@@ -232,7 +231,10 @@ public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSes
      */
     @Override
     public void update(TutoringSession session) throws ObjNotFoundException, NonRecoverableException {
-        final String sql = "INSERT INTO TutoringSession (UserId, SecurityToken, IsActive, StartDate, CourseId, UnitId) VALUES (?,?,?,?,?,?)";
+        final String sql = 
+                "INSERT INTO TutoringSession " +
+                "(UserId, SecurityToken, IsActive, StartDate, CourseId, UnitId) " +
+                "VALUES (?,?,?,?,?,?)";
 
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -261,13 +263,11 @@ public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSes
             ResultSet rs = stmt.getGeneratedKeys();
             if (rs.next()) {
                 session.setId(rs.getInt(1));
-
                 createPendingTasks(session, conn);
             }
 
         } catch (SQLException e) {
             throw new NonRecoverableException("SessionDAO-ERR-1", e);
-
         } finally {
             close(conn, stmt);
         }
@@ -285,7 +285,10 @@ public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSes
 
     private void createPendingTasks(TutoringSession session, Connection conn)
             throws NonRecoverableException {
-        final String sql = "INSERT INTO PendingTask (SessionId, TaskId, PendingStepId) VALUES (?,?,?)";
+        
+        final String sql = "INSERT INTO PendingTask " +
+                           "(SessionId, TaskId, PendingStepId) " +
+                           "VALUES (?,?,?)";
 
         int sessionId = session.getId();
 
@@ -305,10 +308,8 @@ public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSes
                 stmt.executeUpdate();
 
             }
-
         } catch (SQLException e) {
             throw new NonRecoverableException("SessionDAO-ERR-7", e);
-
         } finally {
             close(stmt);
         }
@@ -316,7 +317,11 @@ public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSes
 
     private int createPendingStep(int sessionId, PendingStep pStep, Connection conn)
             throws NonRecoverableException {
-        final String sql = "INSERT INTO PendingStep (SessionId, StepId, NotifyTutor, IsCompleted, CurrentHintIndex) VALUES (?,?,?,?,?)";
+        
+        final String sql =
+                "INSERT INTO PendingStep " +
+                "(SessionId, StepId, NotifyTutor, IsCompleted, CurrentHintIndex) " +
+                "VALUES (?,?,?,?,?)";
 
         PreparedStatement stmt = null;
 
@@ -343,7 +348,6 @@ public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSes
 
         } catch (SQLException e) {
             throw new NonRecoverableException("SessionDAO-ERR-9", e);
-
         } finally {
             close(stmt);
         }
@@ -392,7 +396,6 @@ public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSes
             throw new NonRecoverableException("SessionDAO-ERR-10", new InconsistentDBException(errMsg));
         } catch (SQLException e) {
             throw new NonRecoverableException("SessionDAO-ERR-11", e);
-
         } finally {
             close(stmt);
         }
@@ -401,7 +404,8 @@ public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSes
     public PendingStep retrievePendingStep(int pendingStepId, int sessionId, Task task, Connection conn)
             throws NonRecoverableException {
 
-        final String sql = "SELECT StepId, NotifyTutor, IsCompleted, CurrentHintIndex FROM PendingStep WHERE Id = ?";
+        final String sql = "SELECT StepId, NotifyTutor, IsCompleted, CurrentHintIndex " +
+                           "FROM PendingStep WHERE PendingStepId = ?";
 
         PreparedStatement stmt = null;
 
@@ -426,7 +430,6 @@ public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSes
 
         } catch (SQLException e) {
             throw new NonRecoverableException("SessionDAO-ERR-13", e);
-
         } finally {
             close(stmt);
         }

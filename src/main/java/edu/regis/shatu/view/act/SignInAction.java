@@ -16,8 +16,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.util.logging.Logger;
 
+import javax.swing.JOptionPane;
+
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import edu.regis.shatu.model.Account;
 import edu.regis.shatu.model.TutoringSession;
@@ -26,7 +27,6 @@ import edu.regis.shatu.svc.ServerRequestType;
 import edu.regis.shatu.svc.SvcFacade;
 import edu.regis.shatu.svc.TutorReply;
 import edu.regis.shatu.view.MainFrame;
-import javax.swing.JOptionPane;
 
 /**
  * An (MVC) controller handling a GUI gesture representing a user's request to
@@ -84,9 +84,9 @@ public class SignInAction extends ShaTuGuiAction {
     }
 
     /**
-     * Handle the user's request to sign-in by sending it to the DICE tutor.
+     * Handle the user's request to sign-in by sending it to the ShaTu tutor.
      *
-     * If successful, the MainFrame with the Courtroom View is displayed.
+     * If successful, the MainFrame with the Tutoring Session View is displayed.
      *
      * @param evt ignored
      */
@@ -105,16 +105,11 @@ public class SignInAction extends ShaTuGuiAction {
                 
                 MainFrame frame = MainFrame.instance();
 
+                // Set the model 
                 frame.setModel(session);
                 
                 // Start tracking user inactivity
                 inactivityManager.startTracking();
-                
-                String welcomeMessage = "Welcome, "
-                    + session.getStudent().getAccount().getFirstName()
-                    + "! Your session has successfully started.";
-                JOptionPane.showMessageDialog(null, welcomeMessage, "Welcome", JOptionPane.INFORMATION_MESSAGE);
-
                 
                 break;
                 
