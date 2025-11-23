@@ -12,6 +12,7 @@
  */
 package edu.regis.shatu.view;
 
+import edu.regis.shatu.model.KnowledgeComponentKind;
 import edu.regis.shatu.svc.SHA_256;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -26,6 +27,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 /**
  * ToDo: Should this be a HilightLabel?
@@ -117,62 +120,20 @@ public class BitOpLabel extends JLabel implements MouseListener {
         String labelText = getText();
         System.out.print(getText());
         if (SwingUtilities.isRightMouseButton(evt)){
-            switch(labelText){
-                case ("Ch"):
-                    JOptionPane.showMessageDialog(null, 
-                            "Three incoming values\n" +
-                            "\t e: " + SHA_256.instance().getInTempValue(4) +
-                            "\n\t f: " + SHA_256.instance().getInTempValue(5 )+ 
-                            "\n\t g: " + SHA_256.instance().getInTempValue(6) 
-                            + "\n\n One outgoing value based on Choice Function: " 
-                                    + SHA_256.instance().getChoice(), 
+            BitOperation operation = BitOperation.fromLabel(labelText);
+            if (operation != null) {
+                JOptionPane.showMessageDialog(null,
+                        operation.buildPopupMessage(),
                         "Binary value", JOptionPane.WARNING_MESSAGE);
-                    break;
-                case ("Maj"):
-                    JOptionPane.showMessageDialog(null, 
-                            "Three incoming values\n" +
-                            "\t a: " + SHA_256.instance().getInTempValue(0) +
-                            "\n\t b: " + SHA_256.instance().getInTempValue(1)+ 
-                            "\n\t c: " + SHA_256.instance().getInTempValue(2) 
-                            + "\n\n One outgoing value based on Majority Function: " 
-                                    + SHA_256.instance().getMajority(), 
-                        "Binary value", JOptionPane.WARNING_MESSAGE);
-                    break;
-                case ("\u03A3\u2080"):
-                    JOptionPane.showMessageDialog(null, 
-                            "Incoming value\n" +
-                            "\t a: " + SHA_256.instance().getInTempValue(0) +
-                            "\n\n One outgoing value based on SHA Sum 0 value Function: " 
-                                    + SHA_256.instance().getBigSig0Val(), 
-                        "Binary value", JOptionPane.WARNING_MESSAGE);
-                    break;
-                case ("\u03A3\u2081"):
-                    JOptionPane.showMessageDialog(null, 
-                            "Incoming value\n" +
-                            "\t a: " + SHA_256.instance().getInTempValue(4) +
-                            "\n\n One outgoing value based on SHA Sum 1 value Function: " 
-                                    + SHA_256.instance().getBigSig1Val(), 
-                        "Binary value", JOptionPane.WARNING_MESSAGE);
-                    break;
-            } //end case
+            }
         } //end if
         
         else if (SwingUtilities.isLeftMouseButton(evt)){
-            switch(labelText){
-                case ("Ch"):
-                    stepSelection = StepSelection.CHOICE_FUNCTION;
-                    break;
-                case ("Maj"):
-                    stepSelection = StepSelection.MAJ_FUNCTION;
-                    break;
-                case ("\u03A3\u2080"):
-                    stepSelection = StepSelection.SHA_ZERO;
-                    break;
-                case ("\u03A3\u2081"):
-                    stepSelection = StepSelection.SHA_ONE;
-                    break;
+            BitOperation operation = BitOperation.fromLabel(labelText);
+            if (operation != null) {
+                stepSelection = operation.getSelection();
+                select();
             }
-            select();
         }
     }
 
@@ -207,6 +168,106 @@ public class BitOpLabel extends JLabel implements MouseListener {
         if (!isSelected) {
             setBorder(NORMAL_BORDER);
             setBackground(NORMAL_BACKGROUND);
+        }
+    }
+
+    /**
+     * Metadata describing the SHA-256 bit operations rendered by this label.
+     */
+    private enum BitOperation {
+        CHOICE("Ch", StepSelection.CHOICE_FUNCTION,
+                KnowledgeComponentKind.CHOICE_FUNCTION,
+                new RegisterInfo("e", 4),
+                new RegisterInfo("f", 5),
+                new RegisterInfo("g", 6)) {
+            @Override
+            protected String value() {
+                return SHA_256.instance().getChoice();
+            }
+        },
+        MAJORITY("Maj", StepSelection.MAJ_FUNCTION,
+                KnowledgeComponentKind.MAJORITY_FUNCTION,
+                new RegisterInfo("a", 0),
+                new RegisterInfo("b", 1),
+                new RegisterInfo("c", 2)) {
+            @Override
+            protected String value() {
+                return SHA_256.instance().getMajority();
+            }
+        },
+        BIG_SIGMA_ZERO("\u03A3\u2080", StepSelection.SHA_ZERO,
+                KnowledgeComponentKind.SHA_ZERO,
+                new RegisterInfo("a", 0)) {
+            @Override
+            protected String value() {
+                return SHA_256.instance().getBigSig0Val();
+            }
+        },
+        BIG_SIGMA_ONE("\u03A3\u2081", StepSelection.SHA_ONE,
+                KnowledgeComponentKind.SHA_ONE,
+                new RegisterInfo("a", 4)) {
+            @Override
+            protected String value() {
+                return SHA_256.instance().getBigSig1Val();
+            }
+        };
+
+        private final String label;
+        private final StepSelection selection;
+        private final KnowledgeComponentKind knowledgeComponent;
+        private final RegisterInfo[] registers;
+
+        BitOperation(String label, StepSelection selection,
+                     KnowledgeComponentKind knowledgeComponent, RegisterInfo... registers) {
+            this.label = label;
+            this.selection = selection;
+            this.knowledgeComponent = knowledgeComponent;
+            this.registers = registers;
+        }
+
+        static BitOperation fromLabel(String text) {
+            for (BitOperation operation : values()) {
+                if (operation.label.equals(text)) {
+                    return operation;
+                }
+            }
+            return null;
+        }
+
+        StepSelection getSelection() {
+            return selection;
+        }
+
+        String buildPopupMessage() {
+            String registerHeader = registers.length == 1
+                    ? "Incoming value"
+                    : "Incoming values";
+            String registerDetails = Arrays.stream(registers)
+                    .map(RegisterInfo::render)
+                    .collect(Collectors.joining("\n"));
+            return registerHeader + "\n" +
+                    registerDetails +
+                    "\n\nOne outgoing value based on " + knowledgeComponent.title() + ": " +
+                    value();
+        }
+
+        protected abstract String value();
+    }
+
+    /**
+     * Simple value object describing the register name and index.
+     */
+    private static final class RegisterInfo {
+        private final String name;
+        private final int index;
+
+        private RegisterInfo(String name, int index) {
+            this.name = name;
+            this.index = index;
+        }
+
+        private String render() {
+            return "\t " + name + ": " + SHA_256.instance().getInTempValue(index);
         }
     }
 }
