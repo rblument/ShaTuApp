@@ -126,6 +126,15 @@ public enum StepSubType {
     public StepSelection getViewName() {
         return viewName;
     }
+
+    /**
+     * Return a user facing name for the subtype while returning label.
+     *
+     * @return display text suitable for UI or logging
+     */
+    public String getDisplayName() {
+        return (viewName != null) ? viewName.getLabel().getText() : subType;
+    }
     
     /**
      * Return the subType name that is used by the server
