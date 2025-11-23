@@ -382,7 +382,10 @@ public class ShaTuTutor implements TutorSvc {
         }
     }
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
 
     /**
      * Records that the student asked to see the correct answer for the given knowledge component.

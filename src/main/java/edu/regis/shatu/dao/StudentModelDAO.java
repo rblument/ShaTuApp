@@ -49,12 +49,15 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
         final String sql2 = 
                 "INSERT INTO Assessment " +
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                 "(UserId, KnowledgeComponentId, AssessmentLevel, Exposures, Successes, Hints) " +
                 "VALUES (?,?,?,?,?,?)";
         
         String userId = student.getAccount().getUserId();
         StudentModel studentModel = student.getStudentModel();
 =======
+=======
+>>>>>>> Stashed changes
                 "(UserId, KnowledgeComponentId, AssessmentLevel, Exposures, Successes, Hints, CorrectAnswerRequests) " +
                 "VALUES (?,?,?,?,?,?,?)";
         final String sql3 = 
