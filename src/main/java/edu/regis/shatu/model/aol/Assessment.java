@@ -51,6 +51,11 @@ public class Assessment extends Model {
      * component in this assessment.
      */
     private int hints;
+
+    /**
+     * The number of times the student requested to see the correct answer after answering incorrectly.
+     */
+    private int correctAnswerRequests;
     
     public Assessment(KnowledgeComponent outcome, AssessmentLevel assessment) {
         this.outcome = outcome;
@@ -122,5 +127,17 @@ public class Assessment extends Model {
     public void incrementHints() {
         hints++;
         System.out.println("Hints incremented to " + hints);
+    }
+
+    public int getCorrectAnswerRequests() {
+        return correctAnswerRequests;
+    }
+
+    public void setCorrectAnswerRequests(int correctAnswerRequests) {
+        this.correctAnswerRequests = correctAnswerRequests;
+    }
+
+    public void incrementCorrectAnswerRequests() {
+        correctAnswerRequests++;
     }
 }

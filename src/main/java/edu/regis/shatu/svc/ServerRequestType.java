@@ -86,7 +86,12 @@ public enum ServerRequestType {
     /**
      * Get the current task of the user
      */
-    GET_TASK(":GetTask");
+    GET_TASK(":GetTask"),
+
+    /**
+     * Record that the student asked to reveal the correct answer.
+     */
+    RECORD_CORRECT_ANSWER(":RecordCorrectAnswer");
 
     /**
      * The name used by the server to identify this request.

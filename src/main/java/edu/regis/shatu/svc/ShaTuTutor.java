@@ -30,11 +30,13 @@ import edu.regis.shatu.model.Course;
 import edu.regis.shatu.model.KnowledgeComponent;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.Student;
+import edu.regis.shatu.model.StudentModelFieldKind;
 import edu.regis.shatu.model.Task;
 import edu.regis.shatu.model.TutoringSession;
 import edu.regis.shatu.model.Unit;
 import edu.regis.shatu.model.aol.Assessment;
 import edu.regis.shatu.model.aol.AssessmentLevel;
+import edu.regis.shatu.model.aol.CorrectAnswerRequest;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.PendingStep;
 import edu.regis.shatu.model.aol.PendingTask;
@@ -124,6 +126,7 @@ public class ShaTuTutor implements TutorSvc {
             case "newExample":
             case "requestHint":
             case "resetPassword":
+            case "recordCorrectAnswer":
                 String userId = request.getUserId();
                 try {
                     if (verifySession(userId, request.getSecurityToken())) {
@@ -378,6 +381,70 @@ public class ShaTuTutor implements TutorSvc {
             return new TutorReply();
         }
     }
+<<<<<<< Updated upstream
+=======
+
+    /**
+     * Records that the student asked to see the correct answer for the given knowledge component.
+     *
+     * @param jsonData a JSon encoded {@link CorrectAnswerRequest}
+     * @return a TutorReply indicating success or failure.
+     */
+    public TutorReply recordCorrectAnswer(String jsonData) {
+        CorrectAnswerRequest request = gson.fromJson(jsonData, CorrectAnswerRequest.class);
+        int knowledgeComponentId = request.getKnowledgeComponentId();
+
+        if (knowledgeComponentId <= 0) {
+            return createError("Invalid knowledge component id for correct answer request", null);
+        }
+
+        Assessment assessment = studentModel.findAssessment(knowledgeComponentId);
+        if (assessment == null) {
+            return createError("Assessment not found for knowledge component: " + knowledgeComponentId, null);
+        }
+
+        assessment.incrementCorrectAnswerRequests();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.CORRECT_ANSWER_REQUESTS);
+            return new TutorReply(":Success");
+        } catch (NonRecoverableException ex) {
+            return createError("Unable to update correct answer requests", ex);
+        }
+    }
+    
+    /**
+     * Attempts to sign a student out.
+     * 
+     * This method handles ":SignOut" requests from the GUI client.
+     * 
+     * It is invoked indirectly as a reflection from within request().
+     *
+     * @param jsonUser a JSON encoded User object
+     * @return a TutorReply indicating "SIGN_OUT" for success or ":ERR" for failure
+     */
+    public TutorReply signOut(String jsonUser) {
+        Account requestAcct = gson.fromJson(jsonUser, Account.class);
+
+        try {
+            student = new Student(requestAcct);
+            notifyLogout(student);
+            return new TutorReply("SIGN_OUT");
+        }
+        catch (ObjNotFoundException ex) {
+            TutorReply reply = new TutorReply(":ERR");
+            reply.setData("Student model not found for: " + requestAcct.getUserId());
+            return reply;
+        }
+        catch (NonRecoverableException ex) {
+            Logger.getLogger(ShaTuTutor.class.getName()).log(Level.SEVERE, null, ex);
+            TutorReply reply = new TutorReply(":ERR");
+            reply.setData("NonRecoverableException occured during sign-out");
+            return reply;
+        }
+    }
+>>>>>>> Stashed changes
 
     /*
     public TutorReply getTask(String jsonObj) {
@@ -873,5 +940,3 @@ public class ShaTuTutor implements TutorSvc {
        // LOGGER.log(Level.INFO, "Student {0} logged out at {1}", new Object[]{student.getAccount().getUserId(), milliseconds});
     }
 }
-
-

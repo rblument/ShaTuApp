@@ -255,6 +255,8 @@ abstract public class Objective {
 
         step.setData(gson.toJson(subStep));
 
+        stepReply.addExercisedComponentId(stepName.dbId());
+
         Task task = new Task();
         task.setKind(TaskKind.PROBLEM);
         task.setType(probType);

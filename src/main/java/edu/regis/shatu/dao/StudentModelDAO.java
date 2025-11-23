@@ -48,11 +48,46 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
         final String sql1 = "INSERT INTO StudentModel (UserId, ScaffoldLevel) VALUES (?,?)";
         final String sql2 = 
                 "INSERT INTO Assessment " +
+<<<<<<< Updated upstream
                 "(UserId, KnowledgeComponentId, AssessmentLevel, Exposures, Successes, Hints) " +
                 "VALUES (?,?,?,?,?,?)";
         
         String userId = student.getAccount().getUserId();
         StudentModel studentModel = student.getStudentModel();
+=======
+                "(UserId, KnowledgeComponentId, AssessmentLevel, Exposures, Successes, Hints, CorrectAnswerRequests) " +
+                "VALUES (?,?,?,?,?,?,?)";
+        final String sql3 = 
+                "INSERT INTO Student " + 
+                "(UserId, FirstName, LastName, LastLogin, LastLogout) " +
+                "VALUES (?, ?, ?, ?, ?)";
+        
+        String userId = student.getAccount().getUserId();
+        StudentModel studentModel = student.getStudentModel();
+        
+        try(Connection conn = DriverManager.getConnection(URL)){
+            conn.setAutoCommit(false);    // Only commit if all insertions succeed
+            
+            try(PreparedStatement stmt1 = conn.prepareStatement(sql1);
+                PreparedStatement stmt2 = conn.prepareStatement(sql2, Statement.RETURN_GENERATED_KEYS);
+                PreparedStatement stmt3 = conn.prepareStatement(sql3);
+                ){
+                // Insert into StudentModel
+                stmt1.setString(1, userId);
+                stmt1.setString(2, ScaffoldLevel.EXTREME.toString());
+                stmt1.executeUpdate();
+                
+                // Insert into Assessment
+                for (Assessment assessment : studentModel.getAssessments().values()) {
+                    stmt2.setString(1, userId);
+                    stmt2.setInt(2, assessment.getOutcome().getId());
+                    stmt2.setString(3, "Not Started");
+                    stmt2.setInt(4, assessment.getExposures());
+                    stmt2.setInt(5, assessment.getSuccessess());
+                    stmt2.setInt(6, assessment.getHints());
+                    stmt2.setInt(7, assessment.getCorrectAnswerRequests());
+                    stmt2.executeUpdate();
+>>>>>>> Stashed changes
 
         Connection conn = null;
         PreparedStatement stmt1 = null;
@@ -152,6 +187,11 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
                     sql = "UPDATE Assessment SET Hints = ? WHERE KnowledgeComponentId = ?";
                     stmt = conn.prepareStatement(sql);
                     stmt.setInt(1, assessment.getHints());
+                    break;
+                case CORRECT_ANSWER_REQUESTS:
+                    sql = "UPDATE Assessment SET CorrectAnswerRequests = ? WHERE KnowledgeComponentId = ?";
+                    stmt = conn.prepareStatement(sql);
+                    stmt.setInt(1, assessment.getCorrectAnswerRequests());
                     break;
                 default:
                     break;
@@ -339,7 +379,7 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
             throws ObjNotFoundException, SQLException, NonRecoverableException {
 
         final String sql =
-                "SELECT AssessmentId, KnowledgeComponentId, AssessmentLevel, Exposures, Successes, Hints " +
+                "SELECT AssessmentId, KnowledgeComponentId, AssessmentLevel, Exposures, Successes, Hints, CorrectAnswerRequests " +
                 "FROM Assessment WHERE UserId = ?";
 
         CourseSvc courseSvc = ServiceFactory.findCourseSvc();
@@ -359,6 +399,7 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
             assessment.setExposures(rs.getInt(4));
             assessment.setSuccessess(rs.getInt(5));
             assessment.setHints(rs.getInt(6));
+            assessment.setCorrectAnswerRequests(rs.getInt(7));
             assessments.add(assessment);
         }
         return assessments;

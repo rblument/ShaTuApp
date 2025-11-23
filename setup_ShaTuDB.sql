@@ -39,7 +39,8 @@ CREATE TABLE Assessment (
     AssessmentLevel VARCHAR(32) NOT NULL,
     Exposures INT,
     Successes INT,
-    Hints INT
+    Hints INT,
+    CorrectAnswerRequests INT
 );
 
 -- Truncate Table Assessment;
@@ -493,4 +494,3 @@ ALTER Table Unit
 ADD CONSTRAINT fk_unit_courseid
 FOREIGN KEY (CourseId) REFERENCES Course(CourseId)
 ON UPDATE CASCADE ON DELETE CASCADE;
-

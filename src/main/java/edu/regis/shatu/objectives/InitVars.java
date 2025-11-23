@@ -197,6 +197,7 @@ public class InitVars extends Objective {
         stepReply.setIsRepeatStep(!allCorrect);
         stepReply.setIsNewStep(allCorrect);
         stepReply.setIsNextStep(false);
+        stepReply.addExercisedComponentId(dbId);
 
         // Wrap the StepCompletionReply into a Task and TutorReply
         Step step = new Step(1, 0, StepSubType.STEP_COMPLETION_REPLY);

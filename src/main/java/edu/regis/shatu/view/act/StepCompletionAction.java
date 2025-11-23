@@ -19,17 +19,18 @@ package edu.regis.shatu.view.act;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.util.List;
 import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import edu.regis.shatu.err.IllegalArgException;
 import edu.regis.shatu.model.Account;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.Task;
+import edu.regis.shatu.model.aol.CorrectAnswerRequest;
 import edu.regis.shatu.model.aol.PendingTask;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
@@ -257,6 +258,7 @@ public class StepCompletionAction extends ShaTuGuiAction {
                                     }
                                     case 2 -> {
                                         System.out.println("show answer");
+                                        recordCorrectAnswerRequest(stepReply, gson);
                                         JOptionPane.showMessageDialog(MainFrame.instance(),
                                                 stepReply.getCorrectAnswer(), "Tutor Reply",
                                                 JOptionPane.INFORMATION_MESSAGE);
@@ -275,5 +277,31 @@ public class StepCompletionAction extends ShaTuGuiAction {
         } catch (IllegalArgException e) {
             System.out.println("Illegal arg exception " + e);
         }
+    }
+
+    /**
+     * Inform the tutor that the student asked to see the correct answer so we can track the request.
+     *
+     * @param stepReply reply data containing the knowledge component id involved in the previous attempt
+     * @param gson      serializer used to encode the request payload
+     */
+    private void recordCorrectAnswerRequest(StepCompletionReply stepReply, Gson gson) {
+        List<Integer> componentIds = stepReply.getExercisedComponentIds();
+        if (componentIds == null || componentIds.isEmpty()) {
+            return;
+        }
+
+        int knowledgeComponentId = componentIds.get(0);
+        if (knowledgeComponentId <= 0) {
+            return;
+        }
+
+        CorrectAnswerRequest payload = new CorrectAnswerRequest(knowledgeComponentId);
+        ClientRequest request = new ClientRequest(ServerRequestType.RECORD_CORRECT_ANSWER);
+        Account account = MainFrame.instance().getAccount();
+        request.setUserId(account.getUserId());
+        request.setSecurityToken(MainFrame.instance().getModel().getSecurityToken());
+        request.setData(gson.toJson(payload));
+        SvcFacade.instance().tutorRequest(request);
     }
 }
