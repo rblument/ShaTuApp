@@ -14,17 +14,32 @@ package edu.regis.shatu.view;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
+
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 
+import com.google.gson.Gson;
+
+import edu.regis.shatu.model.Account;
+import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.TutoringSession;
 import edu.regis.shatu.model.aol.PendingStep;
 import edu.regis.shatu.model.aol.PendingTask;
 import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.model.aol.TutoringMode;
+import edu.regis.shatu.model.steps.InformationStep;
+import edu.regis.shatu.model.steps.Step;
+import edu.regis.shatu.svc.ClientRequest;
+import edu.regis.shatu.svc.ServerRequestType;
+import edu.regis.shatu.svc.ServiceFactory;
+import edu.regis.shatu.svc.SvcFacade;
+import edu.regis.shatu.svc.TutorReply;
+import edu.regis.shatu.svc.TutorSvc;
 
 /**
  * Displays a tutoring session.
@@ -77,9 +92,20 @@ public class TutoringSessionView extends GPanel {
     private JButton dashboardButton;
 
     /**
+     * Triggers requesting a new problem.
+     */
+    private JButton requestProblemButton;
+    
+    /**
+     * Utility for conversion of java objects to/from JSON.
+     */
+    private Gson gson;
+
+    /**
      * Initialize this view including creating and laying out its child components.
      */
     public TutoringSessionView() {
+        gson = new Gson();
         initializeComponents();
         layoutComponents();  
     }
@@ -100,20 +126,172 @@ public class TutoringSessionView extends GPanel {
      */
     public void setModel(TutoringSession model) {
         this.model = model;
-        
+    
         if (model != null) {
             PendingTask pTask = model.currentTask();
             PendingStep pStep = pTask.getCurrentStep();
             StepSubType subType = pStep.getStep().getSubType();
             
-            displayStep(subType.getViewName());
+            // TEMPORARY DEBUG - Shows dialog with step type -- remove after fixed
+            JOptionPane.showMessageDialog(this, 
+                "DEBUG: Current step type is: " + subType, 
+                "Debug Info", 
+                JOptionPane.INFORMATION_MESSAGE);
+            
+            // Handle INFO_MESSAGE steps with a dialog
+            if (subType == StepSubType.INFO_MESSAGE) {
+                // Store the step to show dialog after UI loads
+                final PendingStep stepToShow = pStep;
+                
+                // Use SwingUtilities.invokeLater to show dialog AFTER the UI is fully displayed
+                javax.swing.SwingUtilities.invokeLater(() -> {
+                    handleInfoMessage(stepToShow);
+                });
+            } else {
+                StepSelection viewName = subType.getViewName();
+                if (viewName != null) {
+                    displayStep(viewName);
+                }
+            }
 
-            stepView.setModel(model);
         }
-        
+        stepView.setModel(model);
         configureModeSpecificUI();
     }
     
+    /**
+     * Handle an information step by displaying its message in a dialog box.
+     * 
+     * @param pStep 
+     */
+    private void handleInfoMessage(PendingStep pStep) {
+        Step step = pStep.getStep();
+        
+        // Check for null step data defensively
+        if (step == null || step.getData() == null) {
+            System.err.println("Warning: INFO_MESSAGE step has null data");
+            return;
+        }
+        
+        try {
+            // Parses JSON data to get the InformationStep
+            InformationStep infoStep = gson.fromJson(step.getData(), InformationStep.class);
+            
+            if (infoStep != null && infoStep.getMsg() != null && !infoStep.getMsg().isEmpty()) {
+                // Show dialog with "Acknowledged" button
+                String[] options = {"Acknowledged"};
+                JOptionPane.showOptionDialog(
+                    this,                           
+                    infoStep.getMsg(),             
+                    "Information",                  
+                    JOptionPane.DEFAULT_OPTION,    
+                    JOptionPane.INFORMATION_MESSAGE, 
+                    null,                          
+                    options,                       
+                    options[0]                     
+                );
+                
+                // Mark the step as complete after acknowledgment
+                completeInfoMessageStep(step,infoStep);
+
+            } else {
+                System.err.println("Warning: INFO_MESSAGE has empty or null message");
+            }
+        } catch (Exception e) {
+            System.err.println("Error parsing INFO_MESSAGE data: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+
+
+    /**
+     * Complete the INFO_MESSAGE step after user acknowledgment.
+     * @param step 
+     * @param infoStep
+     */
+
+     private void completeInfoMessageStep(Step step, InformationStep infoStep) {
+        try {
+            // Creates a StepCompletion object w/current step data
+            StepCompletion completion = new StepCompletion(step, gson.toJson(infoStep));
+            completion.setStep(step);
+            ClientRequest request = new ClientRequest(ServerRequestType.COMPLETED_STEP);
+            Account account = MainFrame.instance().getAccount();
+
+            if (account == null) {
+                System.err.println("Error! No account found when completing INFO_MESSAGE");
+                return;
+            }
+            
+            TutoringSession session = MainFrame.instance().getModel();
+            if (session == null) {
+                System.err.println("Error! No tutoring session found when completing INFO_MESSAGE");
+                return;
+            }
+            
+            request.setUserId(account.getUserId());
+            request.setSecurityToken(session.getSecurityToken());
+            request.setData(gson.toJson(completion));
+            
+            TutorReply reply = SvcFacade.instance().tutorRequest(request);
+            
+
+            if (reply != null) {
+                handleStepCompletionReply(reply);
+            } else {
+                System.err.println("Error: Received null reply from tutor");
+            }
+            
+        } catch (Exception e) {
+            System.err.println("Error completing INFO_MESSAGE step: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+
+    /**
+     * Handle the reply from the server after completing a step.
+     * @param reply from tutorReply from server
+     */
+    private void handleStepCompletionReply(TutorReply reply) {
+        try {
+            switch (reply.getStatus()) {
+                case ":Success":
+                    PendingTask pendingTask = gson.fromJson(reply.getData(), PendingTask.class);
+                    
+                    if (pendingTask != null) {
+                        // Update w/pending task
+                        TutoringSession session = MainFrame.instance().getModel();
+                        session.addCurrentTask(pendingTask);
+                        
+                        setModel(session);
+                    } else {
+                        System.err.println("Error! Received null pending task in reply");
+                    }
+                    break;
+                    
+                case ":ERR":
+                    System.err.println("Error from tutor: " + reply.getData());
+                    JOptionPane.showMessageDialog(
+                        this,
+                        "An error occurred while processing your acknowledgement.",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                    );
+                    break;
+                    
+                default:
+                    System.err.println("Unexpected reply status: " + reply.getStatus());
+                    break;
+            }
+        } catch (Exception e) {
+            System.err.println("Error handling step completion reply: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+
     /**
      * Display the given selection's view in the StepView handling appropriate
      * highlighting of the associated JLabel selector (see StepSelection enum).
@@ -137,6 +315,10 @@ public class TutoringSessionView extends GPanel {
         dashboardButton = new JButton("Go to Dashboard");
         dashboardButton.addActionListener(e -> navigateToDashboard());
 
+        requestProblemButton = new JButton("Request Problem");
+        requestProblemButton.addActionListener(e -> requestProblem());
+
+
         scrollPane = new JScrollPane(stepSelectorView);
 
         stepViewContainer = new JPanel(new BorderLayout());
@@ -149,7 +331,7 @@ public class TutoringSessionView extends GPanel {
     }
 
     /**
-     * New Method to
+     * Configure the UI based on the current tutoring mode.
      */
     private void configureModeSpecificUI() {
         
@@ -209,7 +391,10 @@ public class TutoringSessionView extends GPanel {
         add(splitPane, BorderLayout.CENTER);
 
         controlPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 0)); // Adds padding
-        controlPanel.add(dashboardButton, BorderLayout.WEST);
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        buttonPanel.add(dashboardButton);
+        buttonPanel.add(requestProblemButton);
+        controlPanel.add(buttonPanel, BorderLayout.WEST);
         dashboardButton.setPreferredSize(new Dimension(150, 25)); // Adjustable initial size
         add(controlPanel, BorderLayout.SOUTH);
     }
@@ -217,6 +402,7 @@ public class TutoringSessionView extends GPanel {
     /**
      * Toggles the given button on/off
      * Ensures the GUI updates to display the button's new state
+     * @param button
      **/
     public void toggleButton(JButton button) {
         button.setEnabled(!button.isEnabled());
@@ -230,4 +416,39 @@ public class TutoringSessionView extends GPanel {
     public void navigateToDashboard() {
         MainFrame.instance().displayView(MainFrame.ViewName.DASHBOARD);
     }
+
+    /**
+     * Requests a new suggested problem from the tutor based on the student's progress.
+     */
+    private void requestProblem() {
+        if (model == null) return;
+
+        try {
+            // Get the tutor service
+            TutorSvc tutor = ServiceFactory.findTutorSvc();
+
+            // Get the user ID from the current session model
+            String userId = model.getStudent().getAccount().getUserId();
+
+            // Build a client request to ask for suggested problem
+            ClientRequest req = new ClientRequest(ServerRequestType.NEW_EXAMPLE);
+            req.setUserId(userId);
+            req.setSecurityToken(model.getSecurityToken());
+            req.setData("{}"); // Empty JSON can include additional info if needed
+
+            // Send request to tutor
+            TutorReply reply = tutor.request(req);
+
+            if (reply.getStatus().equals(":ERR")) {
+                System.err.println("Error requesting problem: " + reply.getData());
+            } else {
+                // update UI to display the new suggested problem
+                System.out.println("Suggested problem received: " + reply.getData());
+            }
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
 }

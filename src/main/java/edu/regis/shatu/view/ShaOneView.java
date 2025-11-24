@@ -171,7 +171,7 @@ public class ShaOneView extends UserRequestView implements KeyListener { //imple
 
         ShaOneStep example = gson.fromJson(currentStep.getData(), ShaOneStep.class);
 
-        String userResponse = answerField.getText().replaceAll("\\s", "");
+        String userResponse = responseTextArea.getText().replaceAll("\\s", "");
 
         example.setResult(userResponse);
 
@@ -293,7 +293,7 @@ public class ShaOneView extends UserRequestView implements KeyListener { //imple
         operandALabel = new JLabel("Operand A: " + operandAValue);
 
         problemSizeLabel = new JLabel("Select Problem Size:");
-        instructionLabel = new JLabel("Solve the Σ₀ function using operand A given below:");
+        instructionLabel = new JLabel("Solve the Σ₁ function using operand A given below:");
 
         questionPanel = new GPanel();
 
@@ -379,42 +379,30 @@ public class ShaOneView extends UserRequestView implements KeyListener { //imple
      */
     protected void updateView() {
 
-
-        if (!checkHintEnabled)
-            resetButtonListeners();
-        
-            
-        Step step = model.currentTask().getCurrentStep().getStep();
-        if (step != null && step.getSubType() == StepSubType.SHA_ONE) {
-            //Get the data from the model as a RotateStep object
-            ShaOneStep example = gson.fromJson(step.getData(), ShaOneStep.class);
-
-            if (example.getOperandA() == null || example.getOperandA().isEmpty()) {
-                operandALabel.setText("x: Please");
-                hintButton.setEnabled(false);
-                checkButton.setEnabled(false);
-                responseTextArea.setEnabled(false);
-            } else {
-                operandALabel.setText("x: " + example.getOperandA());
-                hintButton.setEnabled(true);
-                checkButton.setEnabled(true);
-                responseTextArea.setEnabled(true);
-            }
+        if(!checkHintEnabled){
+            resetButtonListeners(); // Clear any listeners applied from other views
         }
-
-        if (model != null) {
-
-             step = model.currentTask().getCurrentStep().getStep();
-
-            if (step != null) {
-                ShaOneStep example = gson.fromJson(step.getData(), ShaOneStep.class);
-
-                if (example != null) {
-                    operandAValue = example.getOperandA();
-                    operandALabel.setText("Operand A: " + operandAValue);
-                }
-
-            }
+        
+        if(model == null){ return; }
+        
+        Step step = model.currentTask().getCurrentStep().getStep();
+        
+        if(step == null || step.getSubType() != StepSubType.SHA_ONE){
+            return;
+        }
+        
+        ShaOneStep example = gson.fromJson(step.getData(), ShaOneStep.class);
+        
+        if(example == null){ return; }
+        
+        String operandA = example.getOperandA();        
+        
+        if (operandA != null && !operandA.isEmpty()) {
+            operandAValue = operandA;
+            operandALabel.setText("Operand A: " + operandAValue);
+            hintButton.setEnabled(true);
+            checkButton.setEnabled(true);
+            responseTextArea.setEnabled(true);
         }
     }
     
@@ -478,6 +466,13 @@ public class ShaOneView extends UserRequestView implements KeyListener { //imple
             JOptionPane.showMessageDialog(this, "Please provide an answer");
         } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
             checkButton.doClick();
+        }
+        // Handle H key or F1 key for the Hint button
+        else if ((e.getKeyCode() == KeyEvent.VK_H && !e.isControlDown()) || 
+                e.getKeyCode() == KeyEvent.VK_F1) {
+            if (hintButton != null && hintButton.isEnabled()) {
+                hintButton.doClick();
+            }
         }
     }
 

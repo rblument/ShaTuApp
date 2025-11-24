@@ -12,12 +12,18 @@
  */
 package edu.regis.shatu.view.act;
 
-import edu.regis.shatu.view.MainFrame;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.util.logging.Logger;
-import static javax.swing.Action.MNEMONIC_KEY;
-import static javax.swing.Action.SHORT_DESCRIPTION;
+
+import com.google.gson.Gson;
+
+import edu.regis.shatu.model.Account;
+import edu.regis.shatu.svc.ClientRequest;
+import edu.regis.shatu.svc.ServerRequestType;
+import edu.regis.shatu.svc.SvcFacade;
+import edu.regis.shatu.svc.TutorReply;
+import edu.regis.shatu.view.MainFrame;
 
 /**
  * A (MVC) controller handling a GUI gesture representing a user's request to
@@ -35,7 +41,31 @@ public class SignOutAction extends ShaTuGuiAction {
             = Logger.getLogger(SignOutAction.class.getName());
     
     /**
-     * Initialize the action with the "Log out" text.
+     * The single instance of this sign-out action.
+     */
+    private static final SignOutAction SINGLETON;
+
+    /**
+     * Create the singleton for this action, which occurs when this class is
+     * loaded by the Java class, as a result of the class being
+     * referenced by executing SignOutAction.instance() in the
+     * createFileMenu() method of the ShaTuMenuBar class.
+     */
+    static {
+        SINGLETON = new SignOutAction();
+    }
+
+    /**
+     * Returns the singleton instance of this sign-out action.
+     *
+     * @return a singleton instance
+     */
+    public static SignOutAction instance() {
+        return SINGLETON;
+    }
+    
+    /**
+     * Initialize the action with the "Sign out" text.
      */
     public SignOutAction() {
         super("Sign out");
@@ -45,11 +75,23 @@ public class SignOutAction extends ShaTuGuiAction {
     
     /**
      * Handle the user's request to sign out.
+     * 
+     * @param e is ignored
      */
     @Override
     public void actionPerformed(ActionEvent e) {
-        MainFrame.instance().setModel(null);
+        Gson gson = getGsonPretty();
+        Account account = MainFrame.instance().getAccount();
         
-    // TO-DO: Notify the Tutor that the student has signed out 
+        ClientRequest request = new ClientRequest(ServerRequestType.SIGN_OUT);
+        request.setData(gson.toJson(account));
+        TutorReply reply = SvcFacade.instance().tutorRequest(request);
+        
+        if(reply.getStatus().equals("SIGN_OUT")){
+            MainFrame.instance().setModel(null);
+        }
+        else {
+            System.err.println("Something went wrong: " + reply.getData());
+        }
     }
 }

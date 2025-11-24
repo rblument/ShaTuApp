@@ -14,6 +14,7 @@ package edu.regis.shatu.svc;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Random;
 import java.util.logging.Level;
@@ -38,14 +39,13 @@ import edu.regis.shatu.model.aol.AssessmentLevel;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.PendingStep;
 import edu.regis.shatu.model.aol.PendingTask;
-import edu.regis.shatu.model.aol.Problem;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.model.aol.StudentModel;
 import edu.regis.shatu.model.aol.TutoringMode;
 import edu.regis.shatu.model.steps.Step;
+import edu.regis.shatu.model.steps.EncodeAsciiStep;
 import edu.regis.shatu.objectives.*;
-import java.util.Date;
 
 /**
  * The ShaTu tutor, which implements the tutoring service.
@@ -186,7 +186,7 @@ public class ShaTuTutor implements TutorSvc {
     }
 
     /**
-     * Creates a new student account
+     * Creates a new student account.
      *
      * This method handles ":CreateAccount" requests from the GUI client.
      *
@@ -233,7 +233,7 @@ public class ShaTuTutor implements TutorSvc {
      * This method handles ":VerifyUser" requests from the GUI client.
      *
      * @param jsonAcct a JSon encoded Account object
-     * @return a TutorReply if successful the status is "Created", otherwise the
+     * @return a TutorReply if successful the status is "Verified", otherwise the
      *         status is ":ERR".
      * @throws edu.regis.shatu.err.NonRecoverableException
      */
@@ -263,7 +263,6 @@ public class ShaTuTutor implements TutorSvc {
 
                 // Check if session already exists before creating
                 SessionSvc sessionSvc = ServiceFactory.findSessionSvc();
-                TutoringSession session;
 
                 try {
                     session = sessionSvc.retrieve(dbAcct.getUserId()); // already exists
@@ -289,12 +288,12 @@ public class ShaTuTutor implements TutorSvc {
     }
 
     /**
-     * Resets password for user currently in database
+     * Resets password for user currently in database.
      *
      * This method handles ":ResetPassword" requests from the GUI client.
      *
      * @param jsonAcct a JSon encoded Account object
-     * @return a TutorReply if successful the status is "Created", otherwise the
+     * @return a TutorReply if successful the status is "PasswordReset", otherwise the
      *         status is ":ERR".
      * @throws edu.regis.shatu.err.NonRecoverableException
      */
@@ -336,7 +335,6 @@ public class ShaTuTutor implements TutorSvc {
      *         data being a JSon encoded TutoringSession object.
      */
     public TutorReply signIn(String jsonUser) {
-        System.out.println("Received sign in: " + jsonUser);
         Account requestAcct = gson.fromJson(jsonUser, Account.class);
 
         try {
@@ -350,15 +348,15 @@ public class ShaTuTutor implements TutorSvc {
                     StudentModelSvc stuModSvc = ServiceFactory.findStudentModelSvc();
                     studentModel = stuModSvc.retrieve(userId);
                     student.setStudentModel(studentModel);
-
+                    notifyLogin(student);
                 } catch (ObjNotFoundException ex) {
                     TutorReply reply = new TutorReply(":ERR");
-                    reply.setData("Student model not found in sign in for: " + userId);
+                    reply.setData("Student model not found for: " + userId);
                     return reply;
                 }
 
                 SessionSvc svc = ServiceFactory.findSessionSvc();
-                TutoringSession session = svc.retrieve(student.getAccount().getUserId());
+                session = svc.retrieve(student.getAccount().getUserId());
 
                 TutorReply reply = new TutorReply("Authenticated");
 
@@ -376,6 +374,37 @@ public class ShaTuTutor implements TutorSvc {
             Logger.getLogger(ShaTuTutor.class
                     .getName()).log(Level.SEVERE, null, ex);
             return new TutorReply();
+        }
+    }
+    
+    /**
+     * Attempts to sign a student out.
+     * 
+     * This method handles ":SignOut" requests from the GUI client.
+     * 
+     * It is invoked indirectly as a reflection from within request().
+     *
+     * @param jsonUser a JSON encoded User object
+     * @return a TutorReply indicating "SIGN_OUT" for success or ":ERR" for failure
+     */
+    public TutorReply signOut(String jsonUser) {
+        Account requestAcct = gson.fromJson(jsonUser, Account.class);
+
+        try {
+            student = new Student(requestAcct);
+            notifyLogout(student);
+            return new TutorReply("SIGN_OUT");
+        }
+        catch (ObjNotFoundException ex) {
+            TutorReply reply = new TutorReply(":ERR");
+            reply.setData("Student model not found for: " + requestAcct.getUserId());
+            return reply;
+        }
+        catch (NonRecoverableException ex) {
+            Logger.getLogger(ShaTuTutor.class.getName()).log(Level.SEVERE, null, ex);
+            TutorReply reply = new TutorReply(":ERR");
+            reply.setData("NonRecoverableException occured during sign-out");
+            return reply;
         }
     }
 
@@ -465,7 +494,7 @@ public class ShaTuTutor implements TutorSvc {
     */
 
     /**
-     * Returns a hint to the GUI client, if any
+     * Returns a hint to the GUI client, if any.
      *
      * This method handles ":RequestHint" requests from the GUI client.
      *
@@ -510,10 +539,52 @@ public class ShaTuTutor implements TutorSvc {
         }
     }
 
-    public TutorReply completeInfoMsgStep(StepCompletion completion) {
-        TutorReply reply = new TutorReply(":StepCompletionReply");
 
-        return reply;
+    /**
+     * Handles the INFO_MESSAGE step completion
+     * @param completion
+     * @return
+     */
+    public TutorReply completeInfoMsgStep(StepCompletion completion) {
+        TutoringMode mode = session.getTutoringMode();
+        ProblemType firstProblemType;
+        
+        //Does this need to be updated to display where they last where for DO_ONE,  TEACH_ONE?? Will they always start with ASCII?
+        switch (mode) {
+            case SEE_ONE:
+                // First demonstration: ASCII Encoding
+                firstProblemType = ProblemType.ASCII_ENCODE;
+                break;
+            case DO_ONE:
+                // First practice: typically starts with ASCII_ENCODE as well
+                firstProblemType = ProblemType.ASCII_ENCODE;
+                break;
+            case TEACH_ONE:
+                // Teaching mode: starts with ASCII_ENCODE
+                firstProblemType = ProblemType.ASCII_ENCODE;
+                break;
+            default:
+                firstProblemType = ProblemType.ASCII_ENCODE;
+        }
+    
+        // Get the objective for the first task
+        currObjective = getCurrentObjectiveByProbelmType(firstProblemType);
+        
+        // Generate an example for this task
+        // Use the message from the current problem in the session, or a default message
+        String messageToHash;
+        if (session.getProblem() != null && session.getProblem().getMessageToHash() != null) {
+            messageToHash = session.getProblem().getMessageToHash();
+        } else {
+            // Default message for demonstration
+            messageToHash = "Regis Computer Science Rocks!";
+        }
+        
+        EncodeAsciiStep encodeStep = new EncodeAsciiStep();
+        encodeStep.setQuestion(messageToHash);
+        String jsonData = gson.toJson(encodeStep);
+
+        return currObjective.example(session, jsonData);
     }
 
     public TutorReply completedTask(String taskInfo) {
@@ -522,17 +593,26 @@ public class ShaTuTutor implements TutorSvc {
 
     /**
      * Handles :NewExample requests from the client.
+     * Returns a new problem for the student, either specified or adaptively chosen.
      *
-     * @param json a JSon String encoding a NewExampleRequest object
-     * @return TutorReply
+     * @param json JSon encoding a NewExampleRequest; may specify ProblemType
+     * @return TutorReply with the generated Problem
      */
     public TutorReply newExample(String json) {
-        System.out.println("nexExample()");
+        NewExampleRequest request;
+        if (json != null && !json.isEmpty()) {
+            request = gson.fromJson(json, NewExampleRequest.class);
+        } else {
+            request = new NewExampleRequest(); // default request
+        }
 
-        NewExampleRequest request = gson.fromJson(json, NewExampleRequest.class);
+        ProblemType type = (request.getExampleType() != null)
+                ? request.getExampleType()
+                : determineNextProblemType(studentModel);
 
-        currObjective = getCurrentObjectiveByProbelmType(request.getExampleType());
+        currObjective = getCurrentObjectiveByProbelmType(type);
 
+        // Use the existing method in Objective subclasses
         return currObjective.example(session, request.getData());
     }
 
@@ -651,13 +731,7 @@ public class ShaTuTutor implements TutorSvc {
         PendingTask pendingTask = new PendingTask(task);
         pendingTask.setCurrentStep(new PendingStep(task.getCurrentStep()));
         tSession.addTask(pendingTask);
-        
-//        Eventually, this should be the implementation (but task is currently empty)
-//        tSession.setProblem(task.getProblem());
-        // Kludge: Until then, retrieve the problem directly from DB, and manually set it in the session
-        ProblemSvc problemSvc = ServiceFactory.findProblemSvc();
-        Problem problem = problemSvc.retrieve(1);   // 1 = first record in Problem table
-        tSession.setProblem(problem);
+        tSession.setProblem(task.getProblem());
 
         // Generate the security token for this tutoring session.
         Random rnd = new Random();
@@ -804,38 +878,50 @@ public class ShaTuTutor implements TutorSvc {
      * @throws ObjNotFoundException
      * @throws NonRecoverableException 
      */
-    public void notifyLogin(Student student) throws ObjNotFoundException, NonRecoverableException {
-        // ToDo: This needs to be called suring a sign in. 
+    private void notifyLogin(Student student) throws ObjNotFoundException, NonRecoverableException {
         StudentModelSvc stuModelSvc = ServiceFactory.findStudentModelSvc();
         
-                Date now = new Date();
+        Date now = new Date();
         long milliseconds = now.getTime();
+        
         student.setLastLogin(milliseconds);
-
         stuModelSvc.recordLoginEvent(student.getAccount().getUserId(), milliseconds);
 
        // LOGGER.log(Level.INFO, "Student {0} logged in at {1}", new Object[]{student.getAccount().getUserId(), milliseconds});
     }
 
     /**
-     * Update the database to record the fact the student signed out.
+     * Update the database to record the fact the student logged out.
      * 
      * @param student the student who logged out.
      * @throws ObjNotFoundException
      * @throws NonRecoverableException 
      */
-    public void notifyLogout(Student student) throws ObjNotFoundException, NonRecoverableException {
-        // ToDo: This needs to be called during a signout.
+    private void notifyLogout(Student student) throws ObjNotFoundException, NonRecoverableException {
         StudentModelSvc stuModelSvc = ServiceFactory.findStudentModelSvc();
         
         Date now = new Date();
         long milliseconds = now.getTime();
         
-        student.setLastLogout(now.getTime());
+        student.setLastLogout(milliseconds);
         stuModelSvc.recordLogoutEvent(student.getAccount().getUserId(), milliseconds);
 
        // LOGGER.log(Level.INFO, "Student {0} logged out at {1}", new Object[]{student.getAccount().getUserId(), milliseconds});
     }
 
-
+    /**
+     * Determines the next problem type to suggest for the student
+     * based on their progress and performance.
+     *
+     * @param student the Student whose model is used
+     * @return the suggested next ProblemType
+     */
+    private ProblemType determineNextProblemType(StudentModel model) {
+        for (ProblemType type : ProblemType.values()) {
+            if (!model.hasCompleted(type)) {
+                return type;
+            }
+        }
+        return model.getWeakestProblemType();
+    }
 }

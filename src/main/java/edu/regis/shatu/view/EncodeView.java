@@ -313,19 +313,6 @@ public class EncodeView extends UserRequestView {
      */
     @Override
     protected void updateView() {
-        // Ensure 'view' is only initialized when SplashFrame.instance() is non-null
-        /*
-        if (view == null) {
-            MainFrame mainFrame = MainFrame.instance();
-            if (mainFrame != null) {
-                view = SplashFrame.instance().getTutoringSessionView(); // Initialize view once SplashFrame is ready
-
-            } else {
-                System.err.println("SplashFrame.instance() is null. Cannot initialize 'view'.");
-                return; // Exit updateView if the view cannot be initialized
-            }
-        }
-*/
         if (this.model == null) { // Currently in development, Encode Ascii starts first when loaded, which model
                                   // can be null initially.
             questionLabel.setText("Please click new example button to get started");
@@ -374,6 +361,16 @@ public class EncodeView extends UserRequestView {
                     } else { // example has been created.
                         questionLabel.setText(String.format("Convert the following "
                                 + "string to binary: %s", question));
+                        
+                        // SEE_ONE MODE: Automatically display the answer for demonstration
+                        if (model != null && model.getTutoringMode() == TutoringMode.SEE_ONE) {
+                            String correctAnswer = newEncodeAscii.getResult();
+                            if (correctAnswer != null && !correctAnswer.isEmpty()) {
+                                responseTextArea.setText(correctAnswer);
+                                feedbackArea.setText("This is the correct binary representation of the message.");
+                            }
+                        }
+                        
                         checkButton.setEnabled(true);
                         responseTextArea.setEnabled(true);
                         hintButton.setEnabled(true);
@@ -398,6 +395,8 @@ public class EncodeView extends UserRequestView {
 
         // Other update logic here
         System.out.println("UpdateView logic continues...");
+        // Ensures that SEE_ONE mode restrictions are enforced even after the updateView logic has enabled fields
+        configureModeSpecificUI();
     }
 
     /**

@@ -108,11 +108,11 @@ public class SvcFacade {
         Gson gson = new Gson();
         // ToDo: remove debugging stmt.
         String jsonRequest = gson.toJson(request);
-        System.out.println("*** jasonRequest *" + jsonRequest + "*");
+        System.out.println("\n*** jsonRequest *" + jsonRequest + "*");
   
         String jsonReply = send(jsonRequest);
         
-        System.out.println("*** jsonReply: " + jsonReply);
+        System.out.println("*** jsonReply: " + jsonReply + "\n");
         
         return gson.fromJson(jsonReply, TutorReply.class);
     }
