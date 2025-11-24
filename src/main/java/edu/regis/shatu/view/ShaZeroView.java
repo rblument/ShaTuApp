@@ -249,10 +249,10 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
      */
     @Override
     public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_ENTER && answerField.getText().equals("")) {
+        if (e.getKeyCode() == KeyEvent.VK_ENTER && responseTextArea.getText().equals("")) {
             JOptionPane.showMessageDialog(this, "Please provide an answer");
         } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-            // checkButton.doClick();
+            checkButton.doClick();
         }
     }
 
@@ -401,6 +401,7 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
         responseTextArea = new JTextArea(3, 20);
         responseTextArea.setLineWrap(true);
         responseTextArea.setWrapStyleWord(true);
+        responseTextArea.addKeyListener(this);  
 
         responsePane = new JScrollPane(responseTextArea);
         responsePane.setPreferredSize(new Dimension(800, 200));
@@ -428,7 +429,6 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
         setUpRadioButtons();
         setUpQuestionArea();
         setUpResponseArea();
-        setUpButtons();
         setUpDescriptionPanel();
         setUpQRPanel();
     }
@@ -480,22 +480,30 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
      */
     protected void updateView() {
         
-        if (!checkHintEnabled)
+        if(!checkHintEnabled){
             resetButtonListeners(); // Clear any listeners applied from other views
+        }
         
-
-        if (model != null) {
-
-            Step step = model.currentTask().getCurrentStep().getStep();
-
-            if (step != null && step.getSubType() == StepSubType.SHA_ZERO) {
-                ShaZeroStep example = gson.fromJson(step.getData(), ShaZeroStep.class);
-
-                if (example != null) {
-                    operandAValue = example.getOperandA();
-                    operandALabel.setText("Operand A: " + operandAValue);
-                }
-            }
+        if(model == null){ return; }
+        
+        Step step = model.currentTask().getCurrentStep().getStep();
+        
+        if(step == null || step.getSubType() != StepSubType.SHA_ZERO){
+            return;
+        }
+        
+        ShaZeroStep example = gson.fromJson(step.getData(), ShaZeroStep.class);
+        
+        if(example == null){ return; }
+        
+        String operandA = example.getOperandA();        
+        
+        if (operandA != null && !operandA.isEmpty()) {
+            operandAValue = operandA;
+            operandALabel.setText("Operand A: " + operandAValue);
+            hintButton.setEnabled(true);
+            checkButton.setEnabled(true);
+            responseTextArea.setEnabled(true);
         }
     }
 
