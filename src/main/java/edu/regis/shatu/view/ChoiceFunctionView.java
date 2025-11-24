@@ -87,6 +87,8 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
     }
 
     /**
+     * I think this could be done by ShaTuTutor but removing it breaks the class
+     * 
      * Create and return the server request this view makes when a user selects
      * that they want to practice a new choice function example.
      *
@@ -115,6 +117,8 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
 
 
     /**
+     * I think this could be done by ShaTuTutor but removing it breaks the class
+     * 
      * {@inheritDoc}
      */
     @Override

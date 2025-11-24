@@ -222,19 +222,22 @@ public class PrepareScheduleView extends UserRequestView { // implements ActionL
     }
 
     /**
+     * NO LONGER NEEDED KEPT FOR REFRENCE
+     * 
      * Checks if the selected answer is correct.
-     */
-    private void checkAnswer() {
+     * private void checkAnswer() {
         if (answerOptions[correctAnswerIndex].isSelected()) {
             feedbackLabel.setText("Correct! Please choose New Example.");
         } else {
             feedbackLabel.setText("Incorrect. Try again.");
         }
     }
+     */
 
     /**
+     * NO LONGER NEEDED KEPT FOR REFRENCE
+     * 
      * Displays a tailored hint based on the selected answer.
-     */
     private void showHint() {
         int selectedIndex = -1; // Default: No selection
 
@@ -278,10 +281,12 @@ public class PrepareScheduleView extends UserRequestView { // implements ActionL
         // Assign a specific hint for the wrong choice selected
         feedbackLabel.setText(hintMessages[currentStep - 1][selectedIndex]);
     }
+     */
 
     /**
+     * NO LONGER NEEDED KEPT FOR REFRENCE
+     * 
      * Loads the next example or resets the steps.
-     */
     private void loadNewExample() {
         if (answerOptions[0].isSelected() || feedbackLabel.getText().contains("Correct")) {
             if (currentStep < 4) {
@@ -298,6 +303,7 @@ public class PrepareScheduleView extends UserRequestView { // implements ActionL
             feedbackLabel.setText("You must select the correct answer before proceeding.");
         }
     }
+     */
 
     /**
      * Updates the display of previous steps above the question.
@@ -376,6 +382,8 @@ public class PrepareScheduleView extends UserRequestView { // implements ActionL
     } 
     
     /**
+     * I think this could be done by ShaTuTutor but removing it breaks the class
+     * 
      * **Override the abstract newRequest() method from UserRequestView.**
      */
     @Override

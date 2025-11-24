@@ -73,6 +73,7 @@ public class InitVarView extends UserRequestView { // implements ActionListener
      * }
      * }
      */
+    
     private void initializeComponents() {
         hVars = new JTextField[NUM_VARS];
 
@@ -228,7 +229,6 @@ public class InitVarView extends UserRequestView { // implements ActionListener
      *Disables fields not available for SEE_ONE mode for passive viewing.
      * 
      */
-    
     @Override
     protected void configureModeSpecificUI() {
         super.configureModeSpecificUI();//call parent to handle buttons
@@ -262,6 +262,7 @@ public class InitVarView extends UserRequestView { // implements ActionListener
         }
     } 
 
+    // I think this could be done by ShaTuTutor but removing it breaks the class
     @Override
     public NewExampleRequest newRequest() {
         NewExampleRequest ex = new NewExampleRequest();

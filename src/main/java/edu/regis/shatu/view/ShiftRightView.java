@@ -77,22 +77,26 @@ public class ShiftRightView extends UserRequestView implements KeyListener {
     }
 
     /**
+     * NO LONGER NEEDED KEPT FOR REFRENCE
+     * 
      * Handles the action for the Hint button.
-     */
-    private void onNextHint() {
+     * private void onNextHint() {
         feedbackTextArea.setText(String.format(
                 "Hint: Put %d 0s on the left and remove %d bits from the right",
                 shiftLength, shiftLength));
     }
+     */
 
     /**
+     * NO LONGER NEEDED KEPT FOR REFRENCE
+     * 
      * Handles the action for the Check button.
-     */
-    private void onCheckButton() {
+     * private void onCheckButton() {
         if (responseTextArea.getText().equals("")) {
             feedbackTextArea.setText("Please provide an answer");
         }
     }
+     */
 
     /**
      * Create the child GUI components appearing in this frame.
@@ -443,6 +447,8 @@ public class ShiftRightView extends UserRequestView implements KeyListener {
     }
 
     /**
+     * I think this could be done by ShaTuTutor but removing it breaks the class
+     * 
      * Create and return the server request this view makes when a user selects
      * that they want to practice a new bit shift example.
      *

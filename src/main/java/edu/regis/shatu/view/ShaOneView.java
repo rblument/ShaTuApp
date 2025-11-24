@@ -142,6 +142,8 @@ public class ShaOneView extends UserRequestView implements KeyListener { //imple
     }
 
     /**
+     * I think this could be done by ShaTuTutor but removing it breaks the class
+     * 
      * Create and return the server request this view makes when a user selects
      * that they want to practice a new Sha One View example.
      *
@@ -182,28 +184,28 @@ public class ShaOneView extends UserRequestView implements KeyListener { //imple
 
     /**
      * Displays a message dialog indicating the start of the next question.
-     */
-    private void onNextQuestion() {
+     * private void onNextQuestion() {
         JOptionPane.showMessageDialog(this, "Next Question");
     }
+     */
 
     /**
      * Displays a message dialog indicating the provision of a hint.
-     */
-    private void onNextHint() {
+     * private void onNextHint() {
         JOptionPane.showMessageDialog(this, "Hint");
     }
+     */
 
     /**
      * Handles the click event of the check button, verifying the user's answer.
-     */
-    private void onCheckButton() {
+     * private void onCheckButton() {
         if (answerField.getText().equals("")) {
             JOptionPane.showMessageDialog(this, "Please provide an answer");
         } else {
             verifyAnswer();
         }
     }
+     */
 
     /**
      * Sets the main View title and description of the function
@@ -478,10 +480,11 @@ public class ShaOneView extends UserRequestView implements KeyListener { //imple
     }
 
     /**
+     * NO LONGER NEEDED KEPT FOR REFRENCE
+     * 
      * Verifies the user's answer by comparing it with the correct result of the
      * right shift operation.
-     */
-    private void verifyAnswer() {
+     * private void verifyAnswer() {
         String correctAnswer = shiftRightString(EXAMPLE_INPUT, X_PLACES);
         // Get the text from the answerField when the checkButton is clicked
         String userAnswer = answerField.getText();
@@ -492,6 +495,7 @@ public class ShaOneView extends UserRequestView implements KeyListener { //imple
             JOptionPane.showMessageDialog(this, "Incorrect. The correct answer is: " + correctAnswer);
         }
     }
+     */
 
     /**
      * Updates the size of the problem to display.

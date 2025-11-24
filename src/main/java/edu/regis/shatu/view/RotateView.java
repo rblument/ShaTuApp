@@ -75,6 +75,8 @@ public class RotateView extends UserRequestView implements KeyListener {
     }
 
     /**
+     * I think this could be done by ShaTuTutor but removing it breaks the class
+     * 
      * Generates a NewExampleRequest to be sent to the tutor based on the
      * conditions selected by the user when newRequest() is called.
      *

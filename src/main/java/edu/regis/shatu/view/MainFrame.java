@@ -207,6 +207,7 @@ public class MainFrame extends JFrame implements WindowListener {
             case DASHBOARD:
             case TUTOR:
                 model.getStudent().getAccount();
+                return model.getStudent().getAccount();
                 
             case SPLASH:
                 return splashPanel.getModel();
