@@ -145,6 +145,25 @@ public class MainFrame extends JFrame implements WindowListener {
 
         return model;
     }
+    
+    /**
+     * Method to create a copy of an Account object.
+     * @param source the Account to copy
+     * @return a new Account with the same values, or a new empty Account if source is null
+     */
+    private Account copyAccount(Account source) {
+        Account copy = new Account();
+        if (source != null) {
+            copy.setUserId(source.getUserId());
+            copy.setPassword(source.getPassword());
+            copy.setFirstName(source.getFirstName());
+            copy.setLastName(source.getLastName());
+            copy.setSecurityQuestion(source.getSecurityQuestion());
+            copy.setSecurityAnswer(source.getSecurityAnswer());
+            copy.setIsStudent(source.isStudent());
+        }
+        return copy;
+    }
 
     /**
      * Display the given model in the tutoring session view of this frame.
@@ -163,9 +182,10 @@ public class MainFrame extends JFrame implements WindowListener {
         }
             
         tutorSessionView.setModel(model); 
-        splashPanel.setModel(account);
-        forgotPasswordPanel.setModel(account);
-        resetPasswordPanel.setModel(account);
+        splashPanel.setModel(copyAccount(account));
+        forgotPasswordPanel.setModel(copyAccount(account));
+        resetPasswordPanel.setModel(copyAccount(account));
+        
         dashboardPanel.setModel(model);
         
         if (model == null) { // Signed out
@@ -197,17 +217,23 @@ public class MainFrame extends JFrame implements WindowListener {
     }
     
     /**
-     * Return the current account, which depends on the view currently being
-     * displayed.
+     * Return the current account.
      * 
-     * @return 
+     * @return the current user's Account
      */
     public Account getAccount() {
+         if (model != null && model.getStudent() != null && model.getStudent().getAccount() != null) {
+            return model.getStudent().getAccount();
+        }
+        
+        // User is not logged in, get account from the appropriate view
         switch (displayedView) {
             case DASHBOARD:
             case TUTOR:
-                model.getStudent().getAccount();
-                return model.getStudent().getAccount();
+
+                if (model != null) {
+                    return model.getStudent().getAccount();
+                }
                 
             case SPLASH:
                 return splashPanel.getModel();
@@ -221,6 +247,14 @@ public class MainFrame extends JFrame implements WindowListener {
             default:
                 return newAccountPanel.getModel();     
         }
+    }
+    
+    /**
+     * Check if a user is currently logged in.
+     * @return true if a user session exists, false otherwise
+     */
+    public boolean isUserLoggedIn() {
+        return model != null && model.getStudent() != null && model.getStudent().getAccount() != null;
     }
     
      /**
@@ -315,6 +349,7 @@ public class MainFrame extends JFrame implements WindowListener {
         cardPanel.add(resetPasswordPanel, ViewName.RESET_PASSWORD.toString());
         cardPanel.add(forgotPasswordPanel, ViewName.FORGOT_PASSWORD.toString());
         cardPanel.add(dashboardPanel, ViewName.DASHBOARD.toString());
+
 
         setContentPane(cardPanel);
     }
