@@ -622,7 +622,7 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
         }
     } 
 
-
+    // I think this could be done by ShaTuTutor but removing it breaks the class
     // TO DO: not implemented at this time
     @Override
     public NewExampleRequest newRequest() {
@@ -637,6 +637,7 @@ public class CompressionCanvasView extends UserRequestView implements ActionList
         return ex;
     }
 
+    // I think this could be done by ShaTuTutor but removing it breaks the class
     // TO DO: not implemented at this time
     @Override
     public StepCompletion stepCompletion() {

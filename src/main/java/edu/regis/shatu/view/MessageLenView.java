@@ -109,12 +109,13 @@ public class MessageLenView extends UserRequestView {
     }
 
     /**
+     * NO LONGER NEEDED KEPT FOR REFRENCE
+     * 
      * Submit the student's answer to the tutor. Currently is suppose to just do
      * a error check, when the check button is clicked, its suppose to call the
      * stepCompletion method that calls to the tutor and lets the tutor handle
      * checking the answer. This method may be removed later in development.
-     */
-    public void submitAnswer() {
+     * public void submitAnswer() {
 
         if (this.responseTextArea.getText().equals("")) {
             this.feedbackArea.setText("Please provide an answer");
@@ -123,24 +124,27 @@ public class MessageLenView extends UserRequestView {
             // can be found in development.
         }
     }
+     */
 
     /**
+     * NO LONGER NEEDED KEPT FOR REFRENCE
      * This method use to be called when the new example button is clicked, the
      * tutor is suppose to handle creating a new example/question so this method
      * may be outdated, leaving in-case a use can be found in development, but
      * may no longer be needed.
-     */
-    private void prepareNextQuestion() {
+     * private void prepareNextQuestion() {
         // Do nothing, tutor should be handling things, will leave incase a use
         // could be found during development.
     }
+     */
 
     /**
+     * NO LONGER NEEDED KEPT FOR REFRENCE
+     * 
      * Gives the student a hint and adds the ASCII table to the view, rest
      * should be handles by the tutor, maybe all of it should? Adjust as
      * development continues.
-     */
-    public void requestHint() {
+     * public void requestHint() {
 
         // Adjust the hint as needed
         this.feedbackArea.setText("Hint: Lets say you have a message with 1 character, "
@@ -151,6 +155,7 @@ public class MessageLenView extends UserRequestView {
         this.revalidate(); // refreshes the view
         this.repaint(); // refreshes the view
     }
+     */
 
     /**
      * Sets up the description section of the view, explaining the purpose of

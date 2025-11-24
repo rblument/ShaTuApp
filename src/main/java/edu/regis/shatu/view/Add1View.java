@@ -133,11 +133,11 @@ public class Add1View extends UserRequestView {
     }
 
     /**
+     * NO LONGER NEEDED KEPT FOR REFRENCE
      * Submit the student's answer to the tutor. Currently is suppose to just do
      * a error check, when the check button is clicked, its suppose to call the
      * stepCompletion method that calls to the tutor and lets the tutor handle
      * checking the answer. This method may be removed later in development.
-     */
     public void submitAnswer() {
 
         if (this.responseTextArea.getText().equals("")) {
@@ -148,17 +148,19 @@ public class Add1View extends UserRequestView {
 
         }
     }
+     */
 
     /**
+     * NO LONGER NEEDED KEPT FOR REFRENCE
      * This method use to be called when the new example button is clicked, the
      * tutor is suppose to handle creating a new example/question so this method
      * may be outdated, leaving in-case a use can be found in development, but
      * may no longer be needed.
-     */
     private void prepareNextQuestion() {
         // Do nothing, tutor should be handling things, but leaving incase a use
         // could be found later in development
     }
+     */
 
     /**
      * Gives the student a hint and adds the ASCII table to the view, rest

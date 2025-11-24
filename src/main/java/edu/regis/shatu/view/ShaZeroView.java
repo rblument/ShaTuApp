@@ -131,6 +131,8 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
     }
 
     /**
+     * I think this could be done by ShaTuTutor but removing it breaks the class
+     * 
      * Sends a request to the server for a new example problem
      *
      * @return The new example problem
@@ -249,10 +251,10 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
      */
     @Override
     public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_ENTER && answerField.getText().equals("")) {
+        if (e.getKeyCode() == KeyEvent.VK_ENTER && responseTextArea.getText().equals("")) {
             JOptionPane.showMessageDialog(this, "Please provide an answer");
         } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-            // checkButton.doClick();
+            checkButton.doClick();
         }
     }
 
@@ -266,23 +268,28 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
     }
 
     /**
+     * NO LONGER NEEDED KEPT FOR REFRENCE
+     * 
      * Displays a message dialog indicating the start of the next question.
-     */
-    private void onNextQuestion() {
+     * private void onNextQuestion() {
         JOptionPane.showMessageDialog(this, "Next Question");
     }
+     */
 
     /**
+     * NO LONGER NEEDED KEPT FOR REFRENCE
+     * 
      * Displays a message dialog indicating the provision of a hint.
-     */
-    private void onNextHint() {
+     * private void onNextHint() {
         JOptionPane.showMessageDialog(this, "Hint");
     }
+     */
 
     /**
+     * NO LONGER NEEDED KEPT FOR REFRENCE
+     * 
      * Handles the click event of the check button, verifying the user's answer.
-     */
-    private void onCheckButton() {
+     * private void onCheckButton() {
         if (answerField.getText().equals("")) {
             JOptionPane.showMessageDialog(this, "Please provide an answer");
         } else {
@@ -290,6 +297,7 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
             // verifyAnswer();
         }
     }
+     */
 
     /**
      * Sets the main View title and description of the function
@@ -401,6 +409,7 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
         responseTextArea = new JTextArea(3, 20);
         responseTextArea.setLineWrap(true);
         responseTextArea.setWrapStyleWord(true);
+        responseTextArea.addKeyListener(this);  
 
         responsePane = new JScrollPane(responseTextArea);
         responsePane.setPreferredSize(new Dimension(800, 200));

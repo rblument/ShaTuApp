@@ -12,6 +12,16 @@
  */
 package edu.regis.shatu.dao;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+
 import edu.regis.shatu.err.NonRecoverableException;
 import edu.regis.shatu.err.ObjNotFoundException;
 import edu.regis.shatu.model.Course;
@@ -25,14 +35,6 @@ import edu.regis.shatu.model.aol.StudentModel;
 import edu.regis.shatu.svc.CourseSvc;
 import edu.regis.shatu.svc.ServiceFactory;
 import edu.regis.shatu.svc.StudentModelSvc;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
 
 public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
 
@@ -50,41 +52,59 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
                 "INSERT INTO Assessment " +
                 "(UserId, KnowledgeComponentId, AssessmentLevel, Exposures, Successes, Hints) " +
                 "VALUES (?,?,?,?,?,?)";
+        final String sql3 = 
+                "INSERT INTO Student " + 
+                "(UserId, FirstName, LastName, LastLogin, LastLogout) " +
+                "VALUES (?, ?, ?, ?, ?)";
         
         String userId = student.getAccount().getUserId();
         StudentModel studentModel = student.getStudentModel();
+        
+        try(Connection conn = DriverManager.getConnection(URL)){
+            conn.setAutoCommit(false);    // Only commit if all insertions succeed
+            
+            try(PreparedStatement stmt1 = conn.prepareStatement(sql1);
+                PreparedStatement stmt2 = conn.prepareStatement(sql2, Statement.RETURN_GENERATED_KEYS);
+                PreparedStatement stmt3 = conn.prepareStatement(sql3);
+                ){
+                // Insert into StudentModel
+                stmt1.setString(1, userId);
+                stmt1.setString(2, ScaffoldLevel.EXTREME.toString());
+                stmt1.executeUpdate();
+                
+                // Insert into Assessment
+                for (Assessment assessment : studentModel.getAssessments().values()) {
+                    stmt2.setString(1, userId);
+                    stmt2.setInt(2, assessment.getOutcome().getId());
+                    stmt2.setString(3, "Not Started");
+                    stmt2.setInt(4, assessment.getExposures());
+                    stmt2.setInt(5, assessment.getSuccessess());
+                    stmt2.setInt(6, assessment.getHints());
+                    stmt2.executeUpdate();
 
-        Connection conn = null;
-        PreparedStatement stmt1 = null;
-        PreparedStatement stmt2 = null;
-        try {
-            conn = DriverManager.getConnection(URL);
-            stmt1 = conn.prepareStatement(sql1);
-
-            stmt1.setString(1, userId);
-            stmt1.setString(2, ScaffoldLevel.EXTREME.toString());
-            stmt1.executeUpdate();
-
-            stmt2 = conn.prepareStatement(sql2, Statement.RETURN_GENERATED_KEYS);
-            for (Assessment assessment : studentModel.getAssessments().values()) {
-                stmt2.setString(1, userId);
-                stmt2.setInt(2, assessment.getOutcome().getId());
-                stmt2.setString(3, "Not Started");
-                stmt2.setInt(4, assessment.getExposures());
-                stmt2.setInt(5, assessment.getSuccessess());
-                stmt2.setInt(6, assessment.getHints());
-                stmt2.executeUpdate();
-
-                ResultSet rs = stmt2.getGeneratedKeys();
-                if (rs.next()) {
-                    assessment.setId(rs.getInt(1));
+                    ResultSet rs = stmt2.getGeneratedKeys();
+                    if (rs.next()) {
+                        assessment.setId(rs.getInt(1));
+                    }
                 }
+                
+                // Insert into Student
+                stmt3.setString(1, userId);
+                stmt3.setString(2, student.getAccount().getFirstName());
+                stmt3.setString(3, student.getAccount().getLastName());
+                stmt3.setNull(4, java.sql.Types.TIMESTAMP);    // No login is recorded yet
+                stmt3.setNull(5, java.sql.Types.TIMESTAMP);    // No logout is recorded yet
+                stmt3.executeUpdate();
+                
+                conn.commit();
             }
-        } catch (SQLException e) {
+            catch (SQLException e){
+                conn.rollback();    // Do not commit if any insertion fails
+                throw new NonRecoverableException("UserDAO-ERR-5" + e.toString(), e);
+            }
+        }
+        catch (SQLException e){
             throw new NonRecoverableException("UserDAO-ERR-5" + e.toString(), e);
-        } finally {
-            close(stmt2);
-            close(conn, stmt1);
         }
     }
 
@@ -326,11 +346,11 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
     }
     
     /**
-     * Retrive
+     * Retrieve all assessments associated with a student.
      * 
-     * @param userId
-     * @param conn
-     * @return
+     * @param userId a String object representing the student's user id
+     * @param conn a database connection object
+     * @return an ArrayList of Assessment objects
      * @throws ObjNotFoundException
      * @throws SQLException
      * @throws NonRecoverableException
@@ -384,19 +404,37 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
      * {@inheritDoc}
      */
     @Override
-    public void recordLoginEvent(String userId, long timestamp) {
-        String sql = "UPDATE students SET last_login = ? WHERE id = ?";
-        // ToDo: Write this code
-        // execute with JDBC/SQLite/whatever DB is used
+    public void recordLoginEvent(String userId, long timestamp) throws NonRecoverableException {
+        String sql = "UPDATE student SET LastLogin = ? WHERE userId = ?";
+        Timestamp tStamp = new Timestamp(timestamp);    // Store date in a readable format
+        
+        try (Connection conn = DriverManager.getConnection(URL);
+                PreparedStatement stmt = conn.prepareStatement(sql)){
+            stmt.setTimestamp(1, tStamp);
+            stmt.setString(2, userId);
+            stmt.executeUpdate();
+        }
+        catch (SQLException ex) {
+            throw new NonRecoverableException("Error recording login event: " + ex.toString(), ex);
+        }
     }
     
     /**
      * {@inheritDoc}
      */
     @Override
-    public void recordLogoutEvent(String userId, long timestamp) {
-        String sql = "UPDATE students SET last_logout = ? WHERE id = ?";
-        // ToDo Write this code
-        // execute DB update here
+    public void recordLogoutEvent(String userId, long timestamp) throws NonRecoverableException {
+        String sql = "UPDATE student SET LastLogout = ? WHERE userId = ?";
+        Timestamp tStamp = new Timestamp(timestamp);    // Store date in a readable format
+        
+        try (Connection conn = DriverManager.getConnection(URL);
+                PreparedStatement stmt = conn.prepareStatement(sql)){
+            stmt.setTimestamp(1, tStamp);
+            stmt.setString(2, userId);
+            stmt.executeUpdate();
+        }
+        catch (SQLException ex) {
+            throw new NonRecoverableException("Error recording logout event: " + ex.toString(), ex);
+        }
     }
 }
