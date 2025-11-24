@@ -119,4 +119,33 @@ public class StudentModel {
     public void setTutoringMode(TutoringMode tutoringMode) {
         this.tutoringMode = tutoringMode;
     }
+
+    /**
+     * Check if the student has completed all steps of a given problem type.
+     */
+    public boolean hasCompleted(ProblemType type) {
+        for (Assessment a : assessments.values()) {
+            if (a.getOutcome().getProblemType() == type) {
+                return a.getAssessment() == AssessmentLevel.COMPLETED;
+            }
+        }
+        return false; // If no assessment exists for this type, treat as not completed
+    }
+
+    /**
+     * Return problem type student is weakest .
+     */
+    public ProblemType getWeakestProblemType() {
+        ProblemType weakest = null;
+        AssessmentLevel minLevel = AssessmentLevel.COMPLETED;
+
+        for (Assessment a : assessments.values()) {
+            if (a.getAssessment().ordinal() < minLevel.ordinal()) {
+                minLevel = a.getAssessment();
+                weakest = a.getOutcome().getProblemType();
+            }
+        }
+        return weakest != null ? weakest : ProblemType.ASCII_ENCODE;
+    }
+
 }

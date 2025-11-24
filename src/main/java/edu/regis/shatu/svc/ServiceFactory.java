@@ -74,4 +74,8 @@ public class ServiceFactory {
     public static StudentModelSvc findStudentModelSvc() {
         return new StudentModelDAO();
     }
+
+    public static TutorSvc findTutorSvc() {
+        return new ShaTuTutor();
+    }
 }
