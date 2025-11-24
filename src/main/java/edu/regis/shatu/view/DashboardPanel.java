@@ -20,6 +20,8 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -83,11 +85,12 @@ public class DashboardPanel extends JPanel {
     // Database URL (used by service/DAO layer)
     private static final String URL = "jdbc:mysql://localhost:3306/shatudb?serverTimezone=UTC";
 
-    //Background Colors
-//    private static final Color REGIS_BLUE = new Color(0, 43, 73);
-//    private static final Color REGIS_YELLOW = new Color(241, 196, 0);
+    // Flag to track if lessons are being displayed for selection
+    private boolean showingLessonSelection = false;
     
-    
+    // The tutoring mode selected by the user (for lesson selection)
+    private TutoringMode selectedMode = null;
+
     /**
      * Creates a new DashboardPanel and initializes components.
      *
@@ -148,42 +151,33 @@ public class DashboardPanel extends JPanel {
 
         settingsButton.setVerticalAlignment(SwingConstants.TOP);  
         
+        // Let tutor control, navigate directly to TUTOR view
         seeOneButton.addActionListener(evt -> {
+            if (model != null) {
+                model.getStudent().getStudentModel().setTutoringMode(TutoringMode.SEE_ONE);
+            }
             MainFrame.instance().displayView(MainFrame.ViewName.TUTOR);
         });
         
+        //Changed from SPLASH to TUTOR view
+        // Also shows lesson selection so user can pick a lesson
         doOneButton.addActionListener(evt -> {
-            MainFrame.instance().displayView(MainFrame.ViewName.SPLASH);
+            selectedMode = TutoringMode.DO_ONE;
+            if (model != null) {
+                model.getStudent().getStudentModel().setTutoringMode(TutoringMode.DO_ONE);
+            }
+            showLessonSelection();
         });
         
+        //Shows lesson selection with clickable lessons
         teachOneButton.addActionListener(evt -> {
-            // Load all lessons from the model
-            loadAllLessons();
-
-            // Refresh the Teach Me panel to show lessons
-            JPanel teachMeCategoryPanel = createCategoryPanel("Teach Me");
-            JScrollPane teachMeScroll = new JScrollPane(teachMeCategoryPanel);
-            teachMeScroll.setPreferredSize(new Dimension(350, 300));
-
-            // Replace old Teach Me panel in content panel
-            GridBagLayout layout = (GridBagLayout) getLayout();
-            GridBagConstraints gbc = new GridBagConstraints();
-            gbc.fill = GridBagConstraints.BOTH;
-            gbc.insets = new Insets(5, 5, 5, 5);
-            gbc.anchor = GridBagConstraints.NORTH;
-            gbc.weightx = 1.0;
-            gbc.weighty = 1.0;
-            gbc.gridx = 0;
-            gbc.gridy = 0;
-
-            remove(teachMePanel);
-            teachMePanel = teachMeCategoryPanel;
-            add(teachMeScroll, gbc);
-
-            revalidate();
-            repaint();
+            selectedMode = TutoringMode.TEACH_ONE;
+            if (model != null) {
+                model.getStudent().getStudentModel().setTutoringMode(TutoringMode.TEACH_ONE);
+            }
+            // Show lesson selection
+            showLessonSelection();
         });
-
 
         // Initialize progress bar maps and panels
         teachMeProgressBars = new HashMap<>();
@@ -194,6 +188,40 @@ public class DashboardPanel extends JPanel {
         quizMePanel = new JPanel(new GridBagLayout());
         
         //todo load lesson data
+    }
+    
+    /**
+     * Shows the lesson selection panel allowing users to pick a specific lesson.
+     */
+    private void showLessonSelection() {
+        loadAllLessons();
+        
+        if (allLessons.isEmpty()) {
+            JOptionPane.showMessageDialog(this, 
+                "No lessons available. Starting with default lesson.",
+                "No Lessons", 
+                JOptionPane.INFORMATION_MESSAGE);
+            MainFrame.instance().displayView(MainFrame.ViewName.TUTOR);
+            return;
+        }
+        
+        showingLessonSelection = true;
+        
+        String[] lessonArray = allLessons.toArray(new String[0]);
+        String selectedLesson = (String) JOptionPane.showInputDialog(
+            this,
+            "Select a lesson to begin:",
+            "Lesson Selection",
+            JOptionPane.PLAIN_MESSAGE,
+            null,
+            lessonArray,
+            lessonArray[0]
+        );
+        
+        if (selectedLesson != null) {
+            MainFrame.instance().displayView(MainFrame.ViewName.TUTOR);
+        }
+        showingLessonSelection = false;
     }
     
     //Loads the lesson names from database
@@ -566,6 +594,7 @@ public class DashboardPanel extends JPanel {
      * panel.
      *
      * For each lesson, it adds a label (with a shortened title) and a progress bar.
+     * FIXED: Now includes click handlers for lesson labels to allow selection.
      *
      * @param panel            the parent panel.
      * @param startRow         the starting row index.
@@ -604,6 +633,32 @@ public class DashboardPanel extends JPanel {
             lessonLabel.setFont(new Font("Segoe UI", Font.PLAIN, 18));
             lessonLabel.setForeground(Color.BLACK);
             lessonLabel.setBorder(new EmptyBorder(0, 5, 0, 5));
+            
+            // Added click handler for lesson labels (not "None" placeholders)
+            if (!"None".equals(lesson)) {
+                final String lessonName = lesson; 
+                lessonLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
+                lessonLabel.addMouseListener(new MouseAdapter() {
+
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        onLessonSelected(lessonName, studyMode);
+                    }
+                    
+                    @Override
+                    public void mouseEntered(MouseEvent e) {
+                        lessonLabel.setForeground(ColorScheme.REGIS_BLUE);
+                        lessonLabel.setText("<html><u>" + displayLesson + "</u></html>");
+                    }
+                    
+                    @Override
+                    public void mouseExited(MouseEvent e) {
+                        lessonLabel.setForeground(Color.BLACK);
+                        lessonLabel.setText(displayLesson);
+                    }
+                });
+            }
+            
             panel.add(lessonLabel, gbc);
 
             if (!"None".equals(lesson)) {
@@ -640,5 +695,39 @@ public class DashboardPanel extends JPanel {
         }
 
         return row;
+    }
+    
+    /**
+     * Handles when a user clicks on a lesson label to select it.
+     * @param lessonName the name of the selected lesson
+     * @param studyMode the study mode category ("Teach Me", "Practice", "Quiz Me")
+     */
+    private void onLessonSelected(String lessonName, String studyMode) {
+        if (model == null) {
+            JOptionPane.showMessageDialog(this, 
+                "No active session. Please sign in first.",
+                "Error", 
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        TutoringMode mode;
+        switch (studyMode) {
+            case "Teach Me":
+                mode = TutoringMode.SEE_ONE;
+                break;
+            case "Practice":
+                mode = TutoringMode.DO_ONE;
+                break;
+            case "Quiz Me":
+                mode = TutoringMode.TEACH_ONE;
+                break;
+            default:
+                mode = TutoringMode.SEE_ONE;
+                break;
+        }
+        model.getStudent().getStudentModel().setTutoringMode(mode);
+
+        MainFrame.instance().displayView(MainFrame.ViewName.TUTOR);
     }
 }
