@@ -127,12 +127,13 @@ public class RotateView extends UserRequestView implements KeyListener {
      * Creates and initializes the child GUI components appearing in this frame.
      */
     private void initializeComponents() {
-        prompt = new JLabel("Default Prompt Text");
-        problem = new JLabel("Default Problem Text");
+        prompt = new JLabel("Rotate n Bits");
+        problem = new JLabel("Click 'New Example' to begin");
 
         answerField = new JTextField(10);
         answerField.addKeyListener(this);
         answerField.setHorizontalAlignment(JTextField.CENTER);
+        answerField.setEnabled(false);
 
         shortProblem = new JRadioButton("16-bit");
         shortProblem.setSelected(true);
@@ -160,6 +161,7 @@ public class RotateView extends UserRequestView implements KeyListener {
         rotateAmount = new ButtonGroup();
         rotateAmount.add(rotate7Bits);
         rotateAmount.add(rotate16Bits);
+
         // Logic for radio buttons (selected/enabled)
         rotate7Bits.addActionListener(new ActionListener() {
             @Override
@@ -169,6 +171,7 @@ public class RotateView extends UserRequestView implements KeyListener {
                 }
             }
         });
+
         rotate16Bits.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -180,6 +183,7 @@ public class RotateView extends UserRequestView implements KeyListener {
                 }
             }
         });
+
         shortProblem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -191,6 +195,7 @@ public class RotateView extends UserRequestView implements KeyListener {
                 }
             }
         });
+
         longProblem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -258,6 +263,8 @@ public class RotateView extends UserRequestView implements KeyListener {
             resetButtonListeners(); // Clear any listeners applied from other views
         }
 
+        answerField.setText("");   
+
         Step step = model.currentTask().getCurrentStep().getStep();
 
         if (step.getSubType() == StepSubType.ROTATE_BITS) {
@@ -280,20 +287,22 @@ public class RotateView extends UserRequestView implements KeyListener {
             }
 
             if (problemData == null || problemData.isEmpty()) {
-                prompt.setText("");
-                problem.setText("Click 'New Example' when ready.");
+                prompt.setText("Rotate n Bits");
+                problem.setText("Click 'New Example' to begin");
                 checkButton.setEnabled(false);
                 hintButton.setEnabled(false);
+                answerField.setEnabled(false);
             } else {
                 problem.setText(problemData);
                 this.problemString = problemData;
                 this.numRotations = currentStep.getAmount();
                 checkButton.setEnabled(true);
                 hintButton.setEnabled(true);
+                answerField.setEnabled(true);
             }
         }
         
- 
+
     }
     
     /**
@@ -301,7 +310,6 @@ public class RotateView extends UserRequestView implements KeyListener {
      * Disables fields not available for SEE_ONE mode for passive viewing.
      * 
      */
-    
     @Override
     protected void configureModeSpecificUI() {
         super.configureModeSpecificUI();//call parent to handle buttons
