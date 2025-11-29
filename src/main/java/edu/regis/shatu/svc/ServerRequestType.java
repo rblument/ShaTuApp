@@ -26,12 +26,12 @@ public enum ServerRequestType {
     /**
      * Completed an entire task containing one ore more steps.
      */
-    completed_Task(":CompletedTask"),
+    COMPLETED_TASK(":CompletedTask"),
     
     /**
-     * A new user is requesting to create a new account
+     * A new user is requesting to create a new account.
      * 
-     * The ClientRequest data is a JSon Account object
+     * The ClientRequest data is a JSon Account object.
      * 
      * The TutorReply status will be:
      *   "Created" with no data
@@ -40,7 +40,7 @@ public enum ServerRequestType {
     CREATE_ACCOUNT(":CreateAccount"),
     
     /**
-     * The student or client requested another example
+     * The student or client requested another example.
      * 
      */
     NEW_EXAMPLE(":NewExample"),
@@ -59,6 +59,11 @@ public enum ServerRequestType {
      *  "ERR"
      */
     SIGN_IN(":SignIn"),
+    
+    /**
+     * Student request to sign out.
+     */
+    SIGN_OUT(":SignOut"),
     
     /**
      * The student is requesting a hint for the current step.
@@ -84,7 +89,7 @@ public enum ServerRequestType {
     VERIFY_USER(":VerifyUser"),
     
     /**
-     * Get the current task of the user
+     * Get the current task of the user.
      */
     GET_TASK(":GetTask"),
 

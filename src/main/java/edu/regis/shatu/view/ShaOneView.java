@@ -465,6 +465,13 @@ public class ShaOneView extends UserRequestView implements KeyListener { //imple
         } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
             checkButton.doClick();
         }
+        // Handle H key or F1 key for the Hint button
+        else if ((e.getKeyCode() == KeyEvent.VK_H && !e.isControlDown()) || 
+                e.getKeyCode() == KeyEvent.VK_F1) {
+            if (hintButton != null && hintButton.isEnabled()) {
+                hintButton.doClick();
+            }
+        }
     }
 
     public void keyReleased(KeyEvent e) {
