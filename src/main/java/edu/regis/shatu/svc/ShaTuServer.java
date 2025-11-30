@@ -47,6 +47,11 @@ public class ShaTuServer implements Runnable {
             = Logger.getLogger(ShaTuServer.class.getName());
 
     /**
+     * Hard cap on request size to guard against malformed/oversized payloads.
+     */
+    private static final int MAX_REQUEST_LENGTH = 8192;
+
+    /**
      * The socket listening for connections from the client
      */
     private ServerSocket server;
@@ -128,6 +133,14 @@ public class ShaTuServer implements Runnable {
                 out = new PrintWriter(client.getOutputStream(), true);
 
                 String msg = in.readLine();
+                if (msg == null || msg.isEmpty()) {
+                    LOGGER.warning("Received empty request");
+                    return;
+                }
+                if (msg.length() > MAX_REQUEST_LENGTH) {
+                    LOGGER.warning("Request exceeded max length and was rejected");
+                    return;
+                }
                 
                 ClientRequest request = gson.fromJson(msg, ClientRequest.class);
                 
