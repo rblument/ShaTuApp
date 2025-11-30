@@ -77,6 +77,11 @@ public enum ServerRequestType {
      * "ERR" data is error message
      */
     REQUEST_HINT(":RequestHint"),
+
+    /**
+     * The student requested to see the correct answer after an incorrect attempt.
+     */
+    REQUEST_CORRECT_ANSWER(":RequestCorrectAnswer"),
     
     /**
      * The student has reset their password.

@@ -28,7 +28,7 @@ import com.google.gson.Gson;
  *
  * Protocol msg ::= &lt;cmd> &lt;argData> <br>
  * &lt;cmd> ::= :CreateStudentAccount | :LaunchSession | :SignIn | <br>
- * :RequestHint | :CompletedStep | :CompletedTask <br>
+ * :RequestHint | :RequestCorrectAnswer | :CompletedStep | :CompletedTask <br>
  * The &lt;argData> for each command is documented in the TutorSvc interface.
  *
  * @author Rickb

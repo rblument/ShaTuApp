@@ -28,6 +28,8 @@ public enum StudentModelFieldKind {
     SUCCESSES("Success"),
     
     HINTS("Hints"),
+
+    CORRECT_ANSWERS_REQUESTED("Correct Answers Requested"),
     
     ALL("All");
     

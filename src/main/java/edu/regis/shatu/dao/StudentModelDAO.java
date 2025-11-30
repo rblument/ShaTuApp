@@ -50,8 +50,8 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
         final String sql1 = "INSERT INTO StudentModel (UserId, ScaffoldLevel) VALUES (?,?)";
         final String sql2 = 
                 "INSERT INTO Assessment " +
-                "(UserId, KnowledgeComponentId, AssessmentLevel, Exposures, Successes, Hints) " +
-                "VALUES (?,?,?,?,?,?)";
+                "(UserId, KnowledgeComponentId, AssessmentLevel, Exposures, Successes, Hints, CorrectAnswersRequested) " +
+                "VALUES (?,?,?,?,?,?,?)";
         final String sql3 = 
                 "INSERT INTO Student " + 
                 "(UserId, FirstName, LastName, LastLogin, LastLogout) " +
@@ -80,6 +80,7 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
                     stmt2.setInt(4, assessment.getExposures());
                     stmt2.setInt(5, assessment.getSuccessess());
                     stmt2.setInt(6, assessment.getHints());
+                    stmt2.setInt(7, assessment.getCorrectAnswersRequested());
                     stmt2.executeUpdate();
 
                     ResultSet rs = stmt2.getGeneratedKeys();
@@ -172,6 +173,11 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
                     sql = "UPDATE Assessment SET Hints = ? WHERE KnowledgeComponentId = ?";
                     stmt = conn.prepareStatement(sql);
                     stmt.setInt(1, assessment.getHints());
+                    break;
+                case CORRECT_ANSWERS_REQUESTED:
+                    sql = "UPDATE Assessment SET CorrectAnswersRequested = ? WHERE KnowledgeComponentId = ?";
+                    stmt = conn.prepareStatement(sql);
+                    stmt.setInt(1, assessment.getCorrectAnswersRequested());
                     break;
                 default:
                     break;
@@ -359,7 +365,7 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
             throws ObjNotFoundException, SQLException, NonRecoverableException {
 
         final String sql =
-                "SELECT AssessmentId, KnowledgeComponentId, AssessmentLevel, Exposures, Successes, Hints " +
+                "SELECT AssessmentId, KnowledgeComponentId, AssessmentLevel, Exposures, Successes, Hints, CorrectAnswersRequested " +
                 "FROM Assessment WHERE UserId = ?";
 
         CourseSvc courseSvc = ServiceFactory.findCourseSvc();
@@ -379,6 +385,7 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
             assessment.setExposures(rs.getInt(4));
             assessment.setSuccessess(rs.getInt(5));
             assessment.setHints(rs.getInt(6));
+            assessment.setCorrectAnswersRequested(rs.getInt(7));
             assessments.add(assessment);
         }
         return assessments;

@@ -19,6 +19,7 @@ package edu.regis.shatu.view.act;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
@@ -257,6 +258,7 @@ public class StepCompletionAction extends ShaTuGuiAction {
                                     }
                                     case 2 -> {
                                         System.out.println("show answer");
+                                        recordCorrectAnswerRequest(gson, account, ex);
                                         JOptionPane.showMessageDialog(MainFrame.instance(),
                                                 stepReply.getCorrectAnswer(), "Tutor Reply",
                                                 JOptionPane.INFORMATION_MESSAGE);
@@ -274,6 +276,27 @@ public class StepCompletionAction extends ShaTuGuiAction {
             }
         } catch (IllegalArgException e) {
             System.out.println("Illegal arg exception " + e);
+        }
+    }
+
+    /**
+     * Notify the tutor that the student requested to see the correct answer so the
+     * event can be persisted.
+     */
+    private void recordCorrectAnswerRequest(Gson gson, Account account, StepCompletion completion) {
+        try {
+            ClientRequest correctAnswerRequest = new ClientRequest(ServerRequestType.REQUEST_CORRECT_ANSWER);
+            correctAnswerRequest.setUserId(account.getUserId());
+            correctAnswerRequest.setSecurityToken(MainFrame.instance().getModel().getSecurityToken());
+            correctAnswerRequest.setData(gson.toJson(completion));
+
+            TutorReply recordReply = SvcFacade.instance().tutorRequest(correctAnswerRequest);
+
+            if (!":Success".equals(recordReply.getStatus())) {
+                LOGGER.warning("Failed to record correct answer request: " + recordReply.getStatus());
+            }
+        } catch (Exception ex) {
+            LOGGER.log(Level.WARNING, "Unable to record correct answer request", ex);
         }
     }
 }
