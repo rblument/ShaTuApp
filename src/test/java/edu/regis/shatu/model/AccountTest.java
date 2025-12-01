@@ -83,18 +83,24 @@ public class AccountTest {
         public void testFullConstructor() {
             String expectedUserId = "bob@regis.edu";
             String expectedPassword = "secureHash456";
+            String expectedFirstName = "Bobby";
+            String expectedLastName = "Bobberson";
             int expectedSecQuestion = 2;
             String expectedSecAnswer = "answerHash789";
             
             Account fullAccount = new Account(
                 expectedUserId,
                 expectedPassword,
+                expectedFirstName,
+                expectedLastName,
                 expectedSecQuestion,
                 expectedSecAnswer
             );
             
             assertEquals(expectedUserId, fullAccount.getUserId());
             assertEquals(expectedPassword, fullAccount.getPassword());
+            assertEquals(expectedFirstName, fullAccount.getFirstName());
+            assertEquals(expectedLastName, fullAccount.getLastName());
             assertEquals(expectedSecQuestion, fullAccount.getSecurityQuestion());
             assertEquals(expectedSecAnswer, fullAccount.getSecurityAnswer());
             assertTrue(fullAccount.isStudent());
@@ -163,22 +169,11 @@ public class AccountTest {
         }
         
         @Test
-        @DisplayName("Both isStudent() and getIsStudent() should return same value")
-        public void testIsStudentMethods() {
-            boolean isStudentResult = account.isStudent();
-            boolean getIsStudentResult = account.getIsStudent();
-            assertEquals(isStudentResult, getIsStudentResult, 
-                "Both methods should return the same value");
-            assertTrue(isStudentResult, "Default should be student");
-        }
-        
-        @Test
         @DisplayName("setIsStudent should update student status")
         public void testSetIsStudent() {
             assertTrue(account.isStudent(), "Should start as student");
             account.setIsStudent(false);
             assertFalse(account.isStudent(), "Should no longer be student");
-            assertFalse(account.getIsStudent(), "getIsStudent should also return false");
             account.setIsStudent(true);
             assertTrue(account.isStudent(), "Should be student again");
         }
