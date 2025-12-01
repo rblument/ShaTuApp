@@ -104,6 +104,7 @@ public class ShaTuTutor implements TutorSvc {
         // the client request (e.g., ":SignIn" invokes "signIn(...)").
         Logger.getLogger(ShaTuTutor.class.getName()).log(Level.INFO, request.getRequestType().getRequestName());
 
+        // TODO: Consider making this parser into its own method.
         // Efficiently produce "signIn" from ":SignIn", for example.
         char c[] = request.getRequestType().getRequestName().toCharArray();
         c[1] = Character.toLowerCase(c[1]);
@@ -115,6 +116,7 @@ public class ShaTuTutor implements TutorSvc {
 
         String methodName = new String(m);
 
+        // TODO: Consider making this switch into its own method.
         // Most methods require verifying the given security token with the
         // one current known in the DB for the given user.
         switch (methodName) {
@@ -124,6 +126,7 @@ public class ShaTuTutor implements TutorSvc {
             case "newExample":
             case "requestHint":
             case "resetPassword":
+            case "updateAccount":
                 String userId = request.getUserId();
                 try {
                     if (verifySession(userId, request.getSecurityToken())) {
@@ -225,6 +228,35 @@ public class ShaTuTutor implements TutorSvc {
         // return new TutorReply("IllegalUserId");
         // }
     }
+    
+    /**
+     * Updates an existing student's account information in the database.
+     * 
+     * This method handles ":UpdateAccount" requests from the GUI client.
+     * 
+     * TODO: Database tables (Account & Student) are updated independently.
+     * Determine if this should be done with a single transaction. Delete this TODO
+     * when a decision is made and implemented.
+     * 
+     * @param jsonAcct a JSON representation of an account
+     * @return a TutorReply indicating "Success" or ":ERR"
+     */
+    public TutorReply updateAccount(String jsonAcct) {
+        Account account = gson.fromJson(jsonAcct, Account.class);
+        Student student = new Student(account);
+        
+        try {
+            ServiceFactory.findAccountSvc().update(account);    // Updates Account
+            ServiceFactory.findStudentModelSvc().update(student);   // Updates Student
+            return new TutorReply("Success");
+        } catch (ObjNotFoundException ex) {
+            Logger.getLogger(ShaTuTutor.class.getName()).log(Level.SEVERE, null, ex);
+            return new TutorReply(":ERR");
+        } catch (NonRecoverableException ex) {
+            Logger.getLogger(ShaTuTutor.class.getName()).log(Level.SEVERE, null, ex);
+            return new TutorReply(":ERR");
+        }
+    }
 
     /**
      * Verifies the user is in the database and the security question and answer
@@ -284,6 +316,35 @@ public class ShaTuTutor implements TutorSvc {
         } catch (NonRecoverableException ex) {
             LOGGER.log(Level.SEVERE, null, ex);
             return new TutorReply();
+        }
+    }
+    
+    /**
+     * Checks a user-provided password against the password stored in the
+     * database for the user's account.
+     * 
+     * This method handles ":VerifyPassword" requests from the GUI client.
+     * 
+     * @param jsonAcct a JSON encoded Account object
+     * @return a TutorReply object
+     */
+    public TutorReply verifyPassword(String jsonAcct) {
+        Account requestAcct = gson.fromJson(jsonAcct, Account.class);
+        
+        try {
+            Account dbAcct = ServiceFactory.findAccountSvc().retrieve(requestAcct.getUserId());
+            
+            if (dbAcct.getPassword().equals(requestAcct.getPassword())) {
+                return new TutorReply("Authenticated");
+            }
+            else {
+                return new TutorReply("InvalidPassword");
+            }
+        } catch (ObjNotFoundException e) {
+            return new TutorReply(":ERR");
+        } catch (NonRecoverableException ex) {
+            Logger.getLogger(ShaTuTutor.class.getName()).log(Level.SEVERE, null, ex);
+            return new TutorReply(":ERR");
         }
     }
 
