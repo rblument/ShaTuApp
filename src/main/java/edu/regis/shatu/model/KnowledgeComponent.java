@@ -15,6 +15,7 @@ package edu.regis.shatu.model;
 import java.util.ArrayList;
 
 import edu.regis.shatu.model.aol.OutcomeGranularity;
+import edu.regis.shatu.model.aol.ProblemType;
 
 /**
  * Per VanLehn (2006), a component of knowledge (concept, rule, procedure, 
@@ -59,6 +60,11 @@ public class KnowledgeComponent extends TitledModel {
      * The tasks and steps that demonstrate/exercise this knowledge component.
      */
     private ArrayList<ExercisingLocation> exercisingLocations;
+
+    /**
+     * The type of problem associated with this knowledge component.
+     */
+    private ProblemType problemType;
    
     /**
      * Initialize this outcome with the given id.
@@ -122,5 +128,23 @@ public class KnowledgeComponent extends TitledModel {
     
     public void setExercisingLocations(ArrayList<ExercisingLocation> exercisingLocations) {
         this.exercisingLocations = exercisingLocations;
+    }
+
+    /**
+     * Returns the problem type associated with this knowledge component.
+     * 
+     * @return the ProblemType
+     */
+    public ProblemType getProblemType() {
+        return problemType;
+    }
+
+    /**
+     * Sets the problem type associated with this knowledge component.
+     * 
+     * @param problemType the ProblemType to set
+     */
+    public void setProblemType(ProblemType problemType) {
+        this.problemType = problemType;
     }
 }

@@ -162,7 +162,8 @@ public class ExclusiveOrView extends UserRequestView implements KeyListener {
         ActionListener selection = e -> {
             JRadioButton source = (JRadioButton) e.getSource();
             updateProblemSize(source);
-            generateNewQuestion();
+            // generateNewQuestion();
+            // TODO set up to use ShaTuTutor to generate new questions
         };
 
         fourRadioButton.addActionListener(selection);
@@ -357,9 +358,9 @@ public class ExclusiveOrView extends UserRequestView implements KeyListener {
     }
 
     /**
+     * NO LONGER NEEDED KEPT FOR REFRENCE
      * Generates and displays three new input strings.
-     */
-    private void generateNewQuestion() {
+     * private void generateNewQuestion() {
         responseTextArea.setText("");
 
         stringX = generateInputString();
@@ -368,8 +369,10 @@ public class ExclusiveOrView extends UserRequestView implements KeyListener {
         stringXLabel.setText("x: " + stringX);
         stringYLabel.setText("y: " + stringY);
     }
+     */
 
     /**
+     * NO LONGER NEEDED KEPT FOR REFRENCE
      * Performs the XOR operation on two binary strings.
      *
      * The method compares corresponding bits of the two binary strings and
@@ -379,8 +382,7 @@ public class ExclusiveOrView extends UserRequestView implements KeyListener {
      * @param binary1 The first binary string.
      * @param binary2 The second binary string.
      * @return The result of XOR operation as a binary string.
-     */
-    private String performXOR(String x, String y) {
+     * private String performXOR(String x, String y) {
         String tempX = x.replaceAll("\\s", "");
         String tempY = y.replaceAll("\\s", "");
 
@@ -394,6 +396,7 @@ public class ExclusiveOrView extends UserRequestView implements KeyListener {
 
         return binaryResult;
     }
+     */
 
     /**
      * Pads the binary string with leading zeroes to make it of the specified

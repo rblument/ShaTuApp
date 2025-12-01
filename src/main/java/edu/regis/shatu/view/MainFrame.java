@@ -197,21 +197,28 @@ public class MainFrame extends JFrame implements WindowListener {
     }
     
     /**
-     * Return the current account, which depends on the view currently being
+     * Returns the current account, which depends on the view currently being
      * displayed.
-     * 
+
      * TODO: Each view contains its own Account object. Determine if it's necessary for
      * this class to fetch the Accounts from different views, or if the Accounts
      * should be fetched directly from the views themselves. Also, is the Account
      * ever different from view to view?
-     * 
-     * @return an Account object from the current view
+
+     * @return the current user's Account
      */
     public Account getAccount() {
+        if (model != null && model.getStudent() != null && model.getStudent().getAccount() != null) {
+            return model.getStudent().getAccount();
+        }
+        
+        // User is not logged in, get account from the appropriate view
         switch (displayedView) {
             case DASHBOARD:
             case TUTOR:
-                return model.getStudent().getAccount();
+                if (model != null) {
+                    return model.getStudent().getAccount();
+                }
                 
             case SPLASH:
                 return splashPanel.getModel();
@@ -228,6 +235,14 @@ public class MainFrame extends JFrame implements WindowListener {
             default:
                 return newAccountPanel.getModel();     
         }
+    }
+    
+    /**
+     * Check if a user is currently logged in.
+     * @return true if a user session exists, false otherwise
+     */
+    public boolean isUserLoggedIn() {
+        return model != null && model.getStudent() != null && model.getStudent().getAccount() != null;
     }
     
      /**
