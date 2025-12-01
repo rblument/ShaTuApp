@@ -208,11 +208,7 @@ public class MainFrame extends JFrame implements WindowListener {
      * @return the current user's Account
      */
     public Account getAccount() {
-        if (model != null && model.getStudent() != null && model.getStudent().getAccount() != null) {
-            return model.getStudent().getAccount();
-        }
         
-        // User is not logged in, get account from the appropriate view
         switch (displayedView) {
             case DASHBOARD:
             case TUTOR:
