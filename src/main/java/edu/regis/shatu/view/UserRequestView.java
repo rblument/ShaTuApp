@@ -28,8 +28,12 @@ import edu.regis.shatu.model.aol.TutoringMode;
 import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.KeyStroke;
+import javax.swing.AbstractAction;
 
 /**
  * A abstract view that supports various user gestures that results in a request 
@@ -158,6 +162,19 @@ public abstract class UserRequestView extends GPanel {
         checkButton = new JButton(StepCompletionAction.instance());
         hintButton = new JButton(HintAction.instance());
         newExampleButton = new JButton (NewExampleAction.instance());
+
+        // Provide keyboard access to the Hint action from any focused component.
+        hintButton.setMnemonic(KeyEvent.VK_H);
+        hintButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+                .put(KeyStroke.getKeyStroke(KeyEvent.VK_H, 0), "hint-click");
+        hintButton.getActionMap().put("hint-click", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (hintButton.isEnabled()) {
+                    hintButton.doClick();
+                }
+            }
+        });
         
         newExampleButton.addActionListener(e -> {
             checkButton.setEnabled(true);
