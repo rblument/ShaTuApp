@@ -29,11 +29,13 @@ import edu.regis.shatu.err.ObjNotFoundException;
 import edu.regis.shatu.model.Account;
 import edu.regis.shatu.model.Course;
 import edu.regis.shatu.model.KnowledgeComponent;
+import edu.regis.shatu.model.KnowledgeComponentKind;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.Student;
 import edu.regis.shatu.model.Task;
 import edu.regis.shatu.model.TutoringSession;
 import edu.regis.shatu.model.Unit;
+import edu.regis.shatu.model.StudentModelFieldKind;
 import edu.regis.shatu.model.aol.Assessment;
 import edu.regis.shatu.model.aol.AssessmentLevel;
 import edu.regis.shatu.model.aol.NewExampleRequest;
@@ -123,6 +125,7 @@ public class ShaTuTutor implements TutorSvc {
             //case "getTask":
             case "newExample":
             case "requestHint":
+            case "requestCorrectAnswer":
             case "resetPassword":
                 String userId = request.getUserId();
                 try {
@@ -519,6 +522,47 @@ public class ShaTuTutor implements TutorSvc {
     }
 
     /**
+     * Records that the student asked to see the correct answer after an
+     * incorrect attempt.
+     *
+     * This method handles ":RequestCorrectAnswer" requests from the GUI client.
+     *
+     * @param jsonObj a JSon encoded StepCompletion object
+     * @return a TutorReply with status ":Success" or ":ERR"
+     */
+    public TutorReply requestCorrectAnswer(String jsonObj) {
+        StepCompletion completion = gson.fromJson(jsonObj, StepCompletion.class);
+
+        if (completion == null || completion.getStep() == null) {
+            return createError("Missing step information for correct answer request", null);
+        }
+
+        ProblemType problemType = convertStepToProblemType(completion.getStep().getSubType());
+        KnowledgeComponentKind knowledgeComponentKind = mapProblemTypeToKnowledgeComponent(problemType);
+
+        if (knowledgeComponentKind == null) {
+            return createError("Unknown problem type for correct answer request: " + problemType, null);
+        }
+
+        Assessment assessment = studentModel.findAssessment(knowledgeComponentKind.dbId());
+
+        if (assessment == null) {
+            return createError("Assessment not found for: " + knowledgeComponentKind.title(), null);
+        }
+
+        assessment.incrementCorrectAnswersRequested();
+
+        try {
+            StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.CORRECT_ANSWERS_REQUESTED);
+        } catch (NonRecoverableException ex) {
+            return createError("Unknown error updating correct answer request count", ex);
+        }
+
+        return new TutorReply(":Success");
+    }
+
+    /**
      * @param jsonObj a JSon encoded StepCompletion object
      * @return
      */
@@ -704,6 +748,53 @@ public class ShaTuTutor implements TutorSvc {
                 return ProblemType.SHA_ONE;
             default:
                 System.out.println("Unknown step type in convert: " + stepType);
+                return null;
+        }
+    }
+
+    /**
+     * Map a problem type to the associated knowledge component.
+     *
+     * @param problemType the problem type for which the student asked to see the answer
+     * @return the matching KnowledgeComponentKind or null if none exists
+     */
+    private KnowledgeComponentKind mapProblemTypeToKnowledgeComponent(ProblemType problemType) {
+        if (problemType == null) {
+            return null;
+        }
+
+        switch (problemType) {
+            case ASCII_ENCODE:
+                return KnowledgeComponentKind.ASCII_ENCODE;
+            case ADD_ONE_BIT:
+                return KnowledgeComponentKind.ADD_ONE_BIT;
+            case PAD_ZEROS:
+                return KnowledgeComponentKind.PAD_ZEROS;
+            case ADD_MSG_LENGTH:
+                return KnowledgeComponentKind.ADD_MSG_LENGTH;
+            case PREPARE_SCHEDULE:
+                return KnowledgeComponentKind.PREPARE_SCHEDULE;
+            case INITIALIZE_VARS:
+                return KnowledgeComponentKind.INITIALIZE_VARS;
+            case COMPRESS_ROUND:
+                return KnowledgeComponentKind.COMPRESS_ROUND;
+            case ROTATE_BITS:
+                return KnowledgeComponentKind.ROTATE_BITS;
+            case SHIFT_BITS:
+                return KnowledgeComponentKind.SHIFT_BITS;
+            case XOR_BITS:
+                return KnowledgeComponentKind.XOR_BITS;
+            case ADD_BITS:
+                return KnowledgeComponentKind.ADD_BITS;
+            case MAJORITY_FUNCTION:
+                return KnowledgeComponentKind.MAJORITY_FUNCTION;
+            case CHOICE_FUNCTION:
+                return KnowledgeComponentKind.CHOICE_FUNCTION;
+            case SHA_ZERO:
+                return KnowledgeComponentKind.SHA_ZERO;
+            case SHA_ONE:
+                return KnowledgeComponentKind.SHA_ONE;
+            default:
                 return null;
         }
     }

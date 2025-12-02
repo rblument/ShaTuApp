@@ -39,7 +39,8 @@ CREATE TABLE Assessment (
     AssessmentLevel VARCHAR(32) NOT NULL,
     Exposures INT,
     Successes INT,
-    Hints INT
+    Hints INT,
+    CorrectAnswersRequested INT DEFAULT 0
 );
 
 -- Truncate Table Assessment;
