@@ -135,7 +135,7 @@ public class UpdateAccountPanel extends GPanel {
         userId.setText(model.getUserId());
         fName.setText(model.getFirstName());
         lName.setText(model.getLastName());
-        secQuestions.setSelectedIndex(0);
+        secQuestions.setSelectedIndex(model.getSecurityQuestion());
         secAnswer.setText("");
     }
 
@@ -167,10 +167,6 @@ public class UpdateAccountPanel extends GPanel {
         backBut.setEnabled(true);
         
         changePasswordBut = new JButton(ChangePasswordAction.instance());
-        
-        strength = new JLabel("(Strength: very poor)");
-        strength.setForeground(new Color(173,7,1));
-        strength.setFont(new Font("Dialog", Font.PLAIN, 10));
     }
 
     private void layoutPanel() {

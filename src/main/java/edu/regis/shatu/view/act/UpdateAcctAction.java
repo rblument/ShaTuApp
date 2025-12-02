@@ -101,6 +101,8 @@ public class UpdateAcctAction extends ShaTuGuiAction {
             );
             accountCopy.setFirstName(originalAccount.getFirstName());
             accountCopy.setLastName(originalAccount.getLastName());
+            accountCopy.setSecurityQuestion(originalAccount.getSecurityQuestion());
+            accountCopy.setSecurityAnswer(originalAccount.getSecurityAnswer());
         }
         else {
             accountCopy = null;
