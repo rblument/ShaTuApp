@@ -171,7 +171,30 @@ public class ShaOneView extends UserRequestView implements KeyListener { //imple
 
         ShaOneStep example = gson.fromJson(currentStep.getData(), ShaOneStep.class);
 
+        if (example == null) {
+            JOptionPane.showMessageDialog(this, "Please press New Example to generate a question");
+            return null;
+        }
+
         String userResponse = responseTextArea.getText().replaceAll("\\s", "");
+
+        if (userResponse.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please provide an answer");
+            return null;
+        }
+
+        String expected = calculateSigma(example.getOperandA(), example.getBitLength());
+        if (!userResponse.equals(expected)) {
+            JOptionPane.showMessageDialog(this,
+                    "Incorrect. The correct answer is: " + expected,
+                    "Check Result",
+                    JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(this,
+                    "Correct!",
+                    "Check Result",
+                    JOptionPane.INFORMATION_MESSAGE);
+        }
 
         example.setResult(userResponse);
 
@@ -180,6 +203,43 @@ public class ShaOneView extends UserRequestView implements KeyListener { //imple
         step.setStep(currentStep);
 
         return step;
+    }
+
+    private String calculateSigma(String input, int bitLength) {
+        String sanitized = input.replaceAll("\\s", "");
+        long value = Long.parseLong(sanitized, 2);
+        long result = rotateRight(value, 2) ^ rotateRight(value, 13) ^ rotateRight(value, 22);
+        return formatResult(result, bitLength);
+    }
+
+    /**
+     * Formats the Sigma1 result to match the current problem size by padding with
+     * leading zeros.
+     */
+    private String formatResult(long answer, int bitLength) {
+        String finalResult = "";
+
+        switch (bitLength) {
+            case 4:
+                finalResult = String.format("%4s", Long.toBinaryString(answer)).replace(' ', '0');
+                break;
+            case 8:
+                finalResult = String.format("%8s", Long.toBinaryString(answer)).replace(' ', '0');
+                break;
+            case 16:
+                finalResult = String.format("%16s", Long.toBinaryString(answer)).replace(' ', '0');
+                break;
+            case 32:
+                finalResult = String.format("%32s", Long.toBinaryString(answer)).replace(' ', '0');
+                break;
+            default:
+                break;
+        }
+        return finalResult;
+    }
+
+    private long rotateRight(long input, int positions) {
+        return (input >>> positions) | (input << (32 - positions));
     }
 
     /**
