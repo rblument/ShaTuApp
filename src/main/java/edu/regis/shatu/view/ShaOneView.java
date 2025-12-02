@@ -212,6 +212,32 @@ public class ShaOneView extends UserRequestView implements KeyListener { //imple
         return formatResult(result, bitLength);
     }
 
+    /**
+     * Formats the Sigma1 result to match the current problem size by padding with
+     * leading zeros.
+     */
+    private String formatResult(long answer, int bitLength) {
+        String finalResult = "";
+
+        switch (bitLength) {
+            case 4:
+                finalResult = String.format("%4s", Long.toBinaryString(answer)).replace(' ', '0');
+                break;
+            case 8:
+                finalResult = String.format("%8s", Long.toBinaryString(answer)).replace(' ', '0');
+                break;
+            case 16:
+                finalResult = String.format("%16s", Long.toBinaryString(answer)).replace(' ', '0');
+                break;
+            case 32:
+                finalResult = String.format("%32s", Long.toBinaryString(answer)).replace(' ', '0');
+                break;
+            default:
+                break;
+        }
+        return finalResult;
+    }
+
     private long rotateRight(long input, int positions) {
         return (input >>> positions) | (input << (32 - positions));
     }
