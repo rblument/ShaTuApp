@@ -74,17 +74,18 @@ public class UpdateAcctAction extends ShaTuGuiAction {
     }
     
     /**
-     * Prompts the user to enter their password before allowing the user to
-     * commit any changes.
+     * Creates an Account copy and prompts the user to enter their password 
+     * before allowing the user to commit any changes. This Account copy is
+     * returned and contains the password that was entered.
      * 
      * TODO: Determine if there is a more secure way of handling the way in which
      * a user enters a password and how it's temporarily stored.
      * 
-     * @return an Account object containing the user-provided password
+     * @return an Account object that will be used for authentication and updating
+     * if the account is verified
      */
-    private Account promptUser() {
-        Account originalAccount = MainFrame.instance().getAccount();
-        Account accountCopy = new Account();
+    private Account buildAuthenticationAccount() {
+        Account accountCopy;
         JPasswordField passwordField = new JPasswordField();
         Object[] message = {"Please confirm your password:", passwordField};
 
@@ -95,14 +96,10 @@ public class UpdateAcctAction extends ShaTuGuiAction {
                 JOptionPane.OK_CANCEL_OPTION);
 
         if (option == JOptionPane.OK_OPTION) {
-            accountCopy.setUserId(originalAccount.getUserId());
+            accountCopy = new Account(MainFrame.instance().getAccount());
             accountCopy.setPassword(
                     UpdateAccountPanel.encryptSHA256(new String(passwordField.getPassword()))
             );
-            accountCopy.setFirstName(originalAccount.getFirstName());
-            accountCopy.setLastName(originalAccount.getLastName());
-            accountCopy.setSecurityQuestion(originalAccount.getSecurityQuestion());
-            accountCopy.setSecurityAnswer(originalAccount.getSecurityAnswer());
         }
         else {
             accountCopy = null;
@@ -181,21 +178,17 @@ public class UpdateAcctAction extends ShaTuGuiAction {
      */
     @Override
     public void actionPerformed(ActionEvent evt) {
-        Account account = promptUser();
-        TutorReply passwordReply;
-        TutorReply updateReply;
+        Account account = buildAuthenticationAccount();
         
         if(account == null) return; // The user cancelled the prompt
         
-        passwordReply = verifyPasswordRequest(account);
-        if(passwordReply.getStatus().equals("Authenticated")) {
-            updateReply = makeUpdateRequest(account);
-        }
-        else {
+        TutorReply passwordReply = verifyPasswordRequest(account);
+        if(!passwordReply.getStatus().equals("Authenticated")) {
             invalidPasswordMessage();
             return;
         }
         
+        TutorReply updateReply = makeUpdateRequest(account);
         displayResultMessage(updateReply.getStatus());
         MainFrame.instance().displayView(MainFrame.ViewName.TUTOR);
     }
