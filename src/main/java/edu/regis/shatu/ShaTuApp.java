@@ -15,6 +15,8 @@ package edu.regis.shatu;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
@@ -88,14 +90,11 @@ public class ShaTuApp {
             LOGGER.info(" Starting ShaTu Server (Tutoring Service)...");
             // ToDo: Separate the initialization of client and server
             // Start the socket server for the ShaTu tutor.
-            (new Thread(new ShaTuServer())).start();
-            
-            // ToDo: This puts the main client UI thread to sleep to give the 
-            // server a chance to finish starting. This won't be required once 
-            // we separate the server into its own application that executes
-            // on a different host from the GUI client since the server should 
-            // "always" be running.
-            Thread.sleep(4000);
+            Thread serverThread = new Thread(new ShaTuServer(), "ShaTuServer");
+            serverThread.setDaemon(true);
+            serverThread.start();
+
+            waitForServerReady();
                 
             LOGGER.info(" Server is running.");
                 
@@ -116,5 +115,23 @@ public class ShaTuApp {
          //   LOGGER.severe("Couldn't create Data directory in NetBeans Project.");
           //  LOGGER.severe("Perhaps, try changing permissions.");
         }
+    }
+
+    /**
+     * Wait briefly for the embedded server to accept connections; avoids fixed sleeps.
+     */
+    private static void waitForServerReady() throws InterruptedException {
+        final int attempts = 5;
+        final int backoffMillis = 200;
+
+        for (int i = 0; i < attempts; i++) {
+            try (Socket socket = new Socket()) {
+                socket.connect(new InetSocketAddress("localhost", ShaTuServer.PORT), backoffMillis);
+                return;
+            } catch (IOException e) {
+                Thread.sleep(backoffMillis);
+            }
+        }
+        LOGGER.warning("Server readiness check timed out; continuing startup.");
     }
 }
