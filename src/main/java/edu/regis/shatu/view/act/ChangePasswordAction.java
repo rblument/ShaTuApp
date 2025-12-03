@@ -71,18 +71,19 @@ public class ChangePasswordAction extends ShaTuGuiAction{
     }
     
     /**
-     * Prompts the user to enter their password before allowing the user to 
-     * commit any changes.
+     * Creates an Account copy and prompts the user to enter their password 
+     * before allowing the user to commit any changes. This Account copy is
+     * returned and contains the password that was entered.
      * 
      * TODO: Determine if there is a more secure way of handling the way in which
      * a user enters a password and how it's temporarily stored.
      * 
      * @return an Account object containing the user-provided password
      */
-    private Account promptUser() {
-        Account acctCopy = new Account();
+    private Account buildAuthenticationAccount() {
+        Account accountCopy;
         JPasswordField passwordField = new JPasswordField();
-        Object[] message = {"Please confirm your password to proceed:", passwordField};
+        Object[] message = {"Please confirm your password:", passwordField};
 
         int option = JOptionPane.showConfirmDialog(
                 MainFrame.instance(),
@@ -91,16 +92,19 @@ public class ChangePasswordAction extends ShaTuGuiAction{
                 JOptionPane.OK_CANCEL_OPTION);
 
         if (option == JOptionPane.OK_OPTION) {
-            acctCopy.setUserId(MainFrame.instance().getAccount().getUserId());
-            acctCopy.setPassword(
+            // Kludge: Not using the typical MainFrame.instance().getAccount() because
+            // leaving the security answer blank in the update account panel results 
+            // in that "answer" being stored in the DB due to this action.
+            accountCopy = new Account(MainFrame.instance().getModel().getStudent().getAccount());
+            accountCopy.setPassword(
                     UpdateAccountPanel.encryptSHA256(new String(passwordField.getPassword()))
             );
         }
         else {
-            acctCopy = null;
+            accountCopy = null;
         }
         
-        return acctCopy;
+        return accountCopy;
     }
     
     /**
@@ -138,12 +142,11 @@ public class ChangePasswordAction extends ShaTuGuiAction{
      */
     @Override
     public void actionPerformed(ActionEvent evt) {      
-        Account account = promptUser();
-        TutorReply reply;
+        Account account = buildAuthenticationAccount();
         
         if(account == null) return; // The user cancelled the prompt
         
-        reply = verifyPasswordRequest(account);
+        TutorReply reply = verifyPasswordRequest(account);
         if(reply.getStatus().equals("Authenticated")) {
             // Pass control over to the reset password panel
             MainFrame.instance().displayView(MainFrame.ViewName.RESET_PASSWORD);
