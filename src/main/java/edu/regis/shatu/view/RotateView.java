@@ -56,9 +56,7 @@ public class RotateView extends UserRequestView implements KeyListener {
     private JRadioButton shortProblem;
     private JRadioButton longProblem;
     private JRadioButton rightRotate;
-    private JRadioButton leftRotate; // should be phased out as SHA256 does not left rotate, and the concept is
-                                     // simple enough.
-    private JRadioButton rotate7Bits;// -however, there is a lot of framework already in place that includes LEFT.
+    private JRadioButton rotate7Bits;
     private JRadioButton rotate16Bits;
     private ButtonGroup lengthType;
     private ButtonGroup rotationType;
@@ -143,8 +141,6 @@ public class RotateView extends UserRequestView implements KeyListener {
         rightRotate = new JRadioButton("Right Rotation");
         rightRotate.setSelected(true);
 
-        leftRotate = new JRadioButton("Left Rotation");
-
         rotate7Bits = new JRadioButton("Rotate 7 bits");
         rotate7Bits.setSelected(true);
 
@@ -156,7 +152,6 @@ public class RotateView extends UserRequestView implements KeyListener {
 
         rotationType = new ButtonGroup();
         rotationType.add(rightRotate);
-        rotationType.add(leftRotate);
 
         rotateAmount = new ButtonGroup();
         rotateAmount.add(rotate7Bits);
@@ -274,17 +269,9 @@ public class RotateView extends UserRequestView implements KeyListener {
 
             String problemData = currentStep.getData();
 
-            if (rightRotate.isSelected()) {
-                currentStep.setDirection(RotateStep.Direction.RIGHT);
-            } else {
-                currentStep.setDirection(RotateStep.Direction.LEFT);
-            }
-
-            if (currentStep.getDirection() == RotateStep.Direction.RIGHT) {
-                prompt.setText("Perform ROR(" + currentStep.getAmount() + ") on the following String:");
-            } else {
-                prompt.setText("Perform ROL(" + currentStep.getAmount() + ") on the following String:");
-            }
+            // SHA-256 only uses right rotation (ROTR)
+            currentStep.setDirection(RotateStep.Direction.RIGHT);
+            prompt.setText("Perform ROR(" + currentStep.getAmount() + ") on the following String:");
 
             if (problemData == null || problemData.isEmpty()) {
                 prompt.setText("Rotate n Bits");
@@ -312,7 +299,7 @@ public class RotateView extends UserRequestView implements KeyListener {
      */
     @Override
     protected void configureModeSpecificUI() {
-        super.configureModeSpecificUI();//call parent to handle buttons
+        super.configureModeSpecificUI();
         
         if(model == null) {
             return;
@@ -321,15 +308,14 @@ public class RotateView extends UserRequestView implements KeyListener {
         TutoringMode mode = model.getTutoringMode();
         
         if (mode == TutoringMode.SEE_ONE) {
-            //Legnth Buttons
+            //Length Buttons
             shortProblem.setEnabled(false);
             longProblem.setEnabled(false);
             
-            //Rotation type buttons
+            //Rotation type button
             rightRotate.setEnabled(false);
-            leftRotate.setEnabled(false);
             
-            //rotation amount buttons
+            //Rotation amount buttons
             rotate7Bits.setEnabled(false);
             rotate16Bits.setEnabled(false);
             
@@ -338,15 +324,14 @@ public class RotateView extends UserRequestView implements KeyListener {
         }
         // DO_ONE & TEACH_ONE
         else {
-            //Legnth Buttons
+            //Length Buttons
             shortProblem.setEnabled(true);
             longProblem.setEnabled(true);
             
-            //Rotation type buttons
+            //Rotation type button
             rightRotate.setEnabled(true);
-            leftRotate.setEnabled(true);
             
-            //rotation amount buttons
+            //Rotation amount buttons
             rotate7Bits.setEnabled(true);
             rotate16Bits.setEnabled(true);
             
