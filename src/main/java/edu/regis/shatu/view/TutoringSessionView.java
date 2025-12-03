@@ -132,11 +132,6 @@ public class TutoringSessionView extends GPanel {
             PendingStep pStep = pTask.getCurrentStep();
             StepSubType subType = pStep.getStep().getSubType();
             
-            // TEMPORARY DEBUG - Shows dialog with step type -- remove after fixed
-            JOptionPane.showMessageDialog(this, 
-                "DEBUG: Current step type is: " + subType, 
-                "Debug Info", 
-                JOptionPane.INFORMATION_MESSAGE);
             
             // Handle INFO_MESSAGE steps with a dialog
             if (subType == StepSubType.INFO_MESSAGE) {

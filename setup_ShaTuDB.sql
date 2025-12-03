@@ -1,11 +1,10 @@
-
 -- SHATU: SHA-256 Tutor
 -- (C) Johanna & Richard Blumenthal, All rights reserved
 -- Unauthorized use, duplication or distribution without the authors' permission is strictly prohibited.
 -- Unless required by applicable law or agreed to in writing, this software is distributed on an "AS IS" basis without warranties or conditions of any kind, either expressed or implied.
 -- Authors: chand, rickb
 -- Created: Nov 8, 2024
--- Last modified: October 22, 2025 for SHAT-330
+-- Last modified: Dec 2, 2025 for SHAT-293
 
 -- If the ShaTuDB exists, drop it. In general, you will lose any existing data.
 DROP DATABASE IF EXISTS ShaTuDB;
@@ -362,6 +361,10 @@ VALUES (130, 1, 0, 'Encode ASCII', 'Convert an English Text String into its ASCI
 INSERT INTO Task (TaskId, CourseId, UnitId, Title, Description, Kind, SequenceIndex, ExampleType, ProblemId)
 VALUES (140, 1, 0, 'SHA Sum 0 Function', 'Use the Sigma0 function.', 'PROBLEM', 14, 'SHA_ZERO', NULL);
 
+-- NEW: SHA ONE Task (TaskId 230) for the Sigma1 function
+INSERT INTO Task (TaskId, CourseId, UnitId, Title, Description, Kind, SequenceIndex, ExampleType, ProblemId)
+VALUES (230, 1, 0, 'SHA Sum 1 Function', 'Use the Sigma1 function.', 'PROBLEM', 15, 'SHA_ONE', NULL);
+
 INSERT INTO Timeout (TimeoutId, TimeoutType, Seconds, Event, Msg)
 VALUES (0, 'Info Message', 60, 'Reminder', 'Please acknowledge the current information message to continue.');
 
@@ -496,4 +499,3 @@ ALTER Table Unit
 ADD CONSTRAINT fk_unit_courseid
 FOREIGN KEY (CourseId) REFERENCES Course(CourseId)
 ON UPDATE CASCADE ON DELETE CASCADE;
-

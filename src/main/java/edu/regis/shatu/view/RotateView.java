@@ -1,11 +1,11 @@
 /**
  * SHATU: SHA-256 Tutor
- * <p>
+ * 
  * (C) Johanna & Richard Blumenthal, All rights reserved
- * <p>
+ * 
  * Unauthorized use, duplication, or distribution without the authors'
  * permission is strictly prohibited.
- * <p>
+ * 
  * Unless required by applicable law or agreed to in writing, this software is
  * distributed on an "AS IS" basis without warranties or conditions of any kind,
  * either expressed or implied.
@@ -37,7 +37,7 @@ import edu.regis.shatu.model.steps.Step;
  * RotateView class represents the GUI view for rotating strings using ROTR
  * (Right Rotate). It extends GPanel and implements ActionListener and
  * KeyListener interfaces.
- * <p>
+ * 
  * The class provides a user interface for performing right rotations on strings
  * and checking the results. Inline comments have been added for better
  * understanding of the code.
