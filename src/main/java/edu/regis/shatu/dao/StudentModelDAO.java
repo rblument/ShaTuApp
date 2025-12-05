@@ -21,6 +21,8 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import edu.regis.shatu.err.NonRecoverableException;
 import edu.regis.shatu.err.ObjNotFoundException;
@@ -137,6 +139,28 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
             throw new NonRecoverableException("UserDAO-ERR-5" + e.toString(), e);
         } finally {
             close(conn, stmt);
+        }
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void update(Student student) throws NonRecoverableException {
+        final String sql = "UPDATE Student SET FirstName = ?, LastName = ? " +
+                           "WHERE userId = ?";
+        
+        try(Connection conn = DriverManager.getConnection(URL);
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, student.getAccount().getFirstName());
+            stmt.setString(2, student.getAccount().getLastName());
+            stmt.setString(3, student.getAccount().getUserId());
+            
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            Logger.getLogger(StudentModelDAO.class.getName()).log(Level.SEVERE, null, e);
+            throw new NonRecoverableException("Failed to update student info: " + e.getMessage(), e);
         }
     }
 

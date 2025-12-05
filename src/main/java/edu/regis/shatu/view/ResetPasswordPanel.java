@@ -81,8 +81,6 @@ public class ResetPasswordPanel extends GPanel{
     protected JTextField userId;
     protected JPasswordField pass1;
     protected JPasswordField pass2;
-    
-    public String userEmail = "";
 
     protected JLabel strength;
     protected JLabel msg;
@@ -94,7 +92,6 @@ public class ResetPasswordPanel extends GPanel{
         super();
 
         model = new Account();
-        userEmail = "test@regis.edu";
         initComponents();
         layoutPanel();
 
@@ -123,10 +120,6 @@ public class ResetPasswordPanel extends GPanel{
 
         updateDisplay();
     }
-    
-    public void setUserEmail(String userEmail) {
-        this.userEmail = userEmail;
-    }
 
     public JTextField getUserIdComp() {
         return userId;
@@ -148,7 +141,7 @@ public class ResetPasswordPanel extends GPanel{
      * Update our model with the current values displayed in this view
      */
     private void updateModel() {
-        model.setUserId(userEmail);
+        model.setUserId(model.getUserId());
         model.setPassword(encryptSHA256(new String(pass1.getPassword())));
     }
 
@@ -157,7 +150,6 @@ public class ResetPasswordPanel extends GPanel{
      * passwords).
      */
     private void updateDisplay() {
-        model.setUserId(userEmail);
         userId.setText(model.getUserId());
         pass1.setText("");
         pass2.setText("");
@@ -167,7 +159,7 @@ public class ResetPasswordPanel extends GPanel{
         
         LoginDocumentListener docListener = new LoginDocumentListener();
         
-        userId = new JTextField(userEmail, 10);
+        userId = new JTextField(model.getUserId(), 10);
         userId.setEditable(false);
         userId.getDocument().addDocumentListener(docListener);
 

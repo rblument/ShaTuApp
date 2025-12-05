@@ -12,7 +12,8 @@
  */
 package edu.regis.shatu.svc;
 
-import edu.regis.shatu.err.IllegalArgException;
+import java.util.List;
+
 import edu.regis.shatu.err.NonRecoverableException;
 import edu.regis.shatu.err.ObjNotFoundException;
 import edu.regis.shatu.model.Student;
@@ -21,8 +22,6 @@ import edu.regis.shatu.model.aol.Assessment;
 import edu.regis.shatu.model.aol.AssessmentLevel;
 import edu.regis.shatu.model.aol.ScaffoldLevel;
 import edu.regis.shatu.model.aol.StudentModel;
-import java.util.List;
-
 
 /**
  * Specifies the API for {@link StudentModel} life-cycle maintenance
@@ -36,7 +35,6 @@ public interface StudentModelSvc {
      * 
      * @param student the student's email address is used as the student id
      *                (email: user@university.edu)
-     * @throws IllegalArgException a student with the given user id already exists
      * @throws NonRecoverableException perhaps see getCause().getErrorCode()
      */
     void create(Student student) throws NonRecoverableException;
@@ -65,6 +63,13 @@ public interface StudentModelSvc {
      */
     StudentModel retrieve(String userId) throws ObjNotFoundException, NonRecoverableException;
     
+    /**
+     * Updates the student record in the database.
+     * 
+     * @param student the student whose information will be updated
+     * @throws edu.regis.shatu.err.NonRecoverableException
+     */
+    void update(Student student) throws NonRecoverableException;
     
     /**
      * Delete the student from the database including the student's account,

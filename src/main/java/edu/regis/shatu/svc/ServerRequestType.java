@@ -40,6 +40,11 @@ public enum ServerRequestType {
     CREATE_ACCOUNT(":CreateAccount"),
     
     /**
+     * An existing user's attempt to edit account information.
+     */
+    UPDATE_ACCOUNT(":UpdateAccount"),
+    
+    /**
      * The student or client requested another example.
      * 
      */
@@ -87,6 +92,11 @@ public enum ServerRequestType {
      * The student has reset their password.
      */
     RESET_PASSWORD(":ResetPassword"),
+    
+    /**
+     * A user's request to have their password verified.
+     */
+    VERIFY_PASSWORD(":VerifyPassword"),
     
     /**
      * The student has answered their security question.

@@ -12,19 +12,19 @@
  */
 package edu.regis.shatu.view;
 
-import edu.regis.shatu.model.Account;
+import java.awt.CardLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
 import javax.swing.JFrame;
-import javax.swing.Timer;
-
-import edu.regis.shatu.model.TutoringSession;
-import java.awt.CardLayout;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.Timer;
+
+import edu.regis.shatu.model.Account;
+import edu.regis.shatu.model.TutoringSession;
 
 /**
  * The primary GUI window in the ShaTu application.
@@ -35,9 +35,7 @@ import javax.swing.JPanel;
  */
 public class MainFrame extends JFrame implements WindowListener {
 
-    /**
-     * The singleton instance of this frame.
-     */
+    /** The singleton instance of this frame. */
     private final static MainFrame SINGLETON;
 
     // Invoked when this class is loaded
@@ -60,19 +58,13 @@ public class MainFrame extends JFrame implements WindowListener {
      */
     private static final int SCREEN_SIZE_INSET = 50;
     
-    /**
-     * Allowed consecutive illegal passwords before the user is locked out.
-     */
+    /** Allowed consecutive illegal passwords before the user is locked out. */
     public static final int MAX_SIGNIN_ATTEMPTS = 3;
 
-    /**
-     * The SHA tutoring session displayed in this frame.
-     */
+    /** The SHA tutoring session displayed in this frame. */
     private TutoringSession model;
 
-    /**
-     * The view currently displayed in the card panel.
-     */
+    /** The view currently displayed in the card panel. */
     private ViewName displayedView;
 
     /**
@@ -81,14 +73,10 @@ public class MainFrame extends JFrame implements WindowListener {
      */
     private JPanel cardPanel;
 
-    /**
-     * The tutoring session view.
-     */
+    /** The tutoring session view. */
     private TutoringSessionView tutorSessionView;
 
-    /**
-     * The splash panel, which also allows signing in.
-     */
+    /** The splash panel, which also allows signing in. */
     private SplashPanel splashPanel;
 
     private NewAccountPanel newAccountPanel;
@@ -99,14 +87,17 @@ public class MainFrame extends JFrame implements WindowListener {
     
     private DashboardPanel dashboardPanel;
     
+    private UpdateAccountPanel updateAccountPanel;
+    
     /**
      * The number of consecutive illegal passwords attempted by the current
      * user attempting to login (see MAX_SIGNIN_ATTEMPTS).
      */
     protected int signInAttempts = 0;
 
-    private Timer inactivityTimer; // Timer for inactivity tracking
-
+    /** Timer for inactivity tracking. */
+    private Timer inactivityTimer;
+    
     /**
      * Initialize and layout the child components displayed in this frame.
      */
@@ -116,9 +107,9 @@ public class MainFrame extends JFrame implements WindowListener {
         // Get screen dimensions
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 
-        // Calculate the initial size (80% of the splashFrame width)
+        // Calculate the initial size
         int width = (int) (screenSize.width * 0.5);
-        int height = (int) (screenSize.height);
+        int height = (int) (screenSize.height * 0.9);
         setSize(width, height);
 
         setJMenuBar(new ShaTuMenuBar());
@@ -138,55 +129,40 @@ public class MainFrame extends JFrame implements WindowListener {
     /**
      * Update the current model with changes made in this frame and return it.
      *
-     * @return the Session model
+     * @return the TutoringSession model
      */
     public TutoringSession getModel() {
         updateModel();
 
         return model;
     }
-    
-    /**
-     * Method to create a copy of an Account object.
-     * @param source the Account to copy
-     * @return a new Account with the same values, or a new empty Account if source is null
-     */
-    private Account copyAccount(Account source) {
-        Account copy = new Account();
-        if (source != null) {
-            copy.setUserId(source.getUserId());
-            copy.setPassword(source.getPassword());
-            copy.setFirstName(source.getFirstName());
-            copy.setLastName(source.getLastName());
-            copy.setSecurityQuestion(source.getSecurityQuestion());
-            copy.setSecurityAnswer(source.getSecurityAnswer());
-            copy.setIsStudent(source.isStudent());
-        }
-        return copy;
-    }
 
     /**
      * Display the given model in the tutoring session view of this frame.
+     * 
+     * TODO: This method is doing too much. Figure out the best way to separate
+     * concerns. As a tentative example, see the logout method in this class.
      *
      * @param model a TutoringSession model or null to logout.
      */
     public void setModel(TutoringSession model) {
         this.model = model;
-
+   
         Account account;
    
         if (model == null) { // signing out
             account = new Account();
         } else {
-            account = model.getStudent().getAccount();
+            // Use the copy constructor to ensure session model is not overwritten
+            account = new Account(model.getStudent().getAccount());
         }
             
         tutorSessionView.setModel(model); 
-        splashPanel.setModel(copyAccount(account));
-        forgotPasswordPanel.setModel(copyAccount(account));
-        resetPasswordPanel.setModel(copyAccount(account));
-        
+        splashPanel.setModel(account);
+        forgotPasswordPanel.setModel(account);
+        resetPasswordPanel.setModel(account);
         dashboardPanel.setModel(model);
+        updateAccountPanel.setModel(account);
         
         if (model == null) { // Signed out
             displayView(ViewName.SPLASH);
@@ -208,7 +184,11 @@ public class MainFrame extends JFrame implements WindowListener {
         displayedView = name;
     }
     
-    // assumes the tutoring session view is displayed.
+    /**
+     * Assumes the tutoring session view is displayed.
+     * 
+     * @param selection 
+     */
     public void displayStep(StepSelection selection) {
         if (displayedView != ViewName.TUTOR)
             displayView(ViewName.TUTOR);
@@ -217,20 +197,21 @@ public class MainFrame extends JFrame implements WindowListener {
     }
     
     /**
-     * Return the current account.
-     * 
+     * Returns the current account, which depends on the view currently being
+     * displayed.
+
+     * TODO: Each view contains its own Account object. Determine if it's necessary for
+     * this class to fetch the Accounts from different views, or if the Accounts
+     * should be fetched directly from the views themselves. Also, is the Account
+     * ever different from view to view?
+
      * @return the current user's Account
      */
     public Account getAccount() {
-         if (model != null && model.getStudent() != null && model.getStudent().getAccount() != null) {
-            return model.getStudent().getAccount();
-        }
         
-        // User is not logged in, get account from the appropriate view
         switch (displayedView) {
             case DASHBOARD:
             case TUTOR:
-
                 if (model != null) {
                     return model.getStudent().getAccount();
                 }
@@ -243,6 +224,9 @@ public class MainFrame extends JFrame implements WindowListener {
                 
             case RESET_PASSWORD:
                 return resetPasswordPanel.getModel();
+            
+            case UPDATE_ACCOUNT:
+                return updateAccountPanel.getModel();
         
             default:
                 return newAccountPanel.getModel();     
@@ -258,7 +242,7 @@ public class MainFrame extends JFrame implements WindowListener {
     }
     
      /**
-     * Display to the user the result of an invalid password in a sign in.
+     * Displays to the user the result of an invalid password during sign-in.
      * 
      * Handles an invalid password response from a SignInAction keeping track
      * of the number of user attempts thus far.
@@ -266,11 +250,10 @@ public class MainFrame extends JFrame implements WindowListener {
     public void invalidPass() {
         if (signInAttempts < MAX_SIGNIN_ATTEMPTS) {
            
+            signInAttempts++;
             String msg = "Invalid Password attempt " + 
                          String.valueOf(signInAttempts) + " of " + 
                          MAX_SIGNIN_ATTEMPTS;
-            
-            signInAttempts++;
             
             JOptionPane.showMessageDialog(this, msg, "SignIn Error", JOptionPane.ERROR_MESSAGE);
             
@@ -292,6 +275,27 @@ public class MainFrame extends JFrame implements WindowListener {
     public void clearNewAccountPanel() {
         newAccountPanel.clearFields();
     }
+    
+//    /**
+//     * Handles user logout functionality and updates views and panels.
+//     * 
+//     * TODO: This is an example of how logging out could work so that this class'
+//     * setModel() does not have to handle this type of action. Determine the best
+//     * way to implement this. Use "Ctrl + /" to comment/uncomment this block.
+//     * 
+//     */
+//    public void logout() {
+//        tutorSessionView.setModel(null); 
+//        splashPanel.setModel(new Account());
+//        forgotPasswordPanel.setModel(new Account());
+//        resetPasswordPanel.setModel(new Account());
+//        dashboardPanel.setModel(null);
+//        updateAccountPanel.setModel(new Account());
+//        
+//        updateAccountPanel.clearFields();
+//        
+//        displayView(ViewName.SPLASH);
+//    }
 
     @Override
     public void windowOpened(WindowEvent e) {
@@ -336,6 +340,7 @@ public class MainFrame extends JFrame implements WindowListener {
         resetPasswordPanel = new ResetPasswordPanel();
         splashPanel = new SplashPanel();
         tutorSessionView = new TutoringSessionView();
+        updateAccountPanel = new UpdateAccountPanel();
     }
 
     /**
@@ -349,7 +354,7 @@ public class MainFrame extends JFrame implements WindowListener {
         cardPanel.add(resetPasswordPanel, ViewName.RESET_PASSWORD.toString());
         cardPanel.add(forgotPasswordPanel, ViewName.FORGOT_PASSWORD.toString());
         cardPanel.add(dashboardPanel, ViewName.DASHBOARD.toString());
-
+        cardPanel.add(updateAccountPanel, ViewName.UPDATE_ACCOUNT.toString());
 
         setContentPane(cardPanel);
     }
@@ -376,6 +381,7 @@ public class MainFrame extends JFrame implements WindowListener {
         NEW_ACCOUNT,
         RESET_PASSWORD,
         SPLASH,
-        TUTOR;
+        TUTOR,
+        UPDATE_ACCOUNT;
     }
 }

@@ -18,6 +18,7 @@ import javax.swing.JMenuItem;
 
 import edu.regis.shatu.view.act.SaveSessionAction;
 import edu.regis.shatu.view.act.SignOutAction;
+import edu.regis.shatu.view.act.UpdateUserAction;
 
 /**
  * Menu bar used in the MainFrame.
@@ -34,6 +35,10 @@ public class ShaTuMenuBar extends JMenuBar {
      */
     private void createFileMenu() {
         JMenu menu = new JMenu("File");
+        
+        menu.add(new JMenuItem(UpdateUserAction.instance()));
+        
+        menu.addSeparator();
         
         menu.add(new JMenuItem(SaveSessionAction.instance()));
         
