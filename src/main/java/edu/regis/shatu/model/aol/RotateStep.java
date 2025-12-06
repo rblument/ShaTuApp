@@ -21,9 +21,10 @@ package edu.regis.shatu.model.aol;
  */
 public class RotateStep  {
     /**
-     * Enum declaration for the rotation direction
+     * Enum declaration for the rotation direction.
+     * Note: SHA-256 only uses right rotation (ROTR)
      */
-    public enum Direction {RIGHT, LEFT};
+    public enum Direction {RIGHT}
 
     /**
      * Enum representing the direction of the rotation
