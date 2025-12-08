@@ -16,15 +16,18 @@
 -- cleans up the 'test@regis.edu' user, but also all assessment data for every 
 -- student account. It's usefulness is that it leaves static course data untouched.
 
+USE ShaTuDB;
+
+SET FOREIGN_KEY_CHECKS = 0;  -- Disable foreign key checks
+
 DELETE FROM Account WHERE UserId = 'test@regis.edu';
-
 DELETE FROM StudentModel WHERE UserId = 'test@regis.edu';
+DELETE FROM Student WHERE UserId = 'test@regis.edu';
 
-# Note this will clear every user. It resents the auto increment to zero.
+-- Note this will clear every user and reset the auto-increment to zero.
 TRUNCATE TABLE Assessment;
-
 TRUNCATE TABLE TutoringSession;
-
 TRUNCATE TABLE PendingTask;
-
 TRUNCATE TABLE PendingStep;
+
+SET FOREIGN_KEY_CHECKS = 1;  -- Reinstate foreign key checks
