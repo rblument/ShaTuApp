@@ -331,6 +331,7 @@ public class DashboardPanel extends JPanel {
 
         // Header panel
         JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setBackground(ColorScheme.REGIS_BLUE);
         headerPanel.add(settingsButton, BorderLayout.LINE_START);
         welcomeLabel.setText("");
         headerPanel.add(welcomeLabel, BorderLayout.CENTER);
