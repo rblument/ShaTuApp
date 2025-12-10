@@ -487,25 +487,37 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
      * Updates the description, question, and hints from the model
      */
     protected void updateView() {
-        
-        if(!checkHintEnabled){
+
+        // If hints are disabled, clear any previous button listeners
+        if (!checkHintEnabled) {
             resetButtonListeners(); // Clear any listeners applied from other views
         }
-        
-        if(model == null){ return; }
-        
-        Step step = model.currentTask().getCurrentStep().getStep();
-        
-        if(step == null || step.getSubType() != StepSubType.SHA_ZERO){
-            return;
+
+        if (model == null) { 
+            return; 
         }
-        
-        ShaZeroStep example = gson.fromJson(step.getData(), ShaZeroStep.class);
-        
-        if(example == null){ return; }
-        
+
+        // Attempt to get the current step from the model
+        Step step = null;
+        if (model.currentTask() != null && model.currentTask().getCurrentStep() != null) {
+            step = model.currentTask().getCurrentStep().getStep();
+        }
+
+        ShaZeroStep example = null;
+
+        // If no current step exists or it is not SHA_ZERO, create a new example
+        if (step == null || step.getSubType() != StepSubType.SHA_ZERO || step.getData() == null) {
+            NewExampleRequest req = newRequest(); // Generate a new example request
+            example = gson.fromJson(req.getData(), ShaZeroStep.class); // Parse the example from JSON
+        } else {
+            // Otherwise, use the existing step's data
+            example = gson.fromJson(step.getData(), ShaZeroStep.class); // Parse existing example
+        }
+
+        if (example == null) return;
+
+        // Update UI components with the example data
         String operandA = example.getOperandA();        
-        
         if (operandA != null && !operandA.isEmpty()) {
             operandAValue = operandA;
             operandALabel.setText("Operand A: " + operandAValue);
@@ -514,6 +526,7 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
             responseTextArea.setEnabled(true);
         }
     }
+
 
 
     /**
