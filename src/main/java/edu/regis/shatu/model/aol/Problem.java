@@ -12,6 +12,9 @@
  */
 package edu.regis.shatu.model.aol;
 
+import java.util.ArrayList;
+
+import edu.regis.shatu.model.Task;
 import edu.regis.shatu.model.TitledModel;
 
 /**
@@ -25,7 +28,7 @@ import edu.regis.shatu.model.TitledModel;
  * 
  * @author rickb
  */
-public class Problem extends TitledModel {
+public abstract class Problem extends TitledModel {
     // Inherited: id, title, description
     private String messageToHash;
     
@@ -64,4 +67,14 @@ public class Problem extends TitledModel {
                 " Description: " + getDescription() + 
                 " Message: " + this.messageToHash;
     }
+
+
+    /**
+     * Returns the list of tasks that make up this problem.
+     * Each concrete problem type defines its own set of tasks.
+     *
+     * @return an ArrayList of Task objects
+     */
+    public abstract ArrayList<Task> getTasks();
+
 }
