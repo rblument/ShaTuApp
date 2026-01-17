@@ -12,6 +12,7 @@
  */
 package edu.regis.shatu.err;
 
+import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -48,6 +49,15 @@ public class NonRecoverableException extends ShaTuException {
      */
     public NonRecoverableException(String msg, Throwable cause) {
 	super(msg, cause);
+        
+        // When there is a syntax error in an SQL stmt in the DAO, such as an
+        // extra comma, no error message is given, but the error code is 42000, 
+        // so output it (which makes debugging easier).
+        if (cause instanceof SQLException sQLException) {
+            String sqlMsg = sQLException.getSQLState();
+            Logger.getLogger(NonRecoverableException.class.getName())
+                .log(Level.SEVERE, sqlMsg, cause);
+        }
          
         Logger.getLogger(NonRecoverableException.class.getName())
                 .log(Level.SEVERE, msg, cause);

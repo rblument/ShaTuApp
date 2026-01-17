@@ -87,9 +87,7 @@ public enum StepSubType {
     /**
      * The initial default value in a NewExampleRequest
      */
-    DEFAULT("Unknown", null),
-    
-    ERROR("Error", null);
+    DEFAULT("Unknown", null);
     
     /**
      * The name used by the server to identify this request.
@@ -144,20 +142,5 @@ public enum StepSubType {
     @Override
     public String toString() {
         return subType;
-    }
-    
-    /**
-     * Return the enum value for the given title.
-     * 
-     * @param aTitle
-     * @return 
-     */
-    public static StepSubType findValue(String aTitle) {
-        for (StepSubType kind : values()) {
-            if (kind.getSubType().equalsIgnoreCase(aTitle))
-                return kind;
-        }
-        
-        return ERROR;
     }
 }

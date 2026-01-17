@@ -12,6 +12,7 @@
  */
 package edu.regis.shatu.model;
 
+import edu.regis.shatu.model.aol.Problem;
 import java.util.ArrayList;
 
 /**
@@ -38,7 +39,10 @@ public class Unit extends TitledModel {
      */
     private int sequenceId = DEFAULT_ID;
     
-    private ArrayList<Task> tasks;
+    /**
+     * The problems the student needs to solve in this unit.
+     */
+    private ArrayList<Problem> problems;
     
     /**
      * Instantiate this unit with default information
@@ -85,29 +89,34 @@ public class Unit extends TitledModel {
         this.pedagogy = pedagogy;
     }
 
-    public void addTask(Task task) {
-        tasks.add(task);
+   public void addProblem(Problem problem) {
+        problems.add(problem);
     }
     
-    public ArrayList<Task> getTasks() {
-        return tasks;
+    public Problem findProblem(int index) {
+        return problems.get(index);
     }
-
-    public void setTasks(ArrayList<Task> tasks) {
-        this.tasks = tasks;
-    }
+    
     
     /**
-     * Return the task, if any, with the given sequence id.
+     * Return the problem, if any, with the given sequence id.
      * 
-     * @param sequence the sequence position of the task to find.
-     * @return a Task, or null if not found.
+     * @param index the sequence position of the problem to find.
+     * @return a Problem, or null if not found.
      */
-    public Task findTaskBySequence(int sequence) {
-        for (Task task : tasks)
-            if (task.getSequenceIndex() == sequence)
-                return task;
+    public Problem findProblemBySequence(int index) {
+        for (Problem problem : problems)
+            if (problem.getSequenceIndex() == index)
+                return problem;
         
         return null;
+    }
+
+    public ArrayList<Problem> getProblems() {
+        return problems;
+    }
+
+    public void setProblems(ArrayList<Problem> problems) {
+        this.problems = problems;
     }
 }

@@ -48,12 +48,7 @@ public enum TaskSelectionKind {
      * this component (i.e., a fixed sequence within a unit).
      * 
      */
-    OTHER("Other"),
-    
-    /**
-     * Used to signal an unknown selection kind was read from the DB.
-     */
-    ERROR("Error");
+    OTHER("Other");
     
     /**
      * A title that can be displayed to the user.
@@ -75,20 +70,5 @@ public enum TaskSelectionKind {
     
     public String title() {
         return title;
-    }
-    
-    /**
-     * Return the enum value for the given title.
-     * 
-     * @param aTitle
-     * @return 
-     */
-    public static TaskSelectionKind findValue(String aTitle) {
-        for (TaskSelectionKind kind : values()) {
-            if (kind.title().equalsIgnoreCase(aTitle))
-                return kind;
-        }
-        
-        return ERROR;
     }
 }

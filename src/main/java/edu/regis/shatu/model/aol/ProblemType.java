@@ -18,6 +18,8 @@ package edu.regis.shatu.model.aol;
  * @author rickb
  */
 public enum ProblemType {
+    ALL("All Steps"),
+    
     /**
      * Represents a request to 
      * 
@@ -56,14 +58,7 @@ public enum ProblemType {
     
     STEP_COMPLETION_REPLY("Step Completion Reply"),
     
-    REQUEST_HINT("Request Hint"),
-    
-    /**
-     * The initial default value in a NewExampleRequest
-     */
-    DEFAULT("Unknown"),
-    
-    ERROR("ERROR");
+    REQUEST_HINT("Request Hint");
     
      /**
      * The name used by the server to identify this request.
@@ -96,20 +91,5 @@ public enum ProblemType {
     @Override
     public String toString() {
         return requestName;
-    }
-    
-       /**
-     * Return the enum value for the given title.
-     * 
-     * @param aTitle
-     * @return 
-     */
-    public static ProblemType findValue(String aTitle) {
-        for (ProblemType kind : values()) {
-            if (kind.getRequestName().equalsIgnoreCase(aTitle))
-                return kind;
-        }
-        
-        return ERROR;
     }
 }
