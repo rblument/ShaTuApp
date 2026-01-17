@@ -60,11 +60,6 @@ public class Task extends TitledModel {
     private ArrayList<Step> steps;
 
     /**
-     * Convenience reference to the Problem to which this task belongs
-     */
-    private Problem problem;
-
-    /**
      * ToDo: the tasks already completed in this task???
      */
     private TaskState state;
@@ -127,7 +122,6 @@ public class Task extends TitledModel {
     }
 
     public void setSteps(ArrayList<Step> steps) {
-        System.out.println("Task.setSteps: " + steps);
         this.steps = steps;
     }
 
@@ -171,14 +165,6 @@ public class Task extends TitledModel {
         // completion.getStep().setIsCompleted(true);
 
         state.addStepCompletion(completion);
-    }
-
-    public Problem getProblem() {
-        return problem;
-    }
-
-    public void setProblem(Problem problem) {
-        this.problem = problem;
     }
 
     public int getSequenceIndex() {

@@ -41,6 +41,7 @@ import edu.regis.shatu.model.aol.AssessmentLevel;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.PendingStep;
 import edu.regis.shatu.model.aol.PendingTask;
+import edu.regis.shatu.model.aol.Problem;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.model.aol.StudentModel;
@@ -878,12 +879,17 @@ public class ShaTuTutor implements TutorSvc {
         //set tutoringmode to SEE_ONE or Unit 0
         tSession.setTutoringMode(TutoringMode.SEE_ONE);
         
+        Unit unit = course.findUnitBySequenceId(0); // The first unit
+        tSession.setUnit(unit.getDigest());
         
-        Task task = getFirstTask(course);
+        Problem problem = unit.findProblemBySequence(0); // First Problem
+        tSession.setProblem(problem);
+        
+        Task task = problem.findTaskBySequence(0); //Task task = getFirstTask(course);
         PendingTask pendingTask = new PendingTask(task);
         pendingTask.setCurrentStep(new PendingStep(task.getCurrentStep()));
         tSession.addTask(pendingTask);
-        tSession.setProblem(task.getProblem());
+        
 
         // Generate the security token for this tutoring session.
         Random rnd = new Random();
@@ -952,6 +958,7 @@ public class ShaTuTutor implements TutorSvc {
      * @return a Task that should be completed first.
      * @throws NonRecoverableException see the message text.
      */
+    /*
     private Task getFirstTask(Course course) throws NonRecoverableException {
         switch (course.getPrimaryPedagogy()) {
             case STUDENT_CHOICE:
@@ -982,6 +989,7 @@ public class ShaTuTutor implements TutorSvc {
                 throw new NonRecoverableException("Unknwon task selection in course: " + course.getId());
         }
     }
+    */
 
     /**
      * Utility for logging an error and an creating a tutoring reply error with

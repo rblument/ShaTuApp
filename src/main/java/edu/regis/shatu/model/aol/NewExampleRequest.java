@@ -33,7 +33,7 @@ public class NewExampleRequest {
      * Initialize with default values
      */
     public NewExampleRequest() {
-        exampleType = ProblemType.DEFAULT;
+        exampleType = ProblemType.ALL;
 
         data = "";
     }

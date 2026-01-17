@@ -28,17 +28,39 @@ import edu.regis.shatu.model.TitledModel;
  * 
  * @author rickb
  */
-public abstract class Problem extends TitledModel {
-    // Inherited: id, title, description
+public class Problem extends TitledModel {
+    /**
+     * The Tasks that a Student must complete to solve this Problem.
+     */
+    private ArrayList<Task> tasks;
+    
+    /**
+     * The message that is being SHA-256 hashed in this problem.
+     */
     private String messageToHash;
     
-    // ToDo:
-    //public abstract ArrayList<Task> getTasks();
+    /**
+     * The id of the unit in which this Problem resides.
+     */
+    private int unitId;
     
+    /**
+     * The position of this problem in the unit's sequence of problems 
+     */
+    private int sequenceIndex;
+
+    /**
+     * Instantiate this problem with a DEFAULT_ID.
+     */
     public Problem() {
-        super();
+        super(DEFAULT_ID);
     }
     
+    /**
+     * Instantiate this Problem with the given ID.
+     * 
+     * @param id the unique database id of this problem.
+     */
     public Problem(int id) {
         super(id);
     }
@@ -61,20 +83,66 @@ public abstract class Problem extends TitledModel {
         this.messageToHash = messageToHash;
     }
 
-    @Override
-    public String toString() {
-        return "Title: " + getTitle() + 
-                " Description: " + getDescription() + 
-                " Message: " + this.messageToHash;
+    public void addTask(Task task) {
+        tasks.add(task);
     }
-
-
+ 
     /**
      * Returns the list of tasks that make up this problem.
      * Each concrete problem type defines its own set of tasks.
      *
      * @return an ArrayList of Task objects
      */
-    public abstract ArrayList<Task> getTasks();
+    public ArrayList<Task> getTasks() {
+        return tasks;
+    }
+    
+        public void setTasks(ArrayList<Task> tasks) {
+        this.tasks = tasks;
+    }
+    
+     public Task findTaskById(int taskId) {
+        for (Task task : tasks)
+            if (task.getId() == taskId)
+                return task;
+        
+        return null;
+    }
 
+    /**
+     * Return the task, if any, with the given sequence id.
+     * 
+     * @param sequence the sequence position of the task to find.
+     * @return a Task, or null if not found.
+     */
+    public Task findTaskBySequence(int sequence) {
+        for (Task task : tasks)
+            if (task.getSequenceIndex() == sequence)
+                return task;
+        
+        return null;
+    }
+    
+        public int getUnitId() {
+        return unitId;
+    }
+
+    public void setUnitId(int unitId) {
+        this.unitId = unitId;
+    }
+
+    public int getSequenceIndex() {
+        return sequenceIndex;
+    }
+
+    public void setSequenceIndex(int sequenceIndex) {
+        this.sequenceIndex = sequenceIndex;
+    }
+    
+    @Override
+    public String toString() {
+        return "Title: " + getTitle() + 
+                " Description: " + getDescription() + 
+                " Message: " + this.messageToHash;
+    }
 }

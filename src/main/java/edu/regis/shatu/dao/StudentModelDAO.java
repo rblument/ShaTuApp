@@ -78,7 +78,7 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
                 for (Assessment assessment : studentModel.getAssessments().values()) {
                     stmt2.setString(1, userId);
                     stmt2.setInt(2, assessment.getOutcome().getId());
-                    stmt2.setString(3, "Not Started");
+                    stmt2.setString(3, "NOT_STARTED");
                     stmt2.setInt(4, assessment.getExposures());
                     stmt2.setInt(5, assessment.getSuccessess());
                     stmt2.setInt(6, assessment.getHints());
@@ -127,7 +127,7 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 StudentModel studentModel = new StudentModel(userId);
-                studentModel.setScaffoldLevel(ScaffoldLevel.fromString(rs.getString(1)));
+                studentModel.setScaffoldLevel(ScaffoldLevel.valueOf(rs.getString("ScaffoldLevel")));
                 for (Assessment assessment : retrieveAssessments(userId, conn)) {
                     studentModel.addAssessment(assessment);
                 }
@@ -230,7 +230,7 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
         final String sql = """
                     SELECT kc.Title, a.AssessmentLevel
                     FROM Assessment a
-                    JOIN KnowledgeComponent kc ON a.KnowledgeComponentId = kc.KnowledgeComponentId
+                    JOIN KnowledgeComponent kc ON a.KnowledgeComponentId = kc.Id
                     WHERE a.UserId = ?
                 """;
 
@@ -244,7 +244,7 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
                     String assessmentLevel = rs.getString("AssessmentLevel");
 
                     // Determine category based on AssessmentLevel
-                    switch (AssessmentLevel.fromString(assessmentLevel)) {
+                    switch (AssessmentLevel.valueOf(assessmentLevel)) {
                         case NOT_STARTED:
                             if (learningCategory.equalsIgnoreCase("Teach Me")) {
                                 lessons.add(lessonTitle);
@@ -338,7 +338,7 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     String levelStr = rs.getString("AssessmentLevel");
-                    AssessmentLevel level = AssessmentLevel.fromString(levelStr);
+                    AssessmentLevel level = AssessmentLevel.valueOf(levelStr);
                     if (level != null) {
                         return level;
                     } else {
@@ -403,7 +403,7 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
             int assessmentId = rs.getInt(1);
             int knowledgeComponentId = rs.getInt(2);
             KnowledgeComponent outcome = course.findKnowledgeComponent(knowledgeComponentId);
-            AssessmentLevel level = AssessmentLevel.fromString(rs.getString(3));
+            AssessmentLevel level = AssessmentLevel.valueOf(rs.getString(3));
             Assessment assessment = new Assessment(outcome, level);
             assessment.setId(knowledgeComponentId);
             assessment.setExposures(rs.getInt(4));

@@ -33,9 +33,7 @@ public enum TaskKind {
      * A message from the tutor that needs to be acknowledge, which describes
      * how to use the tutor.
      */
-    USAGE("Usage"),
-    
-    ERROR("Error");
+    USAGE("Usage");
     
     /**
      * A GUI displayable string identifying this task kind.
@@ -58,21 +56,6 @@ public enum TaskKind {
      */
     public String title() {
         return title;
-    }
-    
-       /**
-     * Return the enum value for the given title.
-     * 
-     * @param aTitle
-     * @return 
-     */
-    public static TaskKind findValue(String aTitle) {
-        for (TaskKind kind : values()) {
-            if (kind.title().equalsIgnoreCase(aTitle))
-                return kind;
-        }
-        
-        return ERROR;
     }
 }
     

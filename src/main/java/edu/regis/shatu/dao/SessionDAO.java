@@ -50,7 +50,7 @@ import edu.regis.shatu.svc.SessionSvc;
 public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSession> {
 
     public SessionDAO() {
-        super("TutoringSession", "TutoringSessionId");
+        super("TutoringSession", "Id");
     }
 
     /**
@@ -82,14 +82,7 @@ public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSes
             stmt.setTimestamp(4, new Timestamp(session.getStartDate().getTimeInMillis()));
             stmt.setInt(5, session.getCourse().getId());
             stmt.setInt(6, 0); // Start with Unit 0
-            
-            // Handle ProblemId
-            if(session.getProblem() != null){
-                stmt.setInt(7, session.getProblem().getId());
-            }
-            else {
-                stmt.setNull(7, java.sql.Types.INTEGER);    // May be null in the session
-            }
+            stmt.setInt(7, session.getProblem().getId());
             
             stmt.executeUpdate();
 
@@ -113,9 +106,7 @@ public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSes
     @Override
     public TutoringSession retrieve(String userId) throws ObjNotFoundException, NonRecoverableException {
         final String sql =
-                "SELECT TutoringSessionId, SecurityToken, IsActive, StartDate, " +
-                        "CourseId, UnitId, ProblemId " +
-                "FROM TutoringSession WHERE UserId = ?";
+                "SELECT Id, SecurityToken, IsActive, StartDate, CourseId, UnitId, ProblemId FROM TutoringSession WHERE UserId = ?";
 
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -128,7 +119,7 @@ public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSes
 
             ResultSet rs = stmt.executeQuery();
 
-            // I don't like this at all.
+            // ToDo: I don't like this at all.
             // Just don't know how else to return a tutoring session when you need a
             // Student object to make a TutoringSession, but then in turn need an Account
             // object to make a student.
@@ -139,16 +130,16 @@ public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSes
             if (rs.next()) {
                 TutoringSession session = new TutoringSession(stu);
                 session.setId(rs.getInt(1));
-                session.setSecurityToken(rs.getString(2));
-                session.setIsActive(rs.getBoolean(3));
+                session.setSecurityToken(rs.getString("SecurityToken"));
+                session.setIsActive(rs.getBoolean("IsActive"));
 
-                Timestamp timestamp = rs.getTimestamp(4);
+                Timestamp timestamp = rs.getTimestamp("StartDate");
                 GregorianCalendar calendar = new GregorianCalendar();
                 calendar.setTimeInMillis(timestamp.getTime());
                 session.setStartDate(calendar);
 
-                int courseId = rs.getInt(5);
-                int unitId = rs.getInt(6);
+                int courseId = rs.getInt("CourseId");
+                int unitId = rs.getInt("UnitId");
 
                 CourseSvc courseSvc = ServiceFactory.findCourseSvc();
                 try {
@@ -170,7 +161,7 @@ public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSes
                 
                 // Fetch the problem from the DB, if one exists for the session
                 ProblemSvc problemSvc = ServiceFactory.findProblemSvc();
-                int problemId = rs.getInt(7);
+                int problemId = rs.getInt("ProblemId");
                 if (rs.wasNull()) {
                     session.setProblem(null);
                 }
@@ -286,9 +277,7 @@ public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSes
     private void createPendingTasks(TutoringSession session, Connection conn)
             throws NonRecoverableException {
         
-        final String sql = "INSERT INTO PendingTask " +
-                           "(SessionId, TaskId, PendingStepId) " +
-                           "VALUES (?,?,?)";
+        final String sql = "INSERT INTO PendingTask (SessionId, TaskId, PendingStepId) VALUES (?,?,?)";
 
         int sessionId = session.getId();
 
@@ -376,13 +365,13 @@ public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSes
             CourseSvc courseSvc = ServiceFactory.findCourseSvc();
 
             while (rs.next()) {
-                taskId = rs.getInt(1);
+                taskId = rs.getInt("TaskId");
 
-                Task task = courseSvc.retrieveTask(session.getCourse().getId(), taskId, conn);
+                Task task = session.getProblem().findTaskById(taskId);
 
                 PendingTask pTask = new PendingTask(task);
 
-                PendingStep pStep = retrievePendingStep(rs.getInt(2), sessionId, task, conn);
+                PendingStep pStep = retrievePendingStep(rs.getInt("PendingStepId"), sessionId, task, conn);
 
                 pTask.setCurrentStep(pStep);
 
@@ -391,9 +380,6 @@ public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSes
 
             return pendingTasks;
 
-        } catch (ObjNotFoundException ex) {
-            String errMsg = "Task not found in pending task" + taskId;
-            throw new NonRecoverableException("SessionDAO-ERR-10", new InconsistentDBException(errMsg));
         } catch (SQLException e) {
             throw new NonRecoverableException("SessionDAO-ERR-11", e);
         } finally {
@@ -405,7 +391,7 @@ public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSes
             throws NonRecoverableException {
 
         final String sql = "SELECT StepId, NotifyTutor, IsCompleted, CurrentHintIndex " +
-                           "FROM PendingStep WHERE PendingStepId = ?";
+                           "FROM PendingStep WHERE Id = ?";
 
         PreparedStatement stmt = null;
 
