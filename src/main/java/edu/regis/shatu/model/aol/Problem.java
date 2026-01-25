@@ -82,7 +82,12 @@ public class Problem extends TitledModel {
     public void setMessageToHash(String messageToHash){
         this.messageToHash = messageToHash;
     }
-
+    
+    /**
+     * Add a new task to the end of the tasks list
+     * 
+     * @param task a new task to be added
+     */
     public void addTask(Task task) {
         tasks.add(task);
     }
@@ -126,15 +131,26 @@ public class Problem extends TitledModel {
         public int getUnitId() {
         return unitId;
     }
-
+    /**
+     * Set the unit ID
+     * @param unitId the integer ID that is to be set
+     */
     public void setUnitId(int unitId) {
         this.unitId = unitId;
     }
-
+    
+    /**
+     *  Obtain the position of a problem in the sequence of problems
+     * @return position of a problem
+     */
     public int getSequenceIndex() {
         return sequenceIndex;
     }
 
+    /**
+     * Set the position of a problem
+     * @param sequenceIndex  new integer index
+     */
     public void setSequenceIndex(int sequenceIndex) {
         this.sequenceIndex = sequenceIndex;
     }
