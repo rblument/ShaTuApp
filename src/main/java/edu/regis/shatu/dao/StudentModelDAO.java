@@ -436,7 +436,7 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
      */
     @Override
     public void recordLoginEvent(String userId, long timestamp) throws NonRecoverableException {
-        String sql = "UPDATE student SET LastLogin = ? WHERE userId = ?";
+        String sql = "UPDATE Student SET LastLogin = ? WHERE userId = ?";
         Timestamp tStamp = new Timestamp(timestamp);    // Store date in a readable format
         
         try (Connection conn = DriverManager.getConnection(URL);
@@ -455,7 +455,7 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
      */
     @Override
     public void recordLogoutEvent(String userId, long timestamp) throws NonRecoverableException {
-        String sql = "UPDATE student SET LastLogout = ? WHERE userId = ?";
+        String sql = "UPDATE Student SET LastLogout = ? WHERE userId = ?";
         Timestamp tStamp = new Timestamp(timestamp);    // Store date in a readable format
         
         try (Connection conn = DriverManager.getConnection(URL);
