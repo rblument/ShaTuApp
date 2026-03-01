@@ -416,32 +416,47 @@ public class TutoringSessionView extends GPanel {
      * Requests a new suggested problem from the tutor based on the student's progress.
      */
     private void requestProblem() {
-        if (model == null) return;
+        if (model == null) {
+            System.err.println("requestProblem: model is null");
+            return;
+        }
 
         try {
-            // Get the tutor service
+            // tutor service
             TutorSvc tutor = ServiceFactory.findTutorSvc();
 
-            // Get the user ID from the current session model
+            // session + auth
             String userId = model.getStudent().getAccount().getUserId();
+            String token = model.getSecurityToken();
 
-            // Build a client request to ask for suggested problem
+            // IMPORTANT: do NOT send "{}"
+            // send a NewExampleRequest with a valid exampleType the server can map
+            // if your ProblemType enum uses different names, change "ASCII_ENCODE" to match it exactly
+            String json = "{\"exampleType\":\"ASCII_ENCODE\",\"data\":null}";
+
             ClientRequest req = new ClientRequest(ServerRequestType.NEW_EXAMPLE);
             req.setUserId(userId);
-            req.setSecurityToken(model.getSecurityToken());
-            req.setData("{}"); // Empty JSON can include additional info if needed
+            req.setSecurityToken(token);
+            req.setData(json);
 
-            // Send request to tutor
             TutorReply reply = tutor.request(req);
 
-            if (reply.getStatus().equals(":ERR")) {
-                System.err.println("Error requesting problem: " + reply.getData());
-            } else {
-                // update UI to display the new suggested problem
-                System.out.println("Suggested problem received: " + reply.getData());
+            if (reply == null) {
+                System.err.println("requestProblem: null reply from tutor");
+                return;
             }
 
+            if (":ERR".equals(reply.getStatus())) {
+                System.err.println("Error requesting problem: " + reply.getData());
+                return;
+            }
+
+            // success path: right now we just log it
+            // later you can parse reply.getData() into PendingTask or whatever the server returns
+            System.out.println("Suggested problem received: " + reply.getData());
+
         } catch (Exception ex) {
+            System.err.println("requestProblem: exception while requesting problem");
             ex.printStackTrace();
         }
     }
