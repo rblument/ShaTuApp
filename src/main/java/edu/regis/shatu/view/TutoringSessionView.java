@@ -310,7 +310,7 @@ public class TutoringSessionView extends GPanel {
         dashboardButton = new JButton("Go to Dashboard");
         dashboardButton.addActionListener(e -> navigateToDashboard());
 
-        requestProblemButton = new JButton("Request Problem");
+        requestProblemButton = new JButton("Request New Problem");
         requestProblemButton.addActionListener(e -> requestProblem());
 
 
@@ -415,6 +415,7 @@ public class TutoringSessionView extends GPanel {
     /**
      * Requests a new suggested problem from the tutor based on the student's progress.
      */
+    
     private void requestProblem() {
         if (model == null) {
             System.err.println("requestProblem: model is null");
@@ -422,16 +423,11 @@ public class TutoringSessionView extends GPanel {
         }
 
         try {
-            // tutor service
             TutorSvc tutor = ServiceFactory.findTutorSvc();
 
-            // session + auth
             String userId = model.getStudent().getAccount().getUserId();
             String token = model.getSecurityToken();
 
-            // IMPORTANT: do NOT send "{}"
-            // send a NewExampleRequest with a valid exampleType the server can map
-            // if your ProblemType enum uses different names, change "ASCII_ENCODE" to match it exactly
             String json = "{\"exampleType\":\"ASCII_ENCODE\",\"data\":null}";
 
             ClientRequest req = new ClientRequest(ServerRequestType.NEW_EXAMPLE);
@@ -451,9 +447,20 @@ public class TutoringSessionView extends GPanel {
                 return;
             }
 
-            // success path: right now we just log it
-            // later you can parse reply.getData() into PendingTask or whatever the server returns
-            System.out.println("Suggested problem received: " + reply.getData());
+            // --- NEW_EXAMPLE returns a wrapper object ---
+            PendingTask wrapper = gson.fromJson(reply.getData(), PendingTask.class);
+
+            if (wrapper != null) {
+
+                TutoringSession session = MainFrame.instance().getModel();
+
+                // Clear current task stack before inserting new problem
+                session.addCurrentTask(wrapper);
+
+                setModel(session);
+            } else {
+                System.err.println("requestProblem: parsed wrapper was null");
+            }
 
         } catch (Exception ex) {
             System.err.println("requestProblem: exception while requesting problem");
