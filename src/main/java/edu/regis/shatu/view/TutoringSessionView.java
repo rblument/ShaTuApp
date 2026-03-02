@@ -315,7 +315,7 @@ public class TutoringSessionView extends GPanel {
         dashboardButton = new JButton("Go to Dashboard");
         dashboardButton.addActionListener(e -> navigateToDashboard());
 
-        requestProblemButton = new JButton("Request Problem");
+        requestProblemButton = new JButton("Request New Problem");
         requestProblemButton.addActionListener(e -> requestProblem());
 
 
@@ -420,33 +420,55 @@ public class TutoringSessionView extends GPanel {
     /**
      * Requests a new suggested problem from the tutor based on the student's progress.
      */
+    
     private void requestProblem() {
-        if (model == null) return;
+        if (model == null) {
+            System.err.println("requestProblem: model is null");
+            return;
+        }
 
         try {
-            // Get the tutor service
             TutorSvc tutor = ServiceFactory.findTutorSvc();
 
-            // Get the user ID from the current session model
             String userId = model.getStudent().getAccount().getUserId();
+            String token = model.getSecurityToken();
 
-            // Build a client request to ask for suggested problem
+            String json = "{\"exampleType\":\"ASCII_ENCODE\",\"data\":null}";
+
             ClientRequest req = new ClientRequest(ServerRequestType.NEW_EXAMPLE);
             req.setUserId(userId);
-            req.setSecurityToken(model.getSecurityToken());
-            req.setData("{}"); // Empty JSON can include additional info if needed
+            req.setSecurityToken(token);
+            req.setData(json);
 
-            // Send request to tutor
             TutorReply reply = tutor.request(req);
 
-            if (reply.getStatus().equals(":ERR")) {
+            if (reply == null) {
+                System.err.println("requestProblem: null reply from tutor");
+                return;
+            }
+
+            if (":ERR".equals(reply.getStatus())) {
                 System.err.println("Error requesting problem: " + reply.getData());
+                return;
+            }
+
+            // --- NEW_EXAMPLE returns a wrapper object ---
+            PendingTask wrapper = gson.fromJson(reply.getData(), PendingTask.class);
+
+            if (wrapper != null) {
+
+                TutoringSession session = MainFrame.instance().getModel();
+
+                // Clear current task stack before inserting new problem
+                session.addCurrentTask(wrapper);
+
+                setModel(session);
             } else {
-                // update UI to display the new suggested problem
-                System.out.println("Suggested problem received: " + reply.getData());
+                System.err.println("requestProblem: parsed wrapper was null");
             }
 
         } catch (Exception ex) {
+            System.err.println("requestProblem: exception while requesting problem");
             ex.printStackTrace();
         }
     }
