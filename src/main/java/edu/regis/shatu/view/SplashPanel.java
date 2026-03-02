@@ -198,6 +198,8 @@ public class SplashPanel extends GPanel {
 
 	signInBut = new JButton(SignInAction.instance());
 	signInBut.setEnabled(false);
+        
+        password.addActionListener(e -> signInBut.doClick());
         /*
         signInBut.addActionListener(e -> {
         // Fetch the userId and encrypted password
