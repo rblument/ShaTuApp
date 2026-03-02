@@ -27,12 +27,14 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
 import edu.regis.shatu.model.StepCompletion;
+import edu.regis.shatu.model.TutoringSession;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.model.steps.EncodeAsciiStep;
 import edu.regis.shatu.model.steps.Step;
 import edu.regis.shatu.model.aol.TutoringMode;
+import edu.regis.shatu.model.aol.PendingTask;
 
 /**
  * A view that requests the student to add a single '1' bit to the byte prompt.
@@ -328,7 +330,21 @@ public class EncodeView extends UserRequestView {
 
             System.out.println("Encode ASCII update display called"); // Error checking
 
-            Step step = model.currentTask().getCurrentStep().getStep(); // Will be the last subtype a example was
+            PendingTask pTask = model.currentTask();
+            if (pTask == null || pTask.getCurrentStep() == null || pTask.getCurrentStep().getStep() == null) {
+                questionLabel.setText("Please click new example button to get started");
+                feedbackArea.setText("");
+                responseTextArea.setText("");
+                checkButton.setEnabled(false);
+                responseTextArea.setEnabled(false);
+                hintButton.setEnabled(false);
+
+                System.out.println("No current task/step loaded yet (currentTask was null).");
+                System.out.println("UpdateView logic continues...");
+                configureModeSpecificUI();
+                return;
+            }
+            Step step = pTask.getCurrentStep().getStep();
             // created for or empty
 
             System.out.println("Encode Ascii substep from current step: " + step.getSubType()); // Error checking
@@ -399,6 +415,27 @@ public class EncodeView extends UserRequestView {
         configureModeSpecificUI();
     }
 
+    @Override
+    public void setModel(TutoringSession model) {
+        super.setModel(model);
+
+        // Reset Encode view state when a new session model is loaded
+        this.question = null;
+        this.wasHintRequested = false;
+
+        messageLengthField.setText("1");
+        setQuestionField.setText("");
+
+        feedbackArea.setText("");
+        responseTextArea.setText("");
+
+        questionLabel.setText("Please click new example button to get started");
+
+        checkButton.setEnabled(false);
+        responseTextArea.setEnabled(false);
+        hintButton.setEnabled(false);
+    }
+    
     /**
      * Configure UI components based on the current tutoring mode
      * Disables fields not available for SEE_ONE mode for passive viewing.
@@ -415,9 +452,9 @@ public class EncodeView extends UserRequestView {
         TutoringMode mode = model.getTutoringMode();
 
         if (mode == TutoringMode.SEE_ONE) {
-            messageLengthField.setEnabled(false);
-            setQuestionField.setEnabled(false);
-            responseTextArea.setEnabled(false);
+            messageLengthField.setEnabled(true);
+            setQuestionField.setEnabled(true);
+            responseTextArea.setEnabled(true);
         } else {
             // DO_ONE and TEACH_ONE both have enabled the fields
             messageLengthField.setEnabled(true);
