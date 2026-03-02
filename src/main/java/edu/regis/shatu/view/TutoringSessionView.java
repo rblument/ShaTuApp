@@ -129,6 +129,11 @@ public class TutoringSessionView extends GPanel {
     
         if (model != null) {
             PendingTask pTask = model.currentTask();
+            if (pTask == null) {
+                // No pending task loaded (e.g., DB state incomplete). Avoid crashing the UI.
+                // The user can request a new example to continue.
+                return;
+            }
             PendingStep pStep = pTask.getCurrentStep();
             StepSubType subType = pStep.getStep().getSubType();
             

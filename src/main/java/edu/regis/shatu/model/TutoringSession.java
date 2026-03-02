@@ -171,6 +171,10 @@ public class TutoringSession {
     }
     
     public PendingTask currentTask() {
+        //return null rather than crash if empty
+        if (tasks == null || tasks.isEmpty()) {
+            return null;
+        }
         return tasks.get(0);
     }
     

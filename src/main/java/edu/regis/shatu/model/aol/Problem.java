@@ -150,29 +150,24 @@ public class Problem extends TitledModel {
     }
 
     /**
-     * Updates the unitID of the current problem to the specified arg.
-     * 
-     * @param unitId ID of the unit the problem should reside in
+     * Set the unit ID
+     * @param unitId the integer ID that is to be set
      */
     public void setUnitId(int unitId) {
         this.unitId = unitId;
     }
-
+    
     /**
-     * Returns the position of this problem in the sequence of the 
-     * unit's problems
-     * 
-     * @return an integer that represents the problem's location in the unit
+     *  Obtain the position of a problem in the sequence of problems
+     * @return position of a problem
      */
     public int getSequenceIndex() {
         return sequenceIndex;
     }
 
     /**
-     * Updates the location where this problem should reside in the order
-     * of this unit's problems
-     * 
-     * @param sequenceIndex index where the problem should be located
+     * Set the position of a problem
+     * @param sequenceIndex  new integer index
      */
     public void setSequenceIndex(int sequenceIndex) {
         this.sequenceIndex = sequenceIndex;

@@ -12,6 +12,7 @@
  */
 package edu.regis.shatu.dao;
 
+import static edu.regis.shatu.dao.MySqlDAO.URL;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -418,6 +419,129 @@ public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSes
             throw new NonRecoverableException("SessionDAO-ERR-13", e);
         } finally {
             close(stmt);
+        }
+    }
+
+
+
+/**
+ * Remove a pending task (and its associated pending step) for a session.
+ * 
+ *
+ * @param sessionId the tutoring session id
+ * @param taskId the task id to remove
+ * @throws NonRecoverableException on SQL errors
+ */
+public void deletePendingTask(int sessionId, int taskId) throws NonRecoverableException {
+    final String selectSql = "SELECT PendingStepId FROM PendingTask WHERE SessionId = ? AND TaskId = ?";
+    final String deleteTaskSql = "DELETE FROM PendingTask WHERE SessionId = ? AND TaskId = ?";
+    final String deleteStepSql = "DELETE FROM PendingStep WHERE Id = ?";
+
+    Connection conn = null;
+    PreparedStatement selectStmt = null;
+    PreparedStatement deleteTaskStmt = null;
+    PreparedStatement deleteStepStmt = null;
+
+    try {
+        conn = DriverManager.getConnection(URL);
+        conn.setAutoCommit(false);
+
+        Integer pendingStepId = null;
+        selectStmt = conn.prepareStatement(selectSql);
+        selectStmt.setInt(1, sessionId);
+        selectStmt.setInt(2, taskId);
+
+        ResultSet rs = selectStmt.executeQuery();
+        if (rs.next()) {
+            pendingStepId = rs.getInt(1);
+        }
+
+        deleteTaskStmt = conn.prepareStatement(deleteTaskSql);
+        deleteTaskStmt.setInt(1, sessionId);
+        deleteTaskStmt.setInt(2, taskId);
+        deleteTaskStmt.executeUpdate();
+
+        if (pendingStepId != null) {
+            deleteStepStmt = conn.prepareStatement(deleteStepSql);
+            deleteStepStmt.setInt(1, pendingStepId);
+            deleteStepStmt.executeUpdate();
+        }
+
+        conn.commit();
+    } catch (SQLException e) {
+        try {
+            if (conn != null) conn.rollback();
+        } catch (SQLException ignored) { }
+        throw new NonRecoverableException("SessionDAO-ERR-DELETE-PENDING", e);
+    } finally {
+        try { if (conn != null) conn.setAutoCommit(true); } catch (SQLException ignored) { }
+        close(selectStmt);
+        close(deleteTaskStmt);
+        close(deleteStepStmt);
+        close(conn);
+    }
+}
+
+    /**
+     * Update the current pending task for this session with a new task/step.
+     *
+     * @param sessionId the tutoring session id
+     * @param oldTaskId the task id currently pending (e.g., Welcome)
+     * @param newTaskId the next task id to become pending (e.g., ASCII_ENCODE)
+     * @param newStepId the step id to associate with the pending step (must exist in Step table)
+     */
+    public void updatePendingTask(int sessionId, int oldTaskId, int newTaskId, int newStepId) throws NonRecoverableException {
+        final String selectSql = "SELECT PendingStepId FROM PendingTask WHERE SessionId = ? AND TaskId = ?";
+        final String updateTaskSql = "UPDATE PendingTask SET TaskId = ? WHERE SessionId = ? AND TaskId = ?";
+        final String updateStepSql = "UPDATE PendingStep SET StepId = ?, NotifyTutor = ?, IsCompleted = ?, CurrentHintIndex = ? WHERE Id = ?";
+
+        Connection conn = null;
+        PreparedStatement selectStmt = null;
+        PreparedStatement updateTaskStmt = null;
+        PreparedStatement updateStepStmt = null;
+
+        try {
+            conn = DriverManager.getConnection(URL);
+            conn.setAutoCommit(false);
+
+            Integer pendingStepId = null;
+            selectStmt = conn.prepareStatement(selectSql);
+            selectStmt.setInt(1, sessionId);
+            selectStmt.setInt(2, oldTaskId);
+
+            ResultSet rs = selectStmt.executeQuery();
+            if (rs.next()) {
+                pendingStepId = rs.getInt(1);
+            }
+
+            // Update the task id first
+            updateTaskStmt = conn.prepareStatement(updateTaskSql);
+            updateTaskStmt.setInt(1, newTaskId);
+            updateTaskStmt.setInt(2, sessionId);
+            updateTaskStmt.setInt(3, oldTaskId);
+            updateTaskStmt.executeUpdate();
+
+            // Re-point the pending step at the new step id and reset its state
+            if (pendingStepId != null) {
+                updateStepStmt = conn.prepareStatement(updateStepSql);
+                updateStepStmt.setInt(1, newStepId);
+                updateStepStmt.setBoolean(2, true);
+                updateStepStmt.setBoolean(3, false);
+                updateStepStmt.setInt(4, 0);
+                updateStepStmt.setInt(5, pendingStepId);
+                updateStepStmt.executeUpdate();
+            }
+
+            conn.commit();
+        } catch (SQLException e) {
+            try { if (conn != null) conn.rollback(); } catch (SQLException ignored) {}
+            throw new NonRecoverableException("SessionDAO-ERR-UPDATE-PENDING", e);
+        } finally {
+            try { if (conn != null) conn.setAutoCommit(true); } catch (SQLException ignored) {}
+            close(selectStmt);
+            close(updateTaskStmt);
+            close(updateStepStmt);
+            close(conn);
         }
     }
 

@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import edu.regis.shatu.dao.SessionDAO;
 import edu.regis.shatu.err.NonRecoverableException;
 import edu.regis.shatu.err.ObjDuplicateException;
 import edu.regis.shatu.err.ObjNotFoundException;
@@ -43,9 +44,31 @@ import edu.regis.shatu.model.aol.PendingStep;
 import edu.regis.shatu.model.aol.PendingTask;
 import edu.regis.shatu.model.aol.Problem;
 import edu.regis.shatu.model.aol.ProblemType;
+import static edu.regis.shatu.model.aol.ProblemType.ADD_BITS;
+import static edu.regis.shatu.model.aol.ProblemType.ADD_MSG_LENGTH;
+import static edu.regis.shatu.model.aol.ProblemType.ADD_ONE_BIT;
+import static edu.regis.shatu.model.aol.ProblemType.ASCII_ENCODE;
+import static edu.regis.shatu.model.aol.ProblemType.CHOICE_FUNCTION;
+import static edu.regis.shatu.model.aol.ProblemType.COMPRESS_ROUND;
+import static edu.regis.shatu.model.aol.ProblemType.INITIALIZE_VARS;
+import static edu.regis.shatu.model.aol.ProblemType.MAJORITY_FUNCTION;
+import static edu.regis.shatu.model.aol.ProblemType.PAD_ZEROS;
+import static edu.regis.shatu.model.aol.ProblemType.PREPARE_SCHEDULE;
+import static edu.regis.shatu.model.aol.ProblemType.ROTATE_BITS;
+import static edu.regis.shatu.model.aol.ProblemType.SHA_ONE;
+import static edu.regis.shatu.model.aol.ProblemType.SHA_ZERO;
+import static edu.regis.shatu.model.aol.ProblemType.SHIFT_BITS;
+import static edu.regis.shatu.model.aol.ProblemType.XOR_BITS;
 import edu.regis.shatu.model.aol.StepSubType;
+import static edu.regis.shatu.model.aol.StepSubType.ENCODE_ASCII;
+import static edu.regis.shatu.model.aol.StepSubType.ENCODE_BINARY;
+import static edu.regis.shatu.model.aol.StepSubType.ENCODE_HEX;
+import static edu.regis.shatu.model.aol.StepSubType.INFO_MESSAGE;
 import edu.regis.shatu.model.aol.StudentModel;
 import edu.regis.shatu.model.aol.TutoringMode;
+import static edu.regis.shatu.model.aol.TutoringMode.DO_ONE;
+import static edu.regis.shatu.model.aol.TutoringMode.SEE_ONE;
+import static edu.regis.shatu.model.aol.TutoringMode.TEACH_ONE;
 import edu.regis.shatu.model.steps.Step;
 import edu.regis.shatu.model.steps.EncodeAsciiStep;
 import edu.regis.shatu.objectives.*;
@@ -652,6 +675,24 @@ public class ShaTuTutor implements TutorSvc {
      * @return
      */
     public TutorReply completeInfoMsgStep(StepCompletion completion) {
+        // Advance past the one-time INFO_MESSAGE so it won't reappear on the next sign-in.
+        // IMPORTANT: The client UI assumes there is ALWAYS at least one pending task in the session,
+        // so we update the existing PendingTask row instead of deleting it.
+        try {
+        if (session != null) {
+            SessionDAO dao = (SessionDAO) ServiceFactory.findSessionSvc();
+            // Welcome task is always TaskId = 0
+            dao.deletePendingTask(session.getId(), 0);
+
+            // Optional: also remove from in-memory model if it’s present
+            if (session.getTasks() != null) {
+                session.getTasks().removeIf(pt -> pt.getTask() != null && pt.getTask().getId() == 0);
+            }
+        }
+    } catch (Exception ex) {
+        Logger.getLogger(ShaTuTutor.class.getName())
+              .log(Level.WARNING, "Unable to clear welcome task from PendingTask", ex);
+    }
         TutoringMode mode = session.getTutoringMode();
         ProblemType firstProblemType;
         
