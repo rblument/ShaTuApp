@@ -62,6 +62,11 @@ public class AccountDAO extends MySqlDAO implements AccountSvc, CRUD<Account> {
 
         String userId = acct.getUserId();
 
+        /** Try to connect to database defined in MySqlDAO.java.
+         *  Verify if the user already exists if connection was successful.
+         *  If user does not exist create user account. Otherwise inform account exists.
+         *  Error out if unable to connect to the database successfully.
+         */
         try {
             conn = DriverManager.getConnection(URL);
 

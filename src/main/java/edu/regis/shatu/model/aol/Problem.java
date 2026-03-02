@@ -82,11 +82,12 @@ public class Problem extends TitledModel {
     public void setMessageToHash(String messageToHash){
         this.messageToHash = messageToHash;
     }
-    
+
     /**
-     * Add a new task to the end of the tasks list
+     * Adds a new task to the task list the student must
+     * complete to solve the problem
      * 
-     * @param task a new task to be added
+     * @param task a task object
      */
     public void addTask(Task task) {
         tasks.add(task);
@@ -102,10 +103,21 @@ public class Problem extends TitledModel {
         return tasks;
     }
     
-        public void setTasks(ArrayList<Task> tasks) {
+    /**
+     * Replaces the current task list with the specified task list
+     * 
+     * @param tasks an ArrayList of task objects
+     */
+    public void setTasks(ArrayList<Task> tasks) {
         this.tasks = tasks;
     }
     
+    /**
+     * Finds if a specified taskID exists in the current task list
+     * 
+     * @param taskId the ID of the desired task to find
+     * @return task if found, null otherwise
+     */
      public Task findTaskById(int taskId) {
         for (Task task : tasks)
             if (task.getId() == taskId)
@@ -118,7 +130,7 @@ public class Problem extends TitledModel {
      * Return the task, if any, with the given sequence id.
      * 
      * @param sequence the sequence position of the task to find.
-     * @return a Task, or null if not found.
+     * @return the associated task object, or null if not found.
      */
     public Task findTaskBySequence(int sequence) {
         for (Task task : tasks)
@@ -128,9 +140,15 @@ public class Problem extends TitledModel {
         return null;
     }
     
-        public int getUnitId() {
+    /**
+     * Returns the ID of the unit the current problem resides in
+     * 
+     * @return an integer that represents the active unit
+     */
+    public int getUnitId() {
         return unitId;
     }
+
     /**
      * Set the unit ID
      * @param unitId the integer ID that is to be set
