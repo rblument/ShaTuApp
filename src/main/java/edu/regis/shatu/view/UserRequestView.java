@@ -109,6 +109,11 @@ public abstract class UserRequestView extends GPanel {
     }
     
     public void setModel(TutoringSession model) {
+        // SHAT-356: This should prevent model from causing a hang when 
+        // requesting New Example.
+        if (model == null) {
+            return;
+        }
         random = new Random();
         this.model = model;
         configureModeSpecificUI();
