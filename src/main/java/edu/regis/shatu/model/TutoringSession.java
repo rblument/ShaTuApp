@@ -146,11 +146,18 @@ public class TutoringSession {
 
     
     public TutoringMode getTutoringMode() {
-    return tutoringMode;
+        if (student != null && student.getStudentModel() != null
+            && student.getStudentModel().getTutoringMode() != null) {
+            return student.getStudentModel().getTutoringMode();
+        }
+        return tutoringMode;
     }
 
     public void setTutoringMode(TutoringMode tutoringMode) {
         this.tutoringMode = tutoringMode;
+        if (student != null && student.getStudentModel() != null) {
+            student.getStudentModel().setTutoringMode(tutoringMode);
+        }
     }
     
     
