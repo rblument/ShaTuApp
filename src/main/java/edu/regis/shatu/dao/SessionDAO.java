@@ -37,10 +37,12 @@ import edu.regis.shatu.model.TutoringSession;
 import edu.regis.shatu.model.UnitDigest;
 import edu.regis.shatu.model.aol.PendingStep;
 import edu.regis.shatu.model.aol.PendingTask;
+import edu.regis.shatu.model.aol.StudentModel;
 import edu.regis.shatu.svc.CourseSvc;
 import edu.regis.shatu.svc.ProblemSvc;
 import edu.regis.shatu.svc.ServiceFactory;
 import edu.regis.shatu.svc.SessionSvc;
+import edu.regis.shatu.svc.StudentModelSvc;
 
 /**
  *
@@ -100,6 +102,86 @@ public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSes
             close(conn, stmt);
         }
     }
+    
+    @Override
+    public TutoringSession retrieve(Account account) throws ObjNotFoundException, NonRecoverableException {
+               final String sql =
+                "SELECT Id, SecurityToken, IsActive, StartDate, CourseId, UnitId, ProblemId FROM TutoringSession WHERE UserId = ?";
+
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        
+        String userId = account.getUserId();
+
+        try {
+            conn = DriverManager.getConnection(URL);
+            stmt = conn.prepareStatement(sql);
+
+            stmt.setString(1, userId);
+
+            ResultSet rs = stmt.executeQuery();
+
+            Student student = new Student(account);
+
+            if (rs.next()) {
+                TutoringSession session = new TutoringSession(student);
+                session.setId(rs.getInt(1));
+                session.setSecurityToken(rs.getString("SecurityToken"));
+                session.setIsActive(rs.getBoolean("IsActive"));
+
+                Timestamp timestamp = rs.getTimestamp("StartDate");
+                GregorianCalendar calendar = new GregorianCalendar();
+                calendar.setTimeInMillis(timestamp.getTime());
+                session.setStartDate(calendar);
+                
+                StudentModelSvc stuModSvc = ServiceFactory.findStudentModelSvc();
+                StudentModel studentModel = stuModSvc.retrieve(userId);
+                student.setStudentModel(studentModel);
+
+                int courseId = rs.getInt("CourseId");
+                int unitId = rs.getInt("UnitId");
+
+                CourseSvc courseSvc = ServiceFactory.findCourseSvc();
+                try {
+                    CourseDigest digest = courseSvc.retrieveDigest(courseId, conn);
+                    session.setCourse(digest);
+                } catch (ObjNotFoundException ex) {
+                    String errMsg = "SessionDAO-ERR-2 Course digest not found for courseId " + courseId;
+                    throw new NonRecoverableException(errMsg);
+                }
+
+                try {
+                    UnitDigest unitDigest = courseSvc.retrieveUnitDigest(courseId, unitId, conn);
+                    session.setUnit(unitDigest);
+
+                } catch (ObjNotFoundException ex) {
+                    String errMsg = "SessionDAO-ERR-3 Unit " + unitId + " not found in course " + courseId;
+                    throw new NonRecoverableException(errMsg);
+                }
+                
+                // Fetch the problem from the DB, if one exists for the session
+                ProblemSvc problemSvc = ServiceFactory.findProblemSvc();
+                int problemId = rs.getInt("ProblemId");
+                if (rs.wasNull()) {
+                    session.setProblem(null);
+                }
+                else {
+                    session.setProblem(problemSvc.retrieve(problemId));
+                }
+
+                session.setTasks(retrievePendingTasks(session, conn));
+
+                return session;
+
+            } else {
+                throw new ObjNotFoundException("Session not found for userId:" + userId);
+            }
+        } catch (SQLException e) {
+            throw new NonRecoverableException("SessionDAO-ERR-4" + e.toString(), e);
+        } finally {
+            close(conn, stmt);
+        }
+    }
 
     /**
      * {@inheritDoc}
@@ -126,10 +208,10 @@ public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSes
             // object to make a student.
             AccountDAO accDao = new AccountDAO();
             Account acc = accDao.retrieve(userId);
-            Student stu = new Student(acc);
+            Student student = new Student(acc);
 
             if (rs.next()) {
-                TutoringSession session = new TutoringSession(stu);
+                TutoringSession session = new TutoringSession(student);
                 session.setId(rs.getInt(1));
                 session.setSecurityToken(rs.getString("SecurityToken"));
                 session.setIsActive(rs.getBoolean("IsActive"));
@@ -138,6 +220,10 @@ public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSes
                 GregorianCalendar calendar = new GregorianCalendar();
                 calendar.setTimeInMillis(timestamp.getTime());
                 session.setStartDate(calendar);
+                
+                StudentModelSvc stuModSvc = ServiceFactory.findStudentModelSvc();
+                StudentModel studentModel = stuModSvc.retrieve(userId);
+                student.setStudentModel(studentModel);
 
                 int courseId = rs.getInt("CourseId");
                 int unitId = rs.getInt("UnitId");
