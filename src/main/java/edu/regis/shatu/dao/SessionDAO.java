@@ -309,10 +309,16 @@ public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSes
      */
     @Override
     public void update(TutoringSession session) throws ObjNotFoundException, NonRecoverableException {
+        //final String sql = 
+        //        "INSERT INTO TutoringSession " +
+        //        "(UserId, SecurityToken, IsActive, StartDate, CourseId, UnitId) " +
+        //        "VALUES (?,?,?,?,?,?)";
+        
+        // SHAT-362: Change syntax to SQL update instead of insert.
         final String sql = 
-                "INSERT INTO TutoringSession " +
-                "(UserId, SecurityToken, IsActive, StartDate, CourseId, UnitId) " +
-                "VALUES (?,?,?,?,?,?)";
+                "UPDATE TutoringSession " +
+                "SET SecurityToken=?, IsActive=?, StartDate=?, CourseId=?, UnitId=? " +
+                "WHERE UserId=?";
 
         Connection conn = null;
         PreparedStatement stmt = null;
