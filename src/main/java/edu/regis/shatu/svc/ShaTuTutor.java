@@ -682,11 +682,21 @@ public class ShaTuTutor implements TutorSvc {
         if (session != null) {
             SessionDAO dao = (SessionDAO) ServiceFactory.findSessionSvc();
             // Welcome task is always TaskId = 0
-            dao.deletePendingTask(session.getId(), 0);
+            // First ASCII task is TaskId = 10 and first ASCII step is StepId = 1
+            dao.updatePendingTask(session.getId(), 0, 10, 1);
 
-            // Optional: also remove from in-memory model if it’s present
+            // Optional: update in-memory model to match DB transition
             if (session.getTasks() != null) {
-                session.getTasks().removeIf(pt -> pt.getTask() != null && pt.getTask().getId() == 0);
+                for (PendingTask pt : session.getTasks()) {
+                    if (pt.getTask() != null && pt.getTask().getId() == 0) {
+                        Task nextTask = session.getProblem().findTaskById(10);
+                        if (nextTask != null) {
+                            pt.setTask(nextTask);
+                            pt.setCurrentStep(new PendingStep(nextTask.getCurrentStep()));
+                        }
+                        break;
+                    }
+                }
             }
         }
     } catch (Exception ex) {
