@@ -72,6 +72,7 @@ import static edu.regis.shatu.model.aol.TutoringMode.TEACH_ONE;
 import edu.regis.shatu.model.steps.Step;
 import edu.regis.shatu.model.steps.EncodeAsciiStep;
 import edu.regis.shatu.objectives.*;
+import java.util.HashMap;
 
 /**
  * The ShaTu tutor, which implements the tutoring service.
@@ -429,22 +430,16 @@ public class ShaTuTutor implements TutorSvc {
             Account dbAcct = ServiceFactory.findAccountSvc().retrieve(requestAcct.getUserId());
 
             if (dbAcct.getPassword().equals(requestAcct.getPassword())) {
-                student = new Student(dbAcct);
-                String userId = dbAcct.getUserId();
-
-                try {
-                    StudentModelSvc stuModSvc = ServiceFactory.findStudentModelSvc();
-                    studentModel = stuModSvc.retrieve(userId);
-                    student.setStudentModel(studentModel);
-                    notifyLogin(student);
-                } catch (ObjNotFoundException ex) {
-                    TutorReply reply = new TutorReply(":ERR");
-                    reply.setData("Student model not found for: " + userId);
-                    return reply;
-                }
+                //student = new Student(dbAcct);
+                String userId = dbAcct.getUserId();             
 
                 SessionSvc svc = ServiceFactory.findSessionSvc();
-                session = svc.retrieve(student.getAccount().getUserId());
+            
+                session = svc.retrieve(dbAcct);
+                
+                student = session.getStudent();
+                
+                notifyLogin(student);
 
                 TutorReply reply = new TutorReply("Authenticated");
 

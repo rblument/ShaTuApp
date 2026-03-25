@@ -109,6 +109,11 @@ public abstract class UserRequestView extends GPanel {
     }
     
     public void setModel(TutoringSession model) {
+        // SHAT-356: This should prevent model from causing a hang when 
+        // requesting New Example.
+        if (model == null) {
+            return;
+        }
         random = new Random();
         this.model = model;
         configureModeSpecificUI();
@@ -129,7 +134,7 @@ public abstract class UserRequestView extends GPanel {
         if (mode == TutoringMode.SEE_ONE) {
             checkButton.setEnabled(false);
             hintButton.setEnabled(false);
-            newExampleButton.setEnabled(false);
+            newExampleButton.setEnabled(true);
         } else if (mode == TutoringMode.DO_ONE) {
             checkButton.setEnabled(true);
             hintButton.setEnabled(true);
@@ -151,8 +156,11 @@ public abstract class UserRequestView extends GPanel {
      * @param task 
      */
     public void setCurrentTask(PendingTask task) {
-       model.addCurrentTask(task);
-       updateView();
+       if (model == null) {
+            model = MainFrame.instance().getModel();
+        }
+        model.addCurrentTask(task);
+        updateView();
     }
     
       /**
@@ -255,7 +263,7 @@ public abstract class UserRequestView extends GPanel {
     } 
     
     
-    /*
+    
      public JButton getCheckButton() {
         return checkButton;
     }
@@ -268,5 +276,5 @@ public abstract class UserRequestView extends GPanel {
     public JButton getHintButton() {
         return hintButton;
     }
-    */
+    
 }
