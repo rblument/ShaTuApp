@@ -429,37 +429,79 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
+
     /**
      * {@inheritDoc}
      */
     @Override
-    public void recordLoginEvent(String userId, long timestamp) throws NonRecoverableException {
-        String sql = "UPDATE Student SET LastLogin = ? WHERE userId = ?";
-        Timestamp tStamp = new Timestamp(timestamp);    // Store date in a readable format
+public void recordLoginEvent(String userId, long timestamp) throws NonRecoverableException {
+    String updateStudentSql = "UPDATE Student SET LastLogin = ? WHERE UserId = ?";
+    String getLastLogoutSql = "SELECT LastLogout FROM Student WHERE UserId = ?";
+String insertLoginSql = "INSERT INTO Login (StudentId, LogoutTime, LoginTime) VALUES (?, ?, ?)";
+Timestamp tStamp = new Timestamp(timestamp);
 
-        try (Connection conn = DriverManager.getConnection(URL); PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setTimestamp(1, tStamp);
-            stmt.setString(2, userId);
-            stmt.executeUpdate();
-        } catch (SQLException ex) {
-            throw new NonRecoverableException("Error recording login event: " + ex.toString(), ex);
+    try (Connection conn = DriverManager.getConnection(URL)) {
+        Timestamp previousLogout = null;
+
+        try (PreparedStatement getStmt = conn.prepareStatement(getLastLogoutSql)) {
+            getStmt.setString(1, userId);
+            ResultSet rs = getStmt.executeQuery();
+            if (rs.next()) {
+                previousLogout = rs.getTimestamp("LastLogout");
+            }
+        }
+
+        try (PreparedStatement updateStmt = conn.prepareStatement(updateStudentSql)) {
+            updateStmt.setTimestamp(1, tStamp);
+            updateStmt.setString(2, userId);
+            updateStmt.executeUpdate();
+        }
+
+        try (PreparedStatement insertStmt = conn.prepareStatement(insertLoginSql)) {
+            insertStmt.setString(1, userId);
+            insertStmt.setTimestamp(2, previousLogout);
+            insertStmt.setTimestamp(3, tStamp);
+            insertStmt.executeUpdate();
         }
     }
-
-    /**
+    catch (SQLException ex) {
+        throw new NonRecoverableException("Error recording login event: " + ex.toString(), ex);
+    }
+}
+  
+      /**
      * {@inheritDoc}
      */
     @Override
     public void recordLogoutEvent(String userId, long timestamp) throws NonRecoverableException {
-        String sql = "UPDATE Student SET LastLogout = ? WHERE userId = ?";
-        Timestamp tStamp = new Timestamp(timestamp);    // Store date in a readable format
+        String updateStudentSql = "UPDATE Student SET LastLogout = ? WHERE UserId = ?";
+        String updateLoginSql
+                = "UPDATE Login "
+                + "SET LogoutTime = ? "
+                + "WHERE StudentId = ? AND SessionNumber = ("
+                + "    SELECT MAX(SessionNumber) FROM ("
+                + "        SELECT SessionNumber FROM Login WHERE StudentId = ?"
+                + "    ) AS temp"
+                + ")";
+        Timestamp tStamp = new Timestamp(timestamp);
 
-        try (Connection conn = DriverManager.getConnection(URL); PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setTimestamp(1, tStamp);
-            stmt.setString(2, userId);
-            stmt.executeUpdate();
+        try (Connection conn = DriverManager.getConnection(URL)) {
+            try (PreparedStatement updateStudentStmt = conn.prepareStatement(updateStudentSql)) {
+                updateStudentStmt.setTimestamp(1, tStamp);
+                updateStudentStmt.setString(2, userId);
+                updateStudentStmt.executeUpdate();
+            }
+
+            try (PreparedStatement updateLoginStmt = conn.prepareStatement(updateLoginSql)) {
+                updateLoginStmt.setTimestamp(1, tStamp);
+                updateLoginStmt.setString(2, userId);
+                updateLoginStmt.setString(3, userId);
+                updateLoginStmt.executeUpdate();
+            }
         } catch (SQLException ex) {
             throw new NonRecoverableException("Error recording logout event: " + ex.toString(), ex);
         }
     }
 }
+    
+
