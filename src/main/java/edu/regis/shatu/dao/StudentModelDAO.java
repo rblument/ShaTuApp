@@ -169,45 +169,58 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
      */
     @Override
     public void updateAssessment(StudentModel model, Assessment assessment, StudentModelFieldKind field)
-            throws NonRecoverableException {
+        throws NonRecoverableException {
         String sql = "";
-        int assessmentId = assessment.getId();
-
+        int knowledgeComponentId = assessment.getOutcome().getId();
+        String userId = model.getUserId();
         Connection conn = null;
         PreparedStatement stmt = null;
         try {
             conn = DriverManager.getConnection(URL);
             switch (field) {
                 case ASSESSMENT_LEVEL:
-                    sql = "UPDATE Assessment SET AssessmentLevel = ? WHERE KnowledgeComponentId = ? ";
+                    sql = "UPDATE Assessment SET AssessmentLevel = ? WHERE UserId = ? AND KnowledgeComponentId = ?";
                     stmt = conn.prepareStatement(sql);
-                    stmt.setString(1, assessment.getAssessment().title());
+                    stmt.setString(1, assessment.getAssessment().name());
+                    stmt.setString(2, userId);
+                    stmt.setInt(3, knowledgeComponentId);
                     break;
                 case ATTEMPTS:
-                    sql = "UPDATE Assessment SET Exposures = ? WHERE KnowledgeComponentId = ?";
+                    sql = "UPDATE Assessment SET Exposures = ? WHERE UserId = ? AND KnowledgeComponentId = ?";
                     stmt = conn.prepareStatement(sql);
                     stmt.setInt(1, assessment.getExposures());
+                    stmt.setString(2, userId);
+                    stmt.setInt(3, knowledgeComponentId);
                     break;
                 case SUCCESSES:
-                    sql = "UPDATE Assessment SET Successes = ? WHERE KnowledgeComponentId = ?";
+                    sql = "UPDATE Assessment SET Successes = ? WHERE UserId = ? AND KnowledgeComponentId = ?";
                     stmt = conn.prepareStatement(sql);
                     stmt.setInt(1, assessment.getSuccessess());
+                    stmt.setString(2, userId);
+                    stmt.setInt(3, knowledgeComponentId);
                     break;
                 case HINTS:
-                    sql = "UPDATE Assessment SET Hints = ? WHERE KnowledgeComponentId = ?";
+                    sql = "UPDATE Assessment SET Hints = ? WHERE UserId = ? AND KnowledgeComponentId = ?";
                     stmt = conn.prepareStatement(sql);
                     stmt.setInt(1, assessment.getHints());
+                    stmt.setString(2, userId);
+                    stmt.setInt(3, knowledgeComponentId);
                     break;
                 case CORRECT_ANSWERS_REQUESTED:
-                    sql = "UPDATE Assessment SET CorrectAnswersRequested = ? WHERE KnowledgeComponentId = ?";
+                    sql = "UPDATE Assessment SET CorrectAnswersRequested = ? WHERE UserId = ? AND KnowledgeComponentId = ?";
                     stmt = conn.prepareStatement(sql);
                     stmt.setInt(1, assessment.getCorrectAnswersRequested());
+                    stmt.setString(2, userId);
+                    stmt.setInt(3, knowledgeComponentId);
                     break;
                 default:
-                    break;
+                    return;
             }
-            stmt.setInt(2, assessmentId);
-            stmt.execute();
+            int rowsUpdated = stmt.executeUpdate();
+            System.out.println("updateAssessment rowsUpdated = " + rowsUpdated
+                + ", userId = " + userId
+                + ", knowledgeComponentId = " + knowledgeComponentId
+                + ", field = " + field);
         } catch (SQLException e) {
             System.out.println("SQL State: " + e.getSQLState());
             System.out.println("SQL Error Code: " + e.getErrorCode());
@@ -301,9 +314,9 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
         final String sql = 
                 "SELECT kc.Title " +
                 "FROM Assessment a " +
-                "JOIN KnowledgeComponent kc ON a.KnowledgeComponentId = kc.KnowledgeComponentId " +
-                "WHERE a.UserId = ? AND kc.KnowledgeComponentId NOT IN (0, 10, 20) " +
-                "ORDER BY kc.KnowledgeComponentId";
+                "JOIN KnowledgeComponent kc ON a.KnowledgeComponentId = kc.Id " +
+                "WHERE a.UserId = ? AND kc.Id NOT IN (0, 10, 20) " +
+                "ORDER BY kc.Id";
         
         try (Connection conn = DriverManager.getConnection(URL);
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -328,8 +341,10 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
         final String sql = 
                 "SELECT a.AssessmentLevel " +
                 "FROM Assessment a " +
-                "JOIN KnowledgeComponent kc ON a.KnowledgeComponentId = kc.KnowledgeComponentId " +
+                "JOIN KnowledgeComponent kc ON a.KnowledgeComponentId = kc.Id " +
                 "WHERE a.UserId = ? AND kc.Title = ?";
+        System.out.println("retrieveAssessmentLevel called with userId = "
+            + userId + ", lesson = [" + lesson + "]");
         
         try (Connection conn = DriverManager.getConnection(URL);
             PreparedStatement stmt = conn.prepareStatement(sql)) {
