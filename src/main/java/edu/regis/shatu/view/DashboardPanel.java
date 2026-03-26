@@ -187,7 +187,9 @@ public class DashboardPanel extends JPanel {
         practicePanel = new JPanel(new GridBagLayout());
         quizMePanel = new JPanel(new GridBagLayout());
         
-        //todo load lesson data
+        if (model != null) {
+    loadAllLessons();
+}
     }
     
     /**
