@@ -138,13 +138,13 @@ CREATE TABLE Student (
     LastLogout TIMESTAMP
 );
 
-CREATE TABLE `Login` (
-    LoginId INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+CREATE TABLE LoginHistory (
+    Id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     UserId VARCHAR(255) NOT NULL,
-    LastLogOut TIMESTAMP NULL,
-    CurrentLogin TIMESTAMP NOT NULL,
+    LogoutTime TIMESTAMP NULL,
+    LoginTime TIMESTAMP NOT NULL,
     INDEX idx_login_userid (UserId),
-    INDEX idx_login_current (CurrentLogin)
+    INDEX idx_login_current (LoginTime)
 );
 
 CREATE TABLE StudentModel (

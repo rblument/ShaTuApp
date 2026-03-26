@@ -126,19 +126,25 @@ public class DashboardPanel extends JPanel {
             welcomeLabel.setText("Welcome, " + model.getStudent().getAccount().getFirstName() + "!");
             loadAllLessons();
             rebuildDashboard();
+
         }
         
         //update progress bars
         updateAllProgressBars();
+
     }
     /**
      * Ensure allLessons populates and recalculate progress bars from lessons
      */
     private void rebuildDashboard() {
         removeAll();
+ 
         layoutComponents();
+ 
         revalidate();
+ 
         repaint();
+  
     }
 
     /**
@@ -179,7 +185,7 @@ public class DashboardPanel extends JPanel {
             }
             showLessonSelection();
         });
-        
+      
         //Shows lesson selection with clickable lessons
         teachOneButton.addActionListener(evt -> {
             selectedMode = TutoringMode.TEACH_ONE;
@@ -252,9 +258,10 @@ public class DashboardPanel extends JPanel {
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (Exception e) { // ToDo: Catch specific exception.
             System.err.println("Error Loading Lessons: " + e.getMessage());
         }
+        
     }
 
     
@@ -263,7 +270,7 @@ public class DashboardPanel extends JPanel {
         if (model == null) {
             return;
         }
-        
+  
         //update teach me progress bar
         if(teachMeProgressBars != null) {
             for (String lesson : teachMeProgressBars.keySet()) {
@@ -284,7 +291,7 @@ public class DashboardPanel extends JPanel {
                 bar.setString(progress + "%");
             }
         }
-        
+
         //Update Quiz Me Progress Bar
         if(quizMeProgressBars != null) {
             for(String lesson : quizMeProgressBars.keySet()) {
@@ -294,7 +301,7 @@ public class DashboardPanel extends JPanel {
                 bar.setString(progress + "%");
             }
         }
-        
+
         
         int teachMeSum = 0;
         for (String lesson : allLessons) {
@@ -306,27 +313,27 @@ public class DashboardPanel extends JPanel {
             teachMeOverallBar.setString(teachMeOverall + "%");
         }
         
-        
         int practiceSum = 0;
         for (String lesson : allLessons) {
             practiceSum += getProgressForLesson("Practice",lesson);
         }
+        
         int practiceOverall = allLessons.isEmpty()? 0 : practiceSum / allLessons.size();
         if (practiceOverallBar != null) {
             practiceOverallBar.setValue(practiceOverall);
             practiceOverallBar.setString(practiceOverall + "%");
         }
-        
+
         int quizMeSum = 0;
         for (String lesson : allLessons) {
             quizMeSum += getProgressForLesson("Quiz Me",lesson);
         }
+        
         int quizMeOverall = allLessons.isEmpty()? 0 : quizMeSum / allLessons.size();
         if (quizMeOverallBar != null) {
             quizMeOverallBar.setValue(quizMeOverall);
             quizMeOverallBar.setString(quizMeOverall + "%");
         }
-        
         
         //repaint panel to reflect updates
         revalidate();
@@ -471,14 +478,15 @@ public class DashboardPanel extends JPanel {
      * @return the progress percentage.
      */
     private int getProgressForLesson(String studyMode, String lesson) {
+        // ToDo: Why is this try block here, the code should never fail!
         try {
             String userId = model.getStudent().getAccount().getUserId();
             StudentModelSvc studentModelService = ServiceFactory.findStudentModelSvc();
-            System.out.println("Dashboard requesting progress for studyMode = " + studyMode
-                + ", lesson = [" + lesson + "]");
+           // System.out.println("Dashboard requesting progress for studyMode = " + studyMode
+             //   + ", lesson = [" + lesson + "]");
             AssessmentLevel level = studentModelService.retrieveAssessmentLevel(userId, lesson);
-            System.out.println("Dashboard requesting assessment level for userId = "
-                + userId + ", lesson = [" + lesson + "]");
+           // System.out.println("Dashboard requesting assessment level for userId = "
+           //     + userId + ", lesson = [" + lesson + "]");
             int[] progress = mapAssessmentToProgress(level);
             if ("Teach Me".equalsIgnoreCase(studyMode)) {
                 return progress[0];
@@ -488,6 +496,8 @@ public class DashboardPanel extends JPanel {
                 return progress[2];
             }
         } catch (Exception e) {
+            // ToDo: Not sure this is correct, but if it is, it should not
+            // be handling Exception, instead a subclass.
             // Handle error silently
         }
         return 0;
