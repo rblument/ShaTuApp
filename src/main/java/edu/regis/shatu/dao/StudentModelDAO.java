@@ -162,16 +162,12 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
      */
     @Override
     public void updateAssessment(StudentModel model, Assessment assessment, StudentModelFieldKind field)
-<<<<<<< SHAT-361
+
         throws NonRecoverableException {
         String sql = "";
         int knowledgeComponentId = assessment.getOutcome().getId();
         String userId = model.getUserId();
-=======
-            throws NonRecoverableException {
 
-        String sql = "";
->>>>>>> development
         Connection conn = null;
         PreparedStatement stmt = null;
 
@@ -182,13 +178,11 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
                 case ASSESSMENT_LEVEL:
                     sql = "UPDATE Assessment SET AssessmentLevel = ? WHERE UserId = ? AND KnowledgeComponentId = ?";
                     stmt = conn.prepareStatement(sql);
-<<<<<<< SHAT-361
-                    stmt.setString(1, assessment.getAssessment().name());
+
+                    stmt.setString(1, assessment.getAssessment().name()); // COMPLETED, IN_PROGRESS, etc.
                     stmt.setString(2, userId);
                     stmt.setInt(3, knowledgeComponentId);
-=======
-                    stmt.setString(1, assessment.getAssessment().name()); // COMPLETED, IN_PROGRESS, etc.
->>>>>>> development
+
                     break;
 
                 case ATTEMPTS:
@@ -224,26 +218,23 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
                     break;
 
                 default:
-<<<<<<< SHAT-361
-                    return;
-            }
-            int rowsUpdated = stmt.executeUpdate();
-            System.out.println("updateAssessment rowsUpdated = " + rowsUpdated
-                + ", userId = " + userId
-                + ", knowledgeComponentId = " + knowledgeComponentId
-                + ", field = " + field);
-=======
+
                     throw new NonRecoverableException("Unsupported assessment update field: " + field, null);
             }
+            int rowsUpdated = stmt.executeUpdate();
+          //  System.out.println("updateAssessment rowsUpdated = " + rowsUpdated
+           //     + ", userId = " + userId
+           //     + ", knowledgeComponentId = " + knowledgeComponentId
+             //   + ", field = " + field);
 
             stmt.setString(2, model.getUserId());
             stmt.setInt(3, assessment.getOutcome().getId());
             stmt.executeUpdate();
 
->>>>>>> development
+
         } catch (SQLException e) {
-            System.out.println("SQL State: " + e.getSQLState());
-            System.out.println("SQL Error Code: " + e.getErrorCode());
+           // System.out.println("SQL State: " + e.getSQLState());
+          //  System.out.println("SQL Error Code: " + e.getErrorCode());
             throw new NonRecoverableException("UserDAO-ERR-5" + e.toString(), e);
         } finally {
             close(conn, stmt);
@@ -330,26 +321,15 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
     //@Override
     public List<String> retrieveAllLessons(String userId) throws NonRecoverableException {
         List<String> lessons = new ArrayList<>();
-<<<<<<< SHAT-361
-        final String sql = 
-                "SELECT kc.Title " +
-                "FROM Assessment a " +
-                "JOIN KnowledgeComponent kc ON a.KnowledgeComponentId = kc.Id " +
-                "WHERE a.UserId = ? AND kc.Id NOT IN (0, 10, 20) " +
-                "ORDER BY kc.Id";
-        
-        try (Connection conn = DriverManager.getConnection(URL);
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-=======
         final String sql
                 = "SELECT kc.Title "
                 + "FROM Assessment a "
                 + "JOIN KnowledgeComponent kc ON a.KnowledgeComponentId = kc.KnowledgeComponentId "
                 + "WHERE a.UserId = ? AND kc.KnowledgeComponentId NOT IN (0, 10, 20) "
                 + "ORDER BY kc.KnowledgeComponentId";
-
+        
         try (Connection conn = DriverManager.getConnection(URL); PreparedStatement stmt = conn.prepareStatement(sql)) {
->>>>>>> development
+
             stmt.setString(1, userId);
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
@@ -368,26 +348,14 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
     @Override
     public AssessmentLevel retrieveAssessmentLevel(String userId, String lesson)
             throws ObjNotFoundException, NonRecoverableException {
-<<<<<<< SHAT-361
-        final String sql = 
-                "SELECT a.AssessmentLevel " +
-                "FROM Assessment a " +
-                "JOIN KnowledgeComponent kc ON a.KnowledgeComponentId = kc.Id " +
-                "WHERE a.UserId = ? AND kc.Title = ?";
-        System.out.println("retrieveAssessmentLevel called with userId = "
-            + userId + ", lesson = [" + lesson + "]");
-        
-        try (Connection conn = DriverManager.getConnection(URL);
-            PreparedStatement stmt = conn.prepareStatement(sql)) {
-=======
         final String sql
                 = "SELECT a.AssessmentLevel "
                 + "FROM Assessment a "
-                + "JOIN KnowledgeComponent kc ON a.KnowledgeComponentId = kc.KnowledgeComponentId "
+                + "JOIN KnowledgeComponent kc ON a.KnowledgeComponentId = kc.Id "
                 + "WHERE a.UserId = ? AND kc.Title = ?";
-
+        
         try (Connection conn = DriverManager.getConnection(URL); PreparedStatement stmt = conn.prepareStatement(sql)) {
->>>>>>> development
+
             stmt.setString(1, userId);
             stmt.setString(2, lesson);
             try (ResultSet rs = stmt.executeQuery()) {
@@ -466,6 +434,7 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
             assessment.setCorrectAnswersRequested(rs.getInt(7));
             assessments.add(assessment);
         }
+        
         return assessments;
     }
 
@@ -493,7 +462,7 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
 public void recordLoginEvent(String userId, long timestamp) throws NonRecoverableException {
     String updateStudentSql = "UPDATE Student SET LastLogin = ? WHERE UserId = ?";
     String getLastLogoutSql = "SELECT LastLogout FROM Student WHERE UserId = ?";
-String insertLoginSql = "INSERT INTO Login (StudentId, LogoutTime, LoginTime) VALUES (?, ?, ?)";
+String insertLoginSql = "INSERT INTO LoginHistory (UserId, LogoutTime, LoginTime) VALUES (?, ?, ?)";
 Timestamp tStamp = new Timestamp(timestamp);
 
     try (Connection conn = DriverManager.getConnection(URL)) {
@@ -531,12 +500,16 @@ Timestamp tStamp = new Timestamp(timestamp);
     @Override
     public void recordLogoutEvent(String userId, long timestamp) throws NonRecoverableException {
         String updateStudentSql = "UPDATE Student SET LastLogout = ? WHERE UserId = ?";
+        // Assuming the max AutoGenerated Id in LoginHistory is the last login.
+        // MySql works this way now, but if it every auto fills deleted ids as
+        // a new id this will not work and we should create our own monotonically
+        // increasing session number.
         String updateLoginSql
-                = "UPDATE Login "
+                = "UPDATE LoginHistory "
                 + "SET LogoutTime = ? "
-                + "WHERE StudentId = ? AND SessionNumber = ("
-                + "    SELECT MAX(SessionNumber) FROM ("
-                + "        SELECT SessionNumber FROM Login WHERE StudentId = ?"
+                + "WHERE UserId = ? AND SessionNumber = ("
+                + "    SELECT MAX(Id) FROM ("
+                + "        SELECT Id FROM LoginHistory WHERE UserId = ?"
                 + "    ) AS temp"
                 + ")";
         Timestamp tStamp = new Timestamp(timestamp);

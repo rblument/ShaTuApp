@@ -690,78 +690,80 @@ public class ShaTuTutor implements TutorSvc {
 
         // Advance past the one-time INFO_MESSAGE so it won't reappear on the next sign-in.
         try {
-        if (session != null
-                && session.getStudent() != null
-                && session.getStudent().getStudentModel() != null) {
+            if (session != null
+                    && session.getStudent() != null
+                    && session.getStudent().getStudentModel() != null) {
 
-            StudentModel studentModel = session.getStudent().getStudentModel();
-            Assessment assessment = studentModel.findAssessment(0);
+                StudentModel studentModel = session.getStudent().getStudentModel();
+                Assessment assessment = studentModel.findAssessment(0);
 
-            if (assessment != null) {
-                assessment.setExposures(assessment.getExposures() + 1);
-                assessment.setSuccessess(assessment.getSuccessess() + 1);
-                assessment.setAssessment(AssessmentLevel.LOW);
-                
-                StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
-                modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
-                modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.SUCCESSES);
-                modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ASSESSMENT_LEVEL);
+                if (assessment != null) {
+                    assessment.setExposures(assessment.getExposures() + 1);
+                    assessment.setSuccessess(assessment.getSuccessess() + 1);
+                    assessment.setAssessment(AssessmentLevel.LOW);
+
+                    StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+                    modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
+                    modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.SUCCESSES);
+                    modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ASSESSMENT_LEVEL);
+                }
             }
-        }
         } catch (Exception ex) {
-        Logger.getLogger(ShaTuTutor.class.getName())
-              .log(Level.WARNING, "Unable to update INFORMATION_MESSAGE assessment on info-step completion.", ex);
+            Logger.getLogger(ShaTuTutor.class.getName())
+                    .log(Level.WARNING, "Unable to update INFORMATION_MESSAGE assessment on info-step completion.", ex);
         }
-        
+
         try {
-           
-            
-        if (session != null) {
-            SessionDAO dao = (SessionDAO) ServiceFactory.findSessionSvc();
-            // Welcome task is always TaskId = 0
-            dao.deletePendingTask(session.getId(), 0);
 
-            // Optional: also remove from in-memory model if it’s present
-            if (session.getTasks() != null) {
-                session.getTasks().removeIf(pt -> pt.getTask() != null && pt.getTask().getId() == 0);
+            if (session != null) {
+                SessionDAO dao = (SessionDAO) ServiceFactory.findSessionSvc();
+                // Welcome task is always TaskId = 0
+                dao.deletePendingTask(session.getId(), 0);
+
+                // Optional: also remove from in-memory model if it’s present
+                if (session.getTasks() != null) {
+                    session.getTasks().removeIf(pt -> pt.getTask() != null && pt.getTask().getId() == 0);
+                }
             }
-        } catch (Exception ex) {
+        }catch (Exception ex) {
             Logger.getLogger(ShaTuTutor.class.getName())
                     .log(Level.WARNING, "Unable to clear welcome task from PendingTask", ex);
         }
 
-        TutoringMode mode = session.getTutoringMode();
-        ProblemType firstProblemType;
+            TutoringMode mode = session.getTutoringMode();
+            ProblemType firstProblemType;
 
-        switch (mode) {
-            case SEE_ONE:
-                firstProblemType = ProblemType.ASCII_ENCODE;
-                break;
-            case DO_ONE:
-                firstProblemType = ProblemType.ASCII_ENCODE;
-                break;
-            case TEACH_ONE:
-                firstProblemType = ProblemType.ASCII_ENCODE;
-                break;
-            default:
-                firstProblemType = ProblemType.ASCII_ENCODE;
+            switch (mode) {
+                case SEE_ONE:
+                    firstProblemType = ProblemType.ASCII_ENCODE;
+                    break;
+                case DO_ONE:
+                    firstProblemType = ProblemType.ASCII_ENCODE;
+                    break;
+                case TEACH_ONE:
+                    firstProblemType = ProblemType.ASCII_ENCODE;
+                    break;
+                default:
+                    firstProblemType = ProblemType.ASCII_ENCODE;
+            }
+
+            currObjective = getCurrentObjectiveByProbelmType(firstProblemType);
+
+            String messageToHash;
+            if (session.getProblem() != null && session.getProblem().getMessageToHash() != null) {
+                messageToHash = session.getProblem().getMessageToHash();
+            } else {
+                messageToHash = "Regis Computer Science Rocks!";
+            }
+
+            EncodeAsciiStep encodeStep = new EncodeAsciiStep();
+            encodeStep.setQuestion(messageToHash);
+            String jsonData = gson.toJson(encodeStep);
+
+            return currObjective.example(session, jsonData);
         }
 
-        currObjective = getCurrentObjectiveByProbelmType(firstProblemType);
-
-        String messageToHash;
-        if (session.getProblem() != null && session.getProblem().getMessageToHash() != null) {
-            messageToHash = session.getProblem().getMessageToHash();
-        } else {
-            messageToHash = "Regis Computer Science Rocks!";
-        }
-
-        EncodeAsciiStep encodeStep = new EncodeAsciiStep();
-        encodeStep.setQuestion(messageToHash);
-        String jsonData = gson.toJson(encodeStep);
-
-        return currObjective.example(session, jsonData);
-    }
+    
 
     public TutorReply completedTask(String taskInfo) {
         return new TutorReply();

@@ -30,4 +30,6 @@ TRUNCATE TABLE TutoringSession;
 TRUNCATE TABLE PendingTask;
 TRUNCATE TABLE PendingStep;
 
+DELETE FROM LoginHistory WHERE UserId = 'test@regis.edu';
+
 SET FOREIGN_KEY_CHECKS = 1;  -- Reinstate foreign key checks
