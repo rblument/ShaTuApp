@@ -162,9 +162,16 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
      */
     @Override
     public void updateAssessment(StudentModel model, Assessment assessment, StudentModelFieldKind field)
+<<<<<<< SHAT-361
+        throws NonRecoverableException {
+        String sql = "";
+        int knowledgeComponentId = assessment.getOutcome().getId();
+        String userId = model.getUserId();
+=======
             throws NonRecoverableException {
 
         String sql = "";
+>>>>>>> development
         Connection conn = null;
         PreparedStatement stmt = null;
 
@@ -175,34 +182,57 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
                 case ASSESSMENT_LEVEL:
                     sql = "UPDATE Assessment SET AssessmentLevel = ? WHERE UserId = ? AND KnowledgeComponentId = ?";
                     stmt = conn.prepareStatement(sql);
+<<<<<<< SHAT-361
+                    stmt.setString(1, assessment.getAssessment().name());
+                    stmt.setString(2, userId);
+                    stmt.setInt(3, knowledgeComponentId);
+=======
                     stmt.setString(1, assessment.getAssessment().name()); // COMPLETED, IN_PROGRESS, etc.
+>>>>>>> development
                     break;
 
                 case ATTEMPTS:
                     sql = "UPDATE Assessment SET Exposures = ? WHERE UserId = ? AND KnowledgeComponentId = ?";
                     stmt = conn.prepareStatement(sql);
                     stmt.setInt(1, assessment.getExposures());
+                    stmt.setString(2, userId);
+                    stmt.setInt(3, knowledgeComponentId);
                     break;
 
                 case SUCCESSES:
                     sql = "UPDATE Assessment SET Successes = ? WHERE UserId = ? AND KnowledgeComponentId = ?";
                     stmt = conn.prepareStatement(sql);
                     stmt.setInt(1, assessment.getSuccessess());
+                    stmt.setString(2, userId);
+                    stmt.setInt(3, knowledgeComponentId);
                     break;
 
                 case HINTS:
                     sql = "UPDATE Assessment SET Hints = ? WHERE UserId = ? AND KnowledgeComponentId = ?";
                     stmt = conn.prepareStatement(sql);
                     stmt.setInt(1, assessment.getHints());
+                    stmt.setString(2, userId);
+                    stmt.setInt(3, knowledgeComponentId);
                     break;
 
                 case CORRECT_ANSWERS_REQUESTED:
                     sql = "UPDATE Assessment SET CorrectAnswersRequested = ? WHERE UserId = ? AND KnowledgeComponentId = ?";
                     stmt = conn.prepareStatement(sql);
                     stmt.setInt(1, assessment.getCorrectAnswersRequested());
+                    stmt.setString(2, userId);
+                    stmt.setInt(3, knowledgeComponentId);
                     break;
 
                 default:
+<<<<<<< SHAT-361
+                    return;
+            }
+            int rowsUpdated = stmt.executeUpdate();
+            System.out.println("updateAssessment rowsUpdated = " + rowsUpdated
+                + ", userId = " + userId
+                + ", knowledgeComponentId = " + knowledgeComponentId
+                + ", field = " + field);
+=======
                     throw new NonRecoverableException("Unsupported assessment update field: " + field, null);
             }
 
@@ -210,6 +240,7 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
             stmt.setInt(3, assessment.getOutcome().getId());
             stmt.executeUpdate();
 
+>>>>>>> development
         } catch (SQLException e) {
             System.out.println("SQL State: " + e.getSQLState());
             System.out.println("SQL Error Code: " + e.getErrorCode());
@@ -299,6 +330,17 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
     //@Override
     public List<String> retrieveAllLessons(String userId) throws NonRecoverableException {
         List<String> lessons = new ArrayList<>();
+<<<<<<< SHAT-361
+        final String sql = 
+                "SELECT kc.Title " +
+                "FROM Assessment a " +
+                "JOIN KnowledgeComponent kc ON a.KnowledgeComponentId = kc.Id " +
+                "WHERE a.UserId = ? AND kc.Id NOT IN (0, 10, 20) " +
+                "ORDER BY kc.Id";
+        
+        try (Connection conn = DriverManager.getConnection(URL);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+=======
         final String sql
                 = "SELECT kc.Title "
                 + "FROM Assessment a "
@@ -307,6 +349,7 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
                 + "ORDER BY kc.KnowledgeComponentId";
 
         try (Connection conn = DriverManager.getConnection(URL); PreparedStatement stmt = conn.prepareStatement(sql)) {
+>>>>>>> development
             stmt.setString(1, userId);
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
@@ -325,6 +368,18 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
     @Override
     public AssessmentLevel retrieveAssessmentLevel(String userId, String lesson)
             throws ObjNotFoundException, NonRecoverableException {
+<<<<<<< SHAT-361
+        final String sql = 
+                "SELECT a.AssessmentLevel " +
+                "FROM Assessment a " +
+                "JOIN KnowledgeComponent kc ON a.KnowledgeComponentId = kc.Id " +
+                "WHERE a.UserId = ? AND kc.Title = ?";
+        System.out.println("retrieveAssessmentLevel called with userId = "
+            + userId + ", lesson = [" + lesson + "]");
+        
+        try (Connection conn = DriverManager.getConnection(URL);
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
+=======
         final String sql
                 = "SELECT a.AssessmentLevel "
                 + "FROM Assessment a "
@@ -332,6 +387,7 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
                 + "WHERE a.UserId = ? AND kc.Title = ?";
 
         try (Connection conn = DriverManager.getConnection(URL); PreparedStatement stmt = conn.prepareStatement(sql)) {
+>>>>>>> development
             stmt.setString(1, userId);
             stmt.setString(2, lesson);
             try (ResultSet rs = stmt.executeQuery()) {

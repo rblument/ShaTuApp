@@ -124,10 +124,21 @@ public class DashboardPanel extends JPanel {
             }
             
             welcomeLabel.setText("Welcome, " + model.getStudent().getAccount().getFirstName() + "!");
+            loadAllLessons();
+            rebuildDashboard();
         }
         
         //update progress bars
         updateAllProgressBars();
+    }
+    /**
+     * Ensure allLessons populates and recalculate progress bars from lessons
+     */
+    private void rebuildDashboard() {
+        removeAll();
+        layoutComponents();
+        revalidate();
+        repaint();
     }
 
     /**
@@ -463,7 +474,11 @@ public class DashboardPanel extends JPanel {
         try {
             String userId = model.getStudent().getAccount().getUserId();
             StudentModelSvc studentModelService = ServiceFactory.findStudentModelSvc();
+            System.out.println("Dashboard requesting progress for studyMode = " + studyMode
+                + ", lesson = [" + lesson + "]");
             AssessmentLevel level = studentModelService.retrieveAssessmentLevel(userId, lesson);
+            System.out.println("Dashboard requesting assessment level for userId = "
+                + userId + ", lesson = [" + lesson + "]");
             int[] progress = mapAssessmentToProgress(level);
             if ("Teach Me".equalsIgnoreCase(studyMode)) {
                 return progress[0];

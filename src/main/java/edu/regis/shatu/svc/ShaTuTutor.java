@@ -36,6 +36,7 @@ import edu.regis.shatu.model.Student;
 import edu.regis.shatu.model.Task;
 import edu.regis.shatu.model.TutoringSession;
 import edu.regis.shatu.model.Unit;
+import edu.regis.shatu.model.aol.StudentModel;
 import edu.regis.shatu.model.StudentModelFieldKind;
 import edu.regis.shatu.model.aol.Assessment;
 import edu.regis.shatu.model.aol.AssessmentLevel;
@@ -689,16 +690,40 @@ public class ShaTuTutor implements TutorSvc {
 
         // Advance past the one-time INFO_MESSAGE so it won't reappear on the next sign-in.
         try {
-            if (session != null) {
-                SessionDAO dao = (SessionDAO) ServiceFactory.findSessionSvc();
+        if (session != null
+                && session.getStudent() != null
+                && session.getStudent().getStudentModel() != null) {
 
-                // Welcome task is always TaskId = 0
-                dao.deletePendingTask(session.getId(), 0);
+            StudentModel studentModel = session.getStudent().getStudentModel();
+            Assessment assessment = studentModel.findAssessment(0);
 
-                if (session.getTasks() != null) {
-                    session.getTasks().removeIf(pt
-                            -> pt.getTask() != null && pt.getTask().getId() == 0);
-                }
+            if (assessment != null) {
+                assessment.setExposures(assessment.getExposures() + 1);
+                assessment.setSuccessess(assessment.getSuccessess() + 1);
+                assessment.setAssessment(AssessmentLevel.LOW);
+                
+                StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+                modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
+                modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.SUCCESSES);
+                modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ASSESSMENT_LEVEL);
+            }
+        }
+        } catch (Exception ex) {
+        Logger.getLogger(ShaTuTutor.class.getName())
+              .log(Level.WARNING, "Unable to update INFORMATION_MESSAGE assessment on info-step completion.", ex);
+        }
+        
+        try {
+           
+            
+        if (session != null) {
+            SessionDAO dao = (SessionDAO) ServiceFactory.findSessionSvc();
+            // Welcome task is always TaskId = 0
+            dao.deletePendingTask(session.getId(), 0);
+
+            // Optional: also remove from in-memory model if it’s present
+            if (session.getTasks() != null) {
+                session.getTasks().removeIf(pt -> pt.getTask() != null && pt.getTask().getId() == 0);
             }
         } catch (Exception ex) {
             Logger.getLogger(ShaTuTutor.class.getName())
