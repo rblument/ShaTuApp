@@ -14,6 +14,10 @@ package edu.regis.shatu.view.act;
 
 import com.google.gson.Gson;
 import edu.regis.shatu.model.Account;
+import edu.regis.shatu.svc.ClientRequest;
+import edu.regis.shatu.svc.ServerRequestType;
+import edu.regis.shatu.svc.SvcFacade;
+import edu.regis.shatu.svc.TutorReply;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
@@ -72,7 +76,16 @@ public class SaveSessionAction extends ShaTuGuiAction {
         // ToDo: what happens on a save
         Gson gson = getGsonPretty();
         Account account = MainFrame.instance().getAccount();
+        ClientRequest request = new ClientRequest(ServerRequestType.SAVE_SESSION);
+        request.setData(gson.toJson(account));
+        TutorReply reply = SvcFacade.instance().tutorRequest(request);
+        if (reply.getStatus().equals("SAVE_SESSION")) {
+           MainFrame.instance().setModel(null);
+        }
+        else {
+            System.err.println("Something went wrong: " + reply.getData());
+        }
         
-        System.out.println("Save not implemented");
+        
     }
 }
