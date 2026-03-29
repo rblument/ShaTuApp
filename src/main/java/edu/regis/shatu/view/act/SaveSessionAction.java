@@ -76,15 +76,16 @@ public class SaveSessionAction extends ShaTuGuiAction {
         // SHAT-362: Save functionality.
         Gson gson = getGsonPretty();
         Account account = MainFrame.instance().getAccount();
-        
+
         ClientRequest request = new ClientRequest(ServerRequestType.SAVE_SESSION);
-        request.setData(gson.toJson(account));
-        
         // Get the user account.
         request.setUserId(account.getUserId());
         // Get the security token for the user.
         request.setSecurityToken(MainFrame.instance().getModel().getSecurityToken());
+        request.setData(gson.toJson(account));
+
         TutorReply reply = SvcFacade.instance().tutorRequest(request);
+        
         // Alert if unable to save for some reason.
         if (!reply.getStatus().equals("SAVED")) {
             System.err.println("Something went wrong: " + reply.getData());
