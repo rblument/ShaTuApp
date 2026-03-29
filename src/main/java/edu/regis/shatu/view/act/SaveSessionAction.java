@@ -12,12 +12,15 @@
  */
 package edu.regis.shatu.view.act;
 
+import com.google.gson.Gson;
+import edu.regis.shatu.model.Account;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 
 import edu.regis.shatu.util.ImgFactory;
+import edu.regis.shatu.view.MainFrame;
 
 /**
  * Handler for GUI gestures requesting to save the current session.
@@ -67,6 +70,9 @@ public class SaveSessionAction extends ShaTuGuiAction {
      */
     public void actionPerformed(ActionEvent evt) {
         // ToDo: what happens on a save
+        Gson gson = getGsonPretty();
+        Account account = MainFrame.instance().getAccount();
+        
         System.out.println("Save not implemented");
     }
 }
