@@ -155,6 +155,7 @@ public class ShaTuTutor implements TutorSvc {
             case "requestCorrectAnswer":
             case "resetPassword":
             case "updateAccount":
+            case "saveSession":
                 String userId = request.getUserId();
                 try {
                     if (verifySession(userId, request.getSecurityToken())) {
@@ -520,6 +521,7 @@ public class ShaTuTutor implements TutorSvc {
             reply.setData("NonRecoverableException occurred during save");
             return reply;
         }
+    } // End saveSession()
 
     /*
     public TutorReply getTask(String jsonObj) {
