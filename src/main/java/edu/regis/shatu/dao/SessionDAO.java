@@ -303,9 +303,7 @@ public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSes
     /**
      * {@inheritDoc}
      * 
-     * 1. Rename existing session file
-     * 2. Create a new session file using the given update
-     * 3. Delete the original, but now renamed file.
+     * Updates the existing session in the database records.
      */
     @Override
     public void update(TutoringSession session) throws ObjNotFoundException, NonRecoverableException {
