@@ -12,12 +12,19 @@
  */
 package edu.regis.shatu.view.act;
 
+import com.google.gson.Gson;
+import edu.regis.shatu.model.Account;
+import edu.regis.shatu.svc.ClientRequest;
+import edu.regis.shatu.svc.ServerRequestType;
+import edu.regis.shatu.svc.SvcFacade;
+import edu.regis.shatu.svc.TutorReply;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 
 import edu.regis.shatu.util.ImgFactory;
+import edu.regis.shatu.view.MainFrame;
 
 /**
  * Handler for GUI gestures requesting to save the current session.
@@ -66,7 +73,24 @@ public class SaveSessionAction extends ShaTuGuiAction {
      * @param evt 
      */
     public void actionPerformed(ActionEvent evt) {
-        // ToDo: what happens on a save
-        System.out.println("Save not implemented");
+        // SHAT-362: Save functionality.
+        Gson gson = getGsonPretty();
+        Account account = MainFrame.instance().getAccount();
+
+        ClientRequest request = new ClientRequest(ServerRequestType.SAVE_SESSION);
+        // Get the user account.
+        request.setUserId(account.getUserId());
+        // Get the security token for the user.
+        request.setSecurityToken(MainFrame.instance().getModel().getSecurityToken());
+        request.setData(gson.toJson(account));
+
+        TutorReply reply = SvcFacade.instance().tutorRequest(request);
+        
+        // Alert if unable to save for some reason.
+        if (!reply.getStatus().equals("SAVED")) {
+            System.err.println("Something went wrong: " + reply.getData());
+        }
+        
+        
     }
 }

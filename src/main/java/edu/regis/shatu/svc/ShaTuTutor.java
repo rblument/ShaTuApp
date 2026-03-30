@@ -156,6 +156,7 @@ public class ShaTuTutor implements TutorSvc {
             case "requestCorrectAnswer":
             case "resetPassword":
             case "updateAccount":
+            case "saveSession":
                 String userId = request.getUserId();
                 try {
                     if (verifySession(userId, request.getSecurityToken())) {
@@ -489,6 +490,37 @@ public class ShaTuTutor implements TutorSvc {
             return reply;
         }
     }
+    
+    /**
+     * SHAT-362
+     * Attempts to save a student session.
+     * 
+     * This method handles ":SaveSession" requests from the GUI client.
+     * 
+     * It is invoked indirectly as a reflection from within request().
+     * 
+     * @param jsonUser a JSON encoded User object
+     * @return a TutorReply indicating "SAVED" for success or ":ERR" for failure
+     */
+    public TutorReply saveSession(String jsonSession) {
+        try {
+            ServiceFactory.findSessionSvc().update(session);
+            return new TutorReply("SAVED");
+        }
+        // If the user does not have an existing session catch it.
+        catch (ObjNotFoundException ex) {
+            TutorReply reply = new TutorReply(":ERR");
+            reply.setData("Session not found for: " + session.getStudent().getAccount().getUserId());
+            return reply;
+        }
+        // Is the database connection good?
+        catch (NonRecoverableException ex) {
+            System.getLogger(ShaTuTutor.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+            TutorReply reply = new TutorReply(":ERR");
+            reply.setData("NonRecoverableException occurred during save");
+            return reply;
+        }
+    } // End saveSession()
 
     /*
     public TutorReply getTask(String jsonObj) {

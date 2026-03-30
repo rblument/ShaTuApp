@@ -106,7 +106,12 @@ public enum ServerRequestType {
     /**
      * Get the current task of the user.
      */
-    GET_TASK(":GetTask");
+    GET_TASK(":GetTask"),
+    
+    /**
+     * SHAT-362: Added ability to save sessions.
+     */
+    SAVE_SESSION(":SaveSession");
 
     /**
      * The name used by the server to identify this request.
