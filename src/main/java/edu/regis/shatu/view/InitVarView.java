@@ -73,7 +73,6 @@ public class InitVarView extends UserRequestView { // implements ActionListener
      * }
      * }
      */
-    
     private void initializeComponents() {
         hVars = new JTextField[NUM_VARS];
 
@@ -199,7 +198,7 @@ public class InitVarView extends UserRequestView { // implements ActionListener
 
     @Override
     protected void updateView() {
-               resetButtonListeners(); // Clear any listeners applied from other views
+        resetButtonListeners(); // Clear any listeners applied from other views
         feedbackTextArea.setText(""); // Resets text feedback area
         // setupButtons();
 
@@ -221,46 +220,36 @@ public class InitVarView extends UserRequestView { // implements ActionListener
             System.out.println(
                     "----Init Var Step Title-----" + model.currentTask().getCurrentStep().getStep().getTitle());
         }
-      
+
     }
-    
+
     /**
-     * Configure UI components based on the current tutoring mode
-     *Disables fields not available for SEE_ONE mode for passive viewing.
-     * 
+     * Configure UI components based on the current tutoring mode Disables
+     * fields not available for SEE_ONE mode for passive viewing.
+     *
      */
     @Override
     protected void configureModeSpecificUI() {
-        super.configureModeSpecificUI();//call parent to handle buttons
-        
-        if(model == null) {
+        super.configureModeSpecificUI();
+
+        if (model == null) {
             return;
         }
-        
+
         TutoringMode mode = model.getTutoringMode();
-        
+
         if (mode == TutoringMode.SEE_ONE) {
-            //disable all 8 hash var text fields
-            for (int i = 0; i <NUM_VARS; i++) {
+            for (int i = 0; i < NUM_VARS; i++) {
                 hVars[i].setEnabled(false);
             }
-            
-            //disable feedback area
-            
             feedbackTextArea.setEnabled(false);
-        }
-        // DO_ONE & TEACH_ONE
-        else {
-            //enable all 8 hash var text fields
-            for (int i = 0; i <NUM_VARS; i++) {
-                hVars[i].setEnabled(false);
+        } else {
+            for (int i = 0; i < NUM_VARS; i++) {
+                hVars[i].setEnabled(true);
             }
-            
-            //enable feedback area
-            
-            feedbackTextArea.setEnabled(false);
+            feedbackTextArea.setEnabled(true);
         }
-    } 
+    }
 
     // I think this could be done by ShaTuTutor but removing it breaks the class
     @Override
