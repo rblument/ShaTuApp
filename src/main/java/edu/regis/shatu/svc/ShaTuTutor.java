@@ -425,41 +425,45 @@ public class ShaTuTutor implements TutorSvc {
      * data being a JSon encoded TutoringSession object.
      */
     public TutorReply signIn(String jsonUser) {
-        Account requestAcct = gson.fromJson(jsonUser, Account.class);
+    Account requestAcct = gson.fromJson(jsonUser, Account.class);
 
-        try {
-            Account dbAcct = ServiceFactory.findAccountSvc().retrieve(requestAcct.getUserId());
+    try {
+        Account dbAcct = ServiceFactory.findAccountSvc().retrieve(requestAcct.getUserId());
 
-            if (dbAcct.getPassword().equals(requestAcct.getPassword())) {
-                //student = new Student(dbAcct);
-                String userId = dbAcct.getUserId();
+        if (dbAcct.getPassword().equals(requestAcct.getPassword())) {
+            String userId = dbAcct.getUserId();
 
-                SessionSvc svc = ServiceFactory.findSessionSvc();
+            SessionSvc svc = ServiceFactory.findSessionSvc();
 
-                session = svc.retrieve(dbAcct);
+            session = svc.retrieve(dbAcct);
+            student = session.getStudent();
 
-                student = session.getStudent();
-
+            // Do not let login history problems block a successful login
+            try {
                 notifyLogin(student);
-
-                TutorReply reply = new TutorReply("Authenticated");
-
-                reply.setData(gson.toJson(session));
-
-                return reply;
-
-            } else {
-                return new TutorReply("InvalidPassword");
+            } catch (NonRecoverableException ex) {
+                Logger.getLogger(ShaTuTutor.class.getName()).log(
+                        Level.WARNING,
+                        "Login succeeded, but login event could not be recorded.",
+                        ex
+                );
             }
 
-        } catch (ObjNotFoundException e) {
-            return new TutorReply("UnknownUser");
-        } catch (NonRecoverableException ex) {
-            Logger.getLogger(ShaTuTutor.class
-                    .getName()).log(Level.SEVERE, null, ex);
-            return new TutorReply();
+            TutorReply reply = new TutorReply("Authenticated");
+            reply.setData(gson.toJson(session));
+            return reply;
+
+        } else {
+            return new TutorReply("InvalidPassword");
         }
+
+    } catch (ObjNotFoundException e) {
+        return new TutorReply("UnknownUser");
+    } catch (NonRecoverableException ex) {
+        Logger.getLogger(ShaTuTutor.class.getName()).log(Level.SEVERE, null, ex);
+        return new TutorReply();
     }
+}
 
     /**
      * Attempts to sign a student out.

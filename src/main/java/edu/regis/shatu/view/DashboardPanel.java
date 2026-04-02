@@ -577,12 +577,12 @@ public class DashboardPanel extends JPanel {
         gbc.gridx = 0;
         gbc.gridwidth = 2;
         panel.add(overallBar, gbc);
-
+        
         gbc.gridwidth = 1;
-        int row = 2;
-        row = addSection(panel, row, "Not Started:", notStarted, "Teach Me", category);
-        row = addSection(panel, row, "In Progress:", inProgress, "Practice", category);
-        row = addSection(panel, row, "Completed:", completed, "Quiz Me", category);
+int row = 2;
+row = addSection(panel, row, "Not Started:", notStarted, category);
+row = addSection(panel, row, "In Progress:", inProgress, category);
+row = addSection(panel, row, "Completed:", completed, category);
 
         // Filler to push content to the top
         gbc.gridy = ++row;
@@ -633,7 +633,7 @@ public class DashboardPanel extends JPanel {
      * @return the next row index.
      */
     private int addSection(JPanel panel, int startRow, String sectionName,
-            List<String> lessons, String expectedCategory, String studyMode) {
+        List<String> lessons, String studyMode) {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(1, 1, 1, 1);

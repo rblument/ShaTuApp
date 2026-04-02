@@ -462,8 +462,8 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
 public void recordLoginEvent(String userId, long timestamp) throws NonRecoverableException {
     String updateStudentSql = "UPDATE Student SET LastLogin = ? WHERE UserId = ?";
     String getLastLogoutSql = "SELECT LastLogout FROM Student WHERE UserId = ?";
-String insertLoginSql = "INSERT INTO LoginHistory (UserId, LogoutTime, LoginTime) VALUES (?, ?, ?)";
-Timestamp tStamp = new Timestamp(timestamp);
+    String insertLoginSql = "INSERT INTO LoginHistory (UserId, LogoutTime, LoginTime) VALUES (?, ?, ?)";
+    Timestamp tStamp = new Timestamp(timestamp);
 
     try (Connection conn = DriverManager.getConnection(URL)) {
         Timestamp previousLogout = null;
@@ -476,20 +476,28 @@ Timestamp tStamp = new Timestamp(timestamp);
             }
         }
 
+        // Always update Student.LastLogin
         try (PreparedStatement updateStmt = conn.prepareStatement(updateStudentSql)) {
             updateStmt.setTimestamp(1, tStamp);
             updateStmt.setString(2, userId);
             updateStmt.executeUpdate();
         }
 
+        // Try to insert into LoginHistory, but do not fail login if that table is missing
         try (PreparedStatement insertStmt = conn.prepareStatement(insertLoginSql)) {
             insertStmt.setString(1, userId);
             insertStmt.setTimestamp(2, previousLogout);
             insertStmt.setTimestamp(3, tStamp);
             insertStmt.executeUpdate();
+        } catch (SQLException ex) {
+            Logger.getLogger(StudentModelDAO.class.getName()).log(
+                    Level.WARNING,
+                    "Could not insert login history record.",
+                    ex
+            );
         }
-    }
-    catch (SQLException ex) {
+
+    } catch (SQLException ex) {
         throw new NonRecoverableException("Error recording login event: " + ex.toString(), ex);
     }
 }
