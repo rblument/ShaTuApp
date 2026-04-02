@@ -173,28 +173,39 @@ public class NewAccountPanel extends GPanel {
     //public JTextField getFNameComp() {
     //return fName;
     //}
+    /**
+     * TODO:
+     * when not necessary for development anymore:
+     * - remove hard coded fName, lName, userId, pass1, pass2, secAnswer when done testing
+    */
     private void initComponents() {
         LoginDocumentListener docListener = new LoginDocumentListener();
         fName = new HintTextField("First", 15);
+        fName.setText("Testy");
         fName.getDocument().addDocumentListener(docListener);
 
         lName = new HintTextField("Last", 30);
+        lName.setText("McTest");
         lName.getDocument().addDocumentListener(docListener);
 
         userId = new HintTextField("userId@university.edu", 10);
         userId.setIsEmailAddr(true);
+        userId.setText("test@regis.edu");
         userId.getDocument().addDocumentListener(docListener);
 
         pass1 = new JPasswordField(20);
+        pass1.setText("TestP&ss");
         pass1.getDocument().addDocumentListener(docListener);
 
         pass2 = new JPasswordField(20);
+        pass2.setText("TestP&ss");
         pass2.getDocument().addDocumentListener(docListener);
         
         String s1[] = {"What city were you born in?", "What is your mother's maiden name?"};
         secQuestions = new JComboBox(s1);
         
         secAnswer = new JPasswordField(20);
+        secAnswer.setText("Denver");
         secAnswer.getDocument().addDocumentListener(docListener);
 
         signInBut = new JButton(SignInAction.instance());
