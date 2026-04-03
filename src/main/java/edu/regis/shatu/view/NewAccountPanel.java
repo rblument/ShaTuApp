@@ -132,6 +132,9 @@ public class NewAccountPanel extends GPanel {
     
     /**
      * Set all of the text fields in this view to the empty string.
+     * TODO:
+     * modified to make development easier. revert before usage
+     * 
      */
     public void clearFields() {
         fName.setText("");
@@ -172,37 +175,47 @@ public class NewAccountPanel extends GPanel {
     // Used to get focus
     //public JTextField getFNameComp() {
     //return fName;
+    // TODO:
+    // when done testing, 
+    // remove hard-coded login credentials
+    // uncomment signInBut.setEnabled()
     //}
     private void initComponents() {
         LoginDocumentListener docListener = new LoginDocumentListener();
         fName = new HintTextField("First", 15);
+        fName.setText("Testy");
         fName.getDocument().addDocumentListener(docListener);
 
         lName = new HintTextField("Last", 30);
+        lName.setText("McTest");
         lName.getDocument().addDocumentListener(docListener);
 
         userId = new HintTextField("userId@university.edu", 10);
         userId.setIsEmailAddr(true);
+        userId.setText("test@regis.edu");
         userId.getDocument().addDocumentListener(docListener);
 
         pass1 = new JPasswordField(20);
+        pass1.setText("TestP&ss");
         pass1.getDocument().addDocumentListener(docListener);
 
         pass2 = new JPasswordField(20);
+        pass2.setText("testP&ss");
         pass2.getDocument().addDocumentListener(docListener);
         
         String s1[] = {"What city were you born in?", "What is your mother's maiden name?"};
         secQuestions = new JComboBox(s1);
         
         secAnswer = new JPasswordField(20);
+        secAnswer.setText("Denver");
         secAnswer.getDocument().addDocumentListener(docListener);
 
         signInBut = new JButton(SignInAction.instance());
-        signInBut.setEnabled(true);
+//        signInBut.setEnabled(false);
 
         createAcctBut = new JButton(CreateAcctAction.instance());
 
-        createAcctBut.setEnabled(false);
+        createAcctBut.setEnabled(true);
         //MainFrame.instance().getRootPane().setDefaultButton(createAcctBut);
 
         backBut = new JButton(BackToLogin.instance());
@@ -554,7 +567,13 @@ public class NewAccountPanel extends GPanel {
             msg.setText("");
 
         } else {
-            createAcctBut.setEnabled(false);
+            /**
+             * TODO:
+             * when done testing,
+             * switch .setEnabled back to false
+             */
+            createAcctBut.setEnabled(true);
+//            createAcctBut.setEnabled(false);
             msg.setText("(* Please fix problems highlighted in red.)");
         }
     }
