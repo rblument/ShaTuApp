@@ -195,7 +195,7 @@ public class SplashPanel extends GPanel {
         LoginDocumentListener docListener = new LoginDocumentListener();
         
         userId = new JTextField(20);
-        userId.setText("Test@regis.edu");
+        userId.setText("test@regis.edu");
 	userId.getDocument().addDocumentListener(docListener);
 
 	password = new JPasswordField(20);
