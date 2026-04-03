@@ -343,11 +343,16 @@ public class TutoringSessionView extends GPanel {
         
         TutoringMode mode = model.getTutoringMode();
         
+        /**
+         * TODO:
+         * switched label to 'true' to allow for new logins to have access to buttons
+         */
         switch (mode) {
             case SEE_ONE:
                 for (StepSelection step : StepSelection.values()) {
                     HighlightLabel label = step.getLabel();
-                    label.setEnabled(false);
+//                    label.setEnabled(false);
+                    label.setEnabled(true);
                 }
                 break;
             
