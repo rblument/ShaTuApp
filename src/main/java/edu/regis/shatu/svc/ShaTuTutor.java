@@ -691,76 +691,57 @@ public class ShaTuTutor implements TutorSvc {
      * @return
      */
     public TutorReply completeInfoMsgStep(StepCompletion completion) {
-        // Advance past the one-time INFO_MESSAGE so it won't reappear on the next sign-in.
-        // IMPORTANT: The client UI assumes there is ALWAYS at least one pending task in the session,
-        // so we update the existing PendingTask row instead of deleting it.
-        try {
-            
-        /*    
-        if (session != null) {
-            SessionDAO dao = (SessionDAO) ServiceFactory.findSessionSvc();
-            // Welcome task is always TaskId = 0
-            // First ASCII task is TaskId = 10 and first ASCII step is StepId = 1
-            dao.updatePendingTask(session.getId(), 0, 10, 1);
+        System.out.println("[ShaTuTutor.java] - [completeInfoMsgStep] - starting INFO_MESSAGE completion");
 
-            // Optional: update in-memory model to match DB transition
-            if (session.getTasks() != null) {
-                for (PendingTask pt : session.getTasks()) {
-                    if (pt.getTask() != null && pt.getTask().getId() == 0) {
-                        Task nextTask = session.getProblem().findTaskById(10);
-                        if (nextTask != null) {
-                            pt.setTask(nextTask);
-                            pt.setCurrentStep(new PendingStep(nextTask.getCurrentStep()));
-                        }
-                        break;
-                    }
-                }
-            }
+        try {
+            logInfoMessageTransitionReadiness();
+        } catch (Exception ex) {
+            Logger.getLogger(ShaTuTutor.class.getName())
+                  .log(Level.WARNING, "SHAT-347: unable to inspect next task during INFO_MESSAGE completion", ex);
         }
-            */
-        System.out.println("completeInfoMsgStep: skipping DB pending task update for now because ASCII task has no Step rows in DB");
-    } catch (Exception ex) {
-        Logger.getLogger(ShaTuTutor.class.getName())
-              .log(Level.WARNING, "Unable to clear welcome task from PendingTask", ex);
-    }
+
         TutoringMode mode = session.getTutoringMode();
         ProblemType firstProblemType;
-        
-        //Does this need to be updated to display where they last where for DO_ONE,  TEACH_ONE?? Will they always start with ASCII?
+
         switch (mode) {
             case SEE_ONE:
-                // First demonstration: ASCII Encoding
                 firstProblemType = ProblemType.ASCII_ENCODE;
                 break;
             case DO_ONE:
-                // First practice: typically starts with ASCII_ENCODE as well
                 firstProblemType = ProblemType.ASCII_ENCODE;
                 break;
             case TEACH_ONE:
-                // Teaching mode: starts with ASCII_ENCODE
                 firstProblemType = ProblemType.ASCII_ENCODE;
                 break;
             default:
                 firstProblemType = ProblemType.ASCII_ENCODE;
         }
-    
-        // Get the objective for the first task
+
         currObjective = getCurrentObjectiveByProbelmType(firstProblemType);
-        
-        // Generate an example for this task
-        // Use the message from the current problem in the session, or a default message
+
         String messageToHash;
         if (session.getProblem() != null && session.getProblem().getMessageToHash() != null) {
             messageToHash = session.getProblem().getMessageToHash();
         } else {
-            // Default message for demonstration
             messageToHash = "Regis Computer Science Rocks!";
         }
-        
+
         EncodeAsciiStep encodeStep = new EncodeAsciiStep();
         encodeStep.setQuestion(messageToHash);
         String jsonData = gson.toJson(encodeStep);
 
+        try {
+            System.out.println("[ShaTuTutor.java] - [completeInfoMsgStep] - attempting DB transition sessionId=" + session.getId() + ", oldTaskId=0, newTaskId=10, newStepId=1");
+            SessionDAO dao = (SessionDAO) ServiceFactory.findSessionSvc();
+            dao.updatePendingTask(session.getId(), 0, 10, 1);
+            System.out.println("[ShaTuTutor.java] - [completeInfoMsgStep] - DB transition updatePendingTask completed successfully");
+        } catch (Exception ex) {
+            Logger.getLogger(ShaTuTutor.class.getName())
+                  .log(Level.SEVERE, "SHAT-347: failed to persist INFO_MESSAGE -> ASCII_ENCODE transition", ex);
+            System.out.println("[ShaTuTutor.java] - [completeInfoMsgStep] - DB transition failed: " + ex.getMessage());
+        }
+
+        System.out.println("[ShaTuTutor.java] - [completeInfoMsgStep] - returning ASCII example to client");
         return currObjective.example(session, jsonData);
     }
 
@@ -1154,5 +1135,41 @@ public class ShaTuTutor implements TutorSvc {
             }
         }
         return model.getWeakestProblemType();
+    }
+    
+    private void logInfoMessageTransitionReadiness() {
+        if (session == null) {
+            System.out.println("SHAT-347: session was null during INFO_MESSAGE completion");
+            return;
+        }
+
+        if (session.getProblem() == null) {
+            System.out.println("SHAT-347: problem was null during INFO_MESSAGE completion");
+            return;
+        }
+
+        Task nextTask = session.getProblem().findTaskById(10);
+
+        if (nextTask == null) {
+            System.out.println("SHAT-347: next task not found. Expected TaskId 10 for first ASCII task.");
+            return;
+        }
+
+        if (nextTask.getSteps() == null || nextTask.getSteps().isEmpty()) {
+            System.out.println(
+                "SHAT-347: cannot persist transition to task "
+                + nextTask.getId()
+                + " because no Step rows exist for this task in seeded DB"
+            );
+            return;
+        }
+
+        System.out.println(
+            "SHAT-347: next task "
+            + nextTask.getId()
+            + " has "
+            + nextTask.getSteps().size()
+            + " step(s); DB persistence path may be available"
+        );
     }
 }
