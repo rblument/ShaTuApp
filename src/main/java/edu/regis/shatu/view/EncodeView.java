@@ -514,13 +514,24 @@ public class EncodeView extends UserRequestView {
         EncodeAsciiStep completedStep = gson.fromJson(currentStep.getData(), EncodeAsciiStep.class); 
 
         String userResponse = this.responseTextArea.getText().replaceAll(" ", ""); // Get the user's answer.
-
+        
+        if (userResponse.isEmpty()) {
+            System.out.println("EncodeView.stepCompletion: user response was empty");
+        }
+        
         completedStep.setAscii(userResponse);
 
         StepCompletion step = new StepCompletion(currentStep, gson.toJson(completedStep));
 
         step.setStep(currentStep); // Will be sent to the tutor.
-
+        
+        //added print statements for better checking
+        System.out.println("EncodeView.stepCompletion called");
+        System.out.println("currentStep subtype=" + currentStep.getSubType());
+        System.out.println("question=" + completedStep.getQuestion());
+        System.out.println("result=" + completedStep.getResult());
+        System.out.println("ascii userResponse=" + userResponse);
+        
         return step;
     }
 }

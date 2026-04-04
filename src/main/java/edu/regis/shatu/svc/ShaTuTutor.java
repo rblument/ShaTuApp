@@ -436,9 +436,30 @@ public class ShaTuTutor implements TutorSvc {
                 SessionSvc svc = ServiceFactory.findSessionSvc();
             
                 session = svc.retrieve(dbAcct);
+
+                if (session.getTasks().isEmpty() && session.getProblem() != null) {
+                    System.out.println("signIn recovery: session has no pending tasks, rebuilding first task");
+
+                    Task firstTask = session.getProblem().findTaskBySequence(0);
+
+                    if (firstTask != null) {
+                        SessionDAO dao = (SessionDAO) ServiceFactory.findSessionSvc();
+                        dao.addPendingTask(session.getId(), firstTask);
+
+                        session = svc.retrieve(dbAcct);
+
+                        System.out.println("signIn recovery added taskId=" + firstTask.getId());
+                        System.out.println("signIn recovery added stepId=" + firstTask.getCurrentStep().getId());
+                    }
+                }
                 
+                
+                System.out.println("signIn sessionId=" + session.getId());
+                System.out.println("signIn pending task count=" + session.getTasks().size());
+                System.out.println("signIn problem task count=" + session.getProblem().getTasks().size());
+
                 student = session.getStudent();
-                
+
                 notifyLogin(student);
 
                 TutorReply reply = new TutorReply("Authenticated");
@@ -674,6 +695,8 @@ public class ShaTuTutor implements TutorSvc {
         // IMPORTANT: The client UI assumes there is ALWAYS at least one pending task in the session,
         // so we update the existing PendingTask row instead of deleting it.
         try {
+            
+        /*    
         if (session != null) {
             SessionDAO dao = (SessionDAO) ServiceFactory.findSessionSvc();
             // Welcome task is always TaskId = 0
@@ -694,6 +717,8 @@ public class ShaTuTutor implements TutorSvc {
                 }
             }
         }
+            */
+        System.out.println("completeInfoMsgStep: skipping DB pending task update for now because ASCII task has no Step rows in DB");
     } catch (Exception ex) {
         Logger.getLogger(ShaTuTutor.class.getName())
               .log(Level.WARNING, "Unable to clear welcome task from PendingTask", ex);

@@ -99,6 +99,9 @@ public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSes
         } catch (SQLException e) {
             throw new NonRecoverableException("SessionDAO-ERR-1", e);
         } finally {
+            System.out.println("session id after insert = " + session.getId());
+            System.out.println("session task count = " + session.getTasks().size());
+            System.out.println("problem task count = " + session.getProblem().getTasks().size());
             close(conn, stmt);
         }
     }
@@ -361,6 +364,46 @@ public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSes
             file.delete();
     }
 
+
+    public void addPendingTask(int sessionId, Task task) throws NonRecoverableException {
+        final String sql = "INSERT INTO PendingTask (SessionId, TaskId, PendingStepId) VALUES (?,?,?)";
+
+        Connection conn = null;
+        PreparedStatement stmt = null;
+
+        try {
+            conn = DriverManager.getConnection(URL);
+            conn.setAutoCommit(false);
+
+            PendingStep pStep = new PendingStep(task.getCurrentStep());
+            int pendingStepId = createPendingStep(sessionId, pStep, conn);
+
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, sessionId);
+            stmt.setInt(2, task.getId());
+            stmt.setInt(3, pendingStepId);
+            stmt.executeUpdate();
+
+            conn.commit();
+
+            System.out.println("addPendingTask inserted sessionId=" + sessionId);
+            System.out.println("addPendingTask inserted taskId=" + task.getId());
+            System.out.println("addPendingTask inserted pendingStepId=" + pendingStepId);
+
+        } catch (SQLException e) {
+            try {
+                if (conn != null) conn.rollback();
+            } catch (SQLException ignored) { }
+            throw new NonRecoverableException("SessionDAO-ERR-ADD-PENDING-TASK", e);
+        } finally {
+            try {
+                if (conn != null) conn.setAutoCommit(true);
+            } catch (SQLException ignored) { }
+            close(stmt);
+            close(conn);
+        }
+    }
+    
     private void createPendingTasks(TutoringSession session, Connection conn)
             throws NonRecoverableException {
         
@@ -387,6 +430,8 @@ public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSes
         } catch (SQLException e) {
             throw new NonRecoverableException("SessionDAO-ERR-7", e);
         } finally {
+            System.out.println("createPendingTasks sessionId=" + session.getId());
+            System.out.println("createPendingTasks taskCount=" + session.getTasks().size());
             close(stmt);
         }
     }
@@ -447,12 +492,21 @@ public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSes
 
             stmt.setInt(1, sessionId);
 
+            System.out.println("=== retrievePendingTasks START ===");
+            System.out.println("sessionId=" + sessionId);
+            System.out.println("problem=" + (session.getProblem() != null ? session.getProblem().getTitle() : "NULL"));
+
             ResultSet rs = stmt.executeQuery();
 
-            CourseSvc courseSvc = ServiceFactory.findCourseSvc();
+            int rowCount = 0;
 
             while (rs.next()) {
+                rowCount++;
+
                 taskId = rs.getInt("TaskId");
+
+                System.out.println("retrieved pending taskId=" + taskId);
+                System.out.println("retrieved pending stepId=" + rs.getInt("PendingStepId"));
 
                 Task task = session.getProblem().findTaskById(taskId);
 
@@ -464,6 +518,9 @@ public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSes
 
                 pendingTasks.add(pTask);
             }
+
+            System.out.println("total pending rows found=" + rowCount);
+            System.out.println("=== retrievePendingTasks END ===");
 
             return pendingTasks;
 
