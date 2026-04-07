@@ -25,6 +25,7 @@ import javax.swing.Timer;
 
 import edu.regis.shatu.model.Account;
 import edu.regis.shatu.model.TutoringSession;
+import edu.regis.shatu.view.act.SaveSessionAction;
 
 /**
  * The primary GUI window in the ShaTu application.
@@ -303,7 +304,10 @@ public class MainFrame extends JFrame implements WindowListener {
 
     @Override
     public void windowClosing(WindowEvent e) {
-        // ToDo: Save etc.
+        // SHAT-362: Adding save functionality.
+        if (isUserLoggedIn()) {
+            SaveSessionAction.instance().actionPerformed(null);
+        }
         this.dispose();
     }
 

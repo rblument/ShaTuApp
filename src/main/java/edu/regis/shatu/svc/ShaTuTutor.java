@@ -36,6 +36,7 @@ import edu.regis.shatu.model.Student;
 import edu.regis.shatu.model.Task;
 import edu.regis.shatu.model.TutoringSession;
 import edu.regis.shatu.model.Unit;
+import edu.regis.shatu.model.aol.StudentModel;
 import edu.regis.shatu.model.StudentModelFieldKind;
 import edu.regis.shatu.model.aol.Assessment;
 import edu.regis.shatu.model.aol.AssessmentLevel;
@@ -155,6 +156,7 @@ public class ShaTuTutor implements TutorSvc {
             case "requestCorrectAnswer":
             case "resetPassword":
             case "updateAccount":
+            case "saveSession":
                 String userId = request.getUserId();
                 try {
                     if (verifySession(userId, request.getSecurityToken())) {
@@ -224,7 +226,7 @@ public class ShaTuTutor implements TutorSvc {
      * @param jsonAcct a JSon encoded Account object
      * @throws NonRecoverableException perhaps see getCause().getErrorCode().
      * @return a TutorReply if successful the status is "Created", otherwise the
-     *         status is ":ERR".
+     * status is ":ERR".
      */
     public TutorReply createAccount(String jsonAcct) throws NonRecoverableException {
         Account acct = gson.fromJson(jsonAcct, Account.class);
@@ -256,23 +258,23 @@ public class ShaTuTutor implements TutorSvc {
         // return new TutorReply("IllegalUserId");
         // }
     }
-    
+
     /**
      * Updates an existing student's account information in the database.
-     * 
+     *
      * This method handles ":UpdateAccount" requests from the GUI client.
-     * 
+     *
      * TODO: Database tables (Account & Student) are updated independently.
-     * Determine if this should be done with a single transaction. Delete this TODO
-     * when a decision is made and implemented.
-     * 
+     * Determine if this should be done with a single transaction. Delete this
+     * TODO when a decision is made and implemented.
+     *
      * @param jsonAcct a JSON representation of an account
      * @return a TutorReply indicating "Success" or ":ERR"
      */
     public TutorReply updateAccount(String jsonAcct) {
         Account account = gson.fromJson(jsonAcct, Account.class);
         Student student = new Student(account);
-        
+
         try {
             ServiceFactory.findAccountSvc().update(account);    // Updates Account
             ServiceFactory.findStudentModelSvc().update(student);   // Updates Student
@@ -293,8 +295,8 @@ public class ShaTuTutor implements TutorSvc {
      * This method handles ":VerifyUser" requests from the GUI client.
      *
      * @param jsonAcct a JSon encoded Account object
-     * @return a TutorReply if successful the status is "Verified", otherwise the
-     *         status is ":ERR".
+     * @return a TutorReply if successful the status is "Verified", otherwise
+     * the status is ":ERR".
      * @throws edu.regis.shatu.err.NonRecoverableException
      */
     public TutorReply verifyUser(String jsonAcct) throws NonRecoverableException {
@@ -308,8 +310,8 @@ public class ShaTuTutor implements TutorSvc {
         try {
             Account dbAcct = acctSvc.retrieve(requestAcct.getUserId());
 
-            if ((dbAcct.getSecurityAnswer().equals(requestAcct.getSecurityAnswer())) &&
-                    (dbAcct.getSecurityQuestion() == requestAcct.getSecurityQuestion())) {
+            if ((dbAcct.getSecurityAnswer().equals(requestAcct.getSecurityAnswer()))
+                    && (dbAcct.getSecurityQuestion() == requestAcct.getSecurityQuestion())) {
 
                 student = new Student(dbAcct);
 
@@ -346,26 +348,25 @@ public class ShaTuTutor implements TutorSvc {
             return new TutorReply();
         }
     }
-    
+
     /**
      * Checks a user-provided password against the password stored in the
      * database for the user's account.
-     * 
+     *
      * This method handles ":VerifyPassword" requests from the GUI client.
-     * 
+     *
      * @param jsonAcct a JSON encoded Account object
      * @return a TutorReply object
      */
     public TutorReply verifyPassword(String jsonAcct) {
         Account requestAcct = gson.fromJson(jsonAcct, Account.class);
-        
+
         try {
             Account dbAcct = ServiceFactory.findAccountSvc().retrieve(requestAcct.getUserId());
-            
+
             if (dbAcct.getPassword().equals(requestAcct.getPassword())) {
                 return new TutorReply("Authenticated");
-            }
-            else {
+            } else {
                 return new TutorReply("InvalidPassword");
             }
         } catch (ObjNotFoundException e) {
@@ -382,8 +383,8 @@ public class ShaTuTutor implements TutorSvc {
      * This method handles ":ResetPassword" requests from the GUI client.
      *
      * @param jsonAcct a JSon encoded Account object
-     * @return a TutorReply if successful the status is "PasswordReset", otherwise the
-     *         status is ":ERR".
+     * @return a TutorReply if successful the status is "PasswordReset",
+     * otherwise the status is ":ERR".
      * @throws edu.regis.shatu.err.NonRecoverableException
      */
     public TutorReply resetPassword(String jsonAcct) throws NonRecoverableException {
@@ -421,7 +422,7 @@ public class ShaTuTutor implements TutorSvc {
      *
      * @param jsonUser a JSon encoded User object
      * @return a TutorReply, if successful, the status is "Authenticated" with
-     *         data being a JSon encoded TutoringSession object.
+     * data being a JSon encoded TutoringSession object.
      */
     public TutorReply signIn(String jsonUser) {
         Account requestAcct = gson.fromJson(jsonUser, Account.class);
@@ -431,10 +432,10 @@ public class ShaTuTutor implements TutorSvc {
 
             if (dbAcct.getPassword().equals(requestAcct.getPassword())) {
                 //student = new Student(dbAcct);
-                String userId = dbAcct.getUserId();             
+                String userId = dbAcct.getUserId();
 
                 SessionSvc svc = ServiceFactory.findSessionSvc();
-            
+
                 session = svc.retrieve(dbAcct);
 
                 if (session.getTasks().isEmpty() && session.getProblem() != null) {
@@ -480,16 +481,17 @@ public class ShaTuTutor implements TutorSvc {
             return new TutorReply();
         }
     }
-    
+
     /**
      * Attempts to sign a student out.
-     * 
+     *
      * This method handles ":SignOut" requests from the GUI client.
-     * 
+     *
      * It is invoked indirectly as a reflection from within request().
      *
      * @param jsonUser a JSON encoded User object
-     * @return a TutorReply indicating "SIGN_OUT" for success or ":ERR" for failure
+     * @return a TutorReply indicating "SIGN_OUT" for success or ":ERR" for
+     * failure
      */
     public TutorReply signOut(String jsonUser) {
         Account requestAcct = gson.fromJson(jsonUser, Account.class);
@@ -498,19 +500,48 @@ public class ShaTuTutor implements TutorSvc {
             student = new Student(requestAcct);
             notifyLogout(student);
             return new TutorReply("SIGN_OUT");
-        }
-        catch (ObjNotFoundException ex) {
+        } catch (ObjNotFoundException ex) {
             TutorReply reply = new TutorReply(":ERR");
             reply.setData("Student model not found for: " + requestAcct.getUserId());
             return reply;
-        }
-        catch (NonRecoverableException ex) {
+        } catch (NonRecoverableException ex) {
             Logger.getLogger(ShaTuTutor.class.getName()).log(Level.SEVERE, null, ex);
             TutorReply reply = new TutorReply(":ERR");
             reply.setData("NonRecoverableException occured during sign-out");
             return reply;
         }
     }
+    
+    /**
+     * SHAT-362
+     * Attempts to save a student session.
+     * 
+     * This method handles ":SaveSession" requests from the GUI client.
+     * 
+     * It is invoked indirectly as a reflection from within request().
+     * 
+     * @param jsonUser a JSON encoded User object
+     * @return a TutorReply indicating "SAVED" for success or ":ERR" for failure
+     */
+    public TutorReply saveSession(String jsonSession) {
+        try {
+            ServiceFactory.findSessionSvc().update(session);
+            return new TutorReply("SAVED");
+        }
+        // If the user does not have an existing session catch it.
+        catch (ObjNotFoundException ex) {
+            TutorReply reply = new TutorReply(":ERR");
+            reply.setData("Session not found for: " + session.getStudent().getAccount().getUserId());
+            return reply;
+        }
+        // Is the database connection good?
+        catch (NonRecoverableException ex) {
+            System.getLogger(ShaTuTutor.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+            TutorReply reply = new TutorReply(":ERR");
+            reply.setData("NonRecoverableException occurred during save");
+            return reply;
+        }
+    } // End saveSession()
 
     /*
     public TutorReply getTask(String jsonObj) {
@@ -595,8 +626,7 @@ public class ShaTuTutor implements TutorSvc {
         reply.setData(gson.toJson(task));
         return reply;
     }
-    */
-
+     */
     /**
      * Returns a hint to the GUI client, if any.
      *
@@ -604,7 +634,7 @@ public class ShaTuTutor implements TutorSvc {
      *
      * @param jsonObj
      * @return a TutorReply, if successful, the status is "Hint" with data being
-     *         a displayable hint text string.
+     * a displayable hint text string.
      */
     public TutorReply requestHint(String jsonObj) {
         System.out.println("requestHint");
@@ -684,9 +714,9 @@ public class ShaTuTutor implements TutorSvc {
         }
     }
 
-
     /**
      * Handles the INFO_MESSAGE step completion
+     *
      * @param completion
      * @return
      */
@@ -694,10 +724,29 @@ public class ShaTuTutor implements TutorSvc {
         System.out.println("[ShaTuTutor.java] - [completeInfoMsgStep] - starting INFO_MESSAGE completion");
 
         try {
+            Assessment welcomeAssessment = studentModel.findAssessment(0);
+
+            if (welcomeAssessment != null
+                    && welcomeAssessment.getAssessment() != AssessmentLevel.COMPLETED) {
+
+                welcomeAssessment.incrementExposures();
+                welcomeAssessment.incrementSuccessess();
+                welcomeAssessment.setAssessment(AssessmentLevel.COMPLETED);
+
+                StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
+                modelSvc.updateAssessment(studentModel, welcomeAssessment, StudentModelFieldKind.ATTEMPTS);
+                modelSvc.updateAssessment(studentModel, welcomeAssessment, StudentModelFieldKind.SUCCESSES);
+                modelSvc.updateAssessment(studentModel, welcomeAssessment, StudentModelFieldKind.ASSESSMENT_LEVEL);
+            }
+        } catch (NonRecoverableException ex) {
+            return createError("Failed to update welcome acknowledgement assessment", ex);
+        }
+
+        try {
             logInfoMessageTransitionReadiness();
         } catch (Exception ex) {
             Logger.getLogger(ShaTuTutor.class.getName())
-                  .log(Level.WARNING, "SHAT-347: unable to inspect next task during INFO_MESSAGE completion", ex);
+                    .log(Level.WARNING, "SHAT-347: unable to inspect next task during INFO_MESSAGE completion", ex);
         }
 
         TutoringMode mode = session.getTutoringMode();
@@ -731,13 +780,14 @@ public class ShaTuTutor implements TutorSvc {
         String jsonData = gson.toJson(encodeStep);
 
         try {
-            System.out.println("[ShaTuTutor.java] - [completeInfoMsgStep] - attempting DB transition sessionId=" + session.getId() + ", oldTaskId=0, newTaskId=10, newStepId=1");
+            System.out.println("[ShaTuTutor.java] - [completeInfoMsgStep] - attempting DB transition sessionId="
+                    + session.getId() + ", oldTaskId=0, newTaskId=10, newStepId=1");
             SessionDAO dao = (SessionDAO) ServiceFactory.findSessionSvc();
             dao.updatePendingTask(session.getId(), 0, 10, 1);
             System.out.println("[ShaTuTutor.java] - [completeInfoMsgStep] - DB transition updatePendingTask completed successfully");
         } catch (Exception ex) {
             Logger.getLogger(ShaTuTutor.class.getName())
-                  .log(Level.SEVERE, "SHAT-347: failed to persist INFO_MESSAGE -> ASCII_ENCODE transition", ex);
+                    .log(Level.SEVERE, "SHAT-347: failed to persist INFO_MESSAGE -> ASCII_ENCODE transition", ex);
             System.out.println("[ShaTuTutor.java] - [completeInfoMsgStep] - DB transition failed: " + ex.getMessage());
         }
 
@@ -750,8 +800,8 @@ public class ShaTuTutor implements TutorSvc {
     }
 
     /**
-     * Handles :NewExample requests from the client.
-     * Returns a new problem for the student, either specified or adaptively chosen.
+     * Handles :NewExample requests from the client. Returns a new problem for
+     * the student, either specified or adaptively chosen.
      *
      * @param json JSon encoding a NewExampleRequest; may specify ProblemType
      * @return TutorReply with the generated Problem
@@ -775,9 +825,9 @@ public class ShaTuTutor implements TutorSvc {
     }
 
     /**
-     * 
+     *
      * ToDO: Can ProblemType and StepSubType be combined?
-     * 
+     *
      * @param problemType
      * @return
      */
@@ -820,9 +870,8 @@ public class ShaTuTutor implements TutorSvc {
     }
 
     /**
-     * KLUDGE
-     * ToDO: Can ProblemType and StepSubType be combined?
-     * 
+     * KLUDGE ToDO: Can ProblemType and StepSubType be combined?
+     *
      * @param stepType
      * @return
      */
@@ -869,7 +918,8 @@ public class ShaTuTutor implements TutorSvc {
     /**
      * Map a problem type to the associated knowledge component.
      *
-     * @param problemType the problem type for which the student asked to see the answer
+     * @param problemType the problem type for which the student asked to see
+     * the answer
      * @return the matching KnowledgeComponentKind or null if none exists
      */
     private KnowledgeComponentKind mapProblemTypeToKnowledgeComponent(ProblemType problemType) {
@@ -930,24 +980,23 @@ public class ShaTuTutor implements TutorSvc {
 
         //set tutoringmode to SEE_ONE or Unit 0
         tSession.setTutoringMode(TutoringMode.SEE_ONE);
-        
+
         Unit unit = course.findUnitBySequenceId(0); // The first unit
         tSession.setUnit(unit.getDigest());
-        
+
         Problem problem = unit.findProblemBySequence(0); // First Problem
         tSession.setProblem(problem);
-        
+
         Task task = problem.findTaskBySequence(0); //Task task = getFirstTask(course);
         PendingTask pendingTask = new PendingTask(task);
         pendingTask.setCurrentStep(new PendingStep(task.getCurrentStep()));
         tSession.addTask(pendingTask);
-        
 
         // Generate the security token for this tutoring session.
         Random rnd = new Random();
         String clearToken = "Session" + account.getUserId() + Integer.toString(rnd.nextInt());
         tSession.setSecurityToken(SHA_256.instance().sha256(clearToken));
-        
+
         try {
             ServiceFactory.findSessionSvc().create(tSession);
 
@@ -972,27 +1021,29 @@ public class ShaTuTutor implements TutorSvc {
         studentModel = student.getStudentModel();
 
         for (KnowledgeComponent outcome : course.getOutcomes()) {
-            Assessment assessment = new Assessment(outcome, AssessmentLevel.NOT_STARTED);
+            AssessmentLevel startingLevel
+                    = (outcome.getId() == 0)
+                    ? AssessmentLevel.IN_PROGRESS // Welcome acknowledgement starts immediately
+                    : AssessmentLevel.NOT_STARTED;
 
+            Assessment assessment = new Assessment(outcome, startingLevel);
             studentModel.addAssessment(outcome.getId(), assessment);
         }
 
         StudentModelSvc stuSvc = ServiceFactory.findStudentModelSvc();
-
         stuSvc.create(student);
 
         return student;
-
     }
 
     /**
      * Verify that the user with the given id has a session with the given
      * session id.
      *
-     * @param userId    String "user@regis.edu"
+     * @param userId String "user@regis.edu"
      * @param sessionId String identifying a previously generated session id.
      * @return the current TutoringSession associated with the given user id and
-     *         session id
+     * session id
      */
     private boolean verifySession(String userId, String sessionId)
             throws ObjNotFoundException, NonRecoverableException {
@@ -1041,15 +1092,14 @@ public class ShaTuTutor implements TutorSvc {
                 throw new NonRecoverableException("Unknwon task selection in course: " + course.getId());
         }
     }
-    */
-
+     */
     /**
      * Utility for logging an error and an creating a tutoring reply error with
      * the given message, and optional originating exception.
      *
      * @param errMsg a displayable error message
-     * @param ex     the original exception, if any, that caused the error,
-     *               otherwise null.
+     * @param ex the original exception, if any, that caused the error,
+     * otherwise null.
      * @return a TutorReply with an ":ERR" status
      */
     public TutorReply createError(String errMsg, Exception ex) {
@@ -1085,45 +1135,45 @@ public class ShaTuTutor implements TutorSvc {
 
     /**
      * Update the database to record the fact the student logged in.
-     * 
+     *
      * @param student the student who logged in.
      * @throws ObjNotFoundException
-     * @throws NonRecoverableException 
+     * @throws NonRecoverableException
      */
     private void notifyLogin(Student student) throws ObjNotFoundException, NonRecoverableException {
         StudentModelSvc stuModelSvc = ServiceFactory.findStudentModelSvc();
-        
+
         Date now = new Date();
         long milliseconds = now.getTime();
-        
+
         student.setLastLogin(milliseconds);
         stuModelSvc.recordLoginEvent(student.getAccount().getUserId(), milliseconds);
 
-       // LOGGER.log(Level.INFO, "Student {0} logged in at {1}", new Object[]{student.getAccount().getUserId(), milliseconds});
+        // LOGGER.log(Level.INFO, "Student {0} logged in at {1}", new Object[]{student.getAccount().getUserId(), milliseconds});
     }
 
     /**
      * Update the database to record the fact the student logged out.
-     * 
+     *
      * @param student the student who logged out.
      * @throws ObjNotFoundException
-     * @throws NonRecoverableException 
+     * @throws NonRecoverableException
      */
     private void notifyLogout(Student student) throws ObjNotFoundException, NonRecoverableException {
         StudentModelSvc stuModelSvc = ServiceFactory.findStudentModelSvc();
-        
+
         Date now = new Date();
         long milliseconds = now.getTime();
-        
+
         student.setLastLogout(milliseconds);
         stuModelSvc.recordLogoutEvent(student.getAccount().getUserId(), milliseconds);
 
-       // LOGGER.log(Level.INFO, "Student {0} logged out at {1}", new Object[]{student.getAccount().getUserId(), milliseconds});
+        // LOGGER.log(Level.INFO, "Student {0} logged out at {1}", new Object[]{student.getAccount().getUserId(), milliseconds});
     }
 
     /**
-     * Determines the next problem type to suggest for the student
-     * based on their progress and performance.
+     * Determines the next problem type to suggest for the student based on
+     * their progress and performance.
      *
      * @param student the Student whose model is used
      * @return the suggested next ProblemType

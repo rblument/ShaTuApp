@@ -138,6 +138,15 @@ CREATE TABLE Student (
     LastLogout TIMESTAMP
 );
 
+CREATE TABLE LoginHistory (
+    Id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    UserId VARCHAR(255) NOT NULL,
+    LogoutTime TIMESTAMP NULL,
+    LoginTime TIMESTAMP NOT NULL,
+    INDEX idx_login_userid (UserId),
+    INDEX idx_login_current (LoginTime)
+);
+
 CREATE TABLE StudentModel (
     UserId VARCHAR(255) NOT NULL PRIMARY KEY,
     ScaffoldLevel ENUM ('NONE', 'LOW', 'MEDIUM', 'HIGH', 'EXTREME')
@@ -476,3 +485,4 @@ ALTER Table Unit
 ADD CONSTRAINT fk_unit_courseid
 FOREIGN KEY (CourseId) REFERENCES Course(Id)
 ON UPDATE CASCADE ON DELETE CASCADE;
+
