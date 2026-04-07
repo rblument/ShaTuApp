@@ -22,6 +22,7 @@ import java.sql.SQLException;
 import edu.regis.shatu.err.NonRecoverableException;
 import edu.regis.shatu.err.ObjNotFoundException;
 import edu.regis.shatu.model.Hint;
+import edu.regis.shatu.model.steps.EncodeAsciiStep;
 import edu.regis.shatu.model.Task;
 import edu.regis.shatu.model.aol.Problem;
 import edu.regis.shatu.model.aol.ProblemType;
@@ -356,9 +357,35 @@ public class ProblemDAO extends MySqlDAO implements ProblemSvc {
             close(stmt); // Don't close the connection, retrieve(courseId) will
         }
     }
+    
+    
+    private String extractEncodeAsciiData(Connection conn) throws NonRecoverableException {
+        try {
+            EncodeAsciiStep step = new EncodeAsciiStep();
+
+            String question = "Regis Computer Science Rocks!";
+            step.setQuestion(question);
+
+            StringBuilder binary = new StringBuilder();
+            char[] chars = question.toCharArray();
+
+            for (char c : chars) {
+                String binaryChar = String.format("%8s", Integer.toBinaryString(c)).replace(" ", "0");
+                binary.append(binaryChar);
+            }
+
+            step.setResult(binary.toString());
+
+            return gson.toJson(step);
+        } catch (Exception ex) {
+            throw new NonRecoverableException("Failed to rebuild ENCODE_ASCII step data", ex);
+        }
+    }
+
+
+
 
     /**
-     * 
      * @param subType
      * @param subTypeId index into the appropriate table determined by subType
      * @return
@@ -375,7 +402,7 @@ public class ProblemDAO extends MySqlDAO implements ProblemSvc {
             case ENCODE_HEX:
                 return ""; // TBD
             case ENCODE_ASCII:
-                return ""; // TBD
+                return extractEncodeAsciiData(conn);
             case ADD_ONE_BIT:
                 return ""; // TBD
             case PAD_ZEROS:
