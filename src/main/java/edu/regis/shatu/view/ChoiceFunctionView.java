@@ -47,6 +47,15 @@ import java.awt.event.KeyAdapter;
 import javax.swing.JOptionPane;
 import edu.regis.shatu.model.aol.TutoringMode;
 
+//TODO SHAT-368:
+//additional imports for current jira task, move before 
+import edu.regis.shatu.model.aol.PendingTask;
+import java.util.ArrayList;
+import edu.regis.shatu.model.TutoringSession;
+
+
+
+
 /**
  * ChoiceFunctionView class represents a GUI view for a choice function Ch(x, y,
  * z).
@@ -76,12 +85,17 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
     private JLabel viewNameLabel, truthTableLabel, chFunctionLabel,
             stringXLabel, stringYLabel, stringZLabel, answerLabel,
             problemSizeLabel, instructionLabel;
+    
+    
+    //SHAT-368 additions
+    private TutoringSession devModel;
 
     /**
      * Initializes the ChoiceFunctionView by creating and laying out its child
      * components.
      */
     public ChoiceFunctionView() {
+        initModel(); //SHAT-368
         initializeComponents();
         initializeLayout();
     }
@@ -139,6 +153,14 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
     }
 
     /**
+     * SHAT-368
+     * hard-coded setting of model to ensure functionality of starting state
+     */
+    private void initModel(){
+        
+    }
+    
+    /**
      * Creates child GUI components for the view.
      */
     private void initializeComponents() {
@@ -186,7 +208,7 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
         descTextArea.setOpaque(false);
         descTextArea
                 .append("""
-                        The Choice function takes three 32-bit words as input and outputs one 32-bit word. This output is necessary to complete the second addition step in the SHA-256 algorithm.""");
+                        The Choice function takes three N-bit words as input and outputs one N-bit word. This output is necessary to complete the second addition step in the SHA-256 algorithm.""");
     }
 
     /**
@@ -270,9 +292,9 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
     private void setUpQuestionArea() {
 
         problemSize = 4;
-        stringX = "foo"; // generateInputString();
-        stringY = "var"; // generateInputString();
-        stringZ = "baz"; // generateInputString();
+        stringX = "1100"; // generateInputString();
+        stringY = "1001"; // generateInputString();
+        stringZ = "0110"; // generateInputString();
 
         stringXLabel = new JLabel("x: " + stringX);
         stringYLabel = new JLabel("y: " + stringY);
@@ -468,17 +490,23 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
 
     @Override
     protected void updateView() {
-        
         // If check and hint buttons are disabled, reset listenerers and apply those
         // used by this view
         if (!checkHintEnabled) {
             resetButtonListeners(); // Clear any listeners applied from other views
         }
-
-        System.out.println("Choice function update view called."); // Error checking
-
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-
+        //SHAT-368 : added if/else for null checking
+        if(this.model == null){
+            System.out.println("Error: no model present, using hardcoded values");
+            
+            
+            
+            
+            
+            
+        }else{
+                    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        
         Step step = model.currentTask().getCurrentStep().getStep();
 
         System.out.println("Choice value View substep from current step: " + step.getSubType()); // Error checking
@@ -502,6 +530,9 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
                 checkButton.setEnabled(true);
             }
         }
+
+        }
+
        
     }
     
