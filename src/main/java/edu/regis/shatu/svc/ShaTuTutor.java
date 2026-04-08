@@ -435,8 +435,29 @@ public class ShaTuTutor implements TutorSvc {
 
             SessionSvc svc = ServiceFactory.findSessionSvc();
 
-            session = svc.retrieve(dbAcct);
-            student = session.getStudent();
+                if (session.getTasks().isEmpty() && session.getProblem() != null) {
+                    System.out.println("signIn recovery: session has no pending tasks, rebuilding first task");
+
+                    Task firstTask = session.getProblem().findTaskBySequence(0);
+
+                    if (firstTask != null) {
+                        SessionDAO dao = (SessionDAO) ServiceFactory.findSessionSvc();
+                        dao.addPendingTask(session.getId(), firstTask);
+
+                        session = svc.retrieve(dbAcct);
+
+                        System.out.println("signIn recovery added taskId=" + firstTask.getId());
+                        System.out.println("signIn recovery added stepId=" + firstTask.getCurrentStep().getId());
+                    }
+                }
+                
+                
+                System.out.println("signIn sessionId=" + session.getId());
+                System.out.println("signIn pending task count=" + session.getTasks().size());
+                System.out.println("signIn problem task count=" + session.getProblem().getTasks().size());
+
+                student = session.getStudent();
+
 
             // Do not let login history problems block a successful login
             try {
@@ -704,8 +725,9 @@ public class ShaTuTutor implements TutorSvc {
      * @return
      */
     public TutorReply completeInfoMsgStep(StepCompletion completion) {
+        System.out.println("[ShaTuTutor.java] - [completeInfoMsgStep] - starting INFO_MESSAGE completion");
+
         try {
-            // KnowledgeComponent 0 = Information Message Acknowledgement
             Assessment welcomeAssessment = studentModel.findAssessment(0);
 
             if (welcomeAssessment != null
@@ -724,82 +746,58 @@ public class ShaTuTutor implements TutorSvc {
             return createError("Failed to update welcome acknowledgement assessment", ex);
         }
 
-        // Advance past the one-time INFO_MESSAGE so it won't reappear on the next sign-in.
         try {
-            if (session != null
-                    && session.getStudent() != null
-                    && session.getStudent().getStudentModel() != null) {
-
-                StudentModel studentModel = session.getStudent().getStudentModel();
-                Assessment assessment = studentModel.findAssessment(0);
-
-                if (assessment != null) {
-                    assessment.setExposures(assessment.getExposures() + 1);
-                    assessment.setSuccessess(assessment.getSuccessess() + 1);
-                    assessment.setAssessment(AssessmentLevel.LOW);
-
-                    StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
-                    modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
-                    modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.SUCCESSES);
-                    modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ASSESSMENT_LEVEL);
-                }
-            }
+            logInfoMessageTransitionReadiness();
         } catch (Exception ex) {
             Logger.getLogger(ShaTuTutor.class.getName())
-                    .log(Level.WARNING, "Unable to update INFORMATION_MESSAGE assessment on info-step completion.", ex);
+                    .log(Level.WARNING, "SHAT-347: unable to inspect next task during INFO_MESSAGE completion", ex);
         }
+
+        TutoringMode mode = session.getTutoringMode();
+        ProblemType firstProblemType;
+
+        switch (mode) {
+            case SEE_ONE:
+                firstProblemType = ProblemType.ASCII_ENCODE;
+                break;
+            case DO_ONE:
+                firstProblemType = ProblemType.ASCII_ENCODE;
+                break;
+            case TEACH_ONE:
+                firstProblemType = ProblemType.ASCII_ENCODE;
+                break;
+            default:
+                firstProblemType = ProblemType.ASCII_ENCODE;
+        }
+
+        currObjective = getCurrentObjectiveByProbelmType(firstProblemType);
+
+        String messageToHash;
+        if (session.getProblem() != null && session.getProblem().getMessageToHash() != null) {
+            messageToHash = session.getProblem().getMessageToHash();
+        } else {
+            messageToHash = "Regis Computer Science Rocks!";
+        }
+
+        EncodeAsciiStep encodeStep = new EncodeAsciiStep();
+        encodeStep.setQuestion(messageToHash);
+        String jsonData = gson.toJson(encodeStep);
 
         try {
-
-            if (session != null) {
-                SessionDAO dao = (SessionDAO) ServiceFactory.findSessionSvc();
-                // Welcome task is always TaskId = 0
-                dao.deletePendingTask(session.getId(), 0);
-
-                // Optional: also remove from in-memory model if it’s present
-                if (session.getTasks() != null) {
-                    session.getTasks().removeIf(pt -> pt.getTask() != null && pt.getTask().getId() == 0);
-                }
-            }
-        }catch (Exception ex) {
+            System.out.println("[ShaTuTutor.java] - [completeInfoMsgStep] - attempting DB transition sessionId="
+                    + session.getId() + ", oldTaskId=0, newTaskId=10, newStepId=1");
+            SessionDAO dao = (SessionDAO) ServiceFactory.findSessionSvc();
+            dao.updatePendingTask(session.getId(), 0, 10, 1);
+            System.out.println("[ShaTuTutor.java] - [completeInfoMsgStep] - DB transition updatePendingTask completed successfully");
+        } catch (Exception ex) {
             Logger.getLogger(ShaTuTutor.class.getName())
-                    .log(Level.WARNING, "Unable to clear welcome task from PendingTask", ex);
+                    .log(Level.SEVERE, "SHAT-347: failed to persist INFO_MESSAGE -> ASCII_ENCODE transition", ex);
+            System.out.println("[ShaTuTutor.java] - [completeInfoMsgStep] - DB transition failed: " + ex.getMessage());
         }
 
-            TutoringMode mode = session.getTutoringMode();
-            ProblemType firstProblemType;
-
-            switch (mode) {
-                case SEE_ONE:
-                    firstProblemType = ProblemType.ASCII_ENCODE;
-                    break;
-                case DO_ONE:
-                    firstProblemType = ProblemType.ASCII_ENCODE;
-                    break;
-                case TEACH_ONE:
-                    firstProblemType = ProblemType.ASCII_ENCODE;
-                    break;
-                default:
-                    firstProblemType = ProblemType.ASCII_ENCODE;
-            }
-
-            currObjective = getCurrentObjectiveByProbelmType(firstProblemType);
-
-            String messageToHash;
-            if (session.getProblem() != null && session.getProblem().getMessageToHash() != null) {
-                messageToHash = session.getProblem().getMessageToHash();
-            } else {
-                messageToHash = "Regis Computer Science Rocks!";
-            }
-
-            EncodeAsciiStep encodeStep = new EncodeAsciiStep();
-            encodeStep.setQuestion(messageToHash);
-            String jsonData = gson.toJson(encodeStep);
-
-            return currObjective.example(session, jsonData);
-        }
-
-    
+        System.out.println("[ShaTuTutor.java] - [completeInfoMsgStep] - returning ASCII example to client");
+        return currObjective.example(session, jsonData);
+    }
 
     public TutorReply completedTask(String taskInfo) {
         return new TutorReply();
@@ -1191,5 +1189,41 @@ public class ShaTuTutor implements TutorSvc {
             }
         }
         return model.getWeakestProblemType();
+    }
+    
+    private void logInfoMessageTransitionReadiness() {
+        if (session == null) {
+            System.out.println("SHAT-347: session was null during INFO_MESSAGE completion");
+            return;
+        }
+
+        if (session.getProblem() == null) {
+            System.out.println("SHAT-347: problem was null during INFO_MESSAGE completion");
+            return;
+        }
+
+        Task nextTask = session.getProblem().findTaskById(10);
+
+        if (nextTask == null) {
+            System.out.println("SHAT-347: next task not found. Expected TaskId 10 for first ASCII task.");
+            return;
+        }
+
+        if (nextTask.getSteps() == null || nextTask.getSteps().isEmpty()) {
+            System.out.println(
+                "SHAT-347: cannot persist transition to task "
+                + nextTask.getId()
+                + " because no Step rows exist for this task in seeded DB"
+            );
+            return;
+        }
+
+        System.out.println(
+            "SHAT-347: next task "
+            + nextTask.getId()
+            + " has "
+            + nextTask.getSteps().size()
+            + " step(s); DB persistence path may be available"
+        );
     }
 }

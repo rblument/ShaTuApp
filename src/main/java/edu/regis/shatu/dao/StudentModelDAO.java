@@ -502,7 +502,7 @@ public void recordLoginEvent(String userId, long timestamp) throws NonRecoverabl
     }
 }
   
-      /**
+    /**
      * {@inheritDoc}
      */
     @Override
