@@ -209,4 +209,26 @@ public class TutoringSession {
     public void removeTask(int taskId) {
         tasks.removeIf(pendingTask -> pendingTask.getTask().getId() == taskId);
     }
+    
+    
+    //SHAT-368 added for easy model var display during development
+@Override
+public String toString() {
+    StringBuilder sb = new StringBuilder();
+    sb.append("TutoringSession {\n");
+    sb.append("  id: ").append(id).append("\n");
+    sb.append("  securityToken: ").append(securityToken).append("\n");
+    sb.append("  isActive: ").append(isActive).append("\n");
+    sb.append("  startDate: ").append(startDate != null ? startDate.getTime() : "null").append("\n");
+    sb.append("  tutoringMode: ").append(tutoringMode).append("\n");
+    sb.append("  student: ").append(student).append("\n");
+    sb.append("  course: ").append(course).append("\n");
+    sb.append("  unit: ").append(unit).append("\n");
+    sb.append("  problem: ").append(problem).append("\n");
+    sb.append("  tasks: ").append(tasks).append("\n");
+    sb.append("}");
+    return sb.toString();
+}
+
+    
 }
