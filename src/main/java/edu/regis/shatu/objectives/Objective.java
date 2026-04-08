@@ -140,8 +140,8 @@ abstract public class Objective {
      * the given message, and optional originating exception.
      *
      * @param errMsg a displayable error message
-     * @param ex     the original exception, if any, that caused the error,
-     *               otherwise null.
+     * @param ex the original exception, if any, that caused the error,
+     * otherwise null.
      * @return a TutorReply with an ":ERR" status
      */
     public TutorReply createError(String errMsg, Exception ex) {
@@ -178,9 +178,9 @@ abstract public class Objective {
     abstract public TutorReply hint(StepCompletion completion);
 
     /**
-     * Generic Hint function for objectives to leverage. Currently only supports 1
-     * hint message.
-     * 
+     * Generic Hint function for objectives to leverage. Currently only supports
+     * 1 hint message.
+     *
      * @param completion
      * @param stepName
      * @param hintText
@@ -234,10 +234,26 @@ abstract public class Objective {
 
     abstract public TutorReply example(TutoringSession session, String jsonData);
 
+    private AssessmentLevel calculateAssessmentLevel(int exposures, int successes) {
+        if (successes >= 4) {
+            return AssessmentLevel.COMPLETED;
+        } else if (successes == 3) {
+            return AssessmentLevel.VERY_HIGH;
+        } else if (successes == 2) {
+            return AssessmentLevel.HIGH;
+        } else if (successes == 1) {
+            return AssessmentLevel.MEDIUM;
+        } else if (exposures > 0) {
+            return AssessmentLevel.VERY_LOW;
+        } else {
+            return AssessmentLevel.NOT_STARTED;
+        }
+    }
+
     /**
-     * Generic example function covering the more mundane repetitive parts of hint
-     * creation.
-     * 
+     * Generic example function covering the more mundane repetitive parts of
+     * hint creation.
+     *
      * @param subStep
      * @param subType
      * @param probType
@@ -264,10 +280,14 @@ abstract public class Objective {
         // Update the assessment data and save it to the database.
         Assessment assessment = studentModel.findAssessment(kind.dbId());
         assessment.incrementExposures();
+        assessment.setAssessment(calculateAssessmentLevel(
+                assessment.getExposures(),
+                assessment.getSuccessess()));
 
         try {
             StudentModelSvc modelSvc = ServiceFactory.findStudentModelSvc();
             modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ATTEMPTS);
+            modelSvc.updateAssessment(studentModel, assessment, StudentModelFieldKind.ASSESSMENT_LEVEL);
 
             PendingStep pendingStep = new PendingStep(step);
             pendingStep.setCurrentHintIndex(0);
@@ -292,7 +312,7 @@ abstract public class Objective {
     /**
      * Generic Step completion function again covering the repetitive aspects of
      * marking a step as completed.
-     * 
+     *
      * @param correctAnswer the correct answer to the problem in the task step
      * @param studentAnswer the answer given by the student
      * @param stepName
@@ -327,10 +347,11 @@ abstract public class Objective {
             int exposures = assessment.getExposures();
             int successes = assessment.getSuccessess();
 
-            if (exposures > 0 && (double) successes / exposures > 0.6) {
+            assessment.setAssessment(calculateAssessmentLevel(exposures, successes));
+
+            if (assessment.getAssessment() == AssessmentLevel.COMPLETED) {
                 stepReply.setIsNewTask(true);
                 System.out.println("%%%%%%%%%%% Next Task Recommended");
-                assessment.setAssessment(AssessmentLevel.COMPLETED);
             } else {
                 stepReply.setIsNewTask(false);
             }
@@ -353,7 +374,6 @@ abstract public class Objective {
             stepReply.setIsNextStep(false);
         }
 
-        
         // To Do, how to handle id's and sequence for StempCompletion reply steps
         Step step = new Step(-1, -1, StepSubType.STEP_COMPLETION_REPLY);
         // ToDo: fix timeouts
@@ -367,7 +387,6 @@ abstract public class Objective {
         task.setDescription("Choose your next action");
         task.addStep(step);
 
-        
         PendingStep pendingStep = new PendingStep(step);
         pendingStep.setCurrentHintIndex(0);
         pendingStep.setNotifyTutor(true);

@@ -26,6 +26,7 @@ import edu.regis.shatu.svc.StudentModelSvc;
 import edu.regis.shatu.svc.TutorReply;
 
 public class InitVars extends Objective {
+
     public InitVars(Student student) {
         super(student);
     }
@@ -112,16 +113,14 @@ public class InitVars extends Objective {
     }
 
     /**
-     * Handler for the Initialize Variables Step Completion
-     * TODO: Refactor so that:
-     * 1.) Steps in the database are actually completed since as of now, none exist
-     * 2.) Steps are completed for Tasks (Task table) in Units (Unit Table)
-     * 3.) Steps are completed for each Unit (See One, Do One, Teach One)
+     * Handler for the Initialize Variables Step Completion TODO: Refactor so
+     * that: 1.) Steps in the database are actually completed since as of now,
+     * none exist 2.) Steps are completed for Tasks (Task table) in Units (Unit
+     * Table) 3.) Steps are completed for each Unit (See One, Do One, Teach One)
      * As of now, this is only logging assessment data (Assessment table) to the
-     * database based on the number of
-     * exposures, successes, and hints the user has completed during the Do One
-     * section of the application and it is
-     * not actually logging anything
+     * database based on the number of exposures, successes, and hints the user
+     * has completed during the Do One section of the application and it is not
+     * actually logging anything
      *
      * @param completion
      * @return
@@ -171,17 +170,32 @@ public class InitVars extends Objective {
         Assessment assessment = studentModel.findAssessment(dbId);
 
         // Increment success or exposure based on correctness
+        // Increment success or exposure based on correctness
         if (allCorrect) {
             assessment.incrementSuccessess();
         }
         assessment.incrementExposures();
 
-        // Determine whether to recommend a new task
         int successes = assessment.getSuccessess();
-        if (successes > 0) {
+        int exposures = assessment.getExposures();
+
+        if (successes >= 4) {
+            assessment.setAssessment(AssessmentLevel.COMPLETED);
+        } else if (successes == 3) {
+            assessment.setAssessment(AssessmentLevel.VERY_HIGH);
+        } else if (successes == 2) {
+            assessment.setAssessment(AssessmentLevel.HIGH);
+        } else if (successes == 1) {
+            assessment.setAssessment(AssessmentLevel.MEDIUM);
+        } else if (exposures > 0) {
+            assessment.setAssessment(AssessmentLevel.VERY_LOW);
+        } else {
+            assessment.setAssessment(AssessmentLevel.NOT_STARTED);
+        }
+
+        if (assessment.getAssessment() == AssessmentLevel.COMPLETED) {
             stepReply.setIsNewTask(true);
             System.out.println("Next task is recommended.");
-            assessment.setAssessment(AssessmentLevel.COMPLETED);
         } else {
             stepReply.setIsNewTask(false);
         }

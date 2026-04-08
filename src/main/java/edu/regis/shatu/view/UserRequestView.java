@@ -36,38 +36,40 @@ import javax.swing.KeyStroke;
 import javax.swing.AbstractAction;
 
 /**
- * A abstract view that supports various user gestures that results in a request 
+ * A abstract view that supports various user gestures that results in a request
  * being made to the tutor.
- * 
+ *
  * The implementation of the abstract methods in this class allows the various
- * Java actions, such NewExampleAction, to obtain the data to be used in 
+ * Java actions, such NewExampleAction, to obtain the data to be used in
  * constructing the request being sent to the tutor.
- * 
+ *
  * @author Oskar Thiede
  */
 public abstract class UserRequestView extends GPanel {
+
     /**
-     * The current task and step in this tutoring session are displayed in this 
+     * The current task and step in this tutoring session are displayed in this
      * view.
      */
     protected TutoringSession model;
-    
+
     /**
      * Universal 'Check', 'New Example', 'Hint' buttons.
      */
     protected JButton checkButton, newExampleButton, hintButton;
-    
+
     protected boolean checkHintEnabled = false;
-    
+
     /**
      * The Panel for each view's buttons to sit in
      */
     protected GPanel buttonPanel;
-   
+
     /**
      * Convenience utility for converting between Java and JSon objects.
      */
-    protected Gson gson = new GsonBuilder().setPrettyPrinting().create();;
+    protected Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    ;
     
     /**
      * Convenience utility for generating pseudo-random numbers.
@@ -76,29 +78,29 @@ public abstract class UserRequestView extends GPanel {
 
     /**
      * Create and return a new example request associated with the tutoring
-     * topic presented to the student in this view. 
-     * 
-     * This new example request can be sent to the tutor, which will reply
-     * with a task containing the new example problem to be presented to the
-     * student.
-     * 
+     * topic presented to the student in this view.
+     *
+     * This new example request can be sent to the tutor, which will reply with
+     * a task containing the new example problem to be presented to the student.
+     *
      * @return NewExampleRequest
      */
     public abstract NewExampleRequest newRequest();
-    
+
     /**
-     * Update this (subclass) view to display the current tutoring session model.
+     * Update this (subclass) view to display the current tutoring session
+     * model.
      */
     protected abstract void updateView();
 
     /**
      * Create and return a new step completion request, which indicates the
      * student is asking the tutor to check their work.
-     * 
+     *
      * @return StepCompletion
      */
     public abstract StepCompletion stepCompletion();
-    
+
     public UserRequestView() {
         initializePracticeButtons();
         createButtonPanel();
@@ -107,30 +109,29 @@ public abstract class UserRequestView extends GPanel {
     public TutoringSession getModel() {
         return this.model;
     }
-    
+
     public void setModel(TutoringSession model) {
-        // SHAT-356: This should prevent model from causing a hang when 
-        // requesting New Example.
         if (model == null) {
             return;
         }
         random = new Random();
         this.model = model;
-        configureModeSpecificUI();
+
         updateView();
+        configureModeSpecificUI();
     }
-    
+
     /**
-     * Configure UI components based on the current tutoring mode. 
-     * Disables fields not available for SEE_ONE mode for passive viewing.
+     * Configure UI components based on the current tutoring mode. Disables
+     * fields not available for SEE_ONE mode for passive viewing.
      */
-    protected void configureModeSpecificUI(){
+    protected void configureModeSpecificUI() {
         if (model == null) {
             return;
         }
-        
+
         TutoringMode mode = model.getTutoringMode();
-        
+
         if (mode == TutoringMode.SEE_ONE) {
             checkButton.setEnabled(false);
             hintButton.setEnabled(false);
@@ -144,32 +145,30 @@ public abstract class UserRequestView extends GPanel {
             hintButton.setEnabled(true);
             newExampleButton.setEnabled(true);
         }
-        
+
     }
-    
-    
-    
+
     /**
      * Assign the given task as the current task in our tutoring session model
      * and display this task and associated step(s) in the view.
-     * 
-     * @param task 
+     *
+     * @param task
      */
     public void setCurrentTask(PendingTask task) {
-       if (model == null) {
+        if (model == null) {
             model = MainFrame.instance().getModel();
         }
         model.addCurrentTask(task);
         updateView();
     }
-    
-      /**
+
+    /**
      * Create the child GUI components appearing in this frame.
      */
     private void initializePracticeButtons() {
         checkButton = new JButton(StepCompletionAction.instance());
         hintButton = new JButton(HintAction.instance());
-        newExampleButton = new JButton (NewExampleAction.instance());
+        newExampleButton = new JButton(NewExampleAction.instance());
 
         // Provide keyboard access to the Hint action from any focused component.
         hintButton.setMnemonic(KeyEvent.VK_H);
@@ -183,35 +182,34 @@ public abstract class UserRequestView extends GPanel {
                 }
             }
         });
-        
+
         newExampleButton.addActionListener(e -> {
             checkButton.setEnabled(true);
             hintButton.setEnabled(true);
         });
     }
-    
+
     private void createButtonPanel() {
         buttonPanel = new GPanel();
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Add padding
-       
+
         buttonPanel.addc(newExampleButton, 0, 0, 1, 1, 1.0, 1.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
                 5, 5, 5, 5);
-       
+
         buttonPanel.addc(checkButton, 1, 0, 1, 1, 1.0, 1.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
                 5, 5, 5, 5);
-        
+
         buttonPanel.addc(hintButton, 2, 0, 1, 1, 1.0, 1.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
                 5, 5, 5, 5);
     }
-    
-     /**
-     * These buttons are used universally by each view
-     * Each view attaches its own listeners, and must be cleaned up
-     * before interacting with a new view.
-     * 
+
+    /**
+     * These buttons are used universally by each view Each view attaches its
+     * own listeners, and must be cleaned up before interacting with a new view.
+     *
      * Failure to clean up the additional listeners will result in unnecessary,
      * or redundant, operations executed.
      */
@@ -220,8 +218,6 @@ public abstract class UserRequestView extends GPanel {
         ActionListener hintAction = HintAction.instance();
         ActionListener checkAction = StepCompletionAction.instance();
         ActionListener newExampleAction = NewExampleAction.instance();
-        
-        
 
         // Clear all listeners for the check button and re-add the known listener
         for (ActionListener listener : checkButton.getActionListeners()) {
@@ -244,11 +240,12 @@ public abstract class UserRequestView extends GPanel {
             checkButton.setEnabled(true);
             hintButton.setEnabled(true);
         }); // Re-add the lambda listener
-        
+
         // Set the default button states
-        checkButton.setEnabled(false);
-        hintButton.setEnabled(false);
-        newExampleButton.setEnabled(true); // Enable New Example by default
+        // Set the default button states
+        checkButton.setEnabled(true);
+        hintButton.setEnabled(true);
+        newExampleButton.setEnabled(true);
 
         // Reset button text
         checkButton.setText("Check");
@@ -256,19 +253,17 @@ public abstract class UserRequestView extends GPanel {
         newExampleButton.setText("New Example");
 
     }
-    
-    public void actionPerformed(ActionEvent e){
+
+    public void actionPerformed(ActionEvent e) {
         checkButton.setEnabled(true);
         hintButton.setEnabled(true);
-    } 
-    
-    
-    
-     public JButton getCheckButton() {
+    }
+
+    public JButton getCheckButton() {
         return checkButton;
     }
-    
-    public JButton getNewExampleButton(){
+
+    public JButton getNewExampleButton() {
         newExampleButton.setEnabled(true);
         return newExampleButton;
     }
@@ -276,5 +271,5 @@ public abstract class UserRequestView extends GPanel {
     public JButton getHintButton() {
         return hintButton;
     }
-    
+
 }
