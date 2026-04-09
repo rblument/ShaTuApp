@@ -122,8 +122,19 @@ public class StepView extends JPanel {
 
             selectedPanel = name;
             System.out.print(name);
-
-            try {
+            
+            try {                
+                if(MainFrame.instance() == null){
+                    System.out.println("MainFrame not initialized yet");
+                    return;
+                }
+                
+                this.model = MainFrame.instance().getModel();
+                if(this.model == null){
+                    System.out.println("StepView: no session model yet");
+                }
+                
+                
                 getUserRequestView().setModel(model);
                 if (selectedPanel == StepSelection.COMPRESS) {
                     JOptionPane.showMessageDialog(null, 
@@ -140,9 +151,9 @@ public class StepView extends JPanel {
             } catch (IllegalArgException e) {
                 // If we get here, we're somehow displaying a view we don't know
                 // about, which is a clear coding error.
-                System.out.println("StepView.setModel " + e);
+                System.out.println("\nStepView.setModel " + e);
             }
-
+            
         }
     }
 
