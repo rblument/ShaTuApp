@@ -37,6 +37,9 @@ import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.model.steps.AddOneStep;
 import edu.regis.shatu.model.steps.Step;
 import edu.regis.shatu.model.aol.TutoringMode;
+import java.awt.BorderLayout;
+import javax.swing.BorderFactory;
+import javax.swing.JDialog;
 
 /**
  * A view that requests the student to add a single '1' bit to the byte prompt.
@@ -161,27 +164,47 @@ public class Add1View extends UserRequestView {
         // could be found later in development
     }
      */
-
+    private JDialog asciiHintDialog;
+    private JTextArea asciiHintTextArea;
     /**
-     * Gives the student a hint and adds the ASCII table to the view, rest
-     * should be handles by the tutor, maybe all of it should? Adjust as
-     * development continues.
-     */
+    * Displays a hint for the ADD 1 task in a dedicated popup window.
+    *
+    * The popup shows a short hint message and a scroll-able ASCII table
+    * in a separate dialog so the main exercise layout is not modified.
+    */
     public void requestHint() {
 
-        this.feedbackArea.setText("Hint: Check the ASCII Table to the right for guidance.");
+        if (asciiHintDialog == null) {
+            asciiHintDialog = new JDialog(MainFrame.instance(), "ASCII Hint", false);
+            asciiHintDialog.setLayout(new BorderLayout());
 
-        if (!this.isAncestorOf(asciiTableScrollPane)) { // Adds the ASCII table if it doesnt exist.
-            addc(asciiTableScrollPane, 3, 0, GridBagConstraints.REMAINDER,
-                    7, 2.0, 1.0, GridBagConstraints.CENTER,
-                    GridBagConstraints.BOTH, 5, 5, 5, 5);
+            asciiHintTextArea = new JTextArea();
+            asciiHintTextArea.setWrapStyleWord(true);
+            asciiHintTextArea.setLineWrap(true);
+            asciiHintTextArea.setEditable(false);
+            asciiHintTextArea.setOpaque(false);
+            asciiHintTextArea.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-            this.wasHintRequested = true; // Used in the updateView function
+            JPanel topPanel = new JPanel(new BorderLayout());
+            topPanel.add(asciiHintTextArea, BorderLayout.CENTER);
+
+            JScrollPane tablePane = new JScrollPane(asciiTable);
+            tablePane.setPreferredSize(new Dimension(500, 300));
+
+            asciiHintDialog.add(topPanel, BorderLayout.NORTH);
+            asciiHintDialog.add(tablePane, BorderLayout.CENTER);
+
+            asciiHintDialog.pack();
+            asciiHintDialog.setLocationRelativeTo(MainFrame.instance());
         }
 
-        this.revalidate(); // Refreshes the view
-        this.repaint(); // Refreshes the view
-    }
+        asciiHintTextArea.setText("Hint: Check the ASCII Table for guidance.");
+        this.feedbackArea.setText("Hint opened in a separate window.");
+        this.wasHintRequested = true;
+
+        asciiHintDialog.setVisible(true);
+        asciiHintDialog.toFront();
+   }
 
     /**
      * Sets up the description section of the view, explaining the purpose of

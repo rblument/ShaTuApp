@@ -434,7 +434,12 @@ public class ShaTuTutor implements TutorSvc {
             String userId = dbAcct.getUserId();
 
             SessionSvc svc = ServiceFactory.findSessionSvc();
-
+            student = new Student(dbAcct);
+            try {
+                session = svc.retrieve(dbAcct.getUserId());
+            } catch (ObjNotFoundException e) {
+                session = createSession(student, ServiceFactory.findCourseSvc().retrieve(DEFAULT_COURSE_ID));
+                }
                 if (session.getTasks().isEmpty() && session.getProblem() != null) {
                     System.out.println("signIn recovery: session has no pending tasks, rebuilding first task");
 
