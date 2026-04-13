@@ -319,6 +319,8 @@ INSERT INTO Problem (Id, Title, Description, UnitId, SequenceIndex, Message)
 INSERT INTO Step (Id, TaskId, Title, Description, SequenceIndex, ExercisedComponentId, StepSubType, SubTypeId, TimeoutId)
  VALUES (0, 0, 'Acknowledge Welcome', 'First Step in learning the tutor', 0, 0, 'INFO_MESSAGE', 0, 0);
 
+INSERT INTO Step (Id, TaskId, Title, Description, SequenceIndex, ExercisedComponentId, StepSubType, SubTypeId, TimeoutId)
+VALUES (1, 10, 'Encode ASCII', 'Convert the question to binary', 0, 100, 'ENCODE_ASCII', 0, 0);
 
 INSERT INTO Task (Id, ProblemId, Title, Description, Kind, SequenceIndex, ExampleType)
  VALUES (0, 1, 'Welcome', 'Let''s get started', 'MESSAGE', 0, 'ALL');

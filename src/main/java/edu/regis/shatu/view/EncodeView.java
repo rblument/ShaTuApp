@@ -353,11 +353,29 @@ public class EncodeView extends UserRequestView {
             // ToDo: Do we need to handle ENCODE_HEX, ENCODE_BINARY?
             if (step.getSubType() == StepSubType.ENCODE_ASCII) {
 
-                EncodeAsciiStep newEncodeAscii = gson.fromJson(step.getData(), EncodeAsciiStep.class); // Takes data to
-                // the class
-                // object created
-                // from the new
-                // example.
+                String stepData = step.getData();
+                System.out.println("[EncodeView.java] - [updateView] - raw step data=" + stepData);
+
+                EncodeAsciiStep newEncodeAscii = null;
+
+                if (stepData != null && !stepData.trim().isEmpty()) {
+                    newEncodeAscii = gson.fromJson(stepData, EncodeAsciiStep.class);
+                }
+
+                if (newEncodeAscii == null) {
+                    System.out.println("[EncodeView.java] - [updateView] - ENCODE_ASCII step data was null or empty on resume");
+
+                    questionLabel.setText("ASCII step resumed, but question data was not stored. Click New Example to continue.");
+                    feedbackArea.setText("");
+                    responseTextArea.setText("");
+                    checkButton.setEnabled(false);
+                    responseTextArea.setEnabled(false);
+                    hintButton.setEnabled(false);
+
+                    System.out.println("UpdateView logic continues...");
+                    configureModeSpecificUI();
+                    return;
+                }
 
                 // Clear any existing feedback and response from the previous question.
                 feedbackArea.setText("");
@@ -514,13 +532,24 @@ public class EncodeView extends UserRequestView {
         EncodeAsciiStep completedStep = gson.fromJson(currentStep.getData(), EncodeAsciiStep.class); 
 
         String userResponse = this.responseTextArea.getText().replaceAll(" ", ""); // Get the user's answer.
-
+        
+        if (userResponse.isEmpty()) {
+            System.out.println("EncodeView.stepCompletion: user response was empty");
+        }
+        
         completedStep.setAscii(userResponse);
 
         StepCompletion step = new StepCompletion(currentStep, gson.toJson(completedStep));
 
         step.setStep(currentStep); // Will be sent to the tutor.
-
+        
+        //added print statements for better checking
+        System.out.println("EncodeView.stepCompletion called");
+        System.out.println("currentStep subtype=" + currentStep.getSubType());
+        System.out.println("question=" + completedStep.getQuestion());
+        System.out.println("result=" + completedStep.getResult());
+        System.out.println("ascii userResponse=" + userResponse);
+        
         return step;
     }
 }

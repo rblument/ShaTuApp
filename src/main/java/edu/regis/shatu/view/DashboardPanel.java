@@ -48,6 +48,17 @@ import edu.regis.shatu.svc.ServiceFactory;
 import edu.regis.shatu.svc.StudentModelSvc;
 import edu.regis.shatu.view.style.ColorScheme;
 
+import com.google.gson.Gson;
+
+import edu.regis.shatu.model.Account;
+import edu.regis.shatu.model.aol.NewExampleRequest;
+import edu.regis.shatu.model.aol.PendingTask;
+import edu.regis.shatu.model.aol.ProblemType;
+import edu.regis.shatu.svc.ClientRequest;
+import edu.regis.shatu.svc.ServerRequestType;
+import edu.regis.shatu.svc.SvcFacade;
+import edu.regis.shatu.svc.TutorReply;
+
 /**
  * The dashboard screen to be displayed upon user sign in. Enables user to
  * select a mode from the tutor (teach me, practice, quiz me) Tracks user's
@@ -76,7 +87,7 @@ public class DashboardPanel extends JPanel {
     private HashMap<String, JProgressBar> teachMeProgressBars;
     private HashMap<String, JProgressBar> practiceProgressBars;
     private HashMap<String, JProgressBar> quizMeProgressBars;
-    
+
     private JProgressBar teachMeOverallBar;
     private JProgressBar practiceOverallBar;
     private JProgressBar quizMeOverallBar;
@@ -89,7 +100,7 @@ public class DashboardPanel extends JPanel {
 
     // Flag to track if lessons are being displayed for selection
     private boolean showingLessonSelection = false;
-    
+
     // The tutoring mode selected by the user (for lesson selection)
     private TutoringMode selectedMode = null;
 
@@ -131,7 +142,7 @@ public class DashboardPanel extends JPanel {
      */
     public void setModel(TutoringSession model) {
         this.model = model;
-        
+
         if (model != null) {
             // TutoringMode dashboardMode = TutoringMode.DO_ONE;
             // TutoringMode dashboardMode = TutoringMode.TEACH_ONE;
@@ -148,30 +159,32 @@ public class DashboardPanel extends JPanel {
                 case TEACH_ONE -> enableModeButtons(true, true, true);
 
                 default -> enableModeButtons(true, false, false);
+
             }
-            
+
             welcomeLabel.setText("Welcome, " + model.getStudent().getAccount().getFirstName() + "!");
             loadAllLessons();
             rebuildDashboard();
 
         }
-        
+
         //update progress bars
         updateAllProgressBars();
 
     }
+
     /**
      * Ensure allLessons populates and recalculate progress bars from lessons
      */
     private void rebuildDashboard() {
         removeAll();
- 
+
         layoutComponents();
- 
+
         revalidate();
- 
+
         repaint();
-  
+
     }
 
     /**
@@ -193,8 +206,8 @@ public class DashboardPanel extends JPanel {
         teachOneButton = new JButton("Teach One");
         enableModeButtons(true, false, false);
 
-        settingsButton.setVerticalAlignment(SwingConstants.TOP);  
-        
+        settingsButton.setVerticalAlignment(SwingConstants.TOP);
+
         // Let tutor control, navigate directly to TUTOR view
         seeOneButton.addActionListener(evt -> {
             if (model != null) {
@@ -202,7 +215,7 @@ public class DashboardPanel extends JPanel {
             }
             MainFrame.instance().displayView(MainFrame.ViewName.TUTOR);
         });
-        
+
         //Changed from SPLASH to TUTOR view
         // Also shows lesson selection so user can pick a lesson
         doOneButton.addActionListener(evt -> {
@@ -212,7 +225,7 @@ public class DashboardPanel extends JPanel {
             }
             showLessonSelection();
         });
-      
+
         //Shows lesson selection with clickable lessons
         teachOneButton.addActionListener(evt -> {
             selectedMode = TutoringMode.TEACH_ONE;
@@ -230,46 +243,47 @@ public class DashboardPanel extends JPanel {
         teachMePanel = new JPanel(new GridBagLayout());
         practicePanel = new JPanel(new GridBagLayout());
         quizMePanel = new JPanel(new GridBagLayout());
-        
+
         if (model != null) {
-    loadAllLessons();
-}
+            loadAllLessons();
+        }
     }
-    
+
     /**
-     * Shows the lesson selection panel allowing users to pick a specific lesson.
+     * Shows the lesson selection panel allowing users to pick a specific
+     * lesson.
      */
     private void showLessonSelection() {
         loadAllLessons();
-        
+
         if (allLessons.isEmpty()) {
-            JOptionPane.showMessageDialog(this, 
-                "No lessons available. Starting with default lesson.",
-                "No Lessons", 
-                JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    "No lessons available. Starting with default lesson.",
+                    "No Lessons",
+                    JOptionPane.INFORMATION_MESSAGE);
             MainFrame.instance().displayView(MainFrame.ViewName.TUTOR);
             return;
         }
-        
+
         showingLessonSelection = true;
-        
+
         String[] lessonArray = allLessons.toArray(new String[0]);
         String selectedLesson = (String) JOptionPane.showInputDialog(
-            this,
-            "Select a lesson to begin:",
-            "Lesson Selection",
-            JOptionPane.PLAIN_MESSAGE,
-            null,
-            lessonArray,
-            lessonArray[0]
+                this,
+                "Select a lesson to begin:",
+                "Lesson Selection",
+                JOptionPane.PLAIN_MESSAGE,
+                null,
+                lessonArray,
+                lessonArray[0]
         );
-        
+
         if (selectedLesson != null) {
             MainFrame.instance().displayView(MainFrame.ViewName.TUTOR);
         }
         showingLessonSelection = false;
     }
-    
+
     //Loads the lesson names from database
     private void loadAllLessons() {
         allLessons.clear(); // prevent duplicates
@@ -288,30 +302,29 @@ public class DashboardPanel extends JPanel {
         } catch (Exception e) { // ToDo: Catch specific exception.
             System.err.println("Error Loading Lessons: " + e.getMessage());
         }
-        
+
     }
 
-    
     //Updates all progress bars when model changes
     private void updateAllProgressBars() {
         if (model == null) {
             return;
         }
-  
+
         //update teach me progress bar
-        if(teachMeProgressBars != null) {
+        if (teachMeProgressBars != null) {
             for (String lesson : teachMeProgressBars.keySet()) {
-                
+
                 JProgressBar bar = teachMeProgressBars.get(lesson);
                 int progress = getProgressForLesson("Teach Me", lesson);
                 bar.setValue(progress);
                 bar.setString(progress + "%");
             }
         }
-        
+
         //Update Practice Progress Bars
-        if(practiceProgressBars != null) {
-            for(String lesson : practiceProgressBars.keySet()) {
+        if (practiceProgressBars != null) {
+            for (String lesson : practiceProgressBars.keySet()) {
                 JProgressBar bar = practiceProgressBars.get(lesson);
                 int progress = getProgressForLesson("Practice", lesson);
                 bar.setValue(progress);
@@ -320,8 +333,8 @@ public class DashboardPanel extends JPanel {
         }
 
         //Update Quiz Me Progress Bar
-        if(quizMeProgressBars != null) {
-            for(String lesson : quizMeProgressBars.keySet()) {
+        if (quizMeProgressBars != null) {
+            for (String lesson : quizMeProgressBars.keySet()) {
                 JProgressBar bar = quizMeProgressBars.get(lesson);
                 int progress = getProgressForLesson("Quiz Me", lesson);
                 bar.setValue(progress);
@@ -329,23 +342,22 @@ public class DashboardPanel extends JPanel {
             }
         }
 
-        
         int teachMeSum = 0;
         for (String lesson : allLessons) {
-            teachMeSum += getProgressForLesson("Teach Me",lesson);
+            teachMeSum += getProgressForLesson("Teach Me", lesson);
         }
-        int teachMeOverall = allLessons.isEmpty()? 0 : teachMeSum / allLessons.size();
+        int teachMeOverall = allLessons.isEmpty() ? 0 : teachMeSum / allLessons.size();
         if (teachMeOverallBar != null) {
             teachMeOverallBar.setValue(teachMeOverall);
             teachMeOverallBar.setString(teachMeOverall + "%");
         }
-        
+
         int practiceSum = 0;
         for (String lesson : allLessons) {
-            practiceSum += getProgressForLesson("Practice",lesson);
+            practiceSum += getProgressForLesson("Practice", lesson);
         }
-        
-        int practiceOverall = allLessons.isEmpty()? 0 : practiceSum / allLessons.size();
+
+        int practiceOverall = allLessons.isEmpty() ? 0 : practiceSum / allLessons.size();
         if (practiceOverallBar != null) {
             practiceOverallBar.setValue(practiceOverall);
             practiceOverallBar.setString(practiceOverall + "%");
@@ -353,21 +365,21 @@ public class DashboardPanel extends JPanel {
 
         int quizMeSum = 0;
         for (String lesson : allLessons) {
-            quizMeSum += getProgressForLesson("Quiz Me",lesson);
+            quizMeSum += getProgressForLesson("Quiz Me", lesson);
         }
-        
-        int quizMeOverall = allLessons.isEmpty()? 0 : quizMeSum / allLessons.size();
+
+        int quizMeOverall = allLessons.isEmpty() ? 0 : quizMeSum / allLessons.size();
         if (quizMeOverallBar != null) {
             quizMeOverallBar.setValue(quizMeOverall);
             quizMeOverallBar.setString(quizMeOverall + "%");
         }
-        
+
         //repaint panel to reflect updates
         revalidate();
         repaint();
-        
+
     }
-    
+
     /**
      * Lays out all UI components on the panel.
      */
@@ -444,20 +456,19 @@ public class DashboardPanel extends JPanel {
 
         add(contentPanel, BorderLayout.CENTER);
     }
-    
+
     /**
      * Enable/disable the three teaching mode buttons.
-     * 
-     * @param seeOne 
+     *
+     * @param seeOne
      * @param doOne
-     * @param teachOne 
+     * @param teachOne
      */
     private void enableModeButtons(boolean seeOne, boolean doOne, boolean teachOne) {
         seeOneButton.setEnabled(seeOne);
         doOneButton.setEnabled(doOne);
         teachOneButton.setEnabled(teachOne);
     }
-    
 
     /**
      * Shortens a lesson title to a maximum of 20 characters.
@@ -478,16 +489,11 @@ public class DashboardPanel extends JPanel {
     }
 
     /**
-     * Converts an AssessmentLevel to progress percentages for [Teach Me, Practice,
-     * Quiz Me].
+     * Converts an AssessmentLevel to progress percentages for [Teach Me,
+     * Practice, Quiz Me].
      *
-     * Mapping:
-     * NOT_STARTED: [0, 0, 0]
-     * VERY_LOW: [50, 0, 0]
-     * LOW: [100, 0, 0]
-     * MEDIUM: [100, 50, 0]
-     * HIGH: [100, 100, 0]
-     * VERY_HIGH: [100, 100, 50]
+     * Mapping: NOT_STARTED: [0, 0, 0] VERY_LOW: [50, 0, 0] LOW: [100, 0, 0]
+     * MEDIUM: [100, 50, 0] HIGH: [100, 100, 0] VERY_HIGH: [100, 100, 50]
      * COMPLETED: [100, 100, 100]
      *
      * @param level the assessment level.
@@ -504,13 +510,14 @@ public class DashboardPanel extends JPanel {
             case COMPLETED -> new int[] { 100, 100, 100 };
             default -> new int[] { 0, 0, 0 };
         };
+
     }
 
     /**
      * Gets the progress percentage for a lesson in a given study mode.
      *
      * @param studyMode the study mode (e.g., "Teach Me").
-     * @param lesson    the lesson name.
+     * @param lesson the lesson name.
      * @return the progress percentage.
      */
     private int getProgressForLesson(String studyMode, String lesson) {
@@ -518,11 +525,11 @@ public class DashboardPanel extends JPanel {
         try {
             String userId = model.getStudent().getAccount().getUserId();
             StudentModelSvc studentModelService = ServiceFactory.findStudentModelSvc();
-           // System.out.println("Dashboard requesting progress for studyMode = " + studyMode
-             //   + ", lesson = [" + lesson + "]");
+            // System.out.println("Dashboard requesting progress for studyMode = " + studyMode
+            //   + ", lesson = [" + lesson + "]");
             AssessmentLevel level = studentModelService.retrieveAssessmentLevel(userId, lesson);
-           // System.out.println("Dashboard requesting assessment level for userId = "
-           //     + userId + ", lesson = [" + lesson + "]");
+            // System.out.println("Dashboard requesting assessment level for userId = "
+            //     + userId + ", lesson = [" + lesson + "]");
             int[] progress = mapAssessmentToProgress(level);
             if ("Teach Me".equalsIgnoreCase(studyMode)) {
                 return progress[0];
@@ -542,9 +549,8 @@ public class DashboardPanel extends JPanel {
     /**
      * Creates a panel for a study mode category.
      *
-     * The panel shows an overall progress bar and sections for lessons that are Not
-     * Started,
-     * In Progress, and Completed.
+     * The panel shows an overall progress bar and sections for lessons that are
+     * Not Started, In Progress, and Completed.
      *
      * @param category the study mode category.
      * @return the category panel.
@@ -616,9 +622,9 @@ public class DashboardPanel extends JPanel {
 
         gbc.gridwidth = 1;
         int row = 2;
-        row = addSection(panel, row, "Not Started:", notStarted, "Teach Me", category);
-        row = addSection(panel, row, "In Progress:", inProgress, "Practice", category);
-        row = addSection(panel, row, "Completed:", completed, "Quiz Me", category);
+        row = addSection(panel, row, "Not Started:", notStarted, category);
+        row = addSection(panel, row, "In Progress:", inProgress, category);
+        row = addSection(panel, row, "Completed:", completed, category);
 
         // Filler to push content to the top
         gbc.gridy = ++row;
@@ -630,24 +636,23 @@ public class DashboardPanel extends JPanel {
         panel.add(filler, gbc);
 
         //Save Reference to Overall Bar
-        if(null != category) 
-                switch (category) {
-                    case "Teach Me":
-                        teachMeOverallBar = overallBar;
-                        break;
-                    case "Practice":
-                        practiceOverallBar = overallBar;
-                        break;
-                    case "Quiz Me":
-                        quizMeOverallBar = overallBar;
-                        break;
-                    default:
-                        System.err.println("Unknown category: " + category);
-                        break;
-                }
-        
-        
-        
+        if (null != category) {
+            switch (category) {
+                case "Teach Me":
+                    teachMeOverallBar = overallBar;
+                    break;
+                case "Practice":
+                    practiceOverallBar = overallBar;
+                    break;
+                case "Quiz Me":
+                    quizMeOverallBar = overallBar;
+                    break;
+                default:
+                    System.err.println("Unknown category: " + category);
+                    break;
+            }
+        }
+
         panel.revalidate();
         panel.repaint();
         return panel;
@@ -657,19 +662,20 @@ public class DashboardPanel extends JPanel {
      * Adds a section (Not Started, In Progress, or Completed) to the category
      * panel.
      *
-     * For each lesson, it adds a label (with a shortened title) and a progress bar.
-     * FIXED: Now includes click handlers for lesson labels to allow selection.
+     * For each lesson, it adds a label (with a shortened title) and a progress
+     * bar. FIXED: Now includes click handlers for lesson labels to allow
+     * selection.
      *
-     * @param panel            the parent panel.
-     * @param startRow         the starting row index.
-     * @param sectionName      the section title.
-     * @param lessons          the list of lessons in this section.
+     * @param panel the parent panel.
+     * @param startRow the starting row index.
+     * @param sectionName the section title.
+     * @param lessons the list of lessons in this section.
      * @param expectedCategory the study mode for fetching progress.
-     * @param studyMode        the current study mode.
+     * @param studyMode the current study mode.
      * @return the next row index.
      */
     private int addSection(JPanel panel, int startRow, String sectionName,
-            List<String> lessons, String expectedCategory, String studyMode) {
+            List<String> lessons, String studyMode) {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(1, 1, 1, 1);
@@ -697,10 +703,10 @@ public class DashboardPanel extends JPanel {
             lessonLabel.setFont(new Font("Segoe UI", Font.PLAIN, 18));
             lessonLabel.setForeground(Color.BLACK);
             lessonLabel.setBorder(new EmptyBorder(0, 5, 0, 5));
-            
+
             // Added click handler for lesson labels (not "None" placeholders)
             if (!"None".equals(lesson)) {
-                final String lessonName = lesson; 
+                final String lessonName = lesson;
                 lessonLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
                 lessonLabel.addMouseListener(new MouseAdapter() {
 
@@ -708,13 +714,13 @@ public class DashboardPanel extends JPanel {
                     public void mouseClicked(MouseEvent e) {
                         onLessonSelected(lessonName, studyMode);
                     }
-                    
+
                     @Override
                     public void mouseEntered(MouseEvent e) {
                         lessonLabel.setForeground(ColorScheme.REGIS_BLUE);
                         lessonLabel.setText("<html><u>" + displayLesson + "</u></html>");
                     }
-                    
+
                     @Override
                     public void mouseExited(MouseEvent e) {
                         lessonLabel.setForeground(Color.BLACK);
@@ -722,7 +728,7 @@ public class DashboardPanel extends JPanel {
                     }
                 });
             }
-            
+
             panel.add(lessonLabel, gbc);
 
             if (!"None".equals(lesson)) {
@@ -737,22 +743,23 @@ public class DashboardPanel extends JPanel {
                 bar.setBackground(Color.WHITE);
                 bar.setString(progress + "%");
                 panel.add(bar, gbc);
-            
+
                 //Store Progress Bar in the Hashmap for later updates
-                if(null != studyMode) 
-                switch (studyMode) {
-                    case "Teach Me":
-                        teachMeProgressBars.put(lesson, bar);
-                        break;
-                    case "Practice":
-                        practiceProgressBars.put(lesson, bar);
-                        break;
-                    case "Quiz Me":
-                        quizMeProgressBars.put(lesson, bar);
-                        break;
-                    default:
-                        System.err.println("Unknown Study Mode: " + studyMode);
-                        break;
+                if (null != studyMode) {
+                    switch (studyMode) {
+                        case "Teach Me":
+                            teachMeProgressBars.put(lesson, bar);
+                            break;
+                        case "Practice":
+                            practiceProgressBars.put(lesson, bar);
+                            break;
+                        case "Quiz Me":
+                            quizMeProgressBars.put(lesson, bar);
+                            break;
+                        default:
+                            System.err.println("Unknown Study Mode: " + studyMode);
+                            break;
+                    }
                 }
             }
             row++;
@@ -760,30 +767,200 @@ public class DashboardPanel extends JPanel {
 
         return row;
     }
-    
+
+    private ProblemType getProblemTypeForLesson(String lessonName) {
+        if (lessonName == null) {
+            return null;
+        }
+
+        String lesson = lessonName.trim().toLowerCase();
+
+        if (lesson.contains("encode ascii") || lesson.contains("encode hex") || lesson.contains("binary hex")) {
+            return ProblemType.ASCII_ENCODE;
+        }
+        if (lesson.contains("add one bit")) {
+            return ProblemType.ADD_ONE_BIT;
+        }
+        if (lesson.contains("pad with zero")) {
+            return ProblemType.PAD_ZEROS;
+        }
+        if (lesson.contains("msg length")) {
+            return ProblemType.ADD_MSG_LENGTH;
+        }
+        if (lesson.contains("prepare schedule")) {
+            return ProblemType.PREPARE_SCHEDULE;
+        }
+        if (lesson.contains("initialize variables")) {
+            return ProblemType.INITIALIZE_VARS;
+        }
+        if (lesson.contains("compression round")) {
+            return ProblemType.COMPRESS_ROUND;
+        }
+        if (lesson.contains("rotate bits")) {
+            return ProblemType.ROTATE_BITS;
+        }
+        if (lesson.contains("shift bits")) {
+            return ProblemType.SHIFT_BITS;
+        }
+        if (lesson.contains("xor bits")) {
+            return ProblemType.XOR_BITS;
+        }
+        if (lesson.contains("add bit strings")) {
+            return ProblemType.ADD_BITS;
+        }
+        if (lesson.contains("majority function")) {
+            return ProblemType.MAJORITY_FUNCTION;
+        }
+        if (lesson.contains("choice function")) {
+            return ProblemType.CHOICE_FUNCTION;
+        }
+        if (lesson.contains("sha sum 0")) {
+            return ProblemType.SHA_ZERO;
+        }
+        if (lesson.contains("sha sum 1")) {
+            return ProblemType.SHA_ONE;
+        }
+
+        return null;
+    }
+
+    private StepSelection getStepSelectionForLesson(String lessonName) {
+        if (lessonName == null) {
+            return null;
+        }
+
+        String lesson = lessonName.trim().toLowerCase();
+
+        if (lesson.contains("information message")) {
+            return StepSelection.OVERVIEW;
+        }
+        if (lesson.contains("encode ascii") || lesson.contains("encode hex") || lesson.contains("binary hex")) {
+            return StepSelection.ENCODE;
+        }
+        if (lesson.contains("add one bit")) {
+            return StepSelection.ADD1;
+        }
+        if (lesson.contains("pad with zero")) {
+            return StepSelection.PAD;
+        }
+        if (lesson.contains("msg length")) {
+            return StepSelection.LENGTH;
+        }
+        if (lesson.contains("prepare schedule")) {
+            return StepSelection.PREPARE;
+        }
+        if (lesson.contains("initialize variables")) {
+            return StepSelection.INIT_VARS;
+        }
+        if (lesson.contains("compression round")) {
+            return StepSelection.COMPRESS;
+        }
+        if (lesson.contains("rotate bits")) {
+            return StepSelection.ROTATE_BITS;
+        }
+        if (lesson.contains("shift bits")) {
+            return StepSelection.SHIFT_RIGHT;
+        }
+        if (lesson.contains("xor bits")) {
+            return StepSelection.XOR;
+        }
+        if (lesson.contains("add bit strings")) {
+            return StepSelection.ADD_TWO_BIT;
+        }
+        if (lesson.contains("majority function")) {
+            return StepSelection.MAJ_FUNCTION;
+        }
+        if (lesson.contains("choice function")) {
+            return StepSelection.CHOICE_FUNCTION;
+        }
+        if (lesson.contains("sha sum 0")) {
+            return StepSelection.SHA_ZERO;
+        }
+        if (lesson.contains("sha sum 1")) {
+            return StepSelection.SHA_ONE;
+        }
+
+        return null;
+    }
+
+    private void loadRequestedLesson(String lessonName) {
+        try {
+            ProblemType problemType = getProblemTypeForLesson(lessonName);
+
+            if (problemType == null) {
+                return;
+            }
+
+            TutoringSession session = MainFrame.instance().getModel();
+            if (session == null) {
+                return;
+            }
+
+            Account account = session.getStudent().getAccount();
+            if (account == null) {
+                return;
+            }
+
+            Gson gson = new Gson();
+
+            NewExampleRequest ex = new NewExampleRequest();
+            ex.setExampleType(problemType);
+            ex.setData("");
+
+            ClientRequest request = new ClientRequest(ServerRequestType.NEW_EXAMPLE);
+            request.setUserId(account.getUserId());
+            request.setSecurityToken(session.getSecurityToken());
+            request.setData(gson.toJson(ex));
+
+            TutorReply reply = SvcFacade.instance().tutorRequest(request);
+
+            if (reply != null && !":ERR".equals(reply.getStatus())) {
+                PendingTask pendingTask = gson.fromJson(reply.getData(), PendingTask.class);
+
+                if (pendingTask != null) {
+                    session.addCurrentTask(pendingTask);
+                    MainFrame.instance().setModel(session);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * Handles when a user clicks on a lesson label to select it.
+     *
      * @param lessonName the name of the selected lesson
-     * @param studyMode the study mode category ("Teach Me", "Practice", "Quiz Me")
+     * @param studyMode the study mode category ("Teach Me", "Practice", "Quiz
+     * Me")
      */
     private void onLessonSelected(String lessonName, String studyMode) {
         if (model == null) {
-            JOptionPane.showMessageDialog(this, 
-                "No active session. Please sign in first.",
-                "Error", 
-                JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    "No active session. Please sign in first.",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
             return;
         }
-        
+
         TutoringMode mode;
+
         mode = switch (studyMode) {
             case "Teach Me" -> TutoringMode.SEE_ONE;
             case "Practice" -> TutoringMode.DO_ONE;
             case "Quiz Me" -> TutoringMode.TEACH_ONE;
             default -> TutoringMode.SEE_ONE;
         };
+
         model.getStudent().getStudentModel().setTutoringMode(mode);
 
+        loadRequestedLesson(lessonName);
+
         MainFrame.instance().displayView(MainFrame.ViewName.TUTOR);
+
+        StepSelection selection = getStepSelectionForLesson(lessonName);
+        if (selection != null) {
+            MainFrame.instance().displayStep(selection);
+        }
     }
 }
