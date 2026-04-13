@@ -12,6 +12,8 @@
  */
 package edu.regis.shatu.view;
 
+import edu.regis.shatu.err.NonRecoverableException;
+import edu.regis.shatu.err.ObjNotFoundException;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
@@ -67,7 +69,7 @@ import edu.regis.shatu.svc.TutorReply;
 public class DashboardPanel extends JPanel {
 
     private TutoringSession model; // Reference to current tutoringSession
-    private static boolean welcome = false;
+    private static final boolean welcome = false;
 
     private JButton settingsButton;
     private JButton seeOneButton;
@@ -111,6 +113,27 @@ public class DashboardPanel extends JPanel {
         initializeComponents();
         layoutComponents();
     }
+    
+    
+    
+    
+    private int getVisibleModeCount() {
+        if (model == null || model.getStudent() == null || model.getStudent().getStudentModel() == null) {
+            return 3;
+        }
+
+        TutoringMode dashboardMode = model.getStudent().getStudentModel().getTutoringMode();
+
+        return switch (dashboardMode) {
+            case SEE_ONE -> 1;
+            case DO_ONE -> 2;
+            case TEACH_ONE -> 3;
+            default -> 3;
+        };
+    }
+
+
+
 
     /**
      * Updates the tutoring session model.
@@ -121,17 +144,22 @@ public class DashboardPanel extends JPanel {
         this.model = model;
 
         if (model != null) {
-            switch (model.getStudent().getStudentModel().getTutoringMode()) {
-                case SEE_ONE:
-                    enableModeButtons(true, false, false);
-                    break;
+            // TutoringMode dashboardMode = TutoringMode.DO_ONE;
+            // TutoringMode dashboardMode = TutoringMode.TEACH_ONE;
 
-                case DO_ONE:
-                    enableModeButtons(false, true, false);
-                    break;
+            TutoringMode dashboardMode = model.getStudent().getStudentModel().getTutoringMode();
 
-                case TEACH_ONE:
-                    enableModeButtons(false, false, true);
+            System.out.println("[DashboardPanel.setModel] dashboardMode=" + dashboardMode);
+
+            switch (dashboardMode) {
+                case SEE_ONE -> enableModeButtons(true, false, false);
+
+                case DO_ONE -> enableModeButtons(true, true, false);
+
+                case TEACH_ONE -> enableModeButtons(true, true, true);
+
+                default -> enableModeButtons(true, false, false);
+
             }
 
             welcomeLabel.setText("Welcome, " + model.getStudent().getAccount().getFirstName() + "!");
@@ -378,7 +406,9 @@ public class DashboardPanel extends JPanel {
         gbc.weightx = 1.0;
         gbc.weighty = 1.0;
 
-        // Category panels with scroll panes
+        int visibleModeCount = getVisibleModeCount();
+
+        // first column: always show see one / teach me
         JPanel teachMeCategoryPanel = createCategoryPanel("Teach Me");
         JScrollPane teachMeScroll = new JScrollPane(teachMeCategoryPanel);
         teachMeScroll.setPreferredSize(new Dimension(350, 300));
@@ -386,26 +416,41 @@ public class DashboardPanel extends JPanel {
         gbc.gridx = 0;
         contentPanel.add(teachMeScroll, gbc);
 
-        JPanel practiceCategoryPanel = createCategoryPanel("Practice");
-        JScrollPane practiceScroll = new JScrollPane(practiceCategoryPanel);
-        practiceScroll.setPreferredSize(new Dimension(350, 300));
-        gbc.gridx = 1;
-        contentPanel.add(practiceScroll, gbc);
+        // second column: only show for do one and above
+        if (visibleModeCount >= 2) {
+            JPanel practiceCategoryPanel = createCategoryPanel("Practice");
+            JScrollPane practiceScroll = new JScrollPane(practiceCategoryPanel);
+            practiceScroll.setPreferredSize(new Dimension(350, 300));
+            gbc.gridy = 0;
+            gbc.gridx = 1;
+            gbc.weightx = 1.0;
+            gbc.weighty = 1.0;
+            contentPanel.add(practiceScroll, gbc);
+        }
 
-        JPanel quizMeCategoryPanel = createCategoryPanel("Quiz Me");
-        JScrollPane quizMeScroll = new JScrollPane(quizMeCategoryPanel);
-        quizMeScroll.setPreferredSize(new Dimension(350, 300));
-        gbc.gridx = 2;
-        contentPanel.add(quizMeScroll, gbc);
+        // third column: only show for teach one
+        if (visibleModeCount >= 3) {
+            JPanel quizMeCategoryPanel = createCategoryPanel("Quiz Me");
+            JScrollPane quizMeScroll = new JScrollPane(quizMeCategoryPanel);
+            quizMeScroll.setPreferredSize(new Dimension(350, 300));
+            gbc.gridy = 0;
+            gbc.gridx = 2;
+            gbc.weightx = 1.0;
+            gbc.weighty = 1.0;
+            contentPanel.add(quizMeScroll, gbc);
+        }
 
-        // Add study mode buttons below the panels
+        // always show all three mode buttons
         gbc.gridy = 1;
         gbc.weighty = 0.0;
         gbc.weightx = 0.0;
+
         gbc.gridx = 0;
         contentPanel.add(seeOneButton, gbc);
+
         gbc.gridx = 1;
         contentPanel.add(doOneButton, gbc);
+
         gbc.gridx = 2;
         contentPanel.add(teachOneButton, gbc);
 
@@ -455,26 +500,17 @@ public class DashboardPanel extends JPanel {
      * @return an array with progress percentages.
      */
     private int[] mapAssessmentToProgress(AssessmentLevel level) {
-        switch (level) {
-            case NOT_STARTED:
-                return new int[]{0, 0, 0};
-            case VERY_LOW:
-                return new int[]{50, 0, 0};
-            case LOW:
-                return new int[]{100, 0, 0};
-            case MEDIUM:
-                return new int[]{100, 50, 0};
-            case HIGH:
-                return new int[]{100, 100, 0};
-            case VERY_HIGH:
-                return new int[]{100, 100, 50};
-            case IN_PROGRESS:
-                return new int[]{50, 50, 50};
-            case COMPLETED:
-                return new int[]{100, 100, 100};
-            default:
-                return new int[]{0, 0, 0};
-        }
+        return switch (level) {
+            case NOT_STARTED -> new int[] { 0, 0, 0 };
+            case VERY_LOW -> new int[] { 50, 0, 0 };
+            case LOW -> new int[] { 100, 0, 0 };
+            case MEDIUM -> new int[] { 100, 50, 0 };
+            case HIGH -> new int[] { 100, 100, 0 };
+            case VERY_HIGH -> new int[] { 100, 100, 50 };
+            case COMPLETED -> new int[] { 100, 100, 100 };
+            default -> new int[] { 0, 0, 0 };
+        };
+
     }
 
     /**
@@ -502,7 +538,7 @@ public class DashboardPanel extends JPanel {
             } else if ("Quiz Me".equalsIgnoreCase(studyMode)) {
                 return progress[2];
             }
-        } catch (Exception e) {
+        } catch (NonRecoverableException | ObjNotFoundException e) {
             // ToDo: Not sure this is correct, but if it is, it should not
             // be handling Exception, instead a subclass.
             // Handle error silently
@@ -908,20 +944,13 @@ public class DashboardPanel extends JPanel {
         }
 
         TutoringMode mode;
-        switch (studyMode) {
-            case "Teach Me":
-                mode = TutoringMode.SEE_ONE;
-                break;
-            case "Practice":
-                mode = TutoringMode.DO_ONE;
-                break;
-            case "Quiz Me":
-                mode = TutoringMode.TEACH_ONE;
-                break;
-            default:
-                mode = TutoringMode.SEE_ONE;
-                break;
-        }
+
+        mode = switch (studyMode) {
+            case "Teach Me" -> TutoringMode.SEE_ONE;
+            case "Practice" -> TutoringMode.DO_ONE;
+            case "Quiz Me" -> TutoringMode.TEACH_ONE;
+            default -> TutoringMode.SEE_ONE;
+        };
 
         model.getStudent().getStudentModel().setTutoringMode(mode);
 
