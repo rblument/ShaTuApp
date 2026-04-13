@@ -36,6 +36,10 @@ import edu.regis.shatu.model.steps.Step;
 import edu.regis.shatu.model.aol.TutoringMode;
 import edu.regis.shatu.model.aol.PendingTask;
 
+import java.awt.BorderLayout;
+import javax.swing.BorderFactory;
+import javax.swing.JDialog;
+
 /**
  * A view that requests the student to add a single '1' bit to the byte prompt.
  *
@@ -158,7 +162,101 @@ public class EncodeView extends UserRequestView {
         this.repaint(); // Refreshes the view
     }
      */
+    /**
+     * Displays a hint specific to ENCODE ASCII
+     * Dynamically adds the ASCII table to the view
+     * Invoked by HintAction when hint is requested
+     * @param hintText 
+     */
+    public void showAsciiHint(String hintText) {
+        if (asciiHintDialog == null) {
+            asciiHintDialog = new JDialog(MainFrame.instance(), "ASCII Hint", false);
+            asciiHintDialog.setLayout(new BorderLayout());
 
+            asciiHintTextArea = new JTextArea();
+            asciiHintTextArea.setWrapStyleWord(true);
+            asciiHintTextArea.setLineWrap(true);
+            asciiHintTextArea.setEditable(false);
+            asciiHintTextArea.setOpaque(false);
+            asciiHintTextArea.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+            JPanel topPanel = new JPanel(new BorderLayout());
+            topPanel.add(asciiHintTextArea, BorderLayout.CENTER);
+
+            JScrollPane tablePane = new JScrollPane(asciiTable);
+            tablePane.setPreferredSize(new Dimension(500, 300));
+
+            asciiHintDialog.add(topPanel, BorderLayout.NORTH);
+            asciiHintDialog.add(tablePane, BorderLayout.CENTER);
+            asciiHintDialog.pack();
+            asciiHintDialog.setLocationRelativeTo(MainFrame.instance());
+        }
+
+        // Update the displayed hint text each time a new hint is requested.
+        asciiHintTextArea.setText("Hint: " + hintText);
+
+        // Track that the student has requested a hint.
+        this.wasHintRequested = true;
+
+        // Show the popup and bring it to the front if it is already open.
+        asciiHintDialog.setVisible(true);
+        asciiHintDialog.toFront();
+    }
+    
+    private JDialog asciiHintDialog;
+    private JTextArea asciiHintTextArea;
+    
+    /**
+    * Displays a hint for the ENCODE ASCII task in a dedicated popup window.
+    * 
+    * This dialog presents the hint text returned from the tutor and 
+    * a scroll-able ASCII table
+    * 
+    * 
+    * This method is invoked by HintAction when the active view is EncodeView.
+    * 
+    * @param hintText the hint text returned from the tutor
+    */
+   public void showAsciiHintDialog(String hintText) {
+
+       // Create dialog only once (reuse on subsequent hints)
+       if (asciiHintDialog == null) {
+
+           asciiHintDialog = new JDialog(MainFrame.instance(), "ASCII Hint", false);
+           asciiHintDialog.setLayout(new BorderLayout());
+
+           // Text area to display hint message
+           asciiHintTextArea = new JTextArea();
+           asciiHintTextArea.setWrapStyleWord(true);
+           asciiHintTextArea.setLineWrap(true);
+           asciiHintTextArea.setEditable(false);
+           asciiHintTextArea.setOpaque(false);
+           asciiHintTextArea.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+           // Panel for hint text (top of dialog)
+           JPanel topPanel = new JPanel(new BorderLayout());
+           topPanel.add(asciiHintTextArea, BorderLayout.CENTER);
+
+           // Scrollable ASCII table (center of dialog)
+           JScrollPane tablePane = new JScrollPane(asciiTable);
+           tablePane.setPreferredSize(new Dimension(500, 300));
+
+           // Add components to dialog
+           asciiHintDialog.add(topPanel, BorderLayout.NORTH);
+           asciiHintDialog.add(tablePane, BorderLayout.CENTER);
+
+           asciiHintDialog.pack();
+           asciiHintDialog.setLocationRelativeTo(MainFrame.instance());
+       }
+
+       // Update hint text each time the method is called
+       asciiHintTextArea.setText(hintText);
+
+       // Show dialog and bring it to front if already open
+       asciiHintDialog.setVisible(true);
+       asciiHintDialog.toFront();
+   }
+    
     /**
      * Sets up the description section of the view, explaining the purpose of
      * the encoding exercise.
@@ -470,6 +568,10 @@ public class EncodeView extends UserRequestView {
         TutoringMode mode = model.getTutoringMode();
 
         if (mode == TutoringMode.SEE_ONE) {
+            hintButton.setEnabled(true);
+        }
+        if (mode == TutoringMode.SEE_ONE) {
+            hintButton.setEnabled(true);
             messageLengthField.setEnabled(true);
             setQuestionField.setEnabled(true);
             responseTextArea.setEnabled(true);
