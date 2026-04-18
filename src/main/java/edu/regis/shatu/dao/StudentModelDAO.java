@@ -513,13 +513,13 @@ public void recordLoginEvent(String userId, long timestamp) throws NonRecoverabl
         // a new id this will not work and we should create our own monotonically
         // increasing session number.
         String updateLoginSql
-                = "UPDATE LoginHistory "
-                + "SET LogoutTime = ? "
-                + "WHERE UserId = ? AND SessionNumber = ("
-                + "    SELECT MAX(Id) FROM ("
-                + "        SELECT Id FROM LoginHistory WHERE UserId = ?"
-                + "    ) AS temp"
-                + ")";
+            = "UPDATE LoginHistory "
+            + "SET LogoutTime = ? "
+            + "WHERE Id = ("
+            + "    SELECT MAX(Id) FROM ("
+            + "        SELECT Id FROM LoginHistory WHERE UserId = ?"
+            + "    ) AS temp"
+            + ")";
         Timestamp tStamp = new Timestamp(timestamp);
 
         try (Connection conn = DriverManager.getConnection(URL)) {
@@ -532,7 +532,6 @@ public void recordLoginEvent(String userId, long timestamp) throws NonRecoverabl
             try (PreparedStatement updateLoginStmt = conn.prepareStatement(updateLoginSql)) {
                 updateLoginStmt.setTimestamp(1, tStamp);
                 updateLoginStmt.setString(2, userId);
-                updateLoginStmt.setString(3, userId);
                 updateLoginStmt.executeUpdate();
             }
         } catch (SQLException ex) {
