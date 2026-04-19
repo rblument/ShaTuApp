@@ -154,10 +154,11 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
 
     /**
      * SHAT-368
-     * hard-coded setting of model to ensure functionality of starting state
+     * check for if database is correctly populated for this task. i.e.
+     * - table 'step' has the correct steps to complete this object.
      */
     private void initModel(){
-        
+        System.out.println("INIT HERE============================================");
     }
     
     /**
@@ -461,6 +462,13 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
         chTruthTable.getColumnModel().getColumn(5).setPreferredWidth(100);
     }
 
+    
+    private void generateInputString(){
+        
+        
+    }
+    
+    
     /**
      * Handles the keyTyped event for the view.
      *
@@ -497,43 +505,61 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
         }
         //SHAT-368 : added if/else for null checking
         if(this.model == null){
-            System.out.println("Error: no model present, using hardcoded values");
-            
-            
+            System.out.println("\nError: no model present for ChoiceFunctionView.java\n");            
             
             
             
             
         }else{
-                    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            
+            /**
+             * SHAT-368
+             * 
+             */
+            
+            
+            
+            
+            System.out.println("the current model is: \n " + this.getModel() + "\n");
+            System.out.println("The currenttask is: \n" + this.model.currentTask() + "\n");
         
-        Step step = model.currentTask().getCurrentStep().getStep();
+            
+            Step step = model.currentTask().getCurrentStep().getStep();
 
-        System.out.println("Choice value View substep from current step: " + step.getSubType()); // Error checking
+            System.out.println("\nChoice value View substep from current step: " + step.getSubType()); // Error checking
 
-        if (step.getSubType() == StepSubType.CHOICE_FUNCTION) {
-            ChoiceFunctionStep example = gson.fromJson(step.getData(), ChoiceFunctionStep.class);
+        
+            if(model.getTutoringMode() == TutoringMode.SEE_ONE){
+                if (step.getSubType() == StepSubType.CHOICE_FUNCTION) {
+                    ChoiceFunctionStep example = gson.fromJson(step.getData(), ChoiceFunctionStep.class);
 
-            if (example.getOperand1() == null || example.getOperand1().isEmpty()) {
-                stringXLabel.setText("x: Please");
-                stringYLabel.setText("y: click");
-                stringZLabel.setText("z: New Example");
-                hintButton.setEnabled(false);
-                responseTextArea.setEnabled(false);
-                checkButton.setEnabled(false);
-            } else {
-                stringXLabel.setText("x: " + example.getOperand1());
-                stringYLabel.setText("y: " + example.getOperand2());
-                stringZLabel.setText("z: " + example.getOperand3());
-                hintButton.setEnabled(true);
-                responseTextArea.setEnabled(true);
-                checkButton.setEnabled(true);
-            }
+                    if (example.getOperand1() == null || example.getOperand1().isEmpty()) {
+                        stringXLabel.setText("x: Please");
+                        stringYLabel.setText("y: click");
+                        stringZLabel.setText("z: New Example");
+                        hintButton.setEnabled(false);
+                        responseTextArea.setEnabled(false);
+                        checkButton.setEnabled(false);
+                    } else {
+                        stringXLabel.setText("x: " + example.getOperand1());
+                        stringYLabel.setText("y: " + example.getOperand2());
+                        stringZLabel.setText("z: " + example.getOperand3());
+                        hintButton.setEnabled(true);
+                        responseTextArea.setEnabled(true);
+                        checkButton.setEnabled(true);
+                        
+                        
+                        
+                        
+                    }
+                }
+            }else if (model.getTutoringMode() == TutoringMode.DO_ONE){
+                //TODO: implement
+            }else if (model.getTutoringMode() == TutoringMode.TEACH_ONE){
+                //TODO: implement
+            }       
         }
-
-        }
-
-       
     }
     
     /**

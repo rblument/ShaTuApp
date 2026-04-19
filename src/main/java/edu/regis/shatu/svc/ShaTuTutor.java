@@ -679,22 +679,34 @@ public class ShaTuTutor implements TutorSvc {
         // IMPORTANT: The client UI assumes there is ALWAYS at least one pending task in the session,
         // so we update the existing PendingTask row instead of deleting it.
         try {
-        if (session != null) {
-            SessionDAO dao = (SessionDAO) ServiceFactory.findSessionSvc();
-            // Welcome task is always TaskId = 0
-            dao.deletePendingTask(session.getId(), 0);
+            if (session != null) {
+                SessionDAO dao = (SessionDAO) ServiceFactory.findSessionSvc();
+                // Welcome task is always TaskId = 0
+//                dao.deletePendingTask(session.getId(), 0);
 
-            // Optional: also remove from in-memory model if it’s present
-            if (session.getTasks() != null) {
-                session.getTasks().removeIf(pt -> pt.getTask() != null && pt.getTask().getId() == 0);
+            // TODO: Hard-coded for Choice Function development. When sequential task
+            // navigation is implemented, this should be replaced with a proper call to
+            // insertPendingTask() using the dynamically generated task from
+            // currObjective.example(). TaskId and StepId must match rows in the
+            // Task and Step tables in the database.
+            // update pending task, DO NOT DELETE PENDING TASK
+                dao.updatePendingTask(session.getId(), 0, 110, 0);
+
+
+                // Optional: also remove from in-memory model if it’s present
+                if (session.getTasks() != null) {
+                    session.getTasks().removeIf(pt -> pt.getTask() != null && pt.getTask().getId() == 0);
+                }
             }
+        } catch (Exception ex) {
+            Logger.getLogger(ShaTuTutor.class.getName())
+                  .log(Level.WARNING, "Unable to clear welcome task from PendingTask", ex);
         }
-    } catch (Exception ex) {
-        Logger.getLogger(ShaTuTutor.class.getName())
-              .log(Level.WARNING, "Unable to clear welcome task from PendingTask", ex);
-    }
         TutoringMode mode = session.getTutoringMode();
         ProblemType firstProblemType;
+
+
+
         
         //Does this need to be updated to display where they last where for DO_ONE,  TEACH_ONE?? Will they always start with ASCII?
         switch (mode) {

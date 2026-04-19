@@ -399,7 +399,7 @@ public class ProblemDAO extends MySqlDAO implements ProblemSvc {
             case MAJORITY_FUNCTION:
                 return ""; // TBD
             case CHOICE_FUNCTION:
-                return ""; // TBD
+                return extractInfoMsgData(subTypeId, conn); // TBD
             case STEP_COMPLETION_REPLY:
                 return ""; // TBD
             case REQUEST_HINT:
