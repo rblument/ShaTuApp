@@ -28,23 +28,27 @@ public class AddOne extends Objective {
     @Override
     public TutorReply example(TutoringSession session, String jsonData) {
 
-        System.out.println("Start tutor newaddonebitexample"); // Error checking
+        System.out.println("Start tutor newaddonebitexample");
 
-        AddOneStep newAddOneBit = gson.fromJson(jsonData, AddOneStep.class); // This is the AddOneStep created in the
-                                                                             // newExample function from the AddOneView.
+        AddOneStep newAddOneBit = gson.fromJson(jsonData, AddOneStep.class);
 
-        int messageLength = newAddOneBit.getMessageLength(); // Set in the newExample function from the AddOneView,
-                                                             // represents the String length that will be generated for
-                                                             // the question.
+        // If no prior data was passed in, create a fresh example.
+        if (newAddOneBit == null) {
+            newAddOneBit = new AddOneStep();
 
-        String question = generateRandomString(messageLength); // Generates a random string to convert to binary
+            String question = generateRandomString(35);
+            newAddOneBit.setQuestion(question);
+            newAddOneBit.setMessageLength(question.length());
+            newAddOneBit.setResult(addOneFunction(question));
+        } else {
+            // If a step object was passed in, ensure its answer is populated.
+            if (newAddOneBit.getQuestion() != null) {
+                newAddOneBit.setMessageLength(newAddOneBit.getQuestion().length());
+                newAddOneBit.setResult(addOneFunction(newAddOneBit.getQuestion()));
+            }
+        }
 
-        newAddOneBit.setQuestion(question);
-
-        newAddOneBit.setResult(addOneFunction(question)); // Generates the binary version of the question, which is now
-                                                          // the answer
-
-        System.out.println(newAddOneBit.getResult()); // Error checking
+        System.out.println(newAddOneBit.getResult());
 
         return genericExample(newAddOneBit, StepSubType.ADD_ONE_BIT, ProblemType.ADD_ONE_BIT,
                 KnowledgeComponentKind.ADD_ONE_BIT,
@@ -74,12 +78,11 @@ public class AddOne extends Objective {
 
         AddOneStep completedStep = gson.fromJson(completion.getData(), AddOneStep.class);
 
-        String userAnswer = String.valueOf(completedStep.getMessageLength());
-        
+        String userAnswer = completedStep.getResult();
         String correctAnswer = completedStep.getResult();
 
-        System.out.println("Correct Answer: " + correctAnswer); // Error checking
-        System.out.println("User Answer: " + userAnswer); // Error checking
+        System.out.println("Correct Answer: " + correctAnswer);
+        System.out.println("User Answer: " + userAnswer);
 
         return genericComplete(correctAnswer, userAnswer, KnowledgeComponentKind.ADD_ONE_BIT);
     }

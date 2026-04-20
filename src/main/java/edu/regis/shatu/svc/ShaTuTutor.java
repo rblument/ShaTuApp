@@ -72,6 +72,7 @@ import static edu.regis.shatu.model.aol.TutoringMode.SEE_ONE;
 import static edu.regis.shatu.model.aol.TutoringMode.TEACH_ONE;
 import edu.regis.shatu.model.steps.Step;
 import edu.regis.shatu.model.steps.EncodeAsciiStep;
+import edu.regis.shatu.model.steps.StepCompletionReply;
 import edu.regis.shatu.objectives.*;
 import java.util.HashMap;
 
@@ -719,10 +720,124 @@ public class ShaTuTutor implements TutorSvc {
 
             default:
                 currObjective = getCurrentObjectiveByProbelmType(convertStepToProblemType(step.getSubType()));
-                return currObjective.completeStep(completion);
+                TutorReply reply = currObjective.completeStep(completion);
+                
+                if (step.getSubType() == StepSubType.ENCODE_ASCII) {
+                    return handleEncodeAsciiCompletion(completion, reply);
+                }
+                return reply;
         }
     }
 
+    /**
+    * If ENCODE ASCII was answered correctly, replace the current pending task
+    * with the next real task (ADD ONE BIT), persist that transition, and
+    * return the new pending task to the client.
+    *
+    * If the answer was incorrect, return the original completion reply.
+    *
+    * @param reply the reply returned by the current objective
+    * @return either the original reply or the next real pending task
+    */
+    private TutorReply handleEncodeAsciiCompletion(StepCompletion completion, TutorReply reply) {
+        PendingTask replyTask = gson.fromJson(reply.getData(), PendingTask.class);
+
+        if (replyTask == null || replyTask.getCurrentStep() == null) {
+            return reply;
+        }
+
+        Step replyStep = replyTask.getCurrentStep().getStep();
+        if (replyStep == null || replyStep.getSubType() != StepSubType.STEP_COMPLETION_REPLY) {
+            return reply;
+        }
+
+        StepCompletionReply stepReply = gson.fromJson(replyStep.getData(), StepCompletionReply.class);
+        if (stepReply == null || !stepReply.isCorrect()) {
+            return reply;
+        }
+
+        try {
+            PendingTask currentTask = session.currentTask();
+            if (currentTask == null || currentTask.getTask() == null) {
+                return reply;
+            }
+
+            int oldTaskId = currentTask.getTask().getId();
+
+            // Generate the next ADD ONE BIT example data.
+            Objective nextObjective = getCurrentObjectiveByProbelmType(ProblemType.ADD_ONE_BIT);
+            TutorReply nextReply = nextObjective.example(session, null);
+            PendingTask nextPendingTask = gson.fromJson(nextReply.getData(), PendingTask.class);
+
+            if (nextPendingTask == null
+                    || nextPendingTask.getCurrentStep() == null
+                    || nextPendingTask.getCurrentStep().getStep() == null) {
+                return reply;
+            }
+
+            // Use the persisted ADD_ONE_BIT task from the current problem,
+            // not the task id from the generated example reply.
+            Task persistedNextTask = null;
+            for (Task task : session.getProblem().getTasks()) {
+                if (task.getType() == ProblemType.ADD_ONE_BIT) {
+                    persistedNextTask = task;
+                    break;
+                }
+            }
+            System.out.println("persistedNextTask id=" + persistedNextTask.getId());
+            System.out.println("persistedNextTask type=" + persistedNextTask.getType());
+            System.out.println("persistedNextTask steps size=" +
+                    (persistedNextTask.getSteps() == null ? "null" : persistedNextTask.getSteps().size()));
+
+            if (persistedNextTask == null) {
+                Logger.getLogger(ShaTuTutor.class.getName()).log(Level.SEVERE,
+                        "Could not find persisted ADD_ONE_BIT task in current problem");
+                return createError("Failed to locate ADD ONE BIT task", null);
+            }
+            if (persistedNextTask.getSteps() == null || persistedNextTask.getSteps().isEmpty()) {
+                return createError("ADD ONE BIT task has no loaded steps", null);
+            }
+
+             // Use the persisted ADD_ONE_BIT step from that task.
+            Step persistedNextStep = null;
+            for (Step step : persistedNextTask.getSteps()) {
+                if (step.getSubType() == StepSubType.ADD_ONE_BIT) {
+                    persistedNextStep = step;
+                    break;
+                }
+            }
+
+            if (persistedNextStep == null) {
+                Logger.getLogger(ShaTuTutor.class.getName()).log(Level.SEVERE,
+                        "Could not find persisted ADD_ONE_BIT step in current problem");
+                return createError("Failed to locate ADD ONE BIT step", null);
+            }
+
+            int newTaskId = persistedNextTask.getId();
+            int newStepId = persistedNextStep.getId();
+
+            // Preserve generated step data, but point at the persisted step.
+            Step generatedStep = nextPendingTask.getCurrentStep().getStep();
+            persistedNextStep.setData(generatedStep.getData());
+
+            nextPendingTask.setTask(persistedNextTask);
+            nextPendingTask.getCurrentStep().setStep(persistedNextStep);
+
+            SessionDAO dao = (SessionDAO) ServiceFactory.findSessionSvc();
+            dao.updatePendingTask(session.getId(), oldTaskId, newTaskId, newStepId);
+
+            session.removeTask(oldTaskId);
+            session.addCurrentTask(nextPendingTask);
+
+            return nextReply;
+
+        } catch (Exception ex) {
+            Logger.getLogger(ShaTuTutor.class.getName()).log(Level.SEVERE,
+                    "Failed to transition ENCODE_ASCII to ADD_ONE_BIT", ex);
+            return createError("Failed to complete Encode ASCII transition", ex);
+        }
+    }
+    
     /**
      * Handles the INFO_MESSAGE step completion
      *

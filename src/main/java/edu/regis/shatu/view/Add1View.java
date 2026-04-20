@@ -379,15 +379,30 @@ public class Add1View extends UserRequestView {
         System.out.println("Add 1 View substep from current step: " + step.getSubType()); // Error checking
         System.out.println("add one bit type: " + type); // Error checking
         if (step.getSubType() == StepSubType.ADD_ONE_BIT) {
-            AddOneStep newAddOneBit = gson.fromJson(step.getData(), AddOneStep.class); // Takes data to the class object
-                                                                                       // created from the new example.
+            AddOneStep newAddOneBit = null;
+
+            // Only try to deserialize step data if it actually exists.
+            if (step.getData() != null && !step.getData().isBlank()) {
+                newAddOneBit = gson.fromJson(step.getData(), AddOneStep.class);
+            }
 
             // Clear any existing feedback and response from the previous question.
             feedbackArea.setText("");
             responseTextArea.setText("");
 
-            if ((step.getSubType() == type)) { // Subtype was correct
-                System.out.println("If branch was taken, subtype was a addone bit"); // Error checking.
+            if (step.getSubType() == type) { // Subtype was correct
+                System.out.println("If branch was taken, subtype was a addone bit");
+
+                // If no valid step data was restored, do not crash the UI.
+                if (newAddOneBit == null) {
+                    System.out.println("ADD_ONE_BIT step data was empty during updateView");
+
+                    questionLabel.setText("Please click new example button to get started");
+                    checkButton.setEnabled(false);
+                    responseTextArea.setEnabled(false);
+                    hintButton.setEnabled(false);
+                    return;
+                }
 
                 this.question = newAddOneBit.getQuestion();
 
@@ -404,7 +419,7 @@ public class Add1View extends UserRequestView {
                     hintButton.setEnabled(true);
                 }
             } else { // subtype didnt match, new example needs to be created.
-                System.out.println("Else branch was taken, subtype not add one bit"); // Error checking.
+                System.out.println("Else branch was taken, subtype not add one bit");
 
                 questionLabel.setText("Please click new example button to get started");
                 checkButton.setEnabled(false);

@@ -50,6 +50,7 @@ import static edu.regis.shatu.model.aol.StepSubType.STEP_COMPLETION_REPLY;
 import static edu.regis.shatu.model.aol.StepSubType.XOR_BITS;
 import edu.regis.shatu.model.aol.TaskKind;
 import edu.regis.shatu.model.aol.Timeout;
+import edu.regis.shatu.model.steps.AddOneStep;
 import edu.regis.shatu.model.steps.InformationStep;
 import edu.regis.shatu.model.steps.Step;
 import edu.regis.shatu.svc.ProblemSvc;
@@ -383,6 +384,28 @@ public class ProblemDAO extends MySqlDAO implements ProblemSvc {
     }
 
 
+    private String extractAddOneBitData(Connection conn) throws NonRecoverableException {
+        AddOneStep step = new AddOneStep();
+
+        String question = "Regis Computer Science Rocks!";
+        step.setQuestion(question);
+        step.setMessageLength(question.length());
+        step.setResult(addOneBitAnswer(question));
+
+        return gson.toJson(step);
+    }
+    
+    private String addOneBitAnswer(String question) {
+        char[] chars = question.toCharArray();
+        StringBuilder binary = new StringBuilder();
+
+        for (char c : chars) {
+            String binaryChar = String.format("%8s", Integer.toBinaryString(c)).replace(" ", "0");
+            binary.append(binaryChar).append(" ");
+        }
+
+        return binary + "1";
+    }
 
 
     /**
@@ -404,7 +427,7 @@ public class ProblemDAO extends MySqlDAO implements ProblemSvc {
             case ENCODE_ASCII:
                 return extractEncodeAsciiData(conn);
             case ADD_ONE_BIT:
-                return ""; // TBD
+                return extractAddOneBitData(conn);
             case PAD_ZEROS:
                 return ""; // TBD
             case ADD_MSG_LENGTH:
