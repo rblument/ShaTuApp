@@ -47,14 +47,8 @@ import java.awt.event.KeyAdapter;
 import javax.swing.JOptionPane;
 import edu.regis.shatu.model.aol.TutoringMode;
 
-//TODO SHAT-368:
-//additional imports for current jira task, move before 
-import edu.regis.shatu.model.aol.PendingTask;
-import java.util.ArrayList;
-import edu.regis.shatu.model.TutoringSession;
-
-
-
+//SHAT-368 imports
+import java.util.Random;
 
 /**
  * ChoiceFunctionView class represents a GUI view for a choice function Ch(x, y,
@@ -117,6 +111,7 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
         ChoiceFunctionStep newStep = new ChoiceFunctionStep();
 
         newStep.setBitLength(problemSize);
+        
 
         // Set the data of the NewExampleRequest to the new RotateStep containing
         // the desired conditions
@@ -281,9 +276,9 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
     private void setUpQuestionArea() {
 
         problemSize = 4;
-        stringX = "1100"; // generateInputString();
-        stringY = "1001"; // generateInputString();
-        stringZ = "0110"; // generateInputString();
+        stringX = generateInputString(problemSize); // "1100";
+        stringY = generateInputString(problemSize); // "1001"
+        stringZ = generateInputString(problemSize); // "0110"
 
         stringXLabel = new JLabel("x: " + stringX);
         stringYLabel = new JLabel("y: " + stringY);
@@ -450,10 +445,19 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
         chTruthTable.getColumnModel().getColumn(5).setPreferredWidth(100);
     }
 
-    
-    private void generateInputString(){
+    /**
+     * generates and returns a new string containing n bits
+     * @param size number of bits the input string should be
+     * @return the generated input string
+     */
+    private String generateInputString(int n){
+        String temp = "";
         
-        
+        Random random = new Random();
+        for(int i = 0; i < n; i++){
+            temp += random.nextInt(2) + "";
+        }    
+        return temp;
     }
     
     
@@ -494,60 +498,38 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
         //SHAT-368 : added if/else for null checking
         if(this.model == null){
             System.out.println("\nError: no model present for ChoiceFunctionView.java\n");            
-            
-            
-            
-            
-        }else{
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            
-            /**
-             * SHAT-368
-             * 
-             */
-            
-            
-            
-            
-            System.out.println("the current model is: \n " + this.getModel() + "\n");
-            System.out.println("The currenttask is: \n" + this.model.currentTask() + "\n");
-        
-            
-            Step step = model.currentTask().getCurrentStep().getStep();
-
-            System.out.println("\nChoice value View substep from current step: " + step.getSubType()); // Error checking
-
-        
-            if(model.getTutoringMode() == TutoringMode.SEE_ONE){
-                if (step.getSubType() == StepSubType.CHOICE_FUNCTION) {
-                    ChoiceFunctionStep example = gson.fromJson(step.getData(), ChoiceFunctionStep.class);
-
-                    if (example.getOperand1() == null || example.getOperand1().isEmpty()) {
-                        stringXLabel.setText("x: Please");
-                        stringYLabel.setText("y: click");
-                        stringZLabel.setText("z: New Example");
-                        hintButton.setEnabled(false);
-                        responseTextArea.setEnabled(false);
-                        checkButton.setEnabled(false);
-                    } else {
-                        stringXLabel.setText("x: " + example.getOperand1());
-                        stringYLabel.setText("y: " + example.getOperand2());
-                        stringZLabel.setText("z: " + example.getOperand3());
-                        hintButton.setEnabled(true);
-                        responseTextArea.setEnabled(true);
-                        checkButton.setEnabled(true);
-                        
-                        
-                        
-                        
-                    }
-                }
-            }else if (model.getTutoringMode() == TutoringMode.DO_ONE){
-                //TODO: implement
-            }else if (model.getTutoringMode() == TutoringMode.TEACH_ONE){
-                //TODO: implement
-            }       
+    
         }
+        
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            
+            
+        Step step = this.model.currentTask().getCurrentStep().getStep();
+        
+        if(model.getTutoringMode() == TutoringMode.SEE_ONE){
+
+            ChoiceFunctionStep example = gson.fromJson(step.getData(), ChoiceFunctionStep.class);
+
+            if (example.getOperand1() == null || example.getOperand1().isEmpty()) {
+                stringXLabel.setText("x: Please");
+                stringYLabel.setText("y: click");
+                stringZLabel.setText("z: New Example");
+                hintButton.setEnabled(false);
+                responseTextArea.setEnabled(false);
+                checkButton.setEnabled(false);
+            } else {
+                stringXLabel.setText("x: " + example.getOperand1());
+                stringYLabel.setText("y: " + example.getOperand2());
+                stringZLabel.setText("z: " + example.getOperand3());
+                hintButton.setEnabled(true);
+                responseTextArea.setEnabled(true);
+                checkButton.setEnabled(true); 
+            }
+        }else if (model.getTutoringMode() == TutoringMode.DO_ONE){
+            //TODO: implement
+        }else if (model.getTutoringMode() == TutoringMode.TEACH_ONE){
+            //TODO: implement
+        }        
     }
     
     /**
