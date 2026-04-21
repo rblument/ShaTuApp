@@ -85,17 +85,13 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
     private JLabel viewNameLabel, truthTableLabel, chFunctionLabel,
             stringXLabel, stringYLabel, stringZLabel, answerLabel,
             problemSizeLabel, instructionLabel;
-    
-    
-    //SHAT-368 additions
-    private TutoringSession devModel;
+        
 
     /**
      * Initializes the ChoiceFunctionView by creating and laying out its child
      * components.
      */
     public ChoiceFunctionView() {
-        initModel(); //SHAT-368
         initializeComponents();
         initializeLayout();
     }
@@ -152,14 +148,6 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
         return step;
     }
 
-    /**
-     * SHAT-368
-     * check for if database is correctly populated for this task. i.e.
-     * - table 'step' has the correct steps to complete this object.
-     */
-    private void initModel(){
-        System.out.println("INIT HERE============================================");
-    }
     
     /**
      * Creates child GUI components for the view.

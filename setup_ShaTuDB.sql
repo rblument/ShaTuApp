@@ -478,10 +478,10 @@ ON UPDATE CASCADE ON DELETE CASCADE;
 
 -- added for SHAT-368 work
 INSERT INTO Step (Id, TaskId, Title, Description, SequenceIndex, ExercisedComponentId, StepSubType, SubTypeId, TimeoutId)
- VALUES (1, 110, 'Select Variables', 'Select the variables that the Choice Function will use', 0, 0, 'CHOICE_FUNCTION', 0, 0);
+ VALUES (1, 110, 'Choice Function Step', 'Compute Ch(x,y,z)', 0, 0, 'CHOICE_FUNCTION', 0, 0);
 
-INSERT INTO Step (Id, TaskId, Title, Description, SequenceIndex, ExercisedComponentId, StepSubType, SubTypeId, TimeoutId)
- VALUES (2, 110, 'Compare First Bit', 'using the selected vars, walk through how to calculate the first outcome', 1, 0, 'CHOICE_FUNCTION', 0, 0);
-
-INSERT INTO Step (Id, TaskId, Title, Description, SequenceIndex, ExercisedComponentId, StepSubType, SubTypeId, TimeoutId)
- VALUES (3, 110, 'Repeat bit calculation', 'perform bit calculation on remaining bits', 2, 0, 'CHOICE_FUNCTION', 0, 0);
+-- INSERT INTO Step (Id, TaskId, Title, Description, SequenceIndex, ExercisedComponentId, StepSubType, SubTypeId, TimeoutId)
+--  VALUES (2, 110, 'Compare First Bit', 'using the selected vars, walk through how to calculate the first outcome', 1, 0, 'CHOICE_FUNCTION', 0, 0);
+-- 
+-- INSERT INTO Step (Id, TaskId, Title, Description, SequenceIndex, ExercisedComponentId, StepSubType, SubTypeId, TimeoutId)
+--  VALUES (3, 110, 'Repeat bit calculation', 'perform bit calculation on remaining bits', 2, 0, 'CHOICE_FUNCTION', 0, 0);
