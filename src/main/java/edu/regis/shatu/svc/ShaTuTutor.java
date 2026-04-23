@@ -738,11 +738,14 @@ public class ShaTuTutor implements TutorSvc {
             if (session != null) {
                 SessionDAO dao = (SessionDAO) ServiceFactory.findSessionSvc();
                 // Welcome task is always TaskId = 0
-                //dao.deletePendingTask(session.getId(), 0);
                 // SHAT-368: as per function note above, PendingTask should never be deleted
                 
-                //update task from 'WELCOME' to 'ENCODE ASCII'
-                dao.updatePendingTask(session.getId(), 0, 10, 0);
+                //dao.deletePendingTask(session.getId(), 0);
+                
+                
+                //// update task from 'WELCOME' to 'ENCODE ASCII'
+                //dao.updatePendingTask(session.getId(), 0, 10, 0);
+                
                 
 
             // TODO: Hard-coded for Choice Function development. When sequential task
@@ -751,12 +754,12 @@ public class ShaTuTutor implements TutorSvc {
             // currObjective.example(). TaskId and StepId must match rows in the
             // Task and Step tables in the database.
             // update pending task, DO NOT DELETE PENDING TASK
-                //dao.updatePendingTask(session.getId(), 0, 110, 0);
+            // note: updating pendingTask to something other than 'welcome' 
+            // breaks the tutor sign-in process for a returning user
+            // due to a null step/pendingstep.
+//                dao.updatePendingTask(session.getId(), 0, 110, 0);
+                dao.updatePendingTask(session.getId(), 0, 0, 0);
 
-                // Optional: also remove from in-memory model if it’s present
-//                if (session.getTasks() != null) {
-//                    session.getTasks().removeIf(pt -> pt.getTask() != null && pt.getTask().getId() == 0);
-//                }
             }
         } catch (Exception ex) {
             Logger.getLogger(ShaTuTutor.class.getName())
