@@ -497,5 +497,3 @@ INSERT INTO Step (Id, TaskId, Title, Description, SequenceIndex, ExercisedCompon
 -- 
 -- INSERT INTO Step (Id, TaskId, Title, Description, SequenceIndex, ExercisedComponentId, StepSubType, SubTypeId, TimeoutId)
 --  VALUES (3, 110, 'Repeat bit calculation', 'perform bit calculation on remaining bits', 2, 0, 'CHOICE_FUNCTION', 0, 0);
-=======
->>>>>>> development
