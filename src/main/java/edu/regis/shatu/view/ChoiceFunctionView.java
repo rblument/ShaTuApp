@@ -49,6 +49,9 @@ import edu.regis.shatu.model.aol.TutoringMode;
 
 //SHAT-368 imports
 import java.util.Random;
+import edu.regis.shatu.dao.SessionDAO;
+import edu.regis.shatu.err.NonRecoverableException;
+import edu.regis.shatu.objectives.ChoiceFunction;
 
 /**
  * ChoiceFunctionView class represents a GUI view for a choice function Ch(x, y,
@@ -503,7 +506,17 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
         
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
             
-            
+        /**
+         * SHAT-368
+         * hard-coding update to pendingtask for development
+         */
+        try {
+            SessionDAO dao = new SessionDAO();
+            dao.updatePendingTask(this.model.getId(), 0, 110, 0);
+        } catch (NonRecoverableException ex) {
+            System.getLogger(ChoiceFunctionView.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+        }
+        
         Step step = this.model.currentTask().getCurrentStep().getStep();
         
         if(model.getTutoringMode() == TutoringMode.SEE_ONE){
@@ -522,8 +535,56 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
                 stringYLabel.setText("y: " + example.getOperand2());
                 stringZLabel.setText("z: " + example.getOperand3());
                 hintButton.setEnabled(true);
-                responseTextArea.setEnabled(true);
+                
+                char[] xVar = example.getOperand1().toCharArray();
+                char[] yVar = example.getOperand2().toCharArray();
+                char[] zVar = example.getOperand3().toCharArray();
+                String answerBit;
+                String explanation = "";
+                String selectedVar = "";
+                String finalResult = choiceFunction(example.getOperand1(), example.getOperand2(), example.getOperand3());
+                
+
+                
+                String fullVar = "";
+                
+                if(xVar[0] == '0'){
+                    selectedVar = "y";
+                    answerBit = String.valueOf(yVar[0]);
+                    fullVar = example.getOperand2();
+                }else if(xVar[0] == '1'){
+                    selectedVar = "z";
+                    answerBit = String.valueOf(zVar[0]);
+                    fullVar = example.getOperand3();
+
+                }else{
+                    selectedVar.concat("ERROR: bit not correctly found");
+                    answerBit = "-1";
+                    fullVar = "error: no valid variable found";
+                }
+                
+                explanation = "to determine the first bit selected, we first look at variable "
+                        + "x's first bit." 
+                        + "\nIf the first bit of x is a 1, the answer's first bit will " 
+                        + "be selected from variable y." 
+                        + "\nIf the first bit of x is a 0, "
+                        + "the answer's first bit will be selected from variable z.\n\n"
+                        + "Since the first variable is: " + example.getOperand1() 
+                        + ", the first bit is: " + String.valueOf(xVar[0]) + ". \nSo, we will" 
+                        + " choose the first bit from variable " + selectedVar + " = " + fullVar + ", "
+                        + "which will be " + answerBit
+                        + "\n\n" + "We repeat this process for each bit, so the final answer of this example will be: "
+                        + finalResult
+                        
+                        
+                        ;
+                
+
+
+                responseTextArea.setText(explanation);
+                responseTextArea.setEnabled(false);
                 checkButton.setEnabled(true); 
+                
             }
         }else if (model.getTutoringMode() == TutoringMode.DO_ONE){
             //TODO: implement
@@ -531,6 +592,43 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
             //TODO: implement
         }        
     }
+    
+    
+    /**
+     * SHAT-368 NOTE
+     * this was copied over from edu.regis.shatu.objectives.ChoiceFuntion.java.
+     * this was done for testing, will need to correct for final implementation
+     * 
+     * Evaluates the choice function Ch(x, y, z).
+     *
+     * @param x Binary string representation of x.
+     * @param y Binary string representation of y.
+     * @param z Binary string representation of z.
+     * @return Binary string result of Ch(x, y, z).
+     */
+    private String choiceFunction(String x, String y, String z) {
+        // Convert the binary strings to integer values
+        String tempX = x.replaceAll("\\s", "");
+        String tempY = y.replaceAll("\\s", "");
+        String tempZ = z.replaceAll("\\s", "");
+
+        long intX = Long.parseLong(tempX, 2);
+        long intY = Long.parseLong(tempY, 2);
+        long intZ = Long.parseLong(tempZ, 2);
+
+        long xy = intX & intY;
+
+        long notX = ~intX & intZ;
+
+        long result = xy ^ notX;
+
+        // Convert the result back to binary string
+        String binaryResult = String.format("%4s", Long.toBinaryString(result)).replace(' ', '0');
+        System.out.println("the result should be:" + result);
+        System.out.println("returning: " + binaryResult);
+
+        return binaryResult;
+    }    
     
     /**
      * Configure UI components based on the current tutoring mode
