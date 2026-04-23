@@ -730,7 +730,7 @@ public class ShaTuTutor implements TutorSvc {
      * @return
      */
     public TutorReply completeInfoMsgStep(StepCompletion completion) {
-<<<<<<< HEAD
+
         // Advance past the one-time INFO_MESSAGE so it won't reappear on the next sign-in.
         // IMPORTANT: The client UI assumes there is ALWAYS at least one pending task in the session,
         // so we update the existing PendingTask row instead of deleting it.
@@ -769,7 +769,6 @@ public class ShaTuTutor implements TutorSvc {
 
         
         //Does this need to be updated to display where they last where for DO_ONE,  TEACH_ONE?? Will they always start with ASCII?
-=======
         System.out.println("[ShaTuTutor.java] - [completeInfoMsgStep] - starting INFO_MESSAGE completion");
 
         try {
@@ -798,10 +797,8 @@ public class ShaTuTutor implements TutorSvc {
                     .log(Level.WARNING, "SHAT-347: unable to inspect next task during INFO_MESSAGE completion", ex);
         }
 
-        TutoringMode mode = session.getTutoringMode();
-        ProblemType firstProblemType;
-
->>>>>>> development
+        mode = session.getTutoringMode();
+        
         switch (mode) {
             case SEE_ONE:
                 firstProblemType = ProblemType.ASCII_ENCODE;

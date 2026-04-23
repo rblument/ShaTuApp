@@ -208,11 +208,8 @@ public class SplashPanel extends GPanel {
 	password.getDocument().addDocumentListener(docListener);
 
 	signInBut = new JButton(SignInAction.instance());
-<<<<<<< HEAD
         signInBut.setEnabled(true);
-=======
->>>>>>> development
-//	signInBut.setEnabled(false);
+
         
         password.addActionListener(e -> signInBut.doClick());
         /*

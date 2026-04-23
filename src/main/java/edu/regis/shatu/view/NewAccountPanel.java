@@ -205,11 +205,7 @@ public class NewAccountPanel extends GPanel {
         pass1.getDocument().addDocumentListener(docListener);
 
         pass2 = new JPasswordField(20);
-<<<<<<< HEAD
-        pass2.setText("testP&ss");
-=======
         pass2.setText("TestP&ss");
->>>>>>> development
         pass2.getDocument().addDocumentListener(docListener);
         
         String s1[] = {"What city were you born in?", "What is your mother's maiden name?"};
