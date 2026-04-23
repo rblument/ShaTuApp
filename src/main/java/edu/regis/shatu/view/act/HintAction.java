@@ -35,6 +35,7 @@ import edu.regis.shatu.svc.TutorReply;
 import edu.regis.shatu.view.GuiController;
 import edu.regis.shatu.view.MainFrame;
 import edu.regis.shatu.view.UserRequestView;
+import edu.regis.shatu.view.EncodeView;
 
 /**
  * An (MVC) controller handling a GUI gesture representing a user's request to
@@ -134,8 +135,12 @@ public class HintAction extends ShaTuGuiAction {
                         exView.getModel().currentTask().currentStep()
                                 .setCurrentHintIndex(pendingStep.getCurrentHintIndex() + 1);
                         String prompt = hint.getText();
-                        JOptionPane.showMessageDialog(MainFrame.instance(),
-                                prompt, "Tutor Reply", JOptionPane.INFORMATION_MESSAGE);
+                        if (exView instanceof EncodeView) {
+                            ((EncodeView) exView).showAsciiHint(prompt);
+                        } else {
+                            JOptionPane.showMessageDialog(MainFrame.instance(),
+                                    prompt, "Tutor Reply", JOptionPane.INFORMATION_MESSAGE);
+                        }
                     }
             }
         } catch (IllegalArgException e) {

@@ -37,10 +37,12 @@ import edu.regis.shatu.model.TutoringSession;
 import edu.regis.shatu.model.UnitDigest;
 import edu.regis.shatu.model.aol.PendingStep;
 import edu.regis.shatu.model.aol.PendingTask;
+import edu.regis.shatu.model.aol.StudentModel;
 import edu.regis.shatu.svc.CourseSvc;
 import edu.regis.shatu.svc.ProblemSvc;
 import edu.regis.shatu.svc.ServiceFactory;
 import edu.regis.shatu.svc.SessionSvc;
+import edu.regis.shatu.svc.StudentModelSvc;
 
 /**
  *
@@ -97,6 +99,89 @@ public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSes
         } catch (SQLException e) {
             throw new NonRecoverableException("SessionDAO-ERR-1", e);
         } finally {
+            System.out.println("session id after insert = " + session.getId());
+            System.out.println("session task count = " + session.getTasks().size());
+            System.out.println("problem task count = " + session.getProblem().getTasks().size());
+            close(conn, stmt);
+        }
+    }
+    
+    @Override
+    public TutoringSession retrieve(Account account) throws ObjNotFoundException, NonRecoverableException {
+               final String sql =
+                "SELECT Id, SecurityToken, IsActive, StartDate, CourseId, UnitId, ProblemId FROM TutoringSession WHERE UserId = ?";
+
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        
+        String userId = account.getUserId();
+
+        try {
+            conn = DriverManager.getConnection(URL);
+            stmt = conn.prepareStatement(sql);
+
+            stmt.setString(1, userId);
+
+            ResultSet rs = stmt.executeQuery();
+
+            Student student = new Student(account);
+
+            if (rs.next()) {
+                TutoringSession session = new TutoringSession(student);
+                session.setId(rs.getInt(1));
+                session.setSecurityToken(rs.getString("SecurityToken"));
+                session.setIsActive(rs.getBoolean("IsActive"));
+
+                Timestamp timestamp = rs.getTimestamp("StartDate");
+                GregorianCalendar calendar = new GregorianCalendar();
+                calendar.setTimeInMillis(timestamp.getTime());
+                session.setStartDate(calendar);
+                
+                StudentModelSvc stuModSvc = ServiceFactory.findStudentModelSvc();
+                StudentModel studentModel = stuModSvc.retrieve(userId);
+                student.setStudentModel(studentModel);
+
+                int courseId = rs.getInt("CourseId");
+                int unitId = rs.getInt("UnitId");
+
+                CourseSvc courseSvc = ServiceFactory.findCourseSvc();
+                try {
+                    CourseDigest digest = courseSvc.retrieveDigest(courseId, conn);
+                    session.setCourse(digest);
+                } catch (ObjNotFoundException ex) {
+                    String errMsg = "SessionDAO-ERR-2 Course digest not found for courseId " + courseId;
+                    throw new NonRecoverableException(errMsg);
+                }
+
+                try {
+                    UnitDigest unitDigest = courseSvc.retrieveUnitDigest(courseId, unitId, conn);
+                    session.setUnit(unitDigest);
+
+                } catch (ObjNotFoundException ex) {
+                    String errMsg = "SessionDAO-ERR-3 Unit " + unitId + " not found in course " + courseId;
+                    throw new NonRecoverableException(errMsg);
+                }
+                
+                // Fetch the problem from the DB, if one exists for the session
+                ProblemSvc problemSvc = ServiceFactory.findProblemSvc();
+                int problemId = rs.getInt("ProblemId");
+                if (rs.wasNull()) {
+                    session.setProblem(null);
+                }
+                else {
+                    session.setProblem(problemSvc.retrieve(problemId));
+                }
+
+                session.setTasks(retrievePendingTasks(session, conn));
+
+                return session;
+
+            } else {
+                throw new ObjNotFoundException("Session not found for userId:" + userId);
+            }
+        } catch (SQLException e) {
+            throw new NonRecoverableException("SessionDAO-ERR-4" + e.toString(), e);
+        } finally {
             close(conn, stmt);
         }
     }
@@ -126,10 +211,10 @@ public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSes
             // object to make a student.
             AccountDAO accDao = new AccountDAO();
             Account acc = accDao.retrieve(userId);
-            Student stu = new Student(acc);
+            Student student = new Student(acc);
 
             if (rs.next()) {
-                TutoringSession session = new TutoringSession(stu);
+                TutoringSession session = new TutoringSession(student);
                 session.setId(rs.getInt(1));
                 session.setSecurityToken(rs.getString("SecurityToken"));
                 session.setIsActive(rs.getBoolean("IsActive"));
@@ -138,6 +223,10 @@ public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSes
                 GregorianCalendar calendar = new GregorianCalendar();
                 calendar.setTimeInMillis(timestamp.getTime());
                 session.setStartDate(calendar);
+                
+                StudentModelSvc stuModSvc = ServiceFactory.findStudentModelSvc();
+                StudentModel studentModel = stuModSvc.retrieve(userId);
+                student.setStudentModel(studentModel);
 
                 int courseId = rs.getInt("CourseId");
                 int unitId = rs.getInt("UnitId");
@@ -217,16 +306,20 @@ public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSes
     /**
      * {@inheritDoc}
      * 
-     * 1. Rename existing session file
-     * 2. Create a new session file using the given update
-     * 3. Delete the original, but now renamed file.
+     * Updates the existing session in the database records.
      */
     @Override
     public void update(TutoringSession session) throws ObjNotFoundException, NonRecoverableException {
+        //final String sql = 
+        //        "INSERT INTO TutoringSession " +
+        //        "(UserId, SecurityToken, IsActive, StartDate, CourseId, UnitId) " +
+        //        "VALUES (?,?,?,?,?,?)";
+        
+        // SHAT-362: Change syntax to SQL update instead of insert.
         final String sql = 
-                "INSERT INTO TutoringSession " +
-                "(UserId, SecurityToken, IsActive, StartDate, CourseId, UnitId) " +
-                "VALUES (?,?,?,?,?,?)";
+                "UPDATE TutoringSession " +
+                "SET SecurityToken=?, IsActive=?, StartDate=?, CourseId=?, UnitId=? " +
+                "WHERE UserId=?";
 
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -240,23 +333,35 @@ public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSes
             if (!exists("UserId", userId))
                 throw new ObjNotFoundException("No TutoringSession matching " + userId + " found.");
 
-            stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+	    // SHAT-362: Only need to use the sql connection.
+            stmt = conn.prepareStatement(sql);
 
-            stmt.setString(1, userId);
-            stmt.setString(2, session.getSecurityToken());
-            stmt.setBoolean(3, session.isActive());
-            stmt.setTimestamp(4, new Timestamp(session.getStartDate().getTimeInMillis()));
-            stmt.setInt(5, session.getCourse().getId());
-            stmt.setInt(6, 0); // Start with Unit 0
+	    // SHAT-362: Adjusted ordering.
+	    //stmt.setString(1, userId);
+            //stmt.setString(2, session.getSecurityToken());
+            //stmt.setBoolean(3, session.isActive());
+            //stmt.setTimestamp(4, new Timestamp(session.getStartDate().getTimeInMillis()));
+            //stmt.setInt(5, session.getCourse().getId());
+            //stmt.setInt(6, 0); // Start with Unit 0
+
+	    // SHAT-362: Update SQL statement ordering.
+	    stmt.setString(1, session.getSecurityToken());
+	    stmt.setBoolean(2, session.isActive());
+	    stmt.setTimestamp(3, new Timestamp(session.getStartDate().getTimeInMillis()));
+	    stmt.setInt(4, session.getCourse().getId());
+	    stmt.setInt(5, session.getUnit().getId());
+	    stmt.setString(6, userId);
+	    
 
             stmt.executeUpdate();
 
+	    // SHAT-362: Removed as not needed for UPDATE.
             // Get the id/key autogenerated by the DB
-            ResultSet rs = stmt.getGeneratedKeys();
-            if (rs.next()) {
-                session.setId(rs.getInt(1));
-                createPendingTasks(session, conn);
-            }
+            //ResultSet rs = stmt.getGeneratedKeys();
+            //if (rs.next()) {
+            //    session.setId(rs.getInt(1));
+            //    createPendingTasks(session, conn);
+            //}
 
         } catch (SQLException e) {
             throw new NonRecoverableException("SessionDAO-ERR-1", e);
@@ -275,6 +380,46 @@ public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSes
             file.delete();
     }
 
+
+    public void addPendingTask(int sessionId, Task task) throws NonRecoverableException {
+        final String sql = "INSERT INTO PendingTask (SessionId, TaskId, PendingStepId) VALUES (?,?,?)";
+
+        Connection conn = null;
+        PreparedStatement stmt = null;
+
+        try {
+            conn = DriverManager.getConnection(URL);
+            conn.setAutoCommit(false);
+
+            PendingStep pStep = new PendingStep(task.getCurrentStep());
+            int pendingStepId = createPendingStep(sessionId, pStep, conn);
+
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, sessionId);
+            stmt.setInt(2, task.getId());
+            stmt.setInt(3, pendingStepId);
+            stmt.executeUpdate();
+
+            conn.commit();
+
+            System.out.println("addPendingTask inserted sessionId=" + sessionId);
+            System.out.println("addPendingTask inserted taskId=" + task.getId());
+            System.out.println("addPendingTask inserted pendingStepId=" + pendingStepId);
+
+        } catch (SQLException e) {
+            try {
+                if (conn != null) conn.rollback();
+            } catch (SQLException ignored) { }
+            throw new NonRecoverableException("SessionDAO-ERR-ADD-PENDING-TASK", e);
+        } finally {
+            try {
+                if (conn != null) conn.setAutoCommit(true);
+            } catch (SQLException ignored) { }
+            close(stmt);
+            close(conn);
+        }
+    }
+    
     private void createPendingTasks(TutoringSession session, Connection conn)
             throws NonRecoverableException {
         
@@ -301,6 +446,8 @@ public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSes
         } catch (SQLException e) {
             throw new NonRecoverableException("SessionDAO-ERR-7", e);
         } finally {
+            System.out.println("createPendingTasks sessionId=" + session.getId());
+            System.out.println("createPendingTasks taskCount=" + session.getTasks().size());
             close(stmt);
         }
     }
@@ -361,12 +508,21 @@ public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSes
 
             stmt.setInt(1, sessionId);
 
+            System.out.println("=== retrievePendingTasks START ===");
+            System.out.println("sessionId=" + sessionId);
+            System.out.println("problem=" + (session.getProblem() != null ? session.getProblem().getTitle() : "NULL"));
+
             ResultSet rs = stmt.executeQuery();
 
-            CourseSvc courseSvc = ServiceFactory.findCourseSvc();
+            int rowCount = 0;
 
             while (rs.next()) {
+                rowCount++;
+
                 taskId = rs.getInt("TaskId");
+
+                System.out.println("retrieved pending taskId=" + taskId);
+                System.out.println("retrieved pending stepId=" + rs.getInt("PendingStepId"));
 
                 Task task = session.getProblem().findTaskById(taskId);
 
@@ -378,6 +534,9 @@ public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSes
 
                 pendingTasks.add(pTask);
             }
+
+            System.out.println("total pending rows found=" + rowCount);
+            System.out.println("=== retrievePendingTasks END ===");
 
             return pendingTasks;
 

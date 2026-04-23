@@ -15,6 +15,7 @@ package edu.regis.shatu.svc;
 import edu.regis.shatu.dao.interfaces.CRUD;
 import edu.regis.shatu.err.NonRecoverableException;
 import edu.regis.shatu.err.ObjNotFoundException;
+import edu.regis.shatu.model.Account;
 import edu.regis.shatu.model.TutoringSession;
 
 /**
@@ -45,6 +46,16 @@ public interface SessionSvc extends CRUD<TutoringSession> {
     // */
     // TutoringSession retrieve(String student) throws ObjNotFoundException,
     // NonRecoverableException;
+    
+    /**
+     * Load from the DB and return the TutoringSession for the given account.
+     * 
+     * @param account
+     * @return TutoringSession for the given account user id.
+     * @throws ObjNotFoundException No session for the given account exists.
+     * @throws NonRecoverableException NonRecoverableException perhaps see getCause().getErrorCode().
+     */
+    TutoringSession retrieve(Account account) throws ObjNotFoundException, NonRecoverableException;
 
     /**
      * Return the security token (from the DB) for the given user id

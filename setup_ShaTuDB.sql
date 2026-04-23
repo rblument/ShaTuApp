@@ -138,6 +138,15 @@ CREATE TABLE Student (
     LastLogout TIMESTAMP
 );
 
+CREATE TABLE LoginHistory (
+    Id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    UserId VARCHAR(255) NOT NULL,
+    LogoutTime TIMESTAMP NULL,
+    LoginTime TIMESTAMP NOT NULL,
+    INDEX idx_login_userid (UserId),
+    INDEX idx_login_current (LoginTime)
+);
+
 CREATE TABLE StudentModel (
     UserId VARCHAR(255) NOT NULL PRIMARY KEY,
     ScaffoldLevel ENUM ('NONE', 'LOW', 'MEDIUM', 'HIGH', 'EXTREME')
@@ -310,6 +319,8 @@ INSERT INTO Problem (Id, Title, Description, UnitId, SequenceIndex, Message)
 INSERT INTO Step (Id, TaskId, Title, Description, SequenceIndex, ExercisedComponentId, StepSubType, SubTypeId, TimeoutId)
  VALUES (0, 0, 'Acknowledge Welcome', 'First Step in learning the tutor', 0, 0, 'INFO_MESSAGE', 0, 0);
 
+INSERT INTO Step (Id, TaskId, Title, Description, SequenceIndex, ExercisedComponentId, StepSubType, SubTypeId, TimeoutId)
+VALUES (1, 10, 'Encode ASCII', 'Convert the question to binary', 0, 100, 'ENCODE_ASCII', 0, 0);
 
 INSERT INTO Task (Id, ProblemId, Title, Description, Kind, SequenceIndex, ExampleType)
  VALUES (0, 1, 'Welcome', 'Let''s get started', 'MESSAGE', 0, 'ALL');
@@ -475,6 +486,7 @@ ADD CONSTRAINT fk_unit_courseid
 FOREIGN KEY (CourseId) REFERENCES Course(Id)
 ON UPDATE CASCADE ON DELETE CASCADE;
 
+<<<<<<< HEAD
 
 -- added for SHAT-368 work
 INSERT INTO Step (Id, TaskId, Title, Description, SequenceIndex, ExercisedComponentId, StepSubType, SubTypeId, TimeoutId)
@@ -485,3 +497,5 @@ INSERT INTO Step (Id, TaskId, Title, Description, SequenceIndex, ExercisedCompon
 -- 
 -- INSERT INTO Step (Id, TaskId, Title, Description, SequenceIndex, ExercisedComponentId, StepSubType, SubTypeId, TimeoutId)
 --  VALUES (3, 110, 'Repeat bit calculation', 'perform bit calculation on remaining bits', 2, 0, 'CHOICE_FUNCTION', 0, 0);
+=======
+>>>>>>> development

@@ -180,6 +180,11 @@ public class NewAccountPanel extends GPanel {
     // remove hard-coded login credentials
     // uncomment signInBut.setEnabled()
     //}
+    /**
+     * TODO:
+     * when not necessary for development anymore:
+     * - remove hard coded fName, lName, userId, pass1, pass2, secAnswer when done testing
+    */
     private void initComponents() {
         LoginDocumentListener docListener = new LoginDocumentListener();
         fName = new HintTextField("First", 15);
@@ -200,7 +205,11 @@ public class NewAccountPanel extends GPanel {
         pass1.getDocument().addDocumentListener(docListener);
 
         pass2 = new JPasswordField(20);
+<<<<<<< HEAD
         pass2.setText("testP&ss");
+=======
+        pass2.setText("TestP&ss");
+>>>>>>> development
         pass2.getDocument().addDocumentListener(docListener);
         
         String s1[] = {"What city were you born in?", "What is your mother's maiden name?"};

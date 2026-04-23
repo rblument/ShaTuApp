@@ -20,6 +20,8 @@ import edu.regis.shatu.svc.ServiceFactory;
 import edu.regis.shatu.svc.StudentModelSvc;
 import edu.regis.shatu.svc.TutorReply;
 
+        
+     
 public class EncodeAscii extends Objective {
     public EncodeAscii(Student student) {
         super(student);
@@ -151,8 +153,10 @@ public class EncodeAscii extends Objective {
         // EncodeAsciiStep from the StepCompletion function in the Encode Ascii View
         EncodeAsciiStep completedEncodeAsciiStep = gson.fromJson(completion.getData(), EncodeAsciiStep.class);
 
-        String studentAnswer = completedEncodeAsciiStep.getAscii(); // What the user submitted as the answer.
-        String correctAnswer = completedEncodeAsciiStep.getResult();
+        String studentAnswer = completedEncodeAsciiStep.getAscii(); // What the user submitted as the answer
+        
+        
+        String correctAnswer = toBinaryFunction(completedEncodeAsciiStep.getQuestion());
 
         System.out.println("Correct Answer: " + correctAnswer); // Error checking
         System.out.println("User Answer: " + studentAnswer); // Error checking

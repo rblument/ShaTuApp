@@ -187,8 +187,14 @@ public class SplashPanel extends GPanel {
     /**
      * Create the primary child components used in this view
      * TODO:
+<<<<<<< HEAD
      * when done testing,
      * remove hard-coded login credentials
+=======
+     * when not necessary for development anymore:
+     * - remove hardcoded userId and password when done testing
+     * - uncomment signInBut.setEnabled(false);
+>>>>>>> development
      */
     private void initializeComponents() {
         LoginDocumentListener docListener = new LoginDocumentListener();
@@ -202,7 +208,10 @@ public class SplashPanel extends GPanel {
 	password.getDocument().addDocumentListener(docListener);
 
 	signInBut = new JButton(SignInAction.instance());
+<<<<<<< HEAD
         signInBut.setEnabled(true);
+=======
+>>>>>>> development
 //	signInBut.setEnabled(false);
         
         password.addActionListener(e -> signInBut.doClick());
