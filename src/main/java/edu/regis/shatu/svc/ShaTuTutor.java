@@ -682,10 +682,11 @@ public class ShaTuTutor implements TutorSvc {
             if (session != null) {
                 SessionDAO dao = (SessionDAO) ServiceFactory.findSessionSvc();
                 // Welcome task is always TaskId = 0
-                dao.deletePendingTask(session.getId(), 0);
+                //dao.deletePendingTask(session.getId(), 0);
+                // SHAT-368: as per function note above, PendingTask should never be deleted
                 
                 //update task from 'WELCOME' to 'ENCODE ASCII'
-//                dao.updatePendingTask(session.getId(), 0, 10, 0);
+                dao.updatePendingTask(session.getId(), 0, 10, 0);
                 
 
             // TODO: Hard-coded for Choice Function development. When sequential task
