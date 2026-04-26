@@ -151,80 +151,22 @@ public class StepCompletionAction extends ShaTuGuiAction {
                             StepCompletionReply stepReply = gson.fromJson(step.getData(), StepCompletionReply.class);
   
                             if (stepReply.isCorrect()) {
-                                if (stepReply.isNewTask()) {
-                                    String prompt = "Congratulations, the answer you submitted is correct. " +
-                                            "As I believe you've mastered this outcome, I suggest moving on to a different task. "
-                                            +
-                                            "However, if you'd like you can try a similar problem again.";
+                                if (task.getType() != ProblemType.STEP_COMPLETION_REPLY) {
+                                    loadReturnedTask(task);
+                                } else if (stepReply.isNewTask()) {
+                                    String prompt = "Congratulations, the answer you submitted is correct. "
+                                            + "As I believe you've mastered this outcome, I suggest moving on to a different task. "
+                                            + "However, if you'd like you can try a similar problem again.";
                                     String[] options = { selection1, selection3 };
                                     int choice = JOptionPane.showOptionDialog(MainFrame.instance(),
                                             prompt, "Tutor Reply", 0, 3, null, options, options[0]);
 
                                     switch (choice) {
                                         case 0 -> {
-                                            System.out.println("Next Task");
-                                            switch (GuiController.instance().getStepView().getSelectedPanel()) {
-                                                case ENCODE -> {
-                                                    task.setType(ProblemType.ADD_ONE_BIT);
-                                                    StepSelection.ADD1.getLabel().select();
-                                                }
-                                                case ADD1 -> {
-                                                    task.setType(ProblemType.PAD_ZEROS);
-                                                    StepSelection.PAD.getLabel().select();
-                                                }
-                                                case PAD -> {
-                                                    task.setType(ProblemType.ADD_MSG_LENGTH);
-                                                    StepSelection.LENGTH.getLabel().select();
-                                                }
-                                                case LENGTH -> {
-                                                    task.setType(ProblemType.PREPARE_SCHEDULE);
-                                                    StepSelection.PREPARE.getLabel().select();
-                                                }
-                                                case PREPARE -> {
-                                                    task.setType(ProblemType.INITIALIZE_VARS);
-                                                    StepSelection.INIT_VARS.getLabel().select();
-                                                }
-                                                case INIT_VARS -> {
-                                                    task.setType(ProblemType.COMPRESS_ROUND);
-                                                    StepSelection.COMPRESS.getLabel().select();
-                                                }
-                                                case COMPRESS -> {
-                                                    task.setType(ProblemType.ROTATE_BITS);
-                                                    StepSelection.ROTATE_BITS.getLabel().select();
-                                                }
-                                                case ROTATE_BITS -> {
-                                                    task.setType(ProblemType.SHIFT_BITS);
-                                                    StepSelection.SHIFT_RIGHT.getLabel().select();
-                                                }
-                                                case SHIFT_RIGHT -> {
-                                                    task.setType(ProblemType.XOR_BITS);
-                                                    StepSelection.XOR.getLabel().select();
-                                                }
-                                                case XOR -> {
-                                                    task.setType(ProblemType.ADD_BITS);
-                                                    StepSelection.ADD_TWO_BIT.getLabel().select();
-                                                }
-                                                case ADD_TWO_BIT -> {
-                                                    task.setType(ProblemType.CHOICE_FUNCTION);
-                                                    StepSelection.CHOICE_FUNCTION.getLabel().select();
-                                                }
-                                                case CHOICE_FUNCTION -> {
-                                                    task.setType(ProblemType.MAJORITY_FUNCTION);
-                                                    StepSelection.MAJ_FUNCTION.getLabel().select();
-                                                }
-                                                case MAJ_FUNCTION -> {
-                                                    task.setType(ProblemType.SHA_ZERO);
-                                                    StepSelection.SHA_ZERO.getLabel().select();
-                                                }
-                                                case SHA_ZERO -> {
-                                                    task.setType(ProblemType.SHA_ONE);
-                                                    StepSelection.SHA_ONE.getLabel().select();
-                                                }
-                                                case SHA_ONE -> {
-                                                    // This is the last step
-                                                    System.out.println("All steps completed");
-                                                }
-                                            }
+                                            System.out.println("Next Task returned by tutor");
+                                            // Do nothing here yet if tutor still returned only a completion reply.
+                                            // Once ShaTuTutor returns the real next PendingTask, this branch can
+                                            // also call loadReturnedTask(task).
                                         }
                                         default -> {
                                             System.out.println("try similar problem");
@@ -239,12 +181,6 @@ public class StepCompletionAction extends ShaTuGuiAction {
                                             prompt, "Tutor Reply", 0, 3, null, options, options[0]);
                                     NewExampleAction.instance().actionPerformed(null);
                                 }
-                          //  }
-                            // ToDO: what is this
-                          //  else if (stepReply.getResponse().isEmpty()) {
-                          //      String prompt = "Please enter an answer";
-                            //    JOptionPane.showMessageDialog(MainFrame.instance(),
-                             //           prompt, "Tutor Reply", JOptionPane.INFORMATION_MESSAGE);
                             } else {
                                 String prompt = "Unfortunately, your answer was incorrect. Please try agian.";
                                 String[] options = { selection2, selection3, selection4 };
@@ -271,7 +207,7 @@ public class StepCompletionAction extends ShaTuGuiAction {
                         }
                     }
 
-                    // exView.setCurrentTask(task);
+                    //exView.setCurrentTask(task);
 
             }
         } catch (IllegalArgException e) {
@@ -279,6 +215,34 @@ public class StepCompletionAction extends ShaTuGuiAction {
         }
     }
 
+    
+    /**
+    * Routes the client to the correct view based on the real task returned
+    * by the tutor after a successful completion.
+    *
+    * @param task the next task returned by the tutor
+    */
+   private void loadReturnedTask(Task task) {
+       switch (task.getType()) {
+           case ASCII_ENCODE -> StepSelection.ENCODE.getLabel().select();
+           case ADD_ONE_BIT -> StepSelection.ADD1.getLabel().select();
+           case PAD_ZEROS -> StepSelection.PAD.getLabel().select();
+           case ADD_MSG_LENGTH -> StepSelection.LENGTH.getLabel().select();
+           case PREPARE_SCHEDULE -> StepSelection.PREPARE.getLabel().select();
+           case INITIALIZE_VARS -> StepSelection.INIT_VARS.getLabel().select();
+           case COMPRESS_ROUND -> StepSelection.COMPRESS.getLabel().select();
+           case ROTATE_BITS -> StepSelection.ROTATE_BITS.getLabel().select();
+           case SHIFT_BITS -> StepSelection.SHIFT_RIGHT.getLabel().select();
+           case XOR_BITS -> StepSelection.XOR.getLabel().select();
+           case ADD_BITS -> StepSelection.ADD_TWO_BIT.getLabel().select();
+           case CHOICE_FUNCTION -> StepSelection.CHOICE_FUNCTION.getLabel().select();
+           case MAJORITY_FUNCTION -> StepSelection.MAJ_FUNCTION.getLabel().select();
+           case SHA_ZERO -> StepSelection.SHA_ZERO.getLabel().select();
+           case SHA_ONE -> StepSelection.SHA_ONE.getLabel().select();
+           default -> System.out.println("Unhandled task type: " + task.getType());
+       }
+   }
+    
     /**
      * Notify the tutor that the student requested to see the correct answer so the
      * event can be persisted.

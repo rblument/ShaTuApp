@@ -322,6 +322,9 @@ INSERT INTO Step (Id, TaskId, Title, Description, SequenceIndex, ExercisedCompon
 INSERT INTO Step (Id, TaskId, Title, Description, SequenceIndex, ExercisedComponentId, StepSubType, SubTypeId, TimeoutId)
 VALUES (1, 10, 'Encode ASCII', 'Convert the question to binary', 0, 100, 'ENCODE_ASCII', 0, 0);
 
+INSERT INTO Step (Id, TaskId, Title, Description, SequenceIndex, ExercisedComponentId, StepSubType, SubTypeId, TimeoutId)
+VALUES (2, 20, 'Add One Bit', 'Append a single 1 bit to the encoded message', 0, 101, 'ADD_ONE_BIT', 0, 0);
+
 INSERT INTO Task (Id, ProblemId, Title, Description, Kind, SequenceIndex, ExampleType)
  VALUES (0, 1, 'Welcome', 'Let''s get started', 'MESSAGE', 0, 'ALL');
 

@@ -433,7 +433,7 @@ public class EncodeView extends UserRequestView {
                 questionLabel.setText("Please click new example button to get started");
                 feedbackArea.setText("");
                 responseTextArea.setText("");
-                checkButton.setEnabled(false);
+                //checkButton.setEnabled(false);
                 responseTextArea.setEnabled(false);
                 hintButton.setEnabled(false);
 
@@ -566,7 +566,9 @@ public class EncodeView extends UserRequestView {
         }
 
         TutoringMode mode = model.getTutoringMode();
-
+        messageLengthField.setEnabled(true);
+        setQuestionField.setEnabled(true);
+        responseTextArea.setEnabled(true);
         if (mode == TutoringMode.SEE_ONE) {
             hintButton.setEnabled(true);
         }
@@ -575,6 +577,7 @@ public class EncodeView extends UserRequestView {
             messageLengthField.setEnabled(true);
             setQuestionField.setEnabled(true);
             responseTextArea.setEnabled(true);
+            checkButton.setEnabled(true);
         } else {
             // DO_ONE and TEACH_ONE both have enabled the fields
             messageLengthField.setEnabled(true);
