@@ -1,3 +1,4 @@
+-- setup_ShaTuDB.sql
 -- SHATU: SHA-256 Tutor
 -- (C) Johanna & Richard Blumenthal, All rights reserved
 -- Unauthorized use, duplication or distribution without the authors' permission is strictly prohibited.
@@ -150,6 +151,12 @@ CREATE TABLE LoginHistory (
 CREATE TABLE StudentModel (
     UserId VARCHAR(255) NOT NULL PRIMARY KEY,
     ScaffoldLevel ENUM ('NONE', 'LOW', 'MEDIUM', 'HIGH', 'EXTREME')
+);
+
+CREATE TABLE DeveloperMode (
+    UserId VARCHAR(255) NOT NULL PRIMARY KEY,
+    IsEnabled TINYINT DEFAULT 0,
+    TutoringMode ENUM('SEE_ONE', 'DO_ONE', 'TEACH_ONE') DEFAULT 'SEE_ONE'
 );
 
 -- A static description of a task to complete within a course unit.
@@ -388,6 +395,11 @@ INSERT INTO Unit (Id, CourseId, Title,
     0, 'FIXED_SEQUENCE');
 
 /* ********** ADD FOREIGN KEY CONSTRAINTS ********** */
+ALTER TABLE DeveloperMode
+ADD CONSTRAINT fk_developermode_userid
+FOREIGN KEY (UserId) REFERENCES Account(UserId)
+ON UPDATE CASCADE ON DELETE CASCADE;
+
 
 ALTER Table Assessment
 ADD CONSTRAINT fk_assessment_userid
