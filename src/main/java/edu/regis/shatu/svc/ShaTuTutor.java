@@ -416,13 +416,20 @@ public class ShaTuTutor implements TutorSvc {
     }
 
     /**
-     * Attempts to sign a student in.
+     * Authenticates a user attempting to sign in to the system.
      *
-     * This method handles ":SignIn" requests from the GUI client.
+     * This method verifies the provided credentials against stored account
+     * data. If the credentials are valid, a tutoring session is retrieved or
+     * created for the user. A login event is also recorded, but failure to
+     * record login history will not prevent successful authentication.
      *
-     * @param jsonUser a JSon encoded User object
-     * @return a TutorReply, if successful, the status is "Authenticated" with
-     * data being a JSon encoded TutoringSession object.
+     * Possible outcomes: - "Authenticated": user credentials are valid and
+     * session is returned - "InvalidPassword": password does not match stored
+     * credentials - "UnknownUser": user does not exist in the system
+     *
+     * @param jsonUser JSON string containing the userId and password
+     * @return a TutorReply containing the authentication status and session
+     * data if successful
      */
     public TutorReply signIn(String jsonUser) {
         Account requestAcct = gson.fromJson(jsonUser, Account.class);
@@ -431,19 +438,27 @@ public class ShaTuTutor implements TutorSvc {
             Account dbAcct = ServiceFactory.findAccountSvc().retrieve(requestAcct.getUserId());
 
             if (dbAcct.getPassword().equals(requestAcct.getPassword())) {
-                //student = new Student(dbAcct);
                 String userId = dbAcct.getUserId();
 
                 SessionSvc svc = ServiceFactory.findSessionSvc();
 
-                session = svc.retrieve(dbAcct);
+                try {
+                    session = svc.retrieve(dbAcct);
+                } catch (ObjNotFoundException ex) {
+                    Course course = ServiceFactory.findCourseSvc().retrieve(DEFAULT_COURSE_ID);
+                    student = createStudent(dbAcct, course);
+                    session = createSession(student, course);
+                }
 
                 student = session.getStudent();
 
-                notifyLogin(student);
+                try {
+                    notifyLogin(student);
+                } catch (ObjNotFoundException | NonRecoverableException ex) {
+                    LOGGER.log(Level.WARNING, "Login history could not be recorded for " + userId, ex);
+                }
 
                 TutorReply reply = new TutorReply("Authenticated");
-
                 reply.setData(gson.toJson(session));
 
                 return reply;
@@ -455,8 +470,7 @@ public class ShaTuTutor implements TutorSvc {
         } catch (ObjNotFoundException e) {
             return new TutorReply("UnknownUser");
         } catch (NonRecoverableException ex) {
-            Logger.getLogger(ShaTuTutor.class
-                    .getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ShaTuTutor.class.getName()).log(Level.SEVERE, null, ex);
             return new TutorReply();
         }
     }
@@ -490,15 +504,14 @@ public class ShaTuTutor implements TutorSvc {
             return reply;
         }
     }
-    
+
     /**
-     * SHAT-362
-     * Attempts to save a student session.
-     * 
+     * SHAT-362 Attempts to save a student session.
+     *
      * This method handles ":SaveSession" requests from the GUI client.
-     * 
+     *
      * It is invoked indirectly as a reflection from within request().
-     * 
+     *
      * @param jsonUser a JSON encoded User object
      * @return a TutorReply indicating "SAVED" for success or ":ERR" for failure
      */
@@ -506,14 +519,12 @@ public class ShaTuTutor implements TutorSvc {
         try {
             ServiceFactory.findSessionSvc().update(session);
             return new TutorReply("SAVED");
-        }
-        // If the user does not have an existing session catch it.
+        } // If the user does not have an existing session catch it.
         catch (ObjNotFoundException ex) {
             TutorReply reply = new TutorReply(":ERR");
             reply.setData("Session not found for: " + session.getStudent().getAccount().getUserId());
             return reply;
-        }
-        // Is the database connection good?
+        } // Is the database connection good?
         catch (NonRecoverableException ex) {
             System.getLogger(ShaTuTutor.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
             TutorReply reply = new TutorReply(":ERR");
@@ -757,45 +768,43 @@ public class ShaTuTutor implements TutorSvc {
                     session.getTasks().removeIf(pt -> pt.getTask() != null && pt.getTask().getId() == 0);
                 }
             }
-        }catch (Exception ex) {
+        } catch (Exception ex) {
             Logger.getLogger(ShaTuTutor.class.getName())
                     .log(Level.WARNING, "Unable to clear welcome task from PendingTask", ex);
         }
 
-            TutoringMode mode = session.getTutoringMode();
-            ProblemType firstProblemType;
+        TutoringMode mode = session.getTutoringMode();
+        ProblemType firstProblemType;
 
-            switch (mode) {
-                case SEE_ONE:
-                    firstProblemType = ProblemType.ASCII_ENCODE;
-                    break;
-                case DO_ONE:
-                    firstProblemType = ProblemType.ASCII_ENCODE;
-                    break;
-                case TEACH_ONE:
-                    firstProblemType = ProblemType.ASCII_ENCODE;
-                    break;
-                default:
-                    firstProblemType = ProblemType.ASCII_ENCODE;
-            }
-
-            currObjective = getCurrentObjectiveByProbelmType(firstProblemType);
-
-            String messageToHash;
-            if (session.getProblem() != null && session.getProblem().getMessageToHash() != null) {
-                messageToHash = session.getProblem().getMessageToHash();
-            } else {
-                messageToHash = "Regis Computer Science Rocks!";
-            }
-
-            EncodeAsciiStep encodeStep = new EncodeAsciiStep();
-            encodeStep.setQuestion(messageToHash);
-            String jsonData = gson.toJson(encodeStep);
-
-            return currObjective.example(session, jsonData);
+        switch (mode) {
+            case SEE_ONE:
+                firstProblemType = ProblemType.ASCII_ENCODE;
+                break;
+            case DO_ONE:
+                firstProblemType = ProblemType.ASCII_ENCODE;
+                break;
+            case TEACH_ONE:
+                firstProblemType = ProblemType.ASCII_ENCODE;
+                break;
+            default:
+                firstProblemType = ProblemType.ASCII_ENCODE;
         }
 
-    
+        currObjective = getCurrentObjectiveByProbelmType(firstProblemType);
+
+        String messageToHash;
+        if (session.getProblem() != null && session.getProblem().getMessageToHash() != null) {
+            messageToHash = session.getProblem().getMessageToHash();
+        } else {
+            messageToHash = "Regis Computer Science Rocks!";
+        }
+
+        EncodeAsciiStep encodeStep = new EncodeAsciiStep();
+        encodeStep.setQuestion(messageToHash);
+        String jsonData = gson.toJson(encodeStep);
+
+        return currObjective.example(session, jsonData);
+    }
 
     public TutorReply completedTask(String taskInfo) {
         return new TutorReply();

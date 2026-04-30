@@ -38,10 +38,9 @@ import edu.regis.shatu.view.MainFrame;
  * @author rickb
  */
 public class SignInAction extends ShaTuGuiAction {
-    
+
     private final InactivityManager inactivityManager
             = new InactivityManager();
-
 
     /**
      * Exceptions occurring in this class are also logged to this logger.
@@ -84,17 +83,24 @@ public class SignInAction extends ShaTuGuiAction {
     }
 
     /**
-     * Handle the user's request to sign-in by sending it to the ShaTu tutor.
+     * Handles the sign-in button click event.
      *
-     * If successful, the MainFrame with the Tutoring Session View is displayed.
+     * This method sends the user's login credentials to the backend service for
+     * authentication. Based on the response, it either loads the user's
+     * tutoring session into the main UI or displays an appropriate error
+     * message.
      *
-     * @param evt ignored
+     * If authentication is successful, the session is set in the main frame and
+     * inactivity tracking is started. If authentication fails, the user is
+     * notified with a message dialog.
+     *
+     * @param evt the action event triggered by clicking the sign-in button
      */
     @Override
     public void actionPerformed(ActionEvent evt) {
         Gson gson = getGsonPretty();
         Account account = MainFrame.instance().getAccount();
-        
+
         ClientRequest request = new ClientRequest(ServerRequestType.SIGN_IN);
         request.setData(gson.toJson(account));
         TutorReply reply = SvcFacade.instance().tutorRequest(request);
@@ -102,26 +108,36 @@ public class SignInAction extends ShaTuGuiAction {
         switch (reply.getStatus()) {
             case "Authenticated":
                 TutoringSession session = gson.fromJson(reply.getData(), TutoringSession.class);
-                
+
                 MainFrame frame = MainFrame.instance();
 
-                // Set the model 
                 frame.setModel(session);
-                
-                // Start tracking user inactivity
+
                 inactivityManager.startTracking();
-                
+
                 break;
-                
+
             case "InvalidPassword":
                 MainFrame.instance().invalidPass();
                 break;
+
             case "UnknownUser":
-                 JOptionPane.showMessageDialog(MainFrame.instance(), 
-                    account.getUserId() + " is not a known user.\n\nPerhaps, try creating a 'New User' first.",
-                    "Warning", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(MainFrame.instance(),
+                        account.getUserId() + " is not a known user.\n\nPerhaps, try creating a 'New User' first.",
+                        "Warning", JOptionPane.ERROR_MESSAGE);
                 break;
+
+            case ":ERR":
+                JOptionPane.showMessageDialog(MainFrame.instance(),
+                        "Sign in failed because the application hit an internal error.\n"
+                        + reply.getData(),
+                        "Sign In Error", JOptionPane.ERROR_MESSAGE);
+                break;
+
             default:
+                JOptionPane.showMessageDialog(MainFrame.instance(),
+                        "Sign in failed. Server status: " + reply.getStatus(),
+                        "Sign In Error", JOptionPane.ERROR_MESSAGE);
                 System.out.println("Coding error  status: " + reply.getStatus());
         }
     }
