@@ -24,6 +24,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import edu.regis.shatu.dao.SessionDAO;
+import edu.regis.shatu.dao.DeveloperModeDAO;
 import edu.regis.shatu.err.NonRecoverableException;
 import edu.regis.shatu.err.ObjDuplicateException;
 import edu.regis.shatu.err.ObjNotFoundException;
@@ -36,7 +37,6 @@ import edu.regis.shatu.model.Student;
 import edu.regis.shatu.model.Task;
 import edu.regis.shatu.model.TutoringSession;
 import edu.regis.shatu.model.Unit;
-import edu.regis.shatu.model.aol.StudentModel;
 import edu.regis.shatu.model.StudentModelFieldKind;
 import edu.regis.shatu.model.aol.Assessment;
 import edu.regis.shatu.model.aol.AssessmentLevel;
@@ -416,6 +416,34 @@ public class ShaTuTutor implements TutorSvc {
         }
     }
 
+    
+    
+
+
+
+    private void applyDeveloperModeOverride(String userId) {
+        try {
+            DeveloperModeDAO dao = new DeveloperModeDAO();
+            TutoringMode mode = dao.retrieveTutoringMode(userId);
+
+            if (mode == null) {
+                System.out.println("[ShaTuTutor.java] - [DeveloperMode] - no override for userId=" + userId);
+                return;
+            }
+
+            session.setTutoringMode(mode);
+
+            System.out.println("[ShaTuTutor.java] - [DeveloperMode] - tutoringMode override applied=" + mode);
+
+        } catch (NonRecoverableException ex) {
+            Logger.getLogger(ShaTuTutor.class.getName()).log(
+                    Level.WARNING,
+                    "Developer mode override failed. Login will continue normally.",
+                    ex
+            );
+        }
+    }
+    
     /**
      * Attempts to sign a student in.
      *
@@ -463,8 +491,9 @@ public class ShaTuTutor implements TutorSvc {
                 System.out.println("signIn problem task count=" + session.getProblem().getTasks().size());
 
                 student = session.getStudent();
-
-
+                
+                applyDeveloperModeOverride(userId);
+                
             // Do not let login history problems block a successful login
             try {
                 notifyLogin(student);

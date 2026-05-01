@@ -28,6 +28,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+
+import edu.regis.shatu.dao.DeveloperModeDAO;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+
+
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -208,6 +214,8 @@ public class DashboardPanel extends JPanel {
 
         settingsButton.setVerticalAlignment(SwingConstants.TOP);
 
+        settingsButton.addActionListener(evt -> showDeveloperModeSettings());
+        
         // Let tutor control, navigate directly to TUTOR view
         seeOneButton.addActionListener(evt -> {
             if (model != null) {
@@ -963,4 +971,75 @@ public class DashboardPanel extends JPanel {
             MainFrame.instance().displayStep(selection);
         }
     }
+
+    private void showDeveloperModeSettings() {
+        if (model == null || model.getStudent() == null || model.getStudent().getAccount() == null) {
+            JOptionPane.showMessageDialog(this,
+                    "Please sign in before changing settings.",
+                    "Settings",
+                    JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        String userId = model.getStudent().getAccount().getUserId();
+
+        JCheckBox enableDeveloperMode = new JCheckBox("Enable developer mode");
+        JComboBox<TutoringMode> modeBox = new JComboBox<>(TutoringMode.values());
+
+        modeBox.setSelectedItem(model.getStudent().getStudentModel().getTutoringMode());
+
+        JPanel panel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.anchor = GridBagConstraints.WEST;
+
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        panel.add(enableDeveloperMode, gbc);
+
+        gbc.gridy = 1;
+        panel.add(new JLabel("Tutoring mode:"), gbc);
+
+        gbc.gridx = 1;
+        panel.add(modeBox, gbc);
+
+        int result = JOptionPane.showConfirmDialog(
+                this,
+                panel,
+                "Developer Mode Settings",
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE
+        );
+
+        if (result != JOptionPane.OK_OPTION) {
+            return;
+        }
+
+        try {
+            TutoringMode selectedMode = (TutoringMode) modeBox.getSelectedItem();
+            DeveloperModeDAO dao = new DeveloperModeDAO();
+
+            dao.updateDeveloperMode(userId, enableDeveloperMode.isSelected(), selectedMode);
+
+            if (enableDeveloperMode.isSelected()) {
+                model.setTutoringMode(selectedMode);
+                MainFrame.instance().setModel(model);
+                rebuildDashboard();
+                updateAllProgressBars();
+            }
+
+            JOptionPane.showMessageDialog(this,
+                    "Developer mode settings saved. Sign in again to test the full login override.",
+                    "Settings Saved",
+                    JOptionPane.INFORMATION_MESSAGE);
+
+        } catch (NonRecoverableException ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Could not save developer mode settings.",
+                    "Settings Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    
 }
