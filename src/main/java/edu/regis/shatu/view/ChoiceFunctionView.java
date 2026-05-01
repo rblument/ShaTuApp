@@ -47,11 +47,9 @@ import java.awt.event.KeyAdapter;
 import javax.swing.JOptionPane;
 import edu.regis.shatu.model.aol.TutoringMode;
 
-//SHAT-368 imports
 import java.util.Random;
 import edu.regis.shatu.dao.SessionDAO;
 import edu.regis.shatu.err.NonRecoverableException;
-import edu.regis.shatu.objectives.ChoiceFunction;
 
 /**
  * ChoiceFunctionView class represents a GUI view for a choice function Ch(x, y,
@@ -498,17 +496,15 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
         if (!checkHintEnabled) {
             resetButtonListeners(); // Clear any listeners applied from other views
         }
-        //SHAT-368 : added if/else for null checking
-        if(this.model == null){
-            System.out.println("\nError: no model present for ChoiceFunctionView.java\n");            
-    
-        }
         
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
             
         /**
          * SHAT-368
-         * hard-coding update to pendingtask for development
+         * hard-coding update to pendingtask SQL table for development
+         * TODO:
+         *  - create/implement dynamic version that will ensure correct currentTask and currentStep
+         *      for any task (if natural progression doesn't do this already)
          */
         try {
             SessionDAO dao = new SessionDAO();
@@ -519,6 +515,11 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
         
         Step step = this.model.currentTask().getCurrentStep().getStep();
         
+        /**
+         * TODO:
+         * - have SEE_ONE mode correctly go through each step in the ChoiceFunction task
+         *      - note: adjust/edit database setup as desired for correct steps to be present
+         */
         if(model.getTutoringMode() == TutoringMode.SEE_ONE){
 
             ChoiceFunctionStep example = gson.fromJson(step.getData(), ChoiceFunctionStep.class);
@@ -575,15 +576,11 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
                         + "which will be " + answerBit
                         + "\n\n" + "We repeat this process for each bit, so the final answer of this example will be: "
                         + finalResult
-                        
-                        
                         ;
                 
-
-
                 responseTextArea.setText(explanation);
                 responseTextArea.setEnabled(false);
-                checkButton.setEnabled(true); 
+                checkButton.setEnabled(false); 
                 
             }
         }else if (model.getTutoringMode() == TutoringMode.DO_ONE){
@@ -597,7 +594,7 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
     /**
      * SHAT-368 NOTE
      * this was copied over from edu.regis.shatu.objectives.ChoiceFuntion.java.
-     * this was done for testing, will need to correct for final implementation
+     * this was done to simplify testing, 
      * 
      * Evaluates the choice function Ch(x, y, z).
      *
@@ -635,7 +632,6 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
      * Disables fields not available for SEE_ONE mode for passive viewing.
      * 
      */
-    
     @Override
     protected void configureModeSpecificUI() {
         super.configureModeSpecificUI();//call parent to handle buttons
