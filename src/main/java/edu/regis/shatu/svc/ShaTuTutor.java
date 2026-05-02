@@ -125,8 +125,21 @@ public class ShaTuTutor implements TutorSvc {
     }
 
     /**
-     * {@inheritDoc}
-     */
+    * Handles incoming tutor requests from the GUI client.
+    *
+    * This method converts the request type into a matching ShaTuTutor method name,
+    * verifies the user's security token when required, reloads the active student
+    * model and tutoring session, and then dispatches the request using reflection.
+    *
+    * Requests such as ":SignIn" and ":CreateAccount" do not require an existing
+    * session. Requests such as ":CompletedStep", ":RequestHint", and
+    * ":SaveSession" require a valid security token before being processed.
+    *
+    * @param request the ClientRequest containing the request type, user id,
+    * security token, and JSon encoded request data
+    * @return a TutorReply containing the result of the requested tutor operation,
+    * or a TutorReply with status ":ERR" if the request cannot be processed
+    */
     @Override
     public TutorReply request(ClientRequest request) {
         // Uses reflection to invoke a method derived from the request name in
@@ -419,8 +432,18 @@ public class ShaTuTutor implements TutorSvc {
     
     
 
-
-
+    /**
+    * Applies a developer mode tutoring override for the signed-in user.
+    *
+    * This method checks whether the current user has a developer mode tutoring
+    * mode saved in the database. If an override exists, the current session's
+    * tutoring mode is replaced with that developer-selected mode.
+    *
+    * Developer mode is treated as optional testing behavior. If the override
+    * cannot be loaded, the failure is logged and sign-in continues normally.
+    *
+    * @param userId the user id of the student currently signing in
+    */
     private void applyDeveloperModeOverride(String userId) {
         try {
             DeveloperModeDAO dao = new DeveloperModeDAO();
@@ -445,14 +468,24 @@ public class ShaTuTutor implements TutorSvc {
     }
     
     /**
-     * Attempts to sign a student in.
-     *
-     * This method handles ":SignIn" requests from the GUI client.
-     *
-     * @param jsonUser a JSon encoded User object
-     * @return a TutorReply, if successful, the status is "Authenticated" with
-     * data being a JSon encoded TutoringSession object.
-     */
+    * Attempts to sign a student in.
+    *
+    * This method handles ":SignIn" requests from the GUI client. It verifies the
+    * submitted user id and password, retrieves or creates the user's tutoring
+    * session, restores the student and student model data, applies any developer
+    * mode override, and records the login event.
+    *
+    * If an existing session is found but contains no pending tasks, this method
+    * attempts to rebuild the first pending task from the session's assigned
+    * problem. This prevents the tutor from opening into an unusable state when
+    * the TutoringSession row exists but the PendingTask rows are missing.
+    *
+    * @param jsonUser a JSon encoded Account object containing the user's sign-in
+    * credentials
+    * @return a TutorReply if successful the status is "Authenticated" and the
+    * data is a JSon encoded TutoringSession object; otherwise the status is
+    * ":Success" or ":ERR"
+    */
     public TutorReply signIn(String jsonUser) {
     Account requestAcct = gson.fromJson(jsonUser, Account.class);
 
@@ -733,9 +766,21 @@ public class ShaTuTutor implements TutorSvc {
     }
 
     /**
-     * @param jsonObj a JSon encoded StepCompletion object
-     * @return
-     */
+    * Handles a completed step submitted by the GUI client.
+    *
+    * This method handles ":CompletedStep" requests from the GUI client. It
+    * unmarshals the submitted StepCompletion object, checks the subtype of the
+    * completed step, and routes the completion to the correct objective.
+    *
+    * INFO_MESSAGE steps are handled separately because they introduce the lesson
+    * rather than checking a normal student answer. ENCODE_ASCII steps also receive
+    * additional transition handling because a correct ASCII encoding answer should
+    * move the student into the first real SHA-256 task.
+    *
+    * @param jsonObj a JSon encoded StepCompletion object
+    * @return a TutorReply containing either a StepCompletionReply, the next
+    * pending task, or an error reply if the completed step cannot be processed
+    */
     public TutorReply completedStep(String jsonObj) {
         System.out.println("completedStep");
 
@@ -759,14 +804,25 @@ public class ShaTuTutor implements TutorSvc {
     }
 
     /**
-    * If ENCODE ASCII was answered correctly, replace the current pending task
-    * with the next real task (ADD ONE BIT), persist that transition, and
-    * return the new pending task to the client.
+    * Handles the transition from ASCII encoding to the add-one-bit task.
     *
-    * If the answer was incorrect, return the original completion reply.
+    * This method is called after an ENCODE_ASCII step has already been checked by
+    * its objective. If the answer was incorrect, the original completion reply is
+    * returned. If the answer was correct, this method builds the next task,
+    * copies the generated step data into the persisted ADD_ONE_BIT task, updates
+    * the PendingTask row in the database, refreshes the in-memory session task,
+    * and returns the next pending task to the client.
     *
-    * @param reply the reply returned by the current objective
-    * @return either the original reply or the next real pending task
+    * The generated task contains the new example data, while the persisted task
+    * contains the task and step ids that are already tied to the database problem
+    * sequence. This method keeps those ids aligned while still passing the newly
+    * generated example data forward.
+    *
+    * @param completion the StepCompletion submitted by the client for the
+    * ENCODE_ASCII step
+    * @param reply the TutorReply returned by the ENCODE_ASCII objective
+    * @return the original TutorReply if the answer was incorrect, or a TutorReply
+    * containing the next PendingTask if the answer was correct
     */
     private TutorReply handleEncodeAsciiCompletion(StepCompletion completion, TutorReply reply) {
         PendingTask replyTask = gson.fromJson(reply.getData(), PendingTask.class);
@@ -868,11 +924,23 @@ public class ShaTuTutor implements TutorSvc {
     }
     
     /**
-     * Handles the INFO_MESSAGE step completion
-     *
-     * @param completion
-     * @return
-     */
+    * Completes the introductory information message step.
+    *
+    * This method handles INFO_MESSAGE step completions from the GUI client. It
+    * marks the introductory step as complete, updates the student's exposure and
+    * assessment information, selects ASCII encoding as the first real task, and
+    * returns an ASCII encoding example to the client.
+    *
+    * The database transition currently expects the introductory task to use task
+    * id 0 and the first ASCII encoding task to use task id 10 with step id 1.
+    * These values are tied to the seeded problem data and should be updated if
+    * the database seed data changes.
+    *
+    * @param completion the StepCompletion object for the completed information
+    * message step
+    * @return a TutorReply containing the first ASCII encoding example, or an
+    * error reply if the transition cannot be processed
+    */
     public TutorReply completeInfoMsgStep(StepCompletion completion) {
         System.out.println("[ShaTuTutor.java] - [completeInfoMsgStep] - starting INFO_MESSAGE completion");
 
