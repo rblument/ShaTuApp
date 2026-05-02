@@ -136,7 +136,16 @@ public class ForgotPasswordPanel extends GPanel{
         userId.setText("");
         secAnswer.setText("");
         securityQuestions.setSelectedIndex(0);
+        securityQuestions.setEnabled(true);
     }
+    
+    public void prepareForcedPasswordReset(String userIdText) {
+    userId.setText(userIdText);
+    secAnswer.setText("");
+    securityQuestions.setSelectedIndex(0);
+    securityQuestions.setEnabled(false);
+    enableButtons(userId.getDocument());
+}
 
     /**
      * Update our model with the current values displayed in this view
@@ -155,6 +164,7 @@ public class ForgotPasswordPanel extends GPanel{
         userId.setText(model.getUserId());
         secAnswer.setText("");
         securityQuestions.setSelectedIndex(0);
+        securityQuestions.setEnabled(true);
     }
     
     private void initComponents() {

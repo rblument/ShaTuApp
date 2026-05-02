@@ -110,7 +110,7 @@ public class SignInAction extends ShaTuGuiAction {
                 TutoringSession session = gson.fromJson(reply.getData(), TutoringSession.class);
 
                 MainFrame frame = MainFrame.instance();
-
+                frame.clearSignInAttempts();
                 frame.setModel(session);
 
                 inactivityManager.startTracking();

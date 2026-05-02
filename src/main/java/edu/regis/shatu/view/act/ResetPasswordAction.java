@@ -82,7 +82,7 @@ public class ResetPasswordAction extends ShaTuGuiAction {
         
         Account account = mainFrame.getAccount();
         
-        String token = mainFrame.getModel().getSecurityToken();
+String token = mainFrame.getResetSecurityToken();
 
         ClientRequest request = new ClientRequest(ServerRequestType.RESET_PASSWORD);
         request.setUserId(account.getUserId());
@@ -111,6 +111,7 @@ public class ResetPasswordAction extends ShaTuGuiAction {
 
         switch (status) {
             case "PasswordReset":
+                mainFrame.clearSignInAttempts();
                 mainFrame.clearNewAccountPanel();
                 msg = "Student user account password successfully reset\n\n" +
                     "Press OK and we'll return you to the sign-in screen\n\n" +

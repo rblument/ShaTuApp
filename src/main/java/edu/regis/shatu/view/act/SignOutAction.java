@@ -39,7 +39,7 @@ public class SignOutAction extends ShaTuGuiAction {
      */
     private static final Logger LOGGER
             = Logger.getLogger(SignOutAction.class.getName());
-    
+
     /**
      * The single instance of this sign-out action.
      */
@@ -47,9 +47,9 @@ public class SignOutAction extends ShaTuGuiAction {
 
     /**
      * Create the singleton for this action, which occurs when this class is
-     * loaded by the Java class, as a result of the class being
-     * referenced by executing SignOutAction.instance() in the
-     * createFileMenu() method of the ShaTuMenuBar class.
+     * loaded by the Java class, as a result of the class being referenced by
+     * executing SignOutAction.instance() in the createFileMenu() method of the
+     * ShaTuMenuBar class.
      */
     static {
         SINGLETON = new SignOutAction();
@@ -63,7 +63,7 @@ public class SignOutAction extends ShaTuGuiAction {
     public static SignOutAction instance() {
         return SINGLETON;
     }
-    
+
     /**
      * Initialize the action with the "Sign out" text.
      */
@@ -72,26 +72,30 @@ public class SignOutAction extends ShaTuGuiAction {
         putValue(SHORT_DESCRIPTION, "Sign out of the tutor");
         putValue(MNEMONIC_KEY, KeyEvent.VK_O);
     }
-    
+
     /**
      * Handle the user's request to sign out.
-     * 
+     *
      * @param e is ignored
      */
     @Override
     public void actionPerformed(ActionEvent e) {
         Gson gson = getGsonPretty();
         Account account = MainFrame.instance().getAccount();
-        
-        ClientRequest request = new ClientRequest(ServerRequestType.SIGN_OUT);
-        request.setData(gson.toJson(account));
-        TutorReply reply = SvcFacade.instance().tutorRequest(request);
-        
-        if(reply.getStatus().equals("SIGN_OUT")){
-            MainFrame.instance().setModel(null);
+
+        try {
+            ClientRequest request = new ClientRequest(ServerRequestType.SIGN_OUT);
+            request.setData(gson.toJson(account));
+            TutorReply reply = SvcFacade.instance().tutorRequest(request);
+
+            if (!reply.getStatus().equals("SIGN_OUT")) {
+                System.err.println("Something went wrong: " + reply.getData());
+            }
+        } catch (Exception ex) {
+            LOGGER.warning("Sign out request failed: " + ex.getMessage());
         }
-        else {
-            System.err.println("Something went wrong: " + reply.getData());
-        }
+
+        MainFrame.instance().clearSignInAttempts();
+        MainFrame.instance().setModel(null);
     }
 }

@@ -136,6 +136,12 @@ public class ResetPasswordPanel extends GPanel{
         pass1.setText("");
         pass2.setText("");
     }
+    
+    public void preparePasswordReset(String userIdText, String token) {
+    model.setUserId(userIdText);
+    securityToken = token;
+    updateDisplay();
+}
 
     /**
      * Update our model with the current values displayed in this view
