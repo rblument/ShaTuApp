@@ -380,7 +380,19 @@ public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSes
             file.delete();
     }
 
-
+    /**
+     * Adds a pending task to an existing tutoring session.
+     *
+     * This method creates a PendingStep for the task's current step, inserts a new
+     * PendingTask row linked to that PendingStep, and commits both operations as a
+     * single transaction. This keeps the session from being left with a PendingTask
+     * that points to a missing PendingStep.
+     *
+     * @param sessionId the id of the tutoring session receiving the pending task
+     * @param task the task that should be added to the session as pending work
+     * @throws edu.regis.shatu.err.NonRecoverableException if the pending task or
+     * pending step cannot be saved to the database
+     */
     public void addPendingTask(int sessionId, Task task) throws NonRecoverableException {
         final String sql = "INSERT INTO PendingTask (SessionId, TaskId, PendingStepId) VALUES (?,?,?)";
 
@@ -420,6 +432,18 @@ public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSes
         }
     }
     
+    /**
+    * Creates database rows for all pending tasks in a new tutoring session.
+    *
+    * This method is used when a TutoringSession is first saved. For each
+    * PendingTask in the session, it creates the matching PendingStep row, then
+    * inserts a PendingTask row that connects the session, task, and pending step.
+    *
+    * @param session the TutoringSession whose pending tasks should be persisted
+    * @param conn the active database connection used for the session transaction
+    * @throws edu.regis.shatu.err.NonRecoverableException if any pending task or
+    * pending step cannot be saved
+    */
     private void createPendingTasks(TutoringSession session, Connection conn)
             throws NonRecoverableException {
         
@@ -452,6 +476,21 @@ public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSes
         }
     }
 
+    /**
+    * Creates a PendingStep row for a tutoring session.
+    *
+    * This method saves the current progress state for one step, including the
+    * original Step id, whether the tutor should be notified, whether the step is
+    * completed, and the current hint index. The generated PendingStep id is stored
+    * back into the PendingStep object and returned to the caller.
+    *
+    * @param sessionId the id of the tutoring session that owns the pending step
+    * @param pStep the PendingStep object to save
+    * @param conn the active database connection used for the session transaction
+    * @return the generated PendingStep id
+    * @throws edu.regis.shatu.err.NonRecoverableException if the PendingStep row
+    * cannot be inserted or its generated id cannot be retrieved
+    */
     private int createPendingStep(int sessionId, PendingStep pStep, Connection conn)
             throws NonRecoverableException {
         
@@ -490,6 +529,21 @@ public class SessionDAO extends MySqlDAO implements SessionSvc, CRUD<TutoringSes
         }
     }
 
+    /**
+    * Retrieves the pending tasks for an existing tutoring session.
+    *
+    * This method rebuilds the in-memory PendingTask list from the PendingTask
+    * rows stored in the database. Each stored task id is matched to the
+    * corresponding Task in the session's loaded Problem, and each stored
+    * PendingStep id is used to restore the student's current progress through
+    * that task.
+    *
+    * @param session the TutoringSession whose pending tasks should be retrieved
+    * @param conn the active database connection used to load the pending tasks
+    * @return an ArrayList of PendingTask objects restored from the database
+    * @throws edu.regis.shatu.err.NonRecoverableException if the pending tasks
+    * or pending steps cannot be retrieved
+    */
     private ArrayList<PendingTask> retrievePendingTasks(TutoringSession session, Connection conn)
             throws NonRecoverableException {
 
