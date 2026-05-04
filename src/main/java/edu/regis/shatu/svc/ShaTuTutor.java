@@ -874,6 +874,48 @@ public class ShaTuTutor implements TutorSvc {
      * @return
      */
     public TutorReply completeInfoMsgStep(StepCompletion completion) {
+
+        // Advance past the one-time INFO_MESSAGE so it won't reappear on the next sign-in.
+        // IMPORTANT: The client UI assumes there is ALWAYS at least one pending task in the session,
+        // so we update the existing PendingTask row instead of deleting it.
+        try {
+            if (session != null) {
+                SessionDAO dao = (SessionDAO) ServiceFactory.findSessionSvc();
+                // Welcome task is always TaskId = 0
+                // SHAT-368: as per function note above, PendingTask should never be deleted
+                
+                //dao.deletePendingTask(session.getId(), 0);
+                
+                
+                //// update task from 'WELCOME' to 'ENCODE ASCII'
+                //dao.updatePendingTask(session.getId(), 0, 10, 0);
+                
+                
+
+            // TODO: Hard-coded for Choice Function development. When sequential task
+            // navigation is implemented, this should be replaced with a proper call to
+            // insertPendingTask() using the dynamically generated task from
+            // currObjective.example(). TaskId and StepId must match rows in the
+            // Task and Step tables in the database.
+            // update pending task, DO NOT DELETE PENDING TASK
+            // note: updating pendingTask to something other than 'welcome' 
+            // breaks the tutor sign-in process for a returning user
+            // due to a null step/pendingstep.
+//                dao.updatePendingTask(session.getId(), 0, 110, 0);
+                dao.updatePendingTask(session.getId(), 0, 0, 0);
+
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(ShaTuTutor.class.getName())
+                  .log(Level.WARNING, "Unable to clear welcome task from PendingTask", ex);
+        }
+        TutoringMode mode = session.getTutoringMode();
+        ProblemType firstProblemType;
+
+
+
+        
+        //Does this need to be updated to display where they last where for DO_ONE,  TEACH_ONE?? Will they always start with ASCII?
         System.out.println("[ShaTuTutor.java] - [completeInfoMsgStep] - starting INFO_MESSAGE completion");
 
         try {
@@ -902,9 +944,8 @@ public class ShaTuTutor implements TutorSvc {
                     .log(Level.WARNING, "SHAT-347: unable to inspect next task during INFO_MESSAGE completion", ex);
         }
 
-        TutoringMode mode = session.getTutoringMode();
-        ProblemType firstProblemType;
-
+        mode = session.getTutoringMode();
+        
         switch (mode) {
             case SEE_ONE:
                 firstProblemType = ProblemType.ASCII_ENCODE;

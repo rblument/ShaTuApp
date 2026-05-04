@@ -501,3 +501,15 @@ ADD CONSTRAINT fk_unit_courseid
 FOREIGN KEY (CourseId) REFERENCES Course(Id)
 ON UPDATE CASCADE ON DELETE CASCADE;
 
+<<<<<<< HEAD
+
+-- added for SHAT-368 work
+-- adds required steps for task Choice Function
+INSERT INTO Step (Id, TaskId, Title, Description, SequenceIndex, ExercisedComponentId, StepSubType, SubTypeId, TimeoutId)
+ VALUES (1, 110, 'Choice Function Step', 'Compute Ch(x,y,z)', 0, 0, 'CHOICE_FUNCTION', 0, 0);
+
+INSERT INTO Step (Id, TaskId, Title, Description, SequenceIndex, ExercisedComponentId, StepSubType, SubTypeId, TimeoutId)
+ VALUES (2, 110, 'Compare First Bit', 'using the selected vars, walk through how to calculate the first outcome', 1, 0, 'CHOICE_FUNCTION', 0, 0);
+
+INSERT INTO Step (Id, TaskId, Title, Description, SequenceIndex, ExercisedComponentId, StepSubType, SubTypeId, TimeoutId)
+ VALUES (3, 110, 'Repeat bit calculation', 'perform bit calculation on remaining bits', 2, 0, 'CHOICE_FUNCTION', 0, 0);

@@ -1,12 +1,15 @@
 package edu.regis.shatu.objectives;
 
+import edu.regis.shatu.dao.SessionDAO;
 import edu.regis.shatu.model.KnowledgeComponentKind;
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.Student;
 import edu.regis.shatu.model.TutoringSession;
+import edu.regis.shatu.model.aol.PendingTask;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.model.steps.ChoiceFunctionStep;
+import edu.regis.shatu.svc.ServiceFactory;
 import edu.regis.shatu.svc.TutorReply;
 
 public class ChoiceFunction extends Objective {
@@ -56,10 +59,12 @@ public class ChoiceFunction extends Objective {
         substep.setOperand3(operand3);
 
         substep.setResult(choiceFunction(operand1, operand2, operand3, bitLength));
-
-        return genericExample(substep, StepSubType.CHOICE_FUNCTION, ProblemType.CHOICE_FUNCTION,
+        
+        TutorReply reply = genericExample(substep, StepSubType.CHOICE_FUNCTION, ProblemType.CHOICE_FUNCTION,
                 KnowledgeComponentKind.CHOICE_FUNCTION,
                 "Compute the result of the choice function on the three operands");
+        
+        return reply;
     }
 
     @Override

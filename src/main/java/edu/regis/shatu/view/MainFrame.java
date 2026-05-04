@@ -365,9 +365,16 @@ public class MainFrame extends JFrame implements WindowListener {
 
     /**
      * Update the current model with any changes made in this frame's view.
+     * TODO: implement how to update the model
      */
     private void updateModel() {
-
+        
+        if(displayedView == ViewName.DASHBOARD || displayedView == ViewName.TUTOR){
+            TutoringSession current = tutorSessionView.getModel();
+            if(current != null){
+                model = current;
+            }
+        }
     }
 
     /**

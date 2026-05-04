@@ -47,6 +47,10 @@ import java.awt.event.KeyAdapter;
 import javax.swing.JOptionPane;
 import edu.regis.shatu.model.aol.TutoringMode;
 
+import java.util.Random;
+import edu.regis.shatu.dao.SessionDAO;
+import edu.regis.shatu.err.NonRecoverableException;
+
 /**
  * ChoiceFunctionView class represents a GUI view for a choice function Ch(x, y,
  * z).
@@ -76,6 +80,7 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
     private JLabel viewNameLabel, truthTableLabel, chFunctionLabel,
             stringXLabel, stringYLabel, stringZLabel, answerLabel,
             problemSizeLabel, instructionLabel;
+        
 
     /**
      * Initializes the ChoiceFunctionView by creating and laying out its child
@@ -107,6 +112,7 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
         ChoiceFunctionStep newStep = new ChoiceFunctionStep();
 
         newStep.setBitLength(problemSize);
+        
 
         // Set the data of the NewExampleRequest to the new RotateStep containing
         // the desired conditions
@@ -138,6 +144,7 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
         return step;
     }
 
+    
     /**
      * Creates child GUI components for the view.
      */
@@ -186,7 +193,7 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
         descTextArea.setOpaque(false);
         descTextArea
                 .append("""
-                        The Choice function takes three 32-bit words as input and outputs one 32-bit word. This output is necessary to complete the second addition step in the SHA-256 algorithm.""");
+                        The Choice function takes three N-bit words as input and outputs one N-bit word. This output is necessary to complete the second addition step in the SHA-256 algorithm.""");
     }
 
     /**
@@ -270,9 +277,9 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
     private void setUpQuestionArea() {
 
         problemSize = 4;
-        stringX = "foo"; // generateInputString();
-        stringY = "var"; // generateInputString();
-        stringZ = "baz"; // generateInputString();
+        stringX = generateInputString(problemSize); // "1100";
+        stringY = generateInputString(problemSize); // "1001"
+        stringZ = generateInputString(problemSize); // "0110"
 
         stringXLabel = new JLabel("x: " + stringX);
         stringYLabel = new JLabel("y: " + stringY);
@@ -440,6 +447,22 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
     }
 
     /**
+     * generates and returns a new string containing n bits
+     * @param size number of bits the input string should be
+     * @return the generated input string
+     */
+    private String generateInputString(int n){
+        String temp = "";
+        
+        Random random = new Random();
+        for(int i = 0; i < n; i++){
+            temp += random.nextInt(2) + "";
+        }    
+        return temp;
+    }
+    
+    
+    /**
      * Handles the keyTyped event for the view.
      *
      * @param e The KeyEvent that occurred.
@@ -468,22 +491,37 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
 
     @Override
     protected void updateView() {
-        
         // If check and hint buttons are disabled, reset listenerers and apply those
         // used by this view
         if (!checkHintEnabled) {
             resetButtonListeners(); // Clear any listeners applied from other views
         }
-
-        System.out.println("Choice function update view called."); // Error checking
-
+        
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            
+        /**
+         * SHAT-368
+         * hard-coding update to pendingtask SQL table for development
+         * TODO:
+         *  - create/implement dynamic version that will ensure correct currentTask and currentStep
+         *      for any task (if natural progression doesn't do this already)
+         */
+        try {
+            SessionDAO dao = new SessionDAO();
+            dao.updatePendingTask(this.model.getId(), 0, 110, 0);
+        } catch (NonRecoverableException ex) {
+            System.getLogger(ChoiceFunctionView.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+        }
+        
+        Step step = this.model.currentTask().getCurrentStep().getStep();
+        
+        /**
+         * TODO:
+         * - have SEE_ONE mode correctly go through each step in the ChoiceFunction task
+         *      - note: adjust/edit database setup as desired for correct steps to be present
+         */
+        if(model.getTutoringMode() == TutoringMode.SEE_ONE){
 
-        Step step = model.currentTask().getCurrentStep().getStep();
-
-        System.out.println("Choice value View substep from current step: " + step.getSubType()); // Error checking
-
-        if (step.getSubType() == StepSubType.CHOICE_FUNCTION) {
             ChoiceFunctionStep example = gson.fromJson(step.getData(), ChoiceFunctionStep.class);
 
             if (example.getOperand1() == null || example.getOperand1().isEmpty()) {
@@ -498,19 +536,102 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
                 stringYLabel.setText("y: " + example.getOperand2());
                 stringZLabel.setText("z: " + example.getOperand3());
                 hintButton.setEnabled(true);
-                responseTextArea.setEnabled(true);
-                checkButton.setEnabled(true);
+                
+                char[] xVar = example.getOperand1().toCharArray();
+                char[] yVar = example.getOperand2().toCharArray();
+                char[] zVar = example.getOperand3().toCharArray();
+                String answerBit;
+                String explanation = "";
+                String selectedVar = "";
+                String finalResult = choiceFunction(example.getOperand1(), example.getOperand2(), example.getOperand3());
+                
+
+                
+                String fullVar = "";
+                
+                if(xVar[0] == '0'){
+                    selectedVar = "y";
+                    answerBit = String.valueOf(yVar[0]);
+                    fullVar = example.getOperand2();
+                }else if(xVar[0] == '1'){
+                    selectedVar = "z";
+                    answerBit = String.valueOf(zVar[0]);
+                    fullVar = example.getOperand3();
+
+                }else{
+                    selectedVar.concat("ERROR: bit not correctly found");
+                    answerBit = "-1";
+                    fullVar = "error: no valid variable found";
+                }
+                
+                explanation = "to determine the first bit selected, we first look at variable "
+                        + "x's first bit." 
+                        + "\nIf the first bit of x is a 1, the answer's first bit will " 
+                        + "be selected from variable y." 
+                        + "\nIf the first bit of x is a 0, "
+                        + "the answer's first bit will be selected from variable z.\n\n"
+                        + "Since the first variable is: " + example.getOperand1() 
+                        + ", the first bit is: " + String.valueOf(xVar[0]) + ". \nSo, we will" 
+                        + " choose the first bit from variable " + selectedVar + " = " + fullVar + ", "
+                        + "which will be " + answerBit
+                        + "\n\n" + "We repeat this process for each bit, so the final answer of this example will be: "
+                        + finalResult
+                        ;
+                
+                responseTextArea.setText(explanation);
+                responseTextArea.setEnabled(false);
+                checkButton.setEnabled(false); 
+                
             }
-        }
-       
+        }else if (model.getTutoringMode() == TutoringMode.DO_ONE){
+            //TODO: implement
+        }else if (model.getTutoringMode() == TutoringMode.TEACH_ONE){
+            //TODO: implement
+        }        
     }
+    
+    
+    /**
+     * SHAT-368 NOTE
+     * this was copied over from edu.regis.shatu.objectives.ChoiceFuntion.java.
+     * this was done to simplify testing, 
+     * 
+     * Evaluates the choice function Ch(x, y, z).
+     *
+     * @param x Binary string representation of x.
+     * @param y Binary string representation of y.
+     * @param z Binary string representation of z.
+     * @return Binary string result of Ch(x, y, z).
+     */
+    private String choiceFunction(String x, String y, String z) {
+        // Convert the binary strings to integer values
+        String tempX = x.replaceAll("\\s", "");
+        String tempY = y.replaceAll("\\s", "");
+        String tempZ = z.replaceAll("\\s", "");
+
+        long intX = Long.parseLong(tempX, 2);
+        long intY = Long.parseLong(tempY, 2);
+        long intZ = Long.parseLong(tempZ, 2);
+
+        long xy = intX & intY;
+
+        long notX = ~intX & intZ;
+
+        long result = xy ^ notX;
+
+        // Convert the result back to binary string
+        String binaryResult = String.format("%4s", Long.toBinaryString(result)).replace(' ', '0');
+        System.out.println("the result should be:" + result);
+        System.out.println("returning: " + binaryResult);
+
+        return binaryResult;
+    }    
     
     /**
      * Configure UI components based on the current tutoring mode
      * Disables fields not available for SEE_ONE mode for passive viewing.
      * 
      */
-    
     @Override
     protected void configureModeSpecificUI() {
         super.configureModeSpecificUI();//call parent to handle buttons

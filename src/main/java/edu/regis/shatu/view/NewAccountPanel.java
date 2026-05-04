@@ -132,6 +132,9 @@ public class NewAccountPanel extends GPanel {
     
     /**
      * Set all of the text fields in this view to the empty string.
+     * TODO:
+     * modified to make development easier. revert before usage
+     * 
      */
     public void clearFields() {
         fName.setText("");
@@ -172,6 +175,10 @@ public class NewAccountPanel extends GPanel {
     // Used to get focus
     //public JTextField getFNameComp() {
     //return fName;
+    // TODO:
+    // when done testing, 
+    // remove hard-coded login credentials
+    // uncomment signInBut.setEnabled()
     //}
     /**
      * TODO:
@@ -209,11 +216,11 @@ public class NewAccountPanel extends GPanel {
         secAnswer.getDocument().addDocumentListener(docListener);
 
         signInBut = new JButton(SignInAction.instance());
-        signInBut.setEnabled(true);
+//        signInBut.setEnabled(false);
 
         createAcctBut = new JButton(CreateAcctAction.instance());
 
-        createAcctBut.setEnabled(false);
+        createAcctBut.setEnabled(true);
         //MainFrame.instance().getRootPane().setDefaultButton(createAcctBut);
 
         backBut = new JButton(BackToLogin.instance());
@@ -565,7 +572,13 @@ public class NewAccountPanel extends GPanel {
             msg.setText("");
 
         } else {
-            createAcctBut.setEnabled(false);
+            /**
+             * TODO:
+             * when done testing,
+             * switch .setEnabled back to false
+             */
+            createAcctBut.setEnabled(true);
+//            createAcctBut.setEnabled(false);
             msg.setText("(* Please fix problems highlighted in red.)");
         }
     }
