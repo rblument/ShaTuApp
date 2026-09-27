@@ -125,38 +125,29 @@ public class ShaTuTutor implements TutorSvc {
     }
 
     /**
-    * Handles incoming tutor requests from the GUI client.
-    *
-    * This method converts the request type into a matching ShaTuTutor method name,
-    * verifies the user's security token when required, reloads the active student
-    * model and tutoring session, and then dispatches the request using reflection.
-    *
-    * Requests such as ":SignIn" and ":CreateAccount" do not require an existing
-    * session. Requests such as ":CompletedStep", ":RequestHint", and
-    * ":SaveSession" require a valid security token before being processed.
-    *
-    * @param request the ClientRequest containing the request type, user id,
-    * security token, and JSon encoded request data
-    * @return a TutorReply containing the result of the requested tutor operation,
-    * or a TutorReply with status ":ERR" if the request cannot be processed
-    */
+     * Handles incoming tutor requests from the GUI client.
+     *
+     * This method converts the request type into a matching ShaTuTutor method name,
+     * verifies the user's security token when required, reloads the active student
+     * model and tutoring session, and then dispatches the request using reflection.
+     *
+     * Requests such as ":SignIn" and ":CreateAccount" do not require an existing
+     * session. Requests such as ":CompletedStep", ":RequestHint", and
+     * ":SaveSession" require a valid security token before being processed.
+     *
+     * @param request the ClientRequest containing the request type, user id,
+     * security token, and JSon encoded request data
+     * @return a TutorReply containing the result of the requested tutor operation,
+     * or a TutorReply with status ":ERR" if the request cannot be processed
+     */
     @Override
     public TutorReply request(ClientRequest request) {
         // Uses reflection to invoke a method derived from the request name in
         // the client request (e.g., ":SignIn" invokes "signIn(...)").
         Logger.getLogger(ShaTuTutor.class.getName()).log(Level.INFO, request.getRequestType().getRequestName());
 
-        // TODO: Consider making this parser into its own method.
-        // Efficiently produce "signIn" from ":SignIn", for example.
-        char c[] = request.getRequestType().getRequestName().toCharArray();
-        c[1] = Character.toLowerCase(c[1]);
-
-        char m[] = new char[c.length - 1];
-        for (int i = 1; i < c.length; i++) {
-            m[i - 1] = c[i];
-        }
-
-        String methodName = new String(m);
+        // Parse the method name (e.g., ":SignIn" -> "signIn")
+        String methodName = parseMethodName(request.getRequestType().getRequestName());
 
         // TODO: Consider making this switch into its own method.
         // Most methods require verifying the given security token with the
@@ -230,6 +221,20 @@ public class ShaTuTutor implements TutorSvc {
         } catch (InvocationTargetException ex) {
             return createError("ShaTuTutor_ERR_5", (Exception) ex.getCause());
         }
+    }
+
+    /**
+     * Converts a request name (e.g., ":SignIn") into a method name (e.g., "signIn").
+     * 
+     * @param requestName The raw request string from the client
+     * @return The formatted method name for reflection
+     */
+    private String parseMethodName(String requestName) {
+        if (requestName == null || requestName.length() < 2) {
+            return requestName; 
+        }
+        // Grabs the character after the colon, lowercases it, and appends the rest of the string
+        return Character.toLowerCase(requestName.charAt(1)) + requestName.substring(2);
     }
 
     /**
