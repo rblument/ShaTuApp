@@ -85,8 +85,10 @@ public class ShaZero extends Objective {
         input = input.replaceAll("\\s", "");
         long a = Long.parseLong(input, 2);
 
-        // Perform rotations and shift operations
-        return formatResult(rotateRight(a, 2) ^ rotateRight(a, 13) ^ rotateRight(a, 22), bitLength);
+        // FIPS 180-4 section 4.1.2: Sigma 0 is ROTR^2 XOR ROTR^13 XOR ROTR^22.
+        return formatResult(rotateRight(a, 2, bitLength)
+                ^ rotateRight(a, 13, bitLength)
+                ^ rotateRight(a, 22, bitLength), bitLength);
     }
 
     /**
@@ -98,7 +100,19 @@ public class ShaZero extends Objective {
      * @return The rotated string.
      */
 
-    private long rotateRight(long input, int positions) {
-        return (input >>> positions) | (input << (32 - positions));
+    private long rotateRight(long input, int positions, int bitLength) {
+        if (bitLength < 1 || bitLength > 63) {
+            throw new IllegalArgumentException(
+                    "bitLength must be between 1 and 63, was: " + bitLength);
+        }
+        long mask = (1L << bitLength) - 1;
+        long value = input & mask;
+        // floorMod keeps a negative rotation meaningful instead of
+        // silently collapsing the result to zero.
+        int places = Math.floorMod(positions, bitLength);
+        if (places == 0) {
+            return value;
+        }
+        return ((value >>> places) | (value << (bitLength - places))) & mask;
     }
 }

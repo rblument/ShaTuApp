@@ -76,7 +76,8 @@ public class ShaOne extends Objective {
     }
 
     /**
-     * Calculates the SHA Σ₁ function involving rotation and right shift operations.
+     * Calculates the SHA Σ₁ function, the exclusive-or of three right rotations
+     * of the input. Σ₁ uses no shift; that belongs to the lowercase σ functions.
      *
      * @param input The input binary number.
      * @return The result after performing the SHA Σ₁ function.
@@ -85,20 +86,41 @@ public class ShaOne extends Objective {
         input = input.replaceAll("\\s", "");
         long a = Long.parseLong(input, 2);
 
-        // Perform rotations and shift operations
-        return formatResult(rotateRight(a, 2) ^ rotateRight(a, 13) ^ rotateRight(a, 22), bitLength);
+        // FIPS 180-4 section 4.1.2: Sigma 1 is ROTR^6 XOR ROTR^11 XOR ROTR^25.
+        // (Sigma 0 uses 2, 13 and 22 - see ShaZero.)
+        return formatResult(rotateRight(a, 6, bitLength)
+                ^ rotateRight(a, 11, bitLength)
+                ^ rotateRight(a, 25, bitLength), bitLength);
     }
 
     /**
      * Performs rotation (ROR) on the given input string for the
      * specified number of positions.
      *
+     * The rotation is performed within the width of the current problem, so a
+     * 32-bit problem rotates within 32 bits. Bits shifted off the right re-enter
+     * on the left and the result is masked back to {@code bitLength} bits, which
+     * keeps the value from growing wider than the problem the student was given.
+     *
      * @param input     The input value to rotate.
      * @param positions The number of positions for the rotation.
-     * @return The rotated string.
+     * @param bitLength The width of the problem, in bits.
+     * @return The rotated value, masked to bitLength bits.
      */
 
-    private long rotateRight(long input, int positions) {
-        return (input >>> positions) | (input << (32 - positions));
+    private long rotateRight(long input, int positions, int bitLength) {
+        if (bitLength < 1 || bitLength > 63) {
+            throw new IllegalArgumentException(
+                    "bitLength must be between 1 and 63, was: " + bitLength);
+        }
+        long mask = (1L << bitLength) - 1;
+        long value = input & mask;
+        // floorMod keeps a negative rotation meaningful instead of
+        // silently collapsing the result to zero.
+        int places = Math.floorMod(positions, bitLength);
+        if (places == 0) {
+            return value;
+        }
+        return ((value >>> places) | (value << (bitLength - places))) & mask;
     }
 }

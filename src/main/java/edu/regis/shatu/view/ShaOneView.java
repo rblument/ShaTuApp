@@ -208,7 +208,11 @@ public class ShaOneView extends UserRequestView implements KeyListener { //imple
     private String calculateSigma(String input, int bitLength) {
         String sanitized = input.replaceAll("\\s", "");
         long value = Long.parseLong(sanitized, 2);
-        long result = rotateRight(value, 2) ^ rotateRight(value, 13) ^ rotateRight(value, 22);
+        // FIPS 180-4 section 4.1.2: Sigma 1 is ROTR^6 XOR ROTR^11 XOR ROTR^25.
+        // Must stay in step with ShaOne.calculateSigma on the tutor side.
+        long result = rotateRight(value, 6, bitLength)
+                ^ rotateRight(value, 11, bitLength)
+                ^ rotateRight(value, 25, bitLength);
         return formatResult(result, bitLength);
     }
 
@@ -238,8 +242,20 @@ public class ShaOneView extends UserRequestView implements KeyListener { //imple
         return finalResult;
     }
 
-    private long rotateRight(long input, int positions) {
-        return (input >>> positions) | (input << (32 - positions));
+    private long rotateRight(long input, int positions, int bitLength) {
+        if (bitLength < 1 || bitLength > 63) {
+            throw new IllegalArgumentException(
+                    "bitLength must be between 1 and 63, was: " + bitLength);
+        }
+        long mask = (1L << bitLength) - 1;
+        long value = input & mask;
+        // floorMod keeps a negative rotation meaningful instead of
+        // silently collapsing the result to zero.
+        int places = Math.floorMod(positions, bitLength);
+        if (places == 0) {
+            return value;
+        }
+        return ((value >>> places) | (value << (bitLength - places))) & mask;
     }
 
     /**
