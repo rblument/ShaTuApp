@@ -11,19 +11,19 @@ permissions:
 
 jobs:
   test:
-    name: Java 21 tests
+    name: Run Tests
     runs-on: ubuntu-latest
 
     steps:
       - name: Check out code
         uses: actions/checkout@v7
 
-      - name: Set up Java 21
+      - name: Jave Setup (V21)
         uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: '21'
           cache: maven
 
-      - name: Run tests
+      - name: Run All Tests
         run: mvn --batch-mode --no-transfer-progress clean test
