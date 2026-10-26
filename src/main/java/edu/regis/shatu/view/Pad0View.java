@@ -190,10 +190,11 @@ public class Pad0View extends UserRequestView {
                         + "1: Remember, the Sha256 message is a multiple of 512 bits <br>"
                         + "2: The last 64 bits are for the message length that will be calculated in the next step. <br>"
                         + "3: 512 - 64 = 448 bits, that means your message for this step"
-                        + " needs to be 448 bits long. <br>"
+                        + " needs to be 448 bits long, or 448 bits more than a multiple of 512 if it is longer. <br>"
                         + "4: With that in mind, how many bits is the question "
                         + "(dont forget to add 1 bit like you learned in the previous step). <br>"
-                        + "5: Maybe subtract that from 448 to get your answer?</p>" +
+                        + "5: Subtract that from 448. If you get a negative number, add 512 until it is 0 or more. "
+                        + "That is your answer.</p>" +
                         "</body>" +
                         "</html>");
         descriptionTextPane.setEditable(false);
@@ -362,7 +363,7 @@ public class Pad0View extends UserRequestView {
                 else { // subtype matches and a example was already made
                     questionLabel.setText(String.format("Calculate the number of zero's "
                             + "needed to pad the following string so it is "
-                            + "the proper length (448 bits): %s", question));
+                            + "the proper length (448 bits, or 448 more than a multiple of 512): %s", question));
                     checkButton.setEnabled(true);
                     responseTextArea.setEnabled(true);
                     hintButton.setEnabled(true);

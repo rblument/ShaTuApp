@@ -111,6 +111,19 @@ public class AddOneTest {
         assertEquals("01000001 1", reply.getCorrectAnswer());
     }
 
+    @Test
+    @DisplayName("a missing answer is marked wrong instead of throwing")
+    void missingAnswerIsMarkedWrong() {
+        AddOneStep step = new AddOneStep();
+        step.setQuestion("A");
+        step.setMessageLength(1);
+
+        StepCompletionReply reply = grade(step);
+
+        assertFalse(reply.isCorrect());
+        assertEquals("", reply.getStudentAnswer());
+    }
+
     /** Send the step through completeStep and pull out the StepCompletionReply. */
     private StepCompletionReply grade(AddOneStep step) {
         TutorReply reply = objective.completeStep(new StepCompletion(step, gson.toJson(step)));

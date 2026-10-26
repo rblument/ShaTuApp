@@ -81,7 +81,8 @@ public class AddOne extends Objective {
         // The student's answer comes in its own field. The correct answer is
         // worked out again from the question instead of trusting the copy
         // that came back from the client.
-        String userAnswer = completedStep.getUserAnswer();
+        // A missing answer is graded as wrong.
+        String userAnswer = completedStep.getUserAnswer() == null ? "" : completedStep.getUserAnswer();
         String correctAnswer = addOneFunction(completedStep.getQuestion());
 
         System.out.println("Correct Answer: " + correctAnswer);
