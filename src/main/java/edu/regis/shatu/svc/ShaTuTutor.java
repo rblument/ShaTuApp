@@ -219,7 +219,10 @@ public class ShaTuTutor implements TutorSvc {
         } catch (IllegalArgumentException ex) {
             return createError("ShaTuTutor_ERR_4", ex);
         } catch (InvocationTargetException ex) {
-            return createError("ShaTuTutor_ERR_5", (Exception) ex.getCause());
+            // The handler threw, e.g., the database is down. Send its message
+            // so the user sees more than an error code.
+            Exception cause = (Exception) ex.getCause();
+            return createError("Unable to complete " + methodName + ": " + cause.getMessage(), cause);
         }
     }
 
@@ -361,8 +364,7 @@ public class ShaTuTutor implements TutorSvc {
         } catch (ObjNotFoundException e) {
             return new TutorReply("UnknownUser");
         } catch (NonRecoverableException ex) {
-            LOGGER.log(Level.SEVERE, null, ex);
-            return new TutorReply();
+            return createError("Unable to verify user: " + ex.getMessage(), ex);
         }
     }
 

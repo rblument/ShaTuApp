@@ -447,7 +447,7 @@ public class TutoringSessionView extends GPanel {
             }
 
             if (":ERR".equals(reply.getStatus())) {
-                System.err.println("Error requesting problem: " + reply.getData());
+                MainFrame.instance().displayError(reply.getErrorMessage());
                 return;
             }
 
