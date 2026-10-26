@@ -41,7 +41,7 @@ public class InitVarView extends UserRequestView { // implements ActionListener
     private static final int NUM_VARS = 8;
 
     private TutoringSessionView view;
-    private InitVarStep initVarStep;
+    private InitVarStep initVarStep = new InitVarStep();
 
     private JTextField[] hVars;
     private JTextArea feedbackTextArea;
@@ -176,7 +176,8 @@ public class InitVarView extends UserRequestView { // implements ActionListener
         };
 
         for (int i = 0; i < NUM_VARS; i++) {
-            // hVars[i].getDocument().putProperty("field", hVars[i]); // property is itself?
+            // Lets checkInput() find which text field a document belongs to
+            hVars[i].getDocument().putProperty("field", hVars[i]);
             hVars[i].getDocument().addDocumentListener(docListener);
         }
     }
