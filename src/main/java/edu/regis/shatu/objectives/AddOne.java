@@ -78,8 +78,11 @@ public class AddOne extends Objective {
 
         AddOneStep completedStep = gson.fromJson(completion.getData(), AddOneStep.class);
 
-        String userAnswer = completedStep.getResult();
-        String correctAnswer = completedStep.getResult();
+        // The student's answer comes in its own field. The correct answer is
+        // worked out again from the question instead of trusting the copy
+        // that came back from the client.
+        String userAnswer = completedStep.getUserAnswer();
+        String correctAnswer = addOneFunction(completedStep.getQuestion());
 
         System.out.println("Correct Answer: " + correctAnswer);
         System.out.println("User Answer: " + userAnswer);
@@ -95,7 +98,7 @@ public class AddOne extends Objective {
      *
      * @return
      */
-    private String addOneFunction(String question) {
+    String addOneFunction(String question) {
         String answer;
 
         char stringArray[] = question.toCharArray();

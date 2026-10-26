@@ -70,11 +70,12 @@ public class PadZeros extends Objective {
 
         Pad0Step completedPadZeroStep = gson.fromJson(completion.getData(), Pad0Step.class);
 
-        // ToDo: perhaps this should be how many zeroes to add and not the
-        // actual number of zeros
-        String userAnswer = "";
-       // String userAnswer = completedPadZeroStep.getUserAnswer();
-        String correctAnswer = completedPadZeroStep.getResult();
+        // The student's answer is the number of zeros to add. The correct
+        // answer is worked out again from the question instead of trusting
+        // the copy that came back from the client.
+        String userAnswer = completedPadZeroStep.getUserAnswer();
+        int messageLength = completedPadZeroStep.getQuestion().length();
+        String correctAnswer = Integer.toString(calculateZerosNeededForPadding(messageLength));
 
         System.out.println("user answer: " + userAnswer); // Error checking
         System.out.println("Correct answer: " + correctAnswer); // Error checking
@@ -88,11 +89,16 @@ public class PadZeros extends Objective {
      * purposely to give the developer a easier understanding of whats being
      * calculated instead of just using the integers.
      *
-     * @param messageLength
+     * This follows FIPS 180-4 section 5.1.1: k = (448 - (l + 1)) mod 512,
+     * where l is the message length in bits. For example, 1 character needs
+     * 439 zeros, 55 characters need 7, and 56 characters need 511 because the
+     * padding spills into a second 512 bit block.
      *
-     * @return
+     * @param messageLength the number of ASCII characters in the message
+     *
+     * @return the number of zeros needed, from 0 to 511
      */
-    private int calculateZerosNeededForPadding(int messageLength) {
+    int calculateZerosNeededForPadding(int messageLength) {
         int sha256MessageLength = 512;
         int messageLengthStepBitsNeeded = 64;
         int padZerosStepBitsLength = sha256MessageLength - messageLengthStepBitsNeeded;
@@ -100,7 +106,11 @@ public class PadZeros extends Objective {
         int totalBitsPerMessage = bitsPerCharacter * messageLength;
         int appendOneBit = 1;
         int totalMessageLengthInBits = totalBitsPerMessage + appendOneBit;
-        int zerosNeededToPadMessage = padZerosStepBitsLength - totalMessageLengthInBits;
+
+        // Math.floorMod is used instead of % because % keeps the sign in
+        // Java, so -65 % 512 would be -65 instead of 447.
+        int zerosNeededToPadMessage = Math.floorMod(
+                padZerosStepBitsLength - totalMessageLengthInBits, sha256MessageLength);
 
         return zerosNeededToPadMessage;
     }

@@ -467,15 +467,10 @@ public class Pad0View extends UserRequestView {
         Pad0Step completedStep = gson.fromJson(currentStep.getData(), Pad0Step.class); 
 
         String studentResponse = this.responseTextArea.getText().replaceAll("\\s", "");
-        // ToDO perhaps this should be the number of zeros added.
-        try {
-        completedStep.setMessageLength(Integer.parseInt(studentResponse));
-        } catch (NumberFormatException e) {
-            // ToDo UI should not allow us to get here.
-            completedStep.setMessageLength(-1); // tmp
-            System.out.println("Should never get here: " + studentResponse);
-              
-        }
+
+        // The answer is the number of zeros to add. It goes in its own field
+        // so the message length of the question is left alone.
+        completedStep.setUserAnswer(studentResponse);
 
         StepCompletion step = new StepCompletion(currentStep, gson.toJson(completedStep));
 

@@ -26,10 +26,33 @@ public class AddOneStep extends Step {
     private int messageLength;
 
     /**
+     * The binary string the student typed as their answer.
+     */
+    private String userAnswer;
+
+    /**
      * Constructor
      */
     public AddOneStep() {
         super(1, 0, StepSubType.ADD_ONE_BIT);
+    }
+
+    /**
+     * Setter method for the student's answer
+     *
+     * @param userAnswer
+     */
+    public void setUserAnswer(String userAnswer) {
+        this.userAnswer = userAnswer;
+    }
+
+    /**
+     * Getter method for the student's answer
+     *
+     * @return String
+     */
+    public String getUserAnswer() {
+        return this.userAnswer;
     }
 
     /**

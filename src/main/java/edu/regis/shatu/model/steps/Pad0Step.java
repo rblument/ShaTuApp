@@ -29,10 +29,33 @@ public class Pad0Step extends Step {
     private int messageLength;
 
     /**
+     * The number of zeros the student typed as their answer.
+     */
+    private String userAnswer;
+
+    /**
      * Constructor
      */
     public Pad0Step() {
         super(1, 0, StepSubType.PAD_ZEROS);
+    }
+
+    /**
+     * Setter method for the student's answer
+     *
+     * @param userAnswer
+     */
+    public void setUserAnswer(String userAnswer) {
+        this.userAnswer = userAnswer;
+    }
+
+    /**
+     * Getter method for the student's answer
+     *
+     * @return
+     */
+    public String getUserAnswer() {
+        return this.userAnswer;
     }
 
     /**
