@@ -121,10 +121,7 @@ public class HintAction extends ShaTuGuiAction {
 
             switch (reply.getStatus()) {
                 case ":ERR":
-                    // If we get here, there is a coding error in the tutor svc
-                    // frame.displayError("Ooops, an unexpected error occurred: SI_1");
-                    System.out.println("Coding error  status: " + reply.getStatus());
-
+                    MainFrame.instance().displayError(reply.getErrorMessage());
                     break;
 
                 default:

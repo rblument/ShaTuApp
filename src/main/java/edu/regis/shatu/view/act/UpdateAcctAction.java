@@ -150,10 +150,11 @@ public class UpdateAcctAction extends ShaTuGuiAction {
     }
     
     /**
-     * Displays a GUI message indicating success or failure.
+     * Displays a GUI message indicating success, or the tutor's error message
+     * on failure.
      */
-    private void displayResultMessage(String s) {
-        if(s.equals("Success")) {
+    private void displayResultMessage(TutorReply reply) {
+        if(reply.getStatus().equals("Success")) {
             JOptionPane.showMessageDialog(
                     MainFrame.instance(),
                     "Your account information was successfully updated!",
@@ -161,11 +162,7 @@ public class UpdateAcctAction extends ShaTuGuiAction {
                     JOptionPane.INFORMATION_MESSAGE);
         }
         else {
-            JOptionPane.showMessageDialog(
-                    MainFrame.instance(),
-                    "Unable to update your account information at this time.",
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE);
+            MainFrame.instance().displayError(reply.getErrorMessage());
         }
         
     }
@@ -183,13 +180,17 @@ public class UpdateAcctAction extends ShaTuGuiAction {
         if(account == null) return; // The user cancelled the prompt
         
         TutorReply passwordReply = verifyPasswordRequest(account);
-        if(!passwordReply.getStatus().equals("Authenticated")) {
+        if(passwordReply.getStatus().equals("InvalidPassword")) {
             invalidPasswordMessage();
+            return;
+        }
+        if(!passwordReply.getStatus().equals("Authenticated")) {
+            MainFrame.instance().displayError(passwordReply.getErrorMessage());
             return;
         }
         
         TutorReply updateReply = makeUpdateRequest(account);
-        displayResultMessage(updateReply.getStatus());
+        displayResultMessage(updateReply);
         MainFrame.instance().displayView(MainFrame.ViewName.TUTOR);
     }
 }
