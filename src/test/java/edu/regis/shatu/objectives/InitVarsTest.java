@@ -161,4 +161,19 @@ public class InitVarsTest {
 
         assertEquals("First prime number is 2", step.getHints().get(0).getText());
     }
+
+    @Test
+    @DisplayName("Hints sent by the client are replaced by the tutor's hints")
+    void clientHintsAreReplaced() throws Exception {
+        Step step = new Step(1, 0, StepSubType.INITIALIZE_VARS);
+        Hint clientHint = new Hint();
+        clientHint.setId(1);
+        clientHint.setText("The answer is 0");
+        step.addHint(clientHint);
+
+        addHints.invoke(initVars, step);
+
+        assertEquals(24, step.getHints().size());
+        assertEquals("First prime number is 2", step.getHints().get(0).getText());
+    }
 }

@@ -1,5 +1,6 @@
 package edu.regis.shatu.objectives;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 import edu.regis.shatu.err.NonRecoverableException;
@@ -84,15 +85,17 @@ public class InitVars extends Objective {
     }
 
     /**
-     * Adds the three levels of hints for H0 to H7 to the given step.
+     * Replaces the hints on the given step with the three levels of hints for
+     * H0 to H7.
      *
-     * The hints come from the tutor's own InitVarStep, not from the data sent
-     * by the client.
+     * The hints come from the tutor's own InitVarStep. Any hints already on
+     * the step sent by the client are dropped.
      *
      * @param step the step the hints are added to
      */
     private void addHints(Step step) {
         InitVarStep initVarStep = new InitVarStep();
+        step.setHints(new ArrayList<>());
 
         for (int i = 0; i < NUM_VARS; i++) {
             String variable = "H" + i;
