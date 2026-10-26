@@ -512,15 +512,11 @@ public class Add1View extends UserRequestView {
 
         AddOneStep completedStep = gson.fromJson(currentStep.getData(), AddOneStep.class); 
 
-        String studentResponse = this.responseTextArea.getText();
+        // The answer is a binary string such as "01000001 1", so it is sent
+        // as text. Extra spaces and line breaks are cleaned up first.
+        String studentResponse = this.responseTextArea.getText().trim().replaceAll("\\s+", " ");
 
-        try {
-            completedStep.setMessageLength(Integer.parseInt(studentResponse));
-        } catch (NumberFormatException e) {
-            // ToDo: Check proper format in the view.
-            System.out.println("Never let this int conversion fail " + studentResponse);
-            completedStep.setMessageLength(-1); // tmp
-        }
+        completedStep.setUserAnswer(studentResponse);
 
         StepCompletion step = new StepCompletion(currentStep, gson.toJson(completedStep));
 
