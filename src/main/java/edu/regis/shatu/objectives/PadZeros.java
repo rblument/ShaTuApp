@@ -73,7 +73,8 @@ public class PadZeros extends Objective {
         // The student's answer is the number of zeros to add. The correct
         // answer is worked out again from the question instead of trusting
         // the copy that came back from the client.
-        String userAnswer = completedPadZeroStep.getUserAnswer();
+        // A missing answer is graded as wrong.
+        String userAnswer = completedPadZeroStep.getUserAnswer() == null ? "" : completedPadZeroStep.getUserAnswer();
         int messageLength = completedPadZeroStep.getQuestion().length();
         String correctAnswer = Integer.toString(calculateZerosNeededForPadding(messageLength));
 

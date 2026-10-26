@@ -130,6 +130,19 @@ public class PadZerosTest {
         assertFalse(reply.isCorrect());
     }
 
+    @Test
+    @DisplayName("a missing answer is marked wrong instead of throwing")
+    void missingAnswerIsMarkedWrong() {
+        Pad0Step step = new Pad0Step();
+        step.setQuestion("A");
+        step.setMessageLength(1);
+
+        StepCompletionReply reply = grade(step);
+
+        assertFalse(reply.isCorrect());
+        assertEquals("", reply.getStudentAnswer());
+    }
+
     /** Send the step through completeStep and pull out the StepCompletionReply. */
     private StepCompletionReply grade(Pad0Step step) {
         TutorReply reply = objective.completeStep(new StepCompletion(step, gson.toJson(step)));
