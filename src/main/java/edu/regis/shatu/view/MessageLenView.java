@@ -30,6 +30,7 @@ import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.model.steps.MessageLenStep;
+import edu.regis.shatu.model.steps.MessageLengthEncoding;
 import edu.regis.shatu.model.steps.Step;
 import edu.regis.shatu.model.aol.TutoringMode;
 
@@ -373,8 +374,6 @@ public class MessageLenView extends UserRequestView {
      */
     @Override
     public NewExampleRequest newRequest() {
-        System.out.println("new Mess Len request called"); // Error checking
-
         NewExampleRequest ex = new NewExampleRequest(); // Will be sent to the tutor.
 
         ex.setExampleType(ProblemType.ADD_MSG_LENGTH);
@@ -382,12 +381,15 @@ public class MessageLenView extends UserRequestView {
         MessageLenStep newMessageLenStep = new MessageLenStep(); // New MessageLenStep class object to use for the
                                                                  // question and answer.
 
-        newMessageLenStep.setMessageLength(Integer.parseInt(messageLengthField.getText().trim())); // Number of
-                                                                                                   // characters the
-                                                                                                   // question should
-                                                                                                   // be.
-
-        System.out.println(newMessageLenStep); // Error checking
+        int length;
+        try {
+            length = Integer.parseInt(messageLengthField.getText().trim());
+        } catch (NumberFormatException exn) {
+            throw new IllegalArgumentException("Enter a message length between 1 and "
+                    + MessageLengthEncoding.MAX_CHARACTERS + ".", exn);
+        }
+        MessageLengthEncoding.validateLength(length);
+        newMessageLenStep.setMessageLength(length);
 
         ex.setData(gson.toJson(newMessageLenStep));
 

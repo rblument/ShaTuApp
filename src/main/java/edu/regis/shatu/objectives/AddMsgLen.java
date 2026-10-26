@@ -7,6 +7,7 @@ import edu.regis.shatu.model.TutoringSession;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.model.steps.MessageLenStep;
+import edu.regis.shatu.model.steps.MessageLengthEncoding;
 import edu.regis.shatu.svc.TutorReply;
 
 public class AddMsgLen extends Objective {
@@ -28,9 +29,18 @@ public class AddMsgLen extends Objective {
      */
     @Override
     public TutorReply example(TutoringSession session, String jsonData) {
-        System.out.println("Start tutor newAddMsgLenExample"); // Error checking
-
-        MessageLenStep subStep = gson.fromJson(jsonData, MessageLenStep.class);
+        MessageLenStep subStep;
+        try {
+            subStep = gson.fromJson(jsonData, MessageLenStep.class);
+            if (subStep == null) {
+                return createError("Enter a message length between 1 and "
+                        + MessageLengthEncoding.MAX_CHARACTERS + ".", null);
+            }
+            MessageLengthEncoding.validateLength(subStep.getMessageLength());
+        } catch (RuntimeException ex) {
+            return createError("Enter a message length between 1 and "
+                    + MessageLengthEncoding.MAX_CHARACTERS + ".", ex);
+        }
 
         int messageLength = subStep.getMessageLength();
 
@@ -38,9 +48,8 @@ public class AddMsgLen extends Objective {
 
         subStep.setQuestion(question);
 
-        subStep.setResult(Integer.toBinaryString(messageLength * 8));
-
-        System.out.println(subStep.getResult()); // Error checking
+        subStep.setResult(MessageLengthEncoding.practiceAnswer(messageLength));
+        subStep.setLengthBits64(MessageLengthEncoding.lengthBits64(messageLength));
 
         return genericExample(subStep, StepSubType.ADD_MSG_LENGTH, ProblemType.ADD_MSG_LENGTH,
                 KnowledgeComponentKind.ADD_MSG_LENGTH,
