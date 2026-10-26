@@ -19,6 +19,7 @@ import edu.regis.shatu.model.aol.StepSubType;
  * @author rickb
  */
 public class EncodeAsciiStep extends Step {
+    public static final int MAX_MESSAGE_LENGTH = 1024;
     
     /**
      * The length of the message to encode.
@@ -71,5 +72,18 @@ public class EncodeAsciiStep extends Step {
      */
     public int getMessageLength() {
         return this.messageLength;
+    }
+
+    /** Each printable ASCII character is represented by exactly one byte. */
+    public static boolean isSupportedQuestion(String question) {
+        if (question == null || question.isEmpty() || question.length() > MAX_MESSAGE_LENGTH) {
+            return false;
+        }
+        for (int i = 0; i < question.length(); i++) {
+            if (question.charAt(i) < 32 || question.charAt(i) > 126) {
+                return false;
+            }
+        }
+        return true;
     }
 }
