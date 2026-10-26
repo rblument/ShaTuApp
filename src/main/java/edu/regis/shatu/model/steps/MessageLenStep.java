@@ -20,6 +20,7 @@ import edu.regis.shatu.model.aol.StepSubType;
  */
 public class MessageLenStep extends Step {
 
+    private String lengthBits64;
     private int messageLength;
 
     /**
@@ -27,6 +28,15 @@ public class MessageLenStep extends Step {
      */
     public MessageLenStep() {
         super(1, 0, StepSubType.ADD_MSG_LENGTH);
+    }
+
+    /** The 64-bit length field appended during SHA-256 preprocessing. */
+    public String getLengthBits64() {
+        return lengthBits64;
+    }
+
+    public void setLengthBits64(String lengthBits64) {
+        this.lengthBits64 = lengthBits64;
     }
 
     /**
