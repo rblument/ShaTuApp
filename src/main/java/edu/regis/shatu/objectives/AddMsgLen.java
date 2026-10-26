@@ -67,14 +67,22 @@ public class AddMsgLen extends Objective {
     @Override
     public TutorReply completeStep(StepCompletion completion) {
         MessageLenStep completedMessageLenStep = gson.fromJson(completion.getData(), MessageLenStep.class);
+        if (completedMessageLenStep == null || completedMessageLenStep.getQuestion() == null
+                || completedMessageLenStep.getQuestion().isEmpty()
+                || completedMessageLenStep.getQuestion().length() > MessageLenStep.MAX_MESSAGE_LENGTH) {
+            return createError("There is no message to measure. Request a new example.", null);
+        }
 
-        String userAnswer = String.valueOf(completedMessageLenStep.getMessageLength());
-        String correctAnswer = completedMessageLenStep.getResult();
-
-        System.out.println("user answer: " + userAnswer); // Error checking
-        System.out.println("Correct answer: " + correctAnswer); // Error checking
+        String userAnswer = completedMessageLenStep.getUserAnswer();
+        userAnswer = userAnswer == null ? "" : userAnswer.replaceAll("\\s", "");
+        String correctAnswer = binaryForLength(completedMessageLenStep.getQuestion().length());
 
         return genericComplete(correctAnswer, userAnswer, KnowledgeComponentKind.ADD_MSG_LENGTH);
+    }
+
+    /** The practice screen asks for the binary length without leading zeros. */
+    static String binaryForLength(int characters) {
+        return Long.toBinaryString((long) characters * 8);
     }
 
 }

@@ -411,14 +411,7 @@ public class MessageLenView extends UserRequestView {
         MessageLenStep completedStep = gson.fromJson(currentStep.getData(), MessageLenStep.class); 
 
         String studentResponse = this.responseTextArea.getText().replaceAll("\\s", "");
-
-        try {
-            completedStep.setMessageLength(Integer.parseInt(studentResponse));
-        } catch (NumberFormatException e) {
-            // ToDo: Check proper format in the view.
-            System.out.println("Never let this int conversion fail " + studentResponse);
-            completedStep.setMessageLength(-1); // tmp
-        }
+        completedStep.setUserAnswer(studentResponse);
  
         StepCompletion step = new StepCompletion(currentStep, gson.toJson(completedStep));
 
