@@ -929,6 +929,8 @@ public class DashboardPanel extends JPanel {
                     session.addCurrentTask(pendingTask);
                     MainFrame.instance().setModel(session);
                 }
+            } else if (reply != null) {
+                MainFrame.instance().displayError(reply.getErrorMessage());
             }
         } catch (Exception e) {
             e.printStackTrace();

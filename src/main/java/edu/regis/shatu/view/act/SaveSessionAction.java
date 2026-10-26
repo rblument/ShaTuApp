@@ -88,7 +88,7 @@ public class SaveSessionAction extends ShaTuGuiAction {
         
         // Alert if unable to save for some reason.
         if (!reply.getStatus().equals("SAVED")) {
-            System.err.println("Something went wrong: " + reply.getData());
+            MainFrame.instance().displayError(reply.getErrorMessage());
         }
         
         

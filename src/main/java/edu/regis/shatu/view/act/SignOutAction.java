@@ -91,7 +91,7 @@ public class SignOutAction extends ShaTuGuiAction {
             MainFrame.instance().setModel(null);
         }
         else {
-            System.err.println("Something went wrong: " + reply.getData());
+            MainFrame.instance().displayError(reply.getErrorMessage());
         }
     }
 }

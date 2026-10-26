@@ -22,6 +22,12 @@ package edu.regis.shatu.svc;
  */
 public class TutorReply {
     /**
+     * Shown to the user when an ":ERR" reply arrives without a message.
+     */
+    public static final String DEFAULT_ERROR_MESSAGE =
+            "An unexpected error occurred. Please contact ShaTu support.";
+
+    /**
      * The status of this reply (of particular note is ERR)
      */
     private String status;
@@ -67,5 +73,22 @@ public class TutorReply {
 
     public void setData(String data) {
         this.data = data;
+    }
+
+    /**
+     * Return the message to show the user for an ":ERR" reply.
+     *
+     * The tutor puts ":ERR" in the status and the readable message in the
+     * data, so the data is the message. Some error replies carry no data, in
+     * which case DEFAULT_ERROR_MESSAGE is returned.
+     *
+     * @return the error message, never null or empty
+     */
+    public String getErrorMessage() {
+        if (data == null || data.isBlank()) {
+            return DEFAULT_ERROR_MESSAGE;
+        }
+
+        return data.trim();
     }
 }

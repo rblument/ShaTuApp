@@ -272,13 +272,7 @@ public class TutoringSessionView extends GPanel {
                     break;
                     
                 case ":ERR":
-                    System.err.println("Error from tutor: " + reply.getData());
-                    JOptionPane.showMessageDialog(
-                        this,
-                        "An error occurred while processing your acknowledgement.",
-                        "Error",
-                        JOptionPane.ERROR_MESSAGE
-                    );
+                    MainFrame.instance().displayError(reply.getErrorMessage());
                     break;
                     
                 default:
@@ -453,7 +447,7 @@ public class TutoringSessionView extends GPanel {
             }
 
             if (":ERR".equals(reply.getStatus())) {
-                System.err.println("Error requesting problem: " + reply.getData());
+                MainFrame.instance().displayError(reply.getErrorMessage());
                 return;
             }
 

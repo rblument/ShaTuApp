@@ -219,7 +219,10 @@ public class ShaTuTutor implements TutorSvc {
         } catch (IllegalArgumentException ex) {
             return createError("ShaTuTutor_ERR_4", ex);
         } catch (InvocationTargetException ex) {
-            return createError("ShaTuTutor_ERR_5", (Exception) ex.getCause());
+            // The handler threw, e.g., the database is down. Send its message
+            // so the user sees more than an error code.
+            Exception cause = (Exception) ex.getCause();
+            return createError("Unable to complete " + methodName + ": " + cause.getMessage(), cause);
         }
     }
 
@@ -299,11 +302,9 @@ public class ShaTuTutor implements TutorSvc {
             ServiceFactory.findStudentModelSvc().update(student);   // Updates Student
             return new TutorReply("Success");
         } catch (ObjNotFoundException ex) {
-            Logger.getLogger(ShaTuTutor.class.getName()).log(Level.SEVERE, null, ex);
-            return new TutorReply(":ERR");
+            return createError("Account not found for: " + account.getUserId(), ex);
         } catch (NonRecoverableException ex) {
-            Logger.getLogger(ShaTuTutor.class.getName()).log(Level.SEVERE, null, ex);
-            return new TutorReply(":ERR");
+            return createError("Unable to update account: " + ex.getMessage(), ex);
         }
     }
 
@@ -363,8 +364,7 @@ public class ShaTuTutor implements TutorSvc {
         } catch (ObjNotFoundException e) {
             return new TutorReply("UnknownUser");
         } catch (NonRecoverableException ex) {
-            LOGGER.log(Level.SEVERE, null, ex);
-            return new TutorReply();
+            return createError("Unable to verify user: " + ex.getMessage(), ex);
         }
     }
 
@@ -389,10 +389,9 @@ public class ShaTuTutor implements TutorSvc {
                 return new TutorReply("InvalidPassword");
             }
         } catch (ObjNotFoundException e) {
-            return new TutorReply(":ERR");
+            return createError("Account not found for: " + requestAcct.getUserId(), null);
         } catch (NonRecoverableException ex) {
-            Logger.getLogger(ShaTuTutor.class.getName()).log(Level.SEVERE, null, ex);
-            return new TutorReply(":ERR");
+            return createError("Unable to verify password: " + ex.getMessage(), ex);
         }
     }
 
@@ -554,8 +553,7 @@ public class ShaTuTutor implements TutorSvc {
     } catch (ObjNotFoundException e) {
         return new TutorReply("UnknownUser");
     } catch (NonRecoverableException ex) {
-        Logger.getLogger(ShaTuTutor.class.getName()).log(Level.SEVERE, null, ex);
-        return new TutorReply();
+        return createError("Unable to sign in: " + ex.getMessage(), ex);
     }
 }
 

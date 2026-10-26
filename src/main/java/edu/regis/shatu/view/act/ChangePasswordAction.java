@@ -151,8 +151,11 @@ public class ChangePasswordAction extends ShaTuGuiAction{
             // Pass control over to the reset password panel
             MainFrame.instance().displayView(MainFrame.ViewName.RESET_PASSWORD);
         }
-        else {
+        else if(reply.getStatus().equals("InvalidPassword")) {
             invalidPasswordMessage();
+        }
+        else {
+            MainFrame.instance().displayError(reply.getErrorMessage());
         }
     }
 }

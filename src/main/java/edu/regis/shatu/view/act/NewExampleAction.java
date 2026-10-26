@@ -120,8 +120,7 @@ public class NewExampleAction extends ShaTuGuiAction {
 
             switch (reply.getStatus()) {
                 case ":ERR":
-                    // If we get here, there is a coding error in the tutor svc
-                    System.out.println("Coding error  status: " + reply.getStatus());
+                    MainFrame.instance().displayError(reply.getErrorMessage());
                     break;
                 default:
                     //If the status was not an error, we can update the model and the

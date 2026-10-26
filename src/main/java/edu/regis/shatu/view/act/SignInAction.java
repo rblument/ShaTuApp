@@ -121,6 +121,10 @@ public class SignInAction extends ShaTuGuiAction {
                     account.getUserId() + " is not a known user.\n\nPerhaps, try creating a 'New User' first.",
                     "Warning", JOptionPane.ERROR_MESSAGE);
                 break;
+            case ":ERR":
+                // e.g., the tutor's socket or the database is down
+                MainFrame.instance().displayError(reply.getErrorMessage());
+                break;
             default:
                 System.out.println("Coding error  status: " + reply.getStatus());
         }

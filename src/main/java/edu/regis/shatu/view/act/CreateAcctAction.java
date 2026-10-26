@@ -115,9 +115,7 @@ public class CreateAcctAction extends ShaTuGuiAction {
                                               JOptionPane.INFORMATION_MESSAGE);
                 break;
             default: // "ERR" Error should have been logged in tutor.
-                msg = "An unexpected error occurred. Please contact ShaTu support";
-                JOptionPane.showMessageDialog(null, msg, "Error",
-                                              JOptionPane.ERROR_MESSAGE);
+                frame.displayError(reply.getErrorMessage());
         }
     }
 }

@@ -14,13 +14,17 @@ package edu.regis.shatu.view;
 
 import java.awt.CardLayout;
 import java.awt.Dimension;
+import java.awt.GraphicsEnvironment;
 import java.awt.Toolkit;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 import edu.regis.shatu.model.Account;
@@ -35,6 +39,9 @@ import edu.regis.shatu.view.act.SaveSessionAction;
  * @author rickb
  */
 public class MainFrame extends JFrame implements WindowListener {
+
+    /** Errors shown to the user are also logged to this logger. */
+    private static final Logger LOGGER = Logger.getLogger(MainFrame.class.getName());
 
     /** The singleton instance of this frame. */
     private final static MainFrame SINGLETON;
@@ -291,6 +298,31 @@ public class MainFrame extends JFrame implements WindowListener {
         }
     }
     
+    /**
+     * Displays the given error message to the user in a modal error dialog.
+     *
+     * The message is always logged. It can be called from any thread; if the
+     * caller is not on the Swing event thread, the dialog is shown later on
+     * that thread. When there is no display (headless mode), only the log
+     * entry is made.
+     *
+     * @param message the error message to display
+     */
+    public void displayError(String message) {
+        LOGGER.log(Level.WARNING, "Error shown to user: {0}", message);
+
+        if (GraphicsEnvironment.isHeadless()) {
+            return;
+        }
+
+        if (SwingUtilities.isEventDispatchThread()) {
+            JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
+        } else {
+            SwingUtilities.invokeLater(() ->
+                JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE));
+        }
+    }
+
     /**
      * Reset the text fields in the new account panel to the empty string.
      */

@@ -125,8 +125,7 @@ public class ResetPasswordAction extends ShaTuGuiAction {
                 break;
 
             default:
-                msg = "An unexpected error occurred. Server responded with status: " + status;
-                JOptionPane.showMessageDialog(null, msg, "Error", JOptionPane.ERROR_MESSAGE);
+                mainFrame.displayError(reply.getErrorMessage());
                 break;
         }
 
