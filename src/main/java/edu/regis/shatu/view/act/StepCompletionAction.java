@@ -255,6 +255,7 @@ public class StepCompletionAction extends ShaTuGuiAction {
 
             if (!":Success".equals(recordReply.getStatus())) {
                 LOGGER.warning("Failed to record correct answer request: " + recordReply.getStatus());
+                MainFrame.instance().displayError(recordReply.getErrorMessage());
             }
         } catch (Exception ex) {
             LOGGER.log(Level.WARNING, "Unable to record correct answer request", ex);
