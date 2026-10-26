@@ -19,8 +19,10 @@ import edu.regis.shatu.model.aol.StepSubType;
  * @author rickb
  */
 public class MessageLenStep extends Step {
+    public static final int MAX_MESSAGE_LENGTH = 1024;
 
     private int messageLength;
+    private String userAnswer;
 
     /**
      * Constructor
@@ -46,4 +48,14 @@ public class MessageLenStep extends Step {
     public int getMessageLength() {
         return this.messageLength;
     }
+
+    /** The unpadded binary answer submitted by the student. */
+    public String getUserAnswer() {
+        return userAnswer;
+    }
+
+    public void setUserAnswer(String userAnswer) {
+        this.userAnswer = userAnswer;
+    }
+
 }
