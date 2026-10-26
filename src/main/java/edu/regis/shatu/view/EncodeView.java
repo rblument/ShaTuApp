@@ -25,6 +25,8 @@ import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.TutoringSession;
@@ -46,6 +48,7 @@ import javax.swing.JDialog;
  * @author rickb
  */
 public class EncodeView extends UserRequestView {
+    private static final String DEFAULT_INSTRUCTIONS = "Please separate your entries with spaces.";
 
     private TutoringSessionView view;
     private JTextPane descriptionTextPane;
@@ -79,6 +82,53 @@ public class EncodeView extends UserRequestView {
         setupResponseArea();
         setupFeedbackArea();
         setupAsciiTable();
+        setupInputValidation();
+    }
+
+    /** Keep invalid questions from reaching the New Example action. */
+    private void setupInputValidation() {
+        DocumentListener listener = new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent event) {
+                updateNewExampleAvailability();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent event) {
+                updateNewExampleAvailability();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent event) {
+                updateNewExampleAvailability();
+            }
+        };
+        messageLengthField.getDocument().addDocumentListener(listener);
+        setQuestionField.getDocument().addDocumentListener(listener);
+        updateNewExampleAvailability();
+    }
+
+    private void updateNewExampleAvailability() {
+        String error = null;
+        String customQuestion = setQuestionField.getText();
+        if (!customQuestion.isEmpty()) {
+            if (!EncodeAsciiStep.isSupportedQuestion(customQuestion)) {
+                error = "Use 1 to " + EncodeAsciiStep.MAX_MESSAGE_LENGTH
+                        + " printable ASCII characters for a custom question.";
+            }
+        } else {
+            try {
+                int length = Integer.parseInt(messageLengthField.getText().trim());
+                if (length < 1 || length > EncodeAsciiStep.MAX_MESSAGE_LENGTH) {
+                    error = "Enter a message length between 1 and " + EncodeAsciiStep.MAX_MESSAGE_LENGTH + ".";
+                }
+            } catch (NumberFormatException ex) {
+                error = "Enter a message length between 1 and " + EncodeAsciiStep.MAX_MESSAGE_LENGTH + ".";
+            }
+        }
+
+        newExampleButton.setEnabled(error == null);
+        instructionsLabel.setText(error == null ? DEFAULT_INSTRUCTIONS : error);
     }
 
     /**
@@ -277,7 +327,8 @@ public class EncodeView extends UserRequestView {
                         + "<br>1: Set your own question or set the message length. <br>2: Click the New Example button. "
                         + "<br>3: Convert the question to binary, click the hint button to see a conversion table if needed. "
                         + "<br>Note: If you type anything into the set question field and click the New Example button, "
-                        + "your question will always be what you typed in that field. Ensure that field is empty to create a random question.</p>"
+                        + "your question will always be what you typed in that field. Ensure that field is empty to create a random question. "
+                        + "Custom questions must use printable ASCII characters (including spaces) so each character is 8 bits.</p>"
                         + "</body>"
                         + "</html>");
 
@@ -362,7 +413,7 @@ public class EncodeView extends UserRequestView {
      * hint/description.
      */
     private void setupInstructionLabel() {
-        instructionsLabel = new JLabel("Please separate your entries with spaces.");
+        instructionsLabel = new JLabel(DEFAULT_INSTRUCTIONS);
         instructionsLabel.setHorizontalAlignment(JLabel.CENTER);
     }
 
@@ -550,6 +601,7 @@ public class EncodeView extends UserRequestView {
         checkButton.setEnabled(false);
         responseTextArea.setEnabled(false);
         hintButton.setEnabled(false);
+        updateNewExampleAvailability();
     }
     
     /**
@@ -584,6 +636,7 @@ public class EncodeView extends UserRequestView {
             setQuestionField.setEnabled(true);
             responseTextArea.setEnabled(true);
         }
+        updateNewExampleAvailability();
     }
 
     /**
@@ -604,14 +657,26 @@ public class EncodeView extends UserRequestView {
 
         EncodeAsciiStep encodeAsciiStep = new EncodeAsciiStep(); // New class object.
 
-        if (setQuestionField.getText().isEmpty()) { // User wants a random question
-
-            encodeAsciiStep.setMessageLength(Integer.parseInt(messageLengthField.getText().trim())); // Number of
-                                                                                                     // characters the
-                                                                                                     // question needs
-                                                                                                     // to be
+        String customQuestion = setQuestionField.getText();
+        if (customQuestion.isEmpty()) { // User wants a random question
+            int length;
+            try {
+                length = Integer.parseInt(messageLengthField.getText().trim());
+            } catch (NumberFormatException exn) {
+                throw new IllegalArgumentException("Enter a message length between 1 and "
+                        + EncodeAsciiStep.MAX_MESSAGE_LENGTH + ".", exn);
+            }
+            if (length < 1 || length > EncodeAsciiStep.MAX_MESSAGE_LENGTH) {
+                throw new IllegalArgumentException("Enter a message length between 1 and "
+                        + EncodeAsciiStep.MAX_MESSAGE_LENGTH + ".");
+            }
+            encodeAsciiStep.setMessageLength(length);
         } else { // User set their own question
-            encodeAsciiStep.setQuestion(setQuestionField.getText().strip());
+            if (!EncodeAsciiStep.isSupportedQuestion(customQuestion)) {
+                throw new IllegalArgumentException("Use 1 to " + EncodeAsciiStep.MAX_MESSAGE_LENGTH
+                        + " printable ASCII characters for a custom question.");
+            }
+            encodeAsciiStep.setQuestion(customQuestion);
         }
 
         System.out.println(encodeAsciiStep); // Error Checking
@@ -636,7 +701,7 @@ public class EncodeView extends UserRequestView {
 
         EncodeAsciiStep completedStep = gson.fromJson(currentStep.getData(), EncodeAsciiStep.class); 
 
-        String userResponse = this.responseTextArea.getText().replaceAll(" ", ""); // Get the user's answer.
+        String userResponse = this.responseTextArea.getText().replaceAll("\\s", ""); // Get the user's answer.
         
         if (userResponse.isEmpty()) {
             System.out.println("EncodeView.stepCompletion: user response was empty");
