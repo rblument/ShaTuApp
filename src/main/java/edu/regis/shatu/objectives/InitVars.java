@@ -27,6 +27,11 @@ import edu.regis.shatu.svc.TutorReply;
 
 public class InitVars extends Objective {
 
+    /**
+     * SHA256 has eight initial H variables H0 ... H7.
+     */
+    private static final int NUM_VARS = 8;
+
     public InitVars(Student student) {
         super(student);
     }
@@ -35,9 +40,6 @@ public class InitVars extends Objective {
     public TutorReply hint(StepCompletion completion) {
         System.out.println("Tutor hintInitVars");
 
-        // Deserialize the StepCompletion object to access the InitVarStep
-        InitVarStep initVarStep = gson.fromJson(completion.getData(), InitVarStep.class);
-
         StepCompletionReply stepReply = new StepCompletionReply();
         stepReply.setIsCorrect(false);
         stepReply.setIsRepeatStep(true);
@@ -45,25 +47,8 @@ public class InitVars extends Objective {
         stepReply.setIsNewTask(false);
         stepReply.setIsNextStep(false);
 
-        // Dynamically fetch hints for each variable
         Step step = completion.getStep();
-        for (String variable : initVarStep.getCorrectAnswers().keySet()) {
-            // Fetch hints for the variable at different levels
-            Hint hintLevel1 = new Hint();
-            hintLevel1.setId(1);
-            hintLevel1.setText(initVarStep.getHint(variable, 1));
-            step.addHint(hintLevel1);
-
-            Hint hintLevel2 = new Hint();
-            hintLevel2.setId(2);
-            hintLevel2.setText(initVarStep.getHint(variable, 2));
-            step.addHint(hintLevel2);
-
-            Hint hintLevel3 = new Hint();
-            hintLevel3.setId(3);
-            hintLevel3.setText(initVarStep.getHint(variable, 3));
-            step.addHint(hintLevel3);
-        }
+        addHints(step);
 
         step.setSubType(StepSubType.REQUEST_HINT);
 
@@ -99,6 +84,29 @@ public class InitVars extends Objective {
     }
 
     /**
+     * Adds the three levels of hints for H0 to H7 to the given step.
+     *
+     * The hints come from the tutor's own InitVarStep, not from the data sent
+     * by the client.
+     *
+     * @param step the step the hints are added to
+     */
+    private void addHints(Step step) {
+        InitVarStep initVarStep = new InitVarStep();
+
+        for (int i = 0; i < NUM_VARS; i++) {
+            String variable = "H" + i;
+
+            for (int level = 1; level <= 3; level++) {
+                Hint hint = new Hint();
+                hint.setId(level);
+                hint.setText(initVarStep.getHint(variable, level));
+                step.addHint(hint);
+            }
+        }
+    }
+
+    /**
      * Handles client requests for a new initialize vars example.
      *
      * @return a TutorReply
@@ -129,19 +137,22 @@ public class InitVars extends Objective {
     public TutorReply completeStep(StepCompletion completion) {
         System.out.println("Tutor completeInitVarsStep");
 
-        InitVarStep example = gson.fromJson(completion.getData(), InitVarStep.class);
+        InitVarStep submitted = gson.fromJson(completion.getData(), InitVarStep.class);
 
-        // Extract user-provided answers and expected results
-        Map<String, String> userAnswers = example.getUserAnswers();
-        Map<String, String> correctAnswers = example.getCorrectAnswers();
+        // Only the student's answers are taken from the client. They are
+        // graded against the tutor's own copy of the correct answers.
+        InitVarStep example = gradedStep(submitted);
+        boolean allCorrect = example.allAnswersCorrect();
 
-        // Track correctness and prepare feedback
-        boolean allCorrect = true;
+        // Prepare feedback, listing H0 to H7 in order
         StringBuilder feedback = new StringBuilder();
+        StringBuilder correctList = new StringBuilder();
+        StringBuilder studentList = new StringBuilder();
 
-        for (String variable : correctAnswers.keySet()) {
-            String userAnswer = userAnswers.getOrDefault(variable, "");
-            String correctAnswer = correctAnswers.get(variable);
+        for (int i = 0; i < NUM_VARS; i++) {
+            String variable = "H" + i;
+            String userAnswer = example.getUserAnswer(variable);
+            String correctAnswer = example.getAnswer(variable);
 
             feedback.append(variable)
                     .append(": User Answer: ")
@@ -150,9 +161,8 @@ public class InitVars extends Objective {
                     .append(correctAnswer)
                     .append("\n");
 
-            if (!userAnswer.equals(correctAnswer)) {
-                allCorrect = false;
-            }
+            correctList.append(correctAnswer).append(" ");
+            studentList.append(userAnswer).append(" ");
         }
 
         System.out.println("Feedback:\n" + feedback);
@@ -160,10 +170,8 @@ public class InitVars extends Objective {
         // Create StepCompletionReply
         StepCompletionReply stepReply = new StepCompletionReply();
         stepReply.setIsCorrect(allCorrect);
-        stepReply
-                .setCorrectAnswer(correctAnswers.toString().replaceAll("[{}]", "").replaceAll("@\\w{2}=|,", "").trim());
-
-        stepReply.setStudentAnswer(userAnswers.toString().replaceAll("[{}]", "").replaceAll("@\\w{2}=|,", "").trim());
+        stepReply.setCorrectAnswer(correctList.toString().trim());
+        stepReply.setStudentAnswer(studentList.toString().trim());
 
         // Update the student model
         int dbId = KnowledgeComponentKind.fromString("Initialize Variables").dbId();
@@ -237,6 +245,33 @@ public class InitVars extends Objective {
         reply.setData(gson.toJson(pendingTask));
 
         return reply;
+    }
+
+    /**
+     * Copies the student's answers for H0 to H7 into a new InitVarStep.
+     *
+     * The new step holds the tutor's own correct answers, so any correct
+     * answers sent by the client are ignored. A missing answer becomes "".
+     *
+     * @param submitted the InitVarStep sent by the client
+     * @return a step with the student's answers and the tutor's correct answers
+     */
+    private InitVarStep gradedStep(InitVarStep submitted) {
+        InitVarStep graded = new InitVarStep();
+        Map<String, String> userAnswers = submitted.getUserAnswers();
+
+        for (int i = 0; i < NUM_VARS; i++) {
+            String variable = "H" + i;
+            String userAnswer = "";
+
+            if (userAnswers != null && userAnswers.get(variable) != null) {
+                userAnswer = userAnswers.get(variable);
+            }
+
+            graded.setUserAnswer(variable, userAnswer);
+        }
+
+        return graded;
     }
 
 }
