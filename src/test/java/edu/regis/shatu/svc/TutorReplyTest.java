@@ -16,7 +16,7 @@ class TutorReplyTest {
     }
 
     @Test
-    void errorMessageSurvivesTheTripOverTheSocket() {
+    void errorMessageSurvivesGsonRoundTrip() {
         // The server sends gson.toJson(reply) and SvcFacade parses it back.
         Gson gson = new Gson();
         TutorReply sent = new TutorReply(":ERR", "Session not found for: test@regis.edu");
