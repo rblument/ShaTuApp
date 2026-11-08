@@ -22,6 +22,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 
 /**
  * A Facade that standardizes requests from the GUI Client to the ShaTu tutor 
@@ -96,6 +97,16 @@ public class SvcFacade {
      */
     private static final int PORT = 53636;
     
+    /**
+     * Shown to the user when the tutor closes the socket without replying.
+     */
+    static final String NO_REPLY_MESSAGE = "No reply from the tutor. Please try again.";
+    
+    /**
+     * Shown to the user when the tutor's reply can't be parsed.
+     */
+    static final String BAD_REPLY_MESSAGE = "The tutor sent a reply that could not be read. Please try again.";
+    
     
     private SvcFacade() {  
     }
@@ -105,7 +116,8 @@ public class SvcFacade {
      * tutor returning the tutor's reply.
      * 
      * @param request the ClientRequest being sent to the tutor.
-     * @return the TutorReply from the tutor.
+     * @return the TutorReply from the tutor, or an ":ERR" reply if there was
+     *         no usable reply. Never null.
      */
     public TutorReply tutorRequest(ClientRequest request) {
         Gson gson = new Gson();
@@ -117,7 +129,42 @@ public class SvcFacade {
         
         System.out.println("*** jsonReply: " + jsonReply + "\n");
         
-        return gson.fromJson(jsonReply, TutorReply.class);
+        return parseReply(jsonReply);
+    }
+    
+    /**
+     * Convert the JSon encoded reply from the tutor into a TutorReply.
+     *
+     * The tutor closes the socket without writing anything when it can't
+     * handle a request (e.g., an empty or over-length request), so send()
+     * returns null. Gson turns null or "" into a null TutorReply and throws
+     * on malformed JSon, so both cases become an ":ERR" reply instead.
+     *
+     * @param jsonReply the JSon encoded TutorReply, possibly null or empty
+     * @return the parsed TutorReply, or an ":ERR" reply. Never null.
+     */
+    static TutorReply parseReply(String jsonReply) {
+        if (jsonReply == null || jsonReply.isBlank()) {
+            LOGGER.warning("No reply from the tutor");
+            return new TutorReply(":ERR", NO_REPLY_MESSAGE);
+        }
+        
+        try {
+            TutorReply reply = new Gson().fromJson(jsonReply, TutorReply.class);
+            
+            // e.g., the reply was the JSon literal null, or had "status":null,
+            // which callers would throw on when they switch on the status
+            if (reply == null || reply.getStatus() == null) {
+                LOGGER.warning("Unusable reply from the tutor: " + jsonReply);
+                return new TutorReply(":ERR", BAD_REPLY_MESSAGE);
+            }
+            
+            return reply;
+            
+        } catch (JsonSyntaxException e) {
+            LOGGER.log(Level.SEVERE, "Malformed reply from the tutor: " + jsonReply, e);
+            return new TutorReply(":ERR", BAD_REPLY_MESSAGE);
+        }
     }
     
     /**
