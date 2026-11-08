@@ -128,9 +128,8 @@ public class HintAction extends ShaTuGuiAction {
                     PendingStep pendingStep = gson.fromJson(reply.getData(), PendingStep.class);
                     Step step = pendingStep.getStep();
                     if (step.getSubType() == StepSubType.REQUEST_HINT) {
-                        Hint hint = pendingStep.getCurrentHint();
-                        exView.getModel().currentTask().currentStep()
-                                .setCurrentHintIndex(pendingStep.getCurrentHintIndex() + 1);
+                        Hint hint = nextHint(exView.getModel().currentTask().currentStep(),
+                                pendingStep);
                         String prompt = hint.getText();
                         if (exView instanceof EncodeView) {
                             ((EncodeView) exView).showAsciiHint(prompt);
@@ -143,5 +142,25 @@ public class HintAction extends ShaTuGuiAction {
         } catch (IllegalArgException e) {
             System.out.println("Illegal arg exception " + e);
         }
+    }
+
+    /**
+     * Return the hint to show for this press of the Hint button and move the
+     * client's step on to the next hint.
+     *
+     * The tutor never sees the client's hint index (the request only carries
+     * a StepCompletion), so every reply comes back with an index of 0. The
+     * client's own index picks the hint out of the reply's list instead.
+     * After the last hint, getCurrentHint() starts over at the first one.
+     *
+     * @param clientStep the current pending step in the client's model
+     * @param replyStep the pending step in the tutor's reply, with the hints
+     * @return the hint to display
+     */
+    static Hint nextHint(PendingStep clientStep, PendingStep replyStep) {
+        replyStep.setCurrentHintIndex(clientStep.getCurrentHintIndex());
+        Hint hint = replyStep.getCurrentHint();
+        clientStep.setCurrentHintIndex(replyStep.getCurrentHintIndex() + 1);
+        return hint;
     }
 }
