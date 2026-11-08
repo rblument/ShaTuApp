@@ -11,6 +11,7 @@
  *   or conditions of any kind, either expressed or implied.
  */
 package edu.regis.shatu.view.act;
+import java.util.Arrays;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -96,9 +97,15 @@ public class ChangePasswordAction extends ShaTuGuiAction{
             // leaving the security answer blank in the update account panel results 
             // in that "answer" being stored in the DB due to this action.
             accountCopy = new Account(MainFrame.instance().getModel().getStudent().getAccount());
-            accountCopy.setPassword(
-                    UpdateAccountPanel.encryptSHA256(new String(passwordField.getPassword()))
-            );
+            
+            char[] passwordChars = passwordField.getPassword();
+            try {
+                // Pass the char array directly instead of converting to a String
+                accountCopy.setPassword(UpdateAccountPanel.encryptSHA256(passwordChars));
+            } finally {
+                // Securely wipe the plaintext password from memory immediately
+                Arrays.fill(passwordChars, '\0');
+            }
         }
         else {
             accountCopy = null;
