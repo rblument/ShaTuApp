@@ -16,12 +16,16 @@ public class AddOne extends Objective {
     static final int DEFAULT_MESSAGE_LENGTH = 35;
 
     /**
-     * Longest message the client can ask for. Lower than the 1024 used by
-     * Encode ASCII because the Check request carries the question and its
-     * binary answer twice, and at 150 characters it stays under the server's
-     * 8192 character request limit even when every character needs escaping.
+     * Longest message the client can ask for when the tutor makes the
+     * question. Lower than the 1024 used by Encode ASCII because the Check
+     * request carries the question twice and its binary answer up to three
+     * times. At 120 a made-up question stays under the server's 8192
+     * character limit even when every character is one Gson escapes, such
+     * as <, with a correct answer and a 256 character user id made of the
+     * plain characters the New User form allows. A very long typed answer
+     * can still go over the limit.
      */
-    static final int MAX_MESSAGE_LENGTH = 150;
+    static final int MAX_MESSAGE_LENGTH = 120;
 
     public AddOne(Student student) {
         super(student);
