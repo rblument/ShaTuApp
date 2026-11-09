@@ -10,6 +10,23 @@ import edu.regis.shatu.model.steps.AddOneStep;
 import edu.regis.shatu.svc.TutorReply;
 
 public class AddOne extends Objective {
+    /**
+     * Message length used when no step data is sent.
+     */
+    static final int DEFAULT_MESSAGE_LENGTH = 35;
+
+    /**
+     * Longest message the client can ask for when the tutor makes the
+     * question. Lower than the 1024 used by Encode ASCII because the Check
+     * request carries the question twice and its binary answer up to three
+     * times. At 120 a made-up question stays under the server's 8192
+     * character limit even when every character is one Gson escapes, such
+     * as <, with a correct answer and a 256 character user id made of the
+     * plain characters the New User form allows. A very long typed answer
+     * can still go over the limit.
+     */
+    static final int MAX_MESSAGE_LENGTH = 120;
+
     public AddOne(Student student) {
         super(student);
     }
@@ -35,18 +52,24 @@ public class AddOne extends Objective {
         // If no prior data was passed in, create a fresh example.
         if (newAddOneBit == null) {
             newAddOneBit = new AddOneStep();
-
-            String question = generateRandomString(35);
-            newAddOneBit.setQuestion(question);
-            newAddOneBit.setMessageLength(question.length());
-            newAddOneBit.setResult(addOneFunction(question));
-        } else {
-            // If a step object was passed in, ensure its answer is populated.
-            if (newAddOneBit.getQuestion() != null) {
-                newAddOneBit.setMessageLength(newAddOneBit.getQuestion().length());
-                newAddOneBit.setResult(addOneFunction(newAddOneBit.getQuestion()));
-            }
+            newAddOneBit.setMessageLength(DEFAULT_MESSAGE_LENGTH);
         }
+
+        // Add1View only sends the message length the student typed, so make
+        // a question of that length.
+        String question = newAddOneBit.getQuestion();
+        if (question == null || question.isEmpty()) {
+            int messageLength = newAddOneBit.getMessageLength();
+            if (messageLength < 1 || messageLength > MAX_MESSAGE_LENGTH) {
+                return createError("Enter a message length between 1 and "
+                        + MAX_MESSAGE_LENGTH + ".", null);
+            }
+            question = generateRandomString(messageLength);
+            newAddOneBit.setQuestion(question);
+        }
+
+        newAddOneBit.setMessageLength(question.length());
+        newAddOneBit.setResult(addOneFunction(question));
 
         System.out.println(newAddOneBit.getResult());
 
