@@ -76,13 +76,20 @@ public class ShaZero extends Objective {
     }
 
     /**
-     * Calculates the SHA Σ₀ function involving rotation and right shift operations.
+     * Calculates the SHA Σ₀ function using three right rotations.
      *
      * @param input The input binary number.
      * @return The result after performing the SHA Σ₀ function.
      */
     private String calculateSigma(String input, int bitLength) {
-        input = input.replaceAll("\\s", "");
+        if (bitLength != 4 && bitLength != 8 && bitLength != 16 && bitLength != 32) {
+            throw new IllegalArgumentException("Sigma zero problems must be 4, 8, 16, or 32 bits");
+        }
+        input = input == null ? "" : input.replaceAll("\\s", "");
+        if (input.length() != bitLength || !input.matches("[01]+")) {
+            throw new IllegalArgumentException("Sigma zero operand must contain exactly "
+                    + bitLength + " binary digits");
+        }
         long a = Long.parseLong(input, 2);
 
         // FIPS 180-4 section 4.1.2: Sigma 0 is ROTR^2 XOR ROTR^13 XOR ROTR^22.
