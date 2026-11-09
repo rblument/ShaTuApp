@@ -324,19 +324,7 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
 
         responseTextArea.setEnabled(false); // Text area disabled at initialization
 
-       // responseTextArea.addKeyListener(new KeyAdapter() {
-        //    @Override
-         //   public void keyPressed(KeyEvent e){
-         //       if(e.getKeyCode() == KeyEvent.VK_ENTER){
-          //          e.consume();
-          //          if(responseTextArea.getText().equals("")){
-          //              JOptionPane.showMessageDialog(null, "Please provide an answer");
-           //         }else{
-           //             checkButton.doClick();
-           //         }
-          //      }
-         //   }
-       // });
+        responseTextArea.addKeyListener(this);
 
 
         responsePane = new JScrollPane(responseTextArea);
@@ -478,6 +466,12 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
      */
     @Override
     public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+            e.consume();
+            if (!responseTextArea.getText().isBlank() && checkButton.isEnabled()) {
+                checkButton.doClick();
+            }
+        }
     }
 
     /**
@@ -550,13 +544,13 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
                 String fullVar = "";
                 
                 if(xVar[0] == '0'){
-                    selectedVar = "y";
-                    answerBit = String.valueOf(yVar[0]);
-                    fullVar = example.getOperand2();
-                }else if(xVar[0] == '1'){
                     selectedVar = "z";
                     answerBit = String.valueOf(zVar[0]);
                     fullVar = example.getOperand3();
+                }else if(xVar[0] == '1'){
+                    selectedVar = "y";
+                    answerBit = String.valueOf(yVar[0]);
+                    fullVar = example.getOperand2();
 
                 }else{
                     selectedVar.concat("ERROR: bit not correctly found");
@@ -604,27 +598,19 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
      * @return Binary string result of Ch(x, y, z).
      */
     private String choiceFunction(String x, String y, String z) {
-        // Convert the binary strings to integer values
         String tempX = x.replaceAll("\\s", "");
         String tempY = y.replaceAll("\\s", "");
         String tempZ = z.replaceAll("\\s", "");
-
-        long intX = Long.parseLong(tempX, 2);
-        long intY = Long.parseLong(tempY, 2);
-        long intZ = Long.parseLong(tempZ, 2);
-
-        long xy = intX & intY;
-
-        long notX = ~intX & intZ;
-
-        long result = xy ^ notX;
-
-        // Convert the result back to binary string
-        String binaryResult = String.format("%4s", Long.toBinaryString(result)).replace(' ', '0');
-        System.out.println("the result should be:" + result);
-        System.out.println("returning: " + binaryResult);
-
-        return binaryResult;
+        if (tempX.length() != tempY.length() || tempX.length() != tempZ.length()
+                || tempX.isEmpty() || !tempX.matches("[01]+")
+                || !tempY.matches("[01]+") || !tempZ.matches("[01]+")) {
+            throw new IllegalArgumentException("Choice operands must be binary words of equal width");
+        }
+        StringBuilder answer = new StringBuilder(tempX.length());
+        for (int i = 0; i < tempX.length(); i++) {
+            answer.append(tempX.charAt(i) == '1' ? tempY.charAt(i) : tempZ.charAt(i));
+        }
+        return answer.toString();
     }    
     
     /**
