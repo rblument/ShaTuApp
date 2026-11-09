@@ -89,26 +89,26 @@ public class MajorityFunction extends Objective {
      * @return Binary string result of maj(x, y, z).
      */
     private String majorityFunction(String x, String y, String z, int bitLength) {
-        // Convert the binary strings to integer values
-        String tempX = x.replaceAll("\\s", "");
-        String tempY = y.replaceAll("\\s", "");
-        String tempZ = z.replaceAll("\\s", "");
+        if (bitLength != 4 && bitLength != 8 && bitLength != 16 && bitLength != 32) {
+            throw new IllegalArgumentException("Majority problems must be 4, 8, 16, or 32 bits");
+        }
+        String a = validateOperand(x, bitLength);
+        String b = validateOperand(y, bitLength);
+        String c = validateOperand(z, bitLength);
+        StringBuilder result = new StringBuilder(bitLength);
+        for (int i = 0; i < bitLength; i++) {
+            int ones = (a.charAt(i) - '0') + (b.charAt(i) - '0') + (c.charAt(i) - '0');
+            result.append(ones >= 2 ? '1' : '0');
+        }
+        return result.toString();
+    }
 
-        long intX = Long.parseLong(tempX, 2);
-        long intY = Long.parseLong(tempY, 2);
-        long intZ = Long.parseLong(tempZ, 2);
-
-        long xy = intX & intY;
-
-        long xz = intX & intZ;
-
-        long yz = intY & intZ;
-
-        long result = xy ^ xz ^ yz;
-
-        // Convert the result back to binary string
-        String binaryResult = formatResult(result, bitLength);
-
-        return binaryResult;
+    private String validateOperand(String operand, int bitLength) {
+        String bits = operand == null ? "" : operand.replaceAll("\\s", "");
+        if (bits.length() != bitLength || !bits.matches("[01]+")) {
+            throw new IllegalArgumentException("Each majority operand must contain exactly "
+                    + bitLength + " binary digits");
+        }
+        return bits;
     }
 }
