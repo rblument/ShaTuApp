@@ -53,6 +53,7 @@ public class StepCompletion {
     public StepCompletion(Step step, String data) {
         date = System.currentTimeMillis();
 
+        this.step = step;
         this.data = data;
     }
 
