@@ -796,11 +796,19 @@ public class ShaTuTutor implements TutorSvc {
                 return completeInfoMsgStep(completion);
 
             default:
-                currObjective = getCurrentObjectiveByProbelmType(convertStepToProblemType(step.getSubType()));
+                ProblemType pType = convertStepToProblemType(step.getSubType());
+                currObjective = getCurrentObjectiveByProbelmType(pType);
                 TutorReply reply = currObjective.completeStep(completion);
-                
+
+                // Sync the mode after the step is graded
+                TutoringMode syncedMode = syncSessionTutoringMode(pType);
+
                 if (step.getSubType() == StepSubType.ENCODE_ASCII) {
-                    return handleEncodeAsciiCompletion(completion, reply);
+                    reply = handleEncodeAsciiCompletion(completion, reply);
+                }
+                // Carry the synced mode back so the client can follow it
+                if (syncedMode != null) {
+                    reply.setTutoringMode(syncedMode);
                 }
                 return reply;
         }
@@ -1085,8 +1093,15 @@ public class ShaTuTutor implements TutorSvc {
 
         currObjective = getCurrentObjectiveByProbelmType(type);
 
+        // Sync the mode before generating the new example
+        TutoringMode syncedMode = syncSessionTutoringMode(type);
+
         // Use the existing method in Objective subclasses
-        return currObjective.example(session, request.getData());
+        TutorReply reply = currObjective.example(session, request.getData());
+        if (syncedMode != null) {
+            reply.setTutoringMode(syncedMode);
+        }
+        return reply;
     }
 
     /**
@@ -1486,5 +1501,31 @@ public class ShaTuTutor implements TutorSvc {
             + nextTask.getSteps().size()
             + " step(s); DB persistence path may be available"
         );
+    }
+
+    /**
+     * Dynamically updates the tutoring session's mode based on the student's
+     * assessment level for the current problem type.
+     *
+     * @return the mode now set on the session, or null if it was not changed
+     */
+    private TutoringMode syncSessionTutoringMode(ProblemType problemType) {
+        KnowledgeComponentKind kc = mapProblemTypeToKnowledgeComponent(problemType);
+        if (kc != null && studentModel != null && session != null) {
+            Assessment assessment = studentModel.findAssessment(kc.dbId());
+            if (assessment != null) {
+                switch (assessment.getAssessment()) {
+                    case IN_PROGRESS, MEDIUM, HIGH, VERY_HIGH ->
+                        session.setTutoringMode(DO_ONE);
+                    case COMPLETED ->
+                        session.setTutoringMode(TEACH_ONE);
+                    default ->
+                        session.setTutoringMode(SEE_ONE);
+                }
+                System.out.println("Session tutoring mode synced to: " + session.getTutoringMode() + " for " + problemType);
+                return session.getTutoringMode();
+            }
+        }
+        return null;
     }
 }
