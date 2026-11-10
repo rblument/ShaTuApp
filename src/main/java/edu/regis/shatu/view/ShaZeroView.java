@@ -38,10 +38,10 @@ import edu.regis.shatu.model.aol.TutoringMode;
 
 /**
  * ShaZero class represents the GUI view for performing the SHA Σ₀ function,
- * involving rotation and right shift operations.
+ * involving three right rotation operations.
  * It extends GPanel and implements ActionListener and KeyListener interfaces.
  * <p>
- * The class provides a user interface for performing rotations and right shifts
+ * The class provides a user interface for performing right rotations
  * on binary numbers and checking the results.
  * Inline comments have been added for better understanding of the code.
  *
@@ -313,7 +313,7 @@ public class ShaZeroView extends UserRequestView implements KeyListener {
         descTextArea.setWrapStyleWord(true);
         descTextArea.setOpaque(false);
         descTextArea.append("""
-                The 𝛴₀ function takes a single 32-bit word operand, A, and outputs a single 32-bit word.""");
+                The Σ₀ function rotates A right by 2, 13, and 22 places, then XORs those three results. The answer has the same number of bits as the selected problem.""");
     }
 
     /**
