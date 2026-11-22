@@ -86,12 +86,30 @@ public class PrepareSchedule extends Objective {
     public TutorReply example(TutoringSession session, String jsonData) {
         PrepScheduleStep subStep = gson.fromJson(jsonData, PrepScheduleStep.class);
 
+        if (subStep == null) {
+            subStep = new PrepScheduleStep();
+        }
+        if (!PrepScheduleStep.isQuestion(subStep.getQuestionNumber())) {
+            return createError("Pick a question from 1 to " + PrepScheduleStep.QUESTIONS.length + ".", null);
+        }
+        subStep.setAnswer("");
+
         return genericExample(subStep, StepSubType.PREPARE_SCHEDULE, ProblemType.PREPARE_SCHEDULE,
                 KnowledgeComponentKind.PREPARE_SCHEDULE, "Schedule is prepared?");
     }
 
     @Override
     public TutorReply completeStep(StepCompletion completion) {
-        return genericComplete("true", "true", KnowledgeComponentKind.PREPARE_SCHEDULE);
+        PrepScheduleStep completedStep = gson.fromJson(completion.getData(), PrepScheduleStep.class);
+
+        if (completedStep == null || !PrepScheduleStep.isQuestion(completedStep.getQuestionNumber())) {
+            return createError("The tutor couldn't tell which question was answered.", null);
+        }
+
+        // No pick is graded as wrong.
+        String answer = completedStep.getAnswer() == null ? "" : completedStep.getAnswer();
+
+        return genericComplete(PrepScheduleStep.correctAnswer(completedStep.getQuestionNumber()), answer,
+                KnowledgeComponentKind.PREPARE_SCHEDULE);
     }
 }
