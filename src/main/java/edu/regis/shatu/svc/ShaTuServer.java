@@ -18,6 +18,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -52,14 +53,43 @@ public class ShaTuServer implements Runnable {
     private static final int MAX_REQUEST_LENGTH = 8192;
 
     /**
+     * Sent back when the tutor throws while handling a request, so the client
+     * gets an error reply instead of no reply.
+     */
+    static final String REQUEST_FAILED_MESSAGE =
+            "The tutor couldn't handle that request. Please try again.";
+
+    /**
      * The socket listening for connections from the client
      */
     private ServerSocket server;
 
     /**
-     * A no-op
+     * The port this server listens on.
+     */
+    private final int port;
+
+    /**
+     * Makes the tutor for each new connection.
+     */
+    private final Supplier<TutorSvc> tutorFactory;
+
+    /**
+     * A server on PORT that uses a new ShaTuTutor for each connection.
      */
     public ShaTuServer() {
+        this(PORT, ShaTuTutor::new);
+    }
+
+    /**
+     * A server on the given port that uses the given tutors. Used by tests.
+     *
+     * @param port the port to listen on
+     * @param tutorFactory makes the tutor for each connection
+     */
+    ShaTuServer(int port, Supplier<TutorSvc> tutorFactory) {
+        this.port = port;
+        this.tutorFactory = tutorFactory;
     }
 
     /**
@@ -71,7 +101,7 @@ public class ShaTuServer implements Runnable {
     @Override
     public void run() {
         try {
-            server = new ServerSocket(PORT);
+            server = new ServerSocket(port);
 
             while (true) {
                 new ShaTuConnection(server.accept()).run();
@@ -117,7 +147,7 @@ public class ShaTuServer implements Runnable {
         public ShaTuConnection(Socket client) {
             this.client = client;
 
-            tutor = new ShaTuTutor();
+            tutor = tutorFactory.get();
         }
 
 
@@ -142,11 +172,19 @@ public class ShaTuServer implements Runnable {
                     return;
                 }
                 
-                ClientRequest request = gson.fromJson(msg, ClientRequest.class);
-                
-                TutorReply reply = tutor.request(request);
-                
-                out.println(gson.toJson(reply));
+                String reply;
+                try {
+                    ClientRequest request = gson.fromJson(msg, ClientRequest.class);
+
+                    reply = gson.toJson(tutor.request(request));
+                } catch (RuntimeException e) {
+                    // Connections are handled on the thread that accepts them,
+                    // so an exception here would stop the server for good.
+                    LOGGER.log(Level.SEVERE, "Tutor failed to handle a request", e);
+                    reply = gson.toJson(new TutorReply(":ERR", REQUEST_FAILED_MESSAGE));
+                }
+
+                out.println(reply);
 
                 out.flush();
 
