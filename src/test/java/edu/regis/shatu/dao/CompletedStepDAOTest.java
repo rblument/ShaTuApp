@@ -158,4 +158,17 @@ public class CompletedStepDAOTest {
 
         assertTrue(dao.retrieve("nobody@regis.edu").isEmpty());
     }
+
+    @Test
+    @DisplayName("a completion with no date is stored with the current time")
+    void missingDateFallsBackToNow() throws Exception {
+        StepCompletion completion = completion(1, StepSubType.ENCODE_ASCII, 0);
+        completion.setDate(0);
+
+        long before = System.currentTimeMillis();
+        CompletedStep done = dao.record(USER_ID, COURSE_ID, TutoringMode.SEE_ONE, completion);
+
+        assertTrue(done.getCompletionDate() >= before);
+        assertEquals(1, dao.retrieve(USER_ID).size());
+    }
 }

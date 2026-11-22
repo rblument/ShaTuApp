@@ -58,6 +58,9 @@ public class CompletedStepDAO extends MySqlDAO implements CompletedStepSvc {
 
         Step step = completion.getStep();
 
+        // The date is set by the client; fall back to now if it was never set (0).
+        long date = completion.getDate() > 0 ? completion.getDate() : System.currentTimeMillis();
+
         try (Connection conn = DriverManager.getConnection(URL)) {
             Integer unitId = findUnitId(conn, courseId, mode);
             int[] taskAndStep = findTaskAndStep(conn, step);
@@ -71,7 +74,7 @@ public class CompletedStepDAO extends MySqlDAO implements CompletedStepSvc {
             done.setTutoringMode(mode);
             done.setHintsGiven(completion.getHintsGiven());
             done.setTimeoutOccurred(completion.isTimeoutOccur());
-            done.setCompletionDate(completion.getDate());
+            done.setCompletionDate(date);
 
             try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
                 stmt.setString(1, userId);
@@ -82,7 +85,7 @@ public class CompletedStepDAO extends MySqlDAO implements CompletedStepSvc {
                 stmt.setString(6, mode.name());
                 stmt.setInt(7, completion.getHintsGiven());
                 stmt.setBoolean(8, completion.isTimeoutOccur());
-                stmt.setTimestamp(9, new Timestamp(completion.getDate()));
+                stmt.setTimestamp(9, new Timestamp(date));
                 stmt.executeUpdate();
 
                 try (ResultSet keys = stmt.getGeneratedKeys()) {
