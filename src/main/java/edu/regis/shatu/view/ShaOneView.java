@@ -176,25 +176,9 @@ public class ShaOneView extends UserRequestView implements KeyListener { //imple
             return null;
         }
 
+        // Hint sends this too, so it can't require or grade an answer here.
+        // The tutor grades the answer when Check sends it.
         String userResponse = responseTextArea.getText().replaceAll("\\s", "");
-
-        if (userResponse.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please provide an answer");
-            return null;
-        }
-
-        String expected = calculateSigma(example.getOperandA(), example.getBitLength());
-        if (!userResponse.equals(expected)) {
-            JOptionPane.showMessageDialog(this,
-                    "Incorrect. The correct answer is: " + expected,
-                    "Check Result",
-                    JOptionPane.INFORMATION_MESSAGE);
-        } else {
-            JOptionPane.showMessageDialog(this,
-                    "Correct!",
-                    "Check Result",
-                    JOptionPane.INFORMATION_MESSAGE);
-        }
 
         example.setResult(userResponse);
 
@@ -203,59 +187,6 @@ public class ShaOneView extends UserRequestView implements KeyListener { //imple
         step.setStep(currentStep);
 
         return step;
-    }
-
-    private String calculateSigma(String input, int bitLength) {
-        String sanitized = input.replaceAll("\\s", "");
-        long value = Long.parseLong(sanitized, 2);
-        // FIPS 180-4 section 4.1.2: Sigma 1 is ROTR^6 XOR ROTR^11 XOR ROTR^25.
-        // Must stay in step with ShaOne.calculateSigma on the tutor side.
-        long result = rotateRight(value, 6, bitLength)
-                ^ rotateRight(value, 11, bitLength)
-                ^ rotateRight(value, 25, bitLength);
-        return formatResult(result, bitLength);
-    }
-
-    /**
-     * Formats the Sigma1 result to match the current problem size by padding with
-     * leading zeros.
-     */
-    private String formatResult(long answer, int bitLength) {
-        String finalResult = "";
-
-        switch (bitLength) {
-            case 4:
-                finalResult = String.format("%4s", Long.toBinaryString(answer)).replace(' ', '0');
-                break;
-            case 8:
-                finalResult = String.format("%8s", Long.toBinaryString(answer)).replace(' ', '0');
-                break;
-            case 16:
-                finalResult = String.format("%16s", Long.toBinaryString(answer)).replace(' ', '0');
-                break;
-            case 32:
-                finalResult = String.format("%32s", Long.toBinaryString(answer)).replace(' ', '0');
-                break;
-            default:
-                break;
-        }
-        return finalResult;
-    }
-
-    private long rotateRight(long input, int positions, int bitLength) {
-        if (bitLength < 1 || bitLength > 63) {
-            throw new IllegalArgumentException(
-                    "bitLength must be between 1 and 63, was: " + bitLength);
-        }
-        long mask = (1L << bitLength) - 1;
-        long value = input & mask;
-        // floorMod keeps a negative rotation meaningful instead of
-        // silently collapsing the result to zero.
-        int places = Math.floorMod(positions, bitLength);
-        if (places == 0) {
-            return value;
-        }
-        return ((value >>> places) | (value << (bitLength - places))) & mask;
     }
 
     /**
