@@ -26,10 +26,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import com.google.gson.Gson;
+
 import edu.regis.shatu.err.NonRecoverableException;
 import edu.regis.shatu.err.ObjNotFoundException;
 import edu.regis.shatu.model.Account;
 import edu.regis.shatu.model.Student;
+import edu.regis.shatu.svc.ShaTuTutor;
 
 /**
  * Tests that AccountDAO.update(Account, Student) updates the Account and
@@ -134,8 +137,8 @@ public class AccountUpdateTransactionTest {
     @Test
     @DisplayName("ShaTuTutor.updateAccount() updates both tables, or neither on failure")
     void tutorUpdateAccountIsAtomic() throws Exception {
-        com.google.gson.Gson gson = new com.google.gson.Gson();
-        edu.regis.shatu.svc.ShaTuTutor tutor = new edu.regis.shatu.svc.ShaTuTutor();
+        Gson gson = new Gson();
+        ShaTuTutor tutor = new ShaTuTutor();
 
         assertEquals("Success", tutor.updateAccount(gson.toJson(accountNamed("New"))).getStatus());
         assertEquals("New", firstName("Account"));
