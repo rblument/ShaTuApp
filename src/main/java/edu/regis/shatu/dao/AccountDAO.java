@@ -18,12 +18,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import edu.regis.shatu.dao.interfaces.CRUD;
 import edu.regis.shatu.err.NonRecoverableException;
 import edu.regis.shatu.err.ObjDuplicateException;
 import edu.regis.shatu.err.ObjNotFoundException;
 import edu.regis.shatu.model.Account;
+import edu.regis.shatu.model.Student;
 import edu.regis.shatu.svc.AccountSvc;
 
 /**
@@ -124,21 +127,69 @@ public class AccountDAO extends MySqlDAO implements AccountSvc, CRUD<Account> {
      */
     @Override
     public void update(Account account) throws ObjNotFoundException, NonRecoverableException {
-        final String sql = "UPDATE Account SET Password = ?, FirstName = ?, LastName = ?, Question = ?, Answer = ? WHERE UserId = ?";
-
         Connection conn = null;
-        PreparedStatement stmt = null;
-
-        String userId = account.getUserId();
 
         try {
             conn = DriverManager.getConnection(URL);
 
-            Account dbAcct = retrieve(userId, conn);
+            update(account, conn);
 
-            if (dbAcct.isStudent()) {
-                stmt = conn.prepareStatement(sql);
+        } catch (SQLException e) {
+            throw new NonRecoverableException("AccountDAO-ERR-8" + e.toString(), e);
+        } finally {
+            close(conn);
+        }
+    }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void update(Account account, Student student) throws ObjNotFoundException, NonRecoverableException {
+        Connection conn = null;
+        boolean committed = false;
+
+        try {
+            conn = DriverManager.getConnection(URL);
+            conn.setAutoCommit(false);
+
+            update(account, conn);
+            new StudentModelDAO().update(student, conn);
+
+            conn.commit();
+            committed = true;
+
+        } catch (SQLException e) {
+            throw new NonRecoverableException("AccountDAO-ERR-10" + e.toString(), e);
+        } finally {
+            if (conn != null && !committed) {
+                // Undo any partial update. This must happen before close(), which
+                // switches the connection back to auto-commit and so would commit it.
+                try {
+                    conn.rollback();
+                } catch (SQLException e) {
+                    Logger.getLogger(AccountDAO.class.getName()).log(Level.WARNING,
+                            "AccountDAO-ERR-11 rollback failed", e);
+                }
+            }
+            close(conn);
+        }
+    }
+
+    /**
+     * Updates the account using the given connection, which is neither
+     * committed nor closed, so the caller can include this update in its own
+     * transaction.
+     */
+    private void update(Account account, Connection conn) throws ObjNotFoundException, NonRecoverableException {
+        final String sql = "UPDATE Account SET Password = ?, FirstName = ?, LastName = ?, Question = ?, Answer = ? WHERE UserId = ?";
+
+        String userId = account.getUserId();
+
+        Account dbAcct = retrieve(userId, conn);
+
+        if (dbAcct.isStudent()) {
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, account.getPassword());
                 stmt.setString(2, account.getFirstName());
                 stmt.setString(3, account.getLastName());
@@ -151,17 +202,9 @@ public class AccountDAO extends MySqlDAO implements AccountSvc, CRUD<Account> {
                 if (rows != 1) {
                     throw new NonRecoverableException("AccountDAO-ERR-6 Account update failed");
                 }
-
+            } catch (SQLException e) {
+                throw new NonRecoverableException("AccountDAO-ERR-8" + e.toString(), e);
             }
-            // else {
-            // throw new IllegalArgException("AccountDAO-ERR-7 Can only update a student
-            // account");
-            // }
-
-        } catch (SQLException e) {
-            throw new NonRecoverableException("AccountDAO-ERR-8" + e.toString(), e);
-        } finally {
-            close(conn, stmt);
         }
     }
 
