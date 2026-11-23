@@ -1580,18 +1580,53 @@ public class ShaTuTutor implements TutorSvc {
         if (kc != null && studentModel != null && session != null) {
             Assessment assessment = studentModel.findAssessment(kc.dbId());
             if (assessment != null) {
-                switch (assessment.getAssessment()) {
-                    case IN_PROGRESS, MEDIUM, HIGH, VERY_HIGH ->
-                        session.setTutoringMode(DO_ONE);
-                    case COMPLETED ->
-                        session.setTutoringMode(TEACH_ONE);
-                    default ->
-                        session.setTutoringMode(SEE_ONE);
-                }
+                // A mode picked in developer mode wins over the assessment.
+                TutoringMode override = developerModeOverride();
+                session.setTutoringMode(override != null ? override : modeFor(assessment.getAssessment()));
                 System.out.println("Session tutoring mode synced to: " + session.getTutoringMode() + " for " + problemType);
                 return session.getTutoringMode();
             }
         }
         return null;
+    }
+
+    /**
+     * The tutoring mode that matches an assessment level.
+     *
+     * @param level the student's assessment level for a problem type
+     * @return DO_ONE while in progress, TEACH_ONE once completed, else SEE_ONE
+     */
+    static TutoringMode modeFor(AssessmentLevel level) {
+        if (level == null) {
+            return SEE_ONE;
+        }
+        return switch (level) {
+            case IN_PROGRESS, MEDIUM, HIGH, VERY_HIGH -> DO_ONE;
+            case COMPLETED -> TEACH_ONE;
+            default -> SEE_ONE;
+        };
+    }
+
+    /**
+     * The tutoring mode saved in developer mode for the signed-in student.
+     *
+     * Like applyDeveloperModeOverride, a failure to read it is logged and
+     * the normal mode is used.
+     *
+     * @return the developer mode tutoring mode, or null if developer mode is
+     *         off or can't be read
+     */
+    TutoringMode developerModeOverride() {
+        if (student == null || student.getAccount() == null) {
+            return null;
+        }
+
+        try {
+            return new DeveloperModeDAO().retrieveTutoringMode(student.getAccount().getUserId());
+        } catch (NonRecoverableException ex) {
+            Logger.getLogger(ShaTuTutor.class.getName()).log(Level.WARNING,
+                    "Developer mode could not be read. Using the assessment instead.", ex);
+            return null;
+        }
     }
 }
