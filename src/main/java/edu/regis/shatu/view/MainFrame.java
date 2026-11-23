@@ -357,7 +357,12 @@ public class MainFrame extends JFrame implements WindowListener {
      * password panel.
      */
     public void clearResetPasswordPanel() {
-        resetPasswordPanel.setModel(new Account());
+        // A signed-in user (Change Password) may use the panel again before
+        // signing in again, so it keeps showing their id.
+        Account account = isUserLoggedIn()
+                ? new Account(model.getStudent().getAccount()) : new Account();
+
+        resetPasswordPanel.setModel(account);
         resetPasswordPanel.setSecurityToken(null);
     }
 
