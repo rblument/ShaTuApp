@@ -329,6 +329,43 @@ public class MainFrame extends JFrame implements WindowListener {
         newAccountPanel.clearFields();
     }
 
+    /**
+     * Prepare the reset password panel for a user who has just answered their
+     * security question: the panel displays the user's id and remembers the
+     * security token that the tutor needs to accept the password reset.
+     *
+     * @param userId the id of the user that was verified
+     * @param token the security token the tutor returned when it verified the user
+     */
+    public void initializeResetPassword(String userId, String token) {
+        resetPasswordPanel.setModel(new Account(userId));
+        resetPasswordPanel.setSecurityToken(token);
+    }
+
+    /**
+     * Return the security token that the reset password panel is holding.
+     *
+     * @return the token given to initializeResetPassword(), or null if the
+     * panel has not been initialized (or was cleared).
+     */
+    public String getResetPasswordToken() {
+        return resetPasswordPanel.getSecurityToken();
+    }
+
+    /**
+     * Forget the user, the password and the security token held by the reset
+     * password panel.
+     */
+    public void clearResetPasswordPanel() {
+        // A signed-in user (Change Password) may use the panel again before
+        // signing in again, so it keeps showing their id.
+        Account account = isUserLoggedIn()
+                ? new Account(model.getStudent().getAccount()) : new Account();
+
+        resetPasswordPanel.setModel(account);
+        resetPasswordPanel.setSecurityToken(null);
+    }
+
     @Override
     public void windowOpened(WindowEvent e) {
     }

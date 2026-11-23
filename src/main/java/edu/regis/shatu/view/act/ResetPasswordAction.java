@@ -69,6 +69,26 @@ public class ResetPasswordAction extends ShaTuGuiAction {
     }
 
     /**
+     * Choose the security token to send with a reset password request.
+     *
+     * The token of a signed-in user's session wins, since a token left over
+     * from an earlier Forgot Password verification may be out of date.
+     *
+     * @param sessionToken the token of the signed-in user's session, or null
+     * when nobody is signed in
+     * @param verifiedToken the token given to the reset panel when the user
+     * answered their security question, or null
+     * @return the token to send, or null if there is none
+     */
+    static String chooseToken(String sessionToken, String verifiedToken) {
+        if (sessionToken != null && !sessionToken.isEmpty()) {
+            return sessionToken;
+        }
+
+        return verifiedToken;
+    }
+
+    /**
      * Handle the user's request to reset their password. After password is reset,
      * user will be forwarded to the SplashFrame, where they can log in.
      *
@@ -82,7 +102,13 @@ public class ResetPasswordAction extends ShaTuGuiAction {
         
         Account account = mainFrame.getAccount();
         
-        String token = mainFrame.getModel().getSecurityToken();
+        // A signed-in user (Change Password in Update Account) uses the token of
+        // their tutoring session. Otherwise (Forgot Password) nobody is signed
+        // in, and the token was given to the reset panel when the user was
+        // verified.
+        String sessionToken = mainFrame.isUserLoggedIn()
+                ? mainFrame.getModel().getSecurityToken() : null;
+        String token = chooseToken(sessionToken, mainFrame.getResetPasswordToken());
 
         ClientRequest request = new ClientRequest(ServerRequestType.RESET_PASSWORD);
         request.setUserId(account.getUserId());
@@ -105,7 +131,7 @@ public class ResetPasswordAction extends ShaTuGuiAction {
 
         switch (status) {
             case "PasswordReset":
-                mainFrame.clearNewAccountPanel();
+                mainFrame.clearResetPasswordPanel();
                 msg = "Student user account password successfully reset\n\n" +
                     "Press OK and we'll return you to the sign-in screen\n\n" +
                     "Then, please sign-in to the tutor using this account.";
