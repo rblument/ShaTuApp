@@ -34,22 +34,15 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.table.DefaultTableCellRenderer;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.ProblemType;
 import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.model.steps.ChoiceFunctionStep;
 import edu.regis.shatu.model.steps.Step;
-import java.awt.event.KeyAdapter;
-import javax.swing.JOptionPane;
 import edu.regis.shatu.model.aol.TutoringMode;
 
 import java.util.Random;
-import edu.regis.shatu.dao.SessionDAO;
-import edu.regis.shatu.err.NonRecoverableException;
 
 /**
  * ChoiceFunctionView class represents a GUI view for a choice function Ch(x, y,
@@ -66,6 +59,7 @@ import edu.regis.shatu.err.NonRecoverableException;
 public class ChoiceFunctionView extends UserRequestView implements KeyListener {
 
     private TutoringSessionView view;
+    private boolean hasExample;
     private String stringX, stringY, stringZ;
     private int problemSize;
     private JTextArea descTextArea, responseTextArea;
@@ -103,9 +97,6 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
     public NewExampleRequest newRequest() {
         NewExampleRequest ex = new NewExampleRequest();
         
-        //Clear previous answer
-        responseTextArea.setText("");
-      
         //Set example type to the problem associated with the current view
         ex.setExampleType(ProblemType.CHOICE_FUNCTION);
 
@@ -114,8 +105,7 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
         newStep.setBitLength(problemSize);
         
 
-        // Set the data of the NewExampleRequest to the new RotateStep containing
-        // the desired conditions
+        // Send the selected problem width to the tutor.
         ex.setData(gson.toJson(newStep));
 
         return ex;
@@ -485,103 +475,59 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
 
     @Override
     protected void updateView() {
-        // If check and hint buttons are disabled, reset listenerers and apply those
-        // used by this view
         if (!checkHintEnabled) {
-            resetButtonListeners(); // Clear any listeners applied from other views
+            resetButtonListeners();
         }
-        
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            
-        /**
-         * SHAT-368
-         * hard-coding update to pendingtask SQL table for development
-         * TODO:
-         *  - create/implement dynamic version that will ensure correct currentTask and currentStep
-         *      for any task (if natural progression doesn't do this already)
-         */
-        try {
-            SessionDAO dao = new SessionDAO();
-            dao.updatePendingTask(this.model.getId(), 0, 110, 0);
-        } catch (NonRecoverableException ex) {
-            System.getLogger(ChoiceFunctionView.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
-        }
-        
-        Step step = this.model.currentTask().getCurrentStep().getStep();
-        
-        /**
-         * TODO:
-         * - have SEE_ONE mode correctly go through each step in the ChoiceFunction task
-         *      - note: adjust/edit database setup as desired for correct steps to be present
-         */
-        if(model.getTutoringMode() == TutoringMode.SEE_ONE){
+        Step step = model.currentTask() == null || model.currentTask().getCurrentStep() == null
+                ? null : model.currentTask().getCurrentStep().getStep();
+        ChoiceFunctionStep example = step == null || step.getSubType() != StepSubType.CHOICE_FUNCTION
+                ? null : gson.fromJson(step.getData(), ChoiceFunctionStep.class);
+        hasExample = example != null && example.getOperand1() != null
+                && example.getOperand2() != null && example.getOperand3() != null;
 
-            ChoiceFunctionStep example = gson.fromJson(step.getData(), ChoiceFunctionStep.class);
-
-            if (example.getOperand1() == null || example.getOperand1().isEmpty()) {
-                stringXLabel.setText("x: Please");
-                stringYLabel.setText("y: click");
-                stringZLabel.setText("z: New Example");
-                hintButton.setEnabled(false);
-                responseTextArea.setEnabled(false);
-                checkButton.setEnabled(false);
-            } else {
-                stringXLabel.setText("x: " + example.getOperand1());
-                stringYLabel.setText("y: " + example.getOperand2());
-                stringZLabel.setText("z: " + example.getOperand3());
-                hintButton.setEnabled(true);
-                
-                char[] xVar = example.getOperand1().toCharArray();
-                char[] yVar = example.getOperand2().toCharArray();
-                char[] zVar = example.getOperand3().toCharArray();
-                String answerBit;
-                String explanation = "";
-                String selectedVar = "";
-                String finalResult = choiceFunction(example.getOperand1(), example.getOperand2(), example.getOperand3());
-                
-
-                
-                String fullVar = "";
-                
-                if(xVar[0] == '0'){
-                    selectedVar = "z";
-                    answerBit = String.valueOf(zVar[0]);
-                    fullVar = example.getOperand3();
-                }else if(xVar[0] == '1'){
-                    selectedVar = "y";
-                    answerBit = String.valueOf(yVar[0]);
-                    fullVar = example.getOperand2();
-
-                }else{
-                    selectedVar.concat("ERROR: bit not correctly found");
-                    answerBit = "-1";
-                    fullVar = "error: no valid variable found";
-                }
-                
-                explanation = "to determine the first bit selected, we first look at variable "
-                        + "x's first bit." 
-                        + "\nIf the first bit of x is a 1, the answer's first bit will " 
-                        + "be selected from variable y." 
-                        + "\nIf the first bit of x is a 0, "
-                        + "the answer's first bit will be selected from variable z.\n\n"
-                        + "Since the first variable is: " + example.getOperand1() 
-                        + ", the first bit is: " + String.valueOf(xVar[0]) + ". \nSo, we will" 
-                        + " choose the first bit from variable " + selectedVar + " = " + fullVar + ", "
-                        + "which will be " + answerBit
-                        + "\n\n" + "We repeat this process for each bit, so the final answer of this example will be: "
-                        + finalResult
-                        ;
-                
-                responseTextArea.setText(explanation);
-                responseTextArea.setEnabled(false);
-                checkButton.setEnabled(false); 
-                
+        if (hasExample) {
+            try {
+                int width = example.getBitLength();
+                hasExample = (width == 4 || width == 8 || width == 16 || width == 32)
+                        && choiceFunction(example.getOperand1(), example.getOperand2(),
+                                example.getOperand3()).length() == width;
+            } catch (IllegalArgumentException ex) {
+                hasExample = false;
             }
-        }else if (model.getTutoringMode() == TutoringMode.DO_ONE){
-            //TODO: implement
-        }else if (model.getTutoringMode() == TutoringMode.TEACH_ONE){
-            //TODO: implement
-        }        
+        }
+
+        if (hasExample) {
+            stringXLabel.setText("x: " + example.getOperand1());
+            stringYLabel.setText("y: " + example.getOperand2());
+            stringZLabel.setText("z: " + example.getOperand3());
+            problemSize = example.getBitLength();
+            switch (problemSize) {
+                case 4 -> fourRadioButton.setSelected(true);
+                case 8 -> eightRadioButton.setSelected(true);
+                case 16 -> sixteenRadioButton.setSelected(true);
+                case 32 -> thirtytwoRadioButton.setSelected(true);
+                default -> { /* Keep the last selected size for a malformed step. */ }
+            }
+            responseTextArea.setText(model.getTutoringMode() == TutoringMode.SEE_ONE
+                    ? explanation(example) : "");
+        } else {
+            stringXLabel.setText("x: Please");
+            stringYLabel.setText("y: click");
+            stringZLabel.setText("z: New Example");
+            responseTextArea.setText("");
+        }
+        configureModeSpecificUI();
+    }
+
+    private String explanation(ChoiceFunctionStep example) {
+        String x = example.getOperand1().replaceAll("\\s", "");
+        String y = example.getOperand2().replaceAll("\\s", "");
+        String z = example.getOperand3().replaceAll("\\s", "");
+        boolean selectY = x.charAt(0) == '1';
+        return "For each bit, x selects the bit from y when it is 1, or z when it is 0."
+                + "\nThe first bit of x is " + x.charAt(0) + ", so the first answer bit comes from "
+                + (selectY ? "y" : "z") + " and is " + (selectY ? y.charAt(0) : z.charAt(0))
+                + ".\nThe full answer is " + choiceFunction(x, y, z) + ".";
     }
     
     
@@ -620,29 +566,19 @@ public class ChoiceFunctionView extends UserRequestView implements KeyListener {
      */
     @Override
     protected void configureModeSpecificUI() {
-        super.configureModeSpecificUI();//call parent to handle buttons
-        
-        if(model == null) {
+        if (model == null) {
             return;
         }
-        
+        super.configureModeSpecificUI();
         TutoringMode mode = model.getTutoringMode();
-        
-        if (mode == TutoringMode.SEE_ONE) {
-            fourRadioButton.setEnabled(false);
-            eightRadioButton.setEnabled(false);
-            sixteenRadioButton.setEnabled(false);
-            thirtytwoRadioButton.setEnabled(false);
-            responseTextArea.setEnabled(false);
-        }
-        // DO_ONE & TEACH_ONE
-        else {
-            fourRadioButton.setEnabled(true);
-            eightRadioButton.setEnabled(true);
-            sixteenRadioButton.setEnabled(true);
-            thirtytwoRadioButton.setEnabled(true);
-            responseTextArea.setEnabled(true);
-        }
+        boolean practice = mode == TutoringMode.DO_ONE || mode == TutoringMode.TEACH_ONE;
+        fourRadioButton.setEnabled(practice);
+        eightRadioButton.setEnabled(practice);
+        sixteenRadioButton.setEnabled(practice);
+        thirtytwoRadioButton.setEnabled(practice);
+        responseTextArea.setEnabled(practice && hasExample);
+        checkButton.setEnabled(practice && hasExample);
+        hintButton.setEnabled(practice && hasExample);
     } 
 
 }
