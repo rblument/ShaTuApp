@@ -39,8 +39,9 @@ import edu.regis.shatu.view.MainFrame;
  */
 public class SignInAction extends ShaTuGuiAction {
     
+    /** Tracks the signed-in user's inactivity (stopped when they sign out). */
     private final InactivityManager inactivityManager
-            = new InactivityManager();
+            = InactivityManager.instance();
 
 
     /**
