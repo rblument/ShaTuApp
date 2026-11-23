@@ -26,12 +26,18 @@ class ResetPasswordTutorTest {
     private final Gson gson = new Gson();
     private AccountSvc accountSvc;
 
+    /** True only when the test account was created, i.e., a database exists. */
+    private boolean accountCreated;
+
     @BeforeEach
     void createAccount() throws Exception {
+        accountCreated = false;
+
         try {
             accountSvc = ServiceFactory.findAccountSvc();
             accountSvc.delete(accountSvc.getPrimaryKey(), USER_ID);
             accountSvc.create(new Account(USER_ID, OLD_PASSWORD, "Reset", "Tester", QUESTION, ANSWER_HASH));
+            accountCreated = true;
         } catch (Exception | Error e) {
             Assumptions.assumeTrue(false, "No database available: " + e);
         }
@@ -39,7 +45,9 @@ class ResetPasswordTutorTest {
 
     @AfterEach
     void deleteAccount() throws Exception {
-        if (accountSvc != null) {
+        // Without a database (e.g., the GitHub runner) the tests were skipped
+        // and there is nothing to clean up.
+        if (accountCreated) {
             accountSvc.delete(accountSvc.getPrimaryKey(), USER_ID);
         }
     }
