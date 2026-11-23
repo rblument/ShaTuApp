@@ -25,10 +25,14 @@ import javax.swing.JLabel;
 import javax.swing.JRadioButton;
 import javax.swing.SwingConstants;
 
+import com.google.gson.JsonSyntaxException;
+
 import edu.regis.shatu.model.StepCompletion;
 import edu.regis.shatu.model.aol.NewExampleRequest;
 import edu.regis.shatu.model.aol.ProblemType;
+import edu.regis.shatu.model.aol.StepSubType;
 import edu.regis.shatu.model.aol.TutoringMode;
+import edu.regis.shatu.model.steps.PrepScheduleStep;
 import edu.regis.shatu.model.steps.Step;
 
 /**
@@ -46,6 +50,14 @@ public class PrepareScheduleView extends UserRequestView { // implements ActionL
 
     private int currentStep = 1;
     private int correctAnswerIndex; // Stores the shuffled position of the correct answer
+
+    // Whether the question on screen came from the tutor. The first one is
+    // shown before the tutor has sent any.
+    private boolean questionFromTutor = false;
+
+    // The tutor's step whose question is on screen, so a new one is loaded
+    // even when it asks the same question.
+    private Step shownStep;
 
     // Correct Steps (displayed in order)
     private final String[] correctSteps = {
@@ -165,14 +177,9 @@ public class PrepareScheduleView extends UserRequestView { // implements ActionL
      */
     private void loadStep() {
         feedbackLabel.setText("");
+        answerGroup.clearSelection();
 
-        // More challenging step questions
-        String[] stepQuestions = {
-                "Which process ensures the input message conforms to the required block size in SHA-256?",
-                "What transformation is applied to each 512-bit block before processing?",
-                "What technique does SHA-256 use to extend a small set of words into a larger sequence?",
-                "How is the expanded word sequence utilized in the hashing process?"
-        };
+        String[] stepQuestions = PrepScheduleStep.QUESTIONS;
 
         // Ensure the first question always appears correctly
         if (currentStep == 1) {
@@ -181,22 +188,8 @@ public class PrepareScheduleView extends UserRequestView { // implements ActionL
             stepLabel.setText("<html><u>Step " + currentStep + ": " + stepQuestions[currentStep - 1] + "</u></html>");
         }
 
-        // Answer choices with correct answers always in the first position before
-        // shuffling
-        String[][] answerChoices = {
-                { "Padding is added to ensure the message is a multiple of 512 bits.", // Correct answer
-                        "SHA-256 automatically adjusts message length without padding.",
-                        "Each message is divided into arbitrary-sized chunks before hashing." },
-                { "The block is split into 32-bit segments for further manipulation.", // Correct answer
-                        "A checksum is computed and attached to each block.",
-                        "Each chunk remains unaltered until the final hashing step." },
-                { "A series of bitwise operations and shifts increase the number of words.", // Correct answer
-                        "Additional words are appended from external sources.",
-                        "Words are kept constant, ensuring stability in the process." },
-                { "The transformed sequence helps derive intermediate hash values.", // Correct answer
-                        "The expanded words are discarded after processing.",
-                        "Only a subset of the expanded words contributes to the hash output." }
-        };
+        // The correct answer is always the first choice before shuffling.
+        String[][] answerChoices = PrepScheduleStep.CHOICES;
 
         // Store correct answer before shuffling
         String correctAnswer = answerChoices[currentStep - 1][0];
@@ -323,7 +316,27 @@ public class PrepareScheduleView extends UserRequestView { // implements ActionL
     @Override
     public StepCompletion stepCompletion() {
         Step currentStepObj = model.currentTask().currentStep().getStep();
-        return new StepCompletion(currentStepObj, gson.toJson(correctSteps[this.currentStep - 1]));
+
+        // Send the question and the student's pick so the tutor can grade it.
+        PrepScheduleStep answered = new PrepScheduleStep();
+        answered.setQuestionNumber(currentStep);
+        answered.setAnswer(selectedAnswer());
+
+        return new StepCompletion(currentStepObj, gson.toJson(answered));
+    }
+
+    /**
+     * The text of the selected choice.
+     *
+     * @return the selected choice, or "" if none is selected
+     */
+    private String selectedAnswer() {
+        for (JRadioButton option : answerOptions) {
+            if (option.isSelected()) {
+                return option.getText();
+            }
+        }
+        return "";
     }
 
     /**
@@ -333,16 +346,48 @@ public class PrepareScheduleView extends UserRequestView { // implements ActionL
     protected void updateView() {
                 resetButtonListeners();
 
-        // Only update label if the step is greater than 1 to prevent overriding first
-        // question
-        if (currentStep > 1) {
-            stepLabel.setText("<html><u>Step " + currentStep + ": " + correctSteps[currentStep - 1] + "</u></html>");
+        // A new example from the tutor says which question to show.
+        // A step from another screen leaves the question on screen as it is.
+        int questionNumber = questionInCurrentStep();
+        if (questionNumber > 0) {
+            questionFromTutor = true;
+            Step step = model.currentTask().currentStep().getStep();
+            if (step != shownStep) {
+                shownStep = step;
+                currentStep = questionNumber;
+                loadStep();
+            }
         }
 
         feedbackLabel.setText("");
         updatePreviousStepsDisplay();
-        
-      
+    }
+
+    /**
+     * The question number in the current step's data.
+     *
+     * @return the question the tutor sent, or 0 if the current step isn't a
+     *         Prepare Schedule question
+     */
+    private int questionInCurrentStep() {
+        if (model == null || model.currentTask() == null || model.currentTask().currentStep() == null) {
+            return 0;
+        }
+
+        Step step = model.currentTask().currentStep().getStep();
+        if (step == null || step.getSubType() != StepSubType.PREPARE_SCHEDULE) {
+            return 0;
+        }
+
+        try {
+            PrepScheduleStep data = gson.fromJson(step.getData(), PrepScheduleStep.class);
+            if (data != null && PrepScheduleStep.isQuestion(data.getQuestionNumber())) {
+                return data.getQuestionNumber();
+            }
+        } catch (JsonSyntaxException e) {
+            // Not a Prepare Schedule question, keep the one on screen.
+        }
+        return 0;
     }
 
     
@@ -390,7 +435,14 @@ public class PrepareScheduleView extends UserRequestView { // implements ActionL
     public NewExampleRequest newRequest() {
         NewExampleRequest ex = new NewExampleRequest();
         ex.setExampleType(ProblemType.PREPARE_SCHEDULE);
-        ex.setData(gson.toJson(correctSteps));
+
+        // Ask for the question on screen if the tutor hasn't sent one yet,
+        // otherwise the next one, going back to the first after the last.
+        PrepScheduleStep next = new PrepScheduleStep();
+        next.setQuestionNumber(questionFromTutor
+                ? currentStep % PrepScheduleStep.QUESTIONS.length + 1
+                : currentStep);
+        ex.setData(gson.toJson(next));
         return ex;
     }
 }
