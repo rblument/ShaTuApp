@@ -17,6 +17,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
+import java.awt.KeyboardFocusManager;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
@@ -472,7 +473,7 @@ public class ResetPasswordPanel extends GPanel{
          */
         @Override
         public void insertUpdate(DocumentEvent e) {
-            Component comp = MainFrame.instance().getFocusOwner();
+            Component comp = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
             if (comp == pass1) {
                 checkStrength();
             }
@@ -485,7 +486,7 @@ public class ResetPasswordPanel extends GPanel{
          */
         @Override
         public void removeUpdate(DocumentEvent e) {
-            Component comp = MainFrame.instance().getFocusOwner();
+            Component comp = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
             if (comp == pass1) {
                 checkStrength();
             }
@@ -498,7 +499,7 @@ public class ResetPasswordPanel extends GPanel{
          */
         @Override
         public void changedUpdate(DocumentEvent e) {
-            Component comp = MainFrame.instance().getFocusOwner();
+            Component comp = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
             if (comp == pass1) {
                 checkStrength();
             }

@@ -94,9 +94,15 @@ public class CheckSecurityQuestAction extends ShaTuGuiAction {
             case "Verified":
             // Extract token from reply data
             String token = gson.fromJson(reply.getData(), String.class);
-    
-           // frame.initializeResetPassword(account.getUserId(), token);
-           // frame.selectResetPassword(account.getUserId());
+
+            if (token == null || token.isEmpty()) {
+                frame.displayError("The tutor did not return a security token. Please try again.");
+                break;
+            }
+
+            // The reset password panel needs the verified user id (to display
+            // and to send) and the token (the tutor rejects a reset without it)
+            frame.initializeResetPassword(account.getUserId(), token);
             frame.displayView(MainFrame.ViewName.RESET_PASSWORD);
 
             msg = "Success!\n\n" +

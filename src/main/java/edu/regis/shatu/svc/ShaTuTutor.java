@@ -417,12 +417,11 @@ public class ShaTuTutor implements TutorSvc {
             // Retrieve full DB account so we don't lose names or other info
             Account dbAcct = acctSvc.retrieve(acct.getUserId());
 
-            // Only update the changed fields
+            // Only the password changes. The request comes from the reset
+            // password panel, which doesn't know the security question or
+            // answer, so copying them would overwrite the stored ones with
+            // blanks and the user could never be verified again.
             dbAcct.setPassword(acct.getPassword());
-
-            // Only set security question/answer if needed
-            dbAcct.setSecurityQuestion(acct.getSecurityQuestion());
-            dbAcct.setSecurityAnswer(acct.getSecurityAnswer());
 
             acctSvc.update(dbAcct);
 
