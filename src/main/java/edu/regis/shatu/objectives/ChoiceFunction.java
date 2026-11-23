@@ -76,7 +76,6 @@ public class ChoiceFunction extends Objective {
 
         String expectedResult = choiceFunction(operand1, operand2, operand3, bitLength);
 
-        System.out.println("Expected result: " + expectedResult); // ToDo debuggin
 
         return genericComplete(expectedResult, result, KnowledgeComponentKind.CHOICE_FUNCTION);
     }

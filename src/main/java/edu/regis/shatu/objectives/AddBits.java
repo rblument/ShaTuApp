@@ -171,8 +171,6 @@ public class AddBits extends Objective {
             resultBinary = "0" + resultBinary;
         }
 
-        System.out.println("Result : " + resultBinary);
-
         return resultBinary;
     }
 }

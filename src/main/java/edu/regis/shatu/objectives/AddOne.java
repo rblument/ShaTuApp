@@ -71,8 +71,6 @@ public class AddOne extends Objective {
         newAddOneBit.setMessageLength(question.length());
         newAddOneBit.setResult(addOneFunction(question));
 
-        System.out.println(newAddOneBit.getResult());
-
         return genericExample(newAddOneBit, StepSubType.ADD_ONE_BIT, ProblemType.ADD_ONE_BIT,
                 KnowledgeComponentKind.ADD_ONE_BIT,
                 "Add one bit to the given bit string");
@@ -102,9 +100,6 @@ public class AddOne extends Objective {
         // A missing answer is graded as wrong.
         String userAnswer = completedStep.getUserAnswer() == null ? "" : completedStep.getUserAnswer();
         String correctAnswer = addOneFunction(completedStep.getQuestion());
-
-        System.out.println("Correct Answer: " + correctAnswer);
-        System.out.println("User Answer: " + userAnswer);
 
         return genericComplete(correctAnswer, userAnswer, KnowledgeComponentKind.ADD_ONE_BIT);
     }
