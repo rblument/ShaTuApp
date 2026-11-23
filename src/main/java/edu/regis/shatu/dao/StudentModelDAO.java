@@ -141,10 +141,28 @@ public class StudentModelDAO extends MySqlDAO implements StudentModelSvc {
      */
     @Override
     public void update(Student student) throws NonRecoverableException {
+        try (Connection conn = DriverManager.getConnection(URL)) {
+            update(student, conn);
+        } catch (SQLException e) {
+            Logger.getLogger(StudentModelDAO.class.getName()).log(Level.SEVERE, null, e);
+            throw new NonRecoverableException("Failed to update student info: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Updates the student record using the given connection, which is neither
+     * committed nor closed, so the caller can include this update in its own
+     * transaction.
+     *
+     * @param student the student whose information will be updated
+     * @param conn an open connection to the DB
+     * @throws NonRecoverableException the update failed
+     */
+    public void update(Student student, Connection conn) throws NonRecoverableException {
         final String sql = "UPDATE Student SET FirstName = ?, LastName = ? "
                 + "WHERE userId = ?";
 
-        try (Connection conn = DriverManager.getConnection(URL); PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, student.getAccount().getFirstName());
             stmt.setString(2, student.getAccount().getLastName());

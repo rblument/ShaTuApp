@@ -13,7 +13,10 @@
 package edu.regis.shatu.svc;
 
 import edu.regis.shatu.dao.interfaces.CRUD;
+import edu.regis.shatu.err.NonRecoverableException;
+import edu.regis.shatu.err.ObjNotFoundException;
 import edu.regis.shatu.model.Account;
+import edu.regis.shatu.model.Student;
 
 /**
  * The API for {@link Account} life-cycle maintenance (CRUD persistence).
@@ -21,6 +24,17 @@ import edu.regis.shatu.model.Account;
  * @author rickb
  */
 public interface AccountSvc extends CRUD<Account> {
+    /**
+     * Update the given account and its student record in a single
+     * transaction: either both are updated or neither is.
+     *
+     * @param account the account containing the new information.
+     * @param student the student whose name is updated to match the account.
+     * @throws ObjNotFoundException no account exists for the given user id.
+     * @throws NonRecoverableException the update failed, see getCause().
+     */
+    void update(Account account, Student student) throws ObjNotFoundException, NonRecoverableException;
+
         // /**
         // * Insert the give user account into the DB (cannot insert an admin).
         // *

@@ -286,9 +286,8 @@ public class ShaTuTutor implements TutorSvc {
      *
      * This method handles ":UpdateAccount" requests from the GUI client.
      *
-     * TODO: Database tables (Account & Student) are updated independently.
-     * Determine if this should be done with a single transaction. Delete this
-     * TODO when a decision is made and implemented.
+     * The Account and Student tables are updated in a single transaction, so
+     * a failure leaves both unchanged.
      *
      * @param jsonAcct a JSON representation of an account
      * @return a TutorReply indicating "Success" or ":ERR"
@@ -298,8 +297,7 @@ public class ShaTuTutor implements TutorSvc {
         Student student = new Student(account);
 
         try {
-            ServiceFactory.findAccountSvc().update(account);    // Updates Account
-            ServiceFactory.findStudentModelSvc().update(student);   // Updates Student
+            ServiceFactory.findAccountSvc().update(account, student);   // Updates Account and Student together
             return new TutorReply("Success");
         } catch (ObjNotFoundException ex) {
             return createError("Account not found for: " + account.getUserId(), ex);
