@@ -72,6 +72,8 @@ public class BackToLogin extends ShaTuGuiAction {
      */
     @Override
     public void actionPerformed(ActionEvent evt) {
+        // Nobody is signed in, so there is no inactivity to track
+        InactivityManager.instance().stopTracking();
         MainFrame.instance().setModel(null); // logout
     }
 }

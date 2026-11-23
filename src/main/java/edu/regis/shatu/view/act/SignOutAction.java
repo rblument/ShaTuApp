@@ -88,6 +88,8 @@ public class SignOutAction extends ShaTuGuiAction {
         TutorReply reply = SvcFacade.instance().tutorRequest(request);
         
         if(reply.getStatus().equals("SIGN_OUT")){
+            // Nobody is signed in, so there is no inactivity to track
+            InactivityManager.instance().stopTracking();
             MainFrame.instance().setModel(null);
         }
         else {
