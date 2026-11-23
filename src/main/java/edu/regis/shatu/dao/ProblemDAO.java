@@ -463,8 +463,16 @@ public class ProblemDAO extends MySqlDAO implements ProblemSvc {
     }
 
     /**
+     * Load the text of the information message step with the given id.
      * 
      * The data is a POJO String object
+     * 
+     * @param subTypeId the SubStepId of the row in the InfoMsgStep table.
+     * @param conn an open connection to the DB, which isn't closed by this method.
+     * @return the text of the information message.
+     * @throws InconsistentDBException the InfoMsgStep table has no row with the
+     *         given id, even though a Step refers to it.
+     * @throws NonRecoverableException perhaps see getCause().getErrorCode().
      */
     private String extractInfoMsgData(int subTypeId, Connection conn) throws NonRecoverableException {
         final String sql = "SELECT Text FROM InfoMsgStep WHERE SubStepId = ?";
@@ -480,8 +488,9 @@ public class ProblemDAO extends MySqlDAO implements ProblemSvc {
             if (rs.next()) {
                 return rs.getString(1);
             } else {
-                String errMsg = "ERROR: ToDo: Throw database inconsistency InfoMsgStep table: " + subTypeId;
-                throw new NonRecoverableException(errMsg, new InconsistentDBException(errMsg));
+                // A Step refers to an InfoMsgStep row that doesn't exist.
+                throw new InconsistentDBException(
+                        "ProblemDAO-ERR-12 InfoMsgStep row not found, SubStepId: " + subTypeId);
             }
         } catch (SQLException e) {
             throw new NonRecoverableException("ProblemDAO-ERR-10" + e.toString(), e);
@@ -496,6 +505,8 @@ public class ProblemDAO extends MySqlDAO implements ProblemSvc {
      * @param id the id of the timeout that is being retrieved
      * @param conn
      * @return the Timeout with the given id.
+     * @throws InconsistentDBException the Timeout table has no row with the
+     *         given id, even though a Step refers to it.
      * @throws NonRecoverableException perhaps see getCause().getErrorCode().
      */
     private Timeout retrieveTimeout(int id, Connection conn) throws NonRecoverableException {
@@ -514,9 +525,8 @@ public class ProblemDAO extends MySqlDAO implements ProblemSvc {
                 Timeout timeout = new Timeout(rs.getString(1), rs.getInt(2), rs.getString(3), rs.getString(4));
                 return timeout;
             } else {
-                // ToDo: throw a dabase inconsistency error
-                String errMsg = "Timeout not found, id: " + id;
-                throw new NonRecoverableException(errMsg, new InconsistentDBException(errMsg));
+                // A Step refers to a Timeout row that doesn't exist.
+                throw new InconsistentDBException("ProblemDAO-ERR-13 Timeout row not found, Id: " + id);
             }
         } catch (SQLException e) {
             throw new NonRecoverableException("ProblemDAO-ERR-11" + e.toString(), e);
