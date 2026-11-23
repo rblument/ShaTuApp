@@ -29,6 +29,7 @@ TRUNCATE TABLE Assessment;
 TRUNCATE TABLE TutoringSession;
 TRUNCATE TABLE PendingTask;
 TRUNCATE TABLE PendingStep;
+TRUNCATE TABLE CompletedStep;
 
 DELETE FROM LoginHistory WHERE UserId = 'test@regis.edu';
 

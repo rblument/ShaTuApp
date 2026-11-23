@@ -5,7 +5,7 @@
 -- Unless required by applicable law or agreed to in writing, this software is distributed on an "AS IS" basis without warranties or conditions of any kind, either expressed or implied.
 -- Authors: chand, rickb
 -- Created: Nov 8, 2024
--- Last modified: Dec 2, 2025 for SHAT-293
+-- Last modified: Nov 16, 2026 for completed step persistence
 
 -- If the ShaTuDB exists, drop it. In general, you will lose any existing data.
 DROP DATABASE IF EXISTS ShaTuDB;
@@ -203,6 +203,22 @@ CREATE TABLE Unit (
                    'MICROADAPTATION', 'OTHER')
 );
 
+-- The steps each student has correctly completed. UnitId is the unit matching the
+-- tutoring mode the student was in (Unit 0 = See One, 1 = Do One, 2 = Teach One).
+-- Task, Step and Unit ids are NULL if the completed step has no matching static row.
+CREATE TABLE CompletedStep (
+    Id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    UserId VARCHAR(256) NOT NULL,
+    UnitId INT DEFAULT NULL,
+    TaskId INT DEFAULT NULL,
+    StepId INT DEFAULT NULL,
+    StepSubType VARCHAR(64) NOT NULL,
+    TutoringMode ENUM('SEE_ONE', 'DO_ONE', 'TEACH_ONE') NOT NULL,
+    HintsGiven INT NOT NULL DEFAULT 0,
+    TimeoutOccurred TINYINT NOT NULL DEFAULT 0,
+    CompletionDate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 /* ********** POPULATE TABLES ********** */
 
 INSERT INTO Course (Id, Title, PrimaryPedagogy, Description)
@@ -394,6 +410,16 @@ INSERT INTO Unit (Id, CourseId, Title,
         'It also exposes the student to the general operation of the ShaTu application.'),
     0, 'FIXED_SEQUENCE');
 
+INSERT INTO Unit (Id, CourseId, Title, Description, SequenceIndex, Pedagogy)
+ VALUES (1, 1, 'SHA-256: Do One',
+    'In this unit, the student performs each primary step of the SHA-256 algorithm with the tutor providing hints.',
+    1, 'FIXED_SEQUENCE');
+
+INSERT INTO Unit (Id, CourseId, Title, Description, SequenceIndex, Pedagogy)
+ VALUES (2, 1, 'SHA-256: Teach One',
+    'In this unit, the student demonstrates mastery of each primary step of the SHA-256 algorithm.',
+    2, 'FIXED_SEQUENCE');
+
 /* ********** ADD FOREIGN KEY CONSTRAINTS ********** */
 ALTER TABLE DeveloperMode
 ADD CONSTRAINT fk_developermode_userid
@@ -501,15 +527,73 @@ ADD CONSTRAINT fk_unit_courseid
 FOREIGN KEY (CourseId) REFERENCES Course(Id)
 ON UPDATE CASCADE ON DELETE CASCADE;
 
-<<<<<<< HEAD
+-- Every Task now has at least one Step, so completed steps can be recorded against
+-- a Step, its Task, and the Unit (see CompletedStep). A new step's Id is its Task's Id.
 
 -- added for SHAT-368 work
--- adds required steps for task Choice Function
+-- adds required steps for task Choice Function. The Ids were 1, 2 and 3, which
+-- collided with the Encode ASCII and Add One Bit steps above.
 INSERT INTO Step (Id, TaskId, Title, Description, SequenceIndex, ExercisedComponentId, StepSubType, SubTypeId, TimeoutId)
- VALUES (1, 110, 'Choice Function Step', 'Compute Ch(x,y,z)', 0, 0, 'CHOICE_FUNCTION', 0, 0);
+ VALUES (110, 110, 'Choice Function Step', 'Compute Ch(x,y,z)', 0, 210, 'CHOICE_FUNCTION', 0, 0);
 
 INSERT INTO Step (Id, TaskId, Title, Description, SequenceIndex, ExercisedComponentId, StepSubType, SubTypeId, TimeoutId)
- VALUES (2, 110, 'Compare First Bit', 'using the selected vars, walk through how to calculate the first outcome', 1, 0, 'CHOICE_FUNCTION', 0, 0);
+ VALUES (111, 110, 'Compare First Bit', 'using the selected vars, walk through how to calculate the first outcome', 1, 210, 'CHOICE_FUNCTION', 0, 0);
 
 INSERT INTO Step (Id, TaskId, Title, Description, SequenceIndex, ExercisedComponentId, StepSubType, SubTypeId, TimeoutId)
- VALUES (3, 110, 'Repeat bit calculation', 'perform bit calculation on remaining bits', 2, 0, 'CHOICE_FUNCTION', 0, 0);
+ VALUES (112, 110, 'Repeat bit calculation', 'perform bit calculation on remaining bits', 2, 210, 'CHOICE_FUNCTION', 0, 0);
+
+INSERT INTO Step (Id, TaskId, Title, Description, SequenceIndex, ExercisedComponentId, StepSubType, SubTypeId, TimeoutId)
+ VALUES (30, 30, 'Pad with Zeroes', 'Pad a bit string to the appropriate length with zeroes', 0, 120, 'PAD_ZEROS', 0, 0);
+
+INSERT INTO Step (Id, TaskId, Title, Description, SequenceIndex, ExercisedComponentId, StepSubType, SubTypeId, TimeoutId)
+ VALUES (40, 40, 'Add Message Length', 'Add the appropriate message length to the bit string', 0, 130, 'ADD_MSG_LENGTH', 0, 0);
+
+INSERT INTO Step (Id, TaskId, Title, Description, SequenceIndex, ExercisedComponentId, StepSubType, SubTypeId, TimeoutId)
+ VALUES (50, 50, 'Prepare Schedule', 'Prepare the schedule', 0, 140, 'PREPARE_SCHEDULE', 0, 0);
+
+INSERT INTO Step (Id, TaskId, Title, Description, SequenceIndex, ExercisedComponentId, StepSubType, SubTypeId, TimeoutId)
+ VALUES (60, 60, 'Initialize Variables', 'Initialize the compression round variables.', 0, 150, 'INITIALIZE_VARS', 0, 0);
+
+INSERT INTO Step (Id, TaskId, Title, Description, SequenceIndex, ExercisedComponentId, StepSubType, SubTypeId, TimeoutId)
+ VALUES (70, 70, 'Compression Round', 'Sequence the Compression Round.', 0, 160, 'COMPRESS_ROUND', 0, 0);
+
+INSERT INTO Step (Id, TaskId, Title, Description, SequenceIndex, ExercisedComponentId, StepSubType, SubTypeId, TimeoutId)
+ VALUES (80, 80, 'Rotate Bits', 'Rotate a bit string.', 0, 170, 'ROTATE_BITS', 0, 0);
+
+INSERT INTO Step (Id, TaskId, Title, Description, SequenceIndex, ExercisedComponentId, StepSubType, SubTypeId, TimeoutId)
+ VALUES (90, 90, 'Shift Bits', 'Shift a bit string.', 0, 180, 'SHIFT_BITS', 0, 0);
+
+INSERT INTO Step (Id, TaskId, Title, Description, SequenceIndex, ExercisedComponentId, StepSubType, SubTypeId, TimeoutId)
+ VALUES (100, 100, 'XOR Bits', 'XOR a bit string.', 0, 190, 'XOR_BITS', 0, 0);
+
+INSERT INTO Step (Id, TaskId, Title, Description, SequenceIndex, ExercisedComponentId, StepSubType, SubTypeId, TimeoutId)
+ VALUES (120, 120, 'Majority Function', 'Use the majority function on appropriate bit strings.', 0, 200, 'MAJORITY_FUNCTION', 0, 0);
+
+INSERT INTO Step (Id, TaskId, Title, Description, SequenceIndex, ExercisedComponentId, StepSubType, SubTypeId, TimeoutId)
+ VALUES (130, 130, 'Encode ASCII', 'Convert the question to binary', 0, 100, 'ENCODE_ASCII', 0, 0);
+
+INSERT INTO Step (Id, TaskId, Title, Description, SequenceIndex, ExercisedComponentId, StepSubType, SubTypeId, TimeoutId)
+ VALUES (140, 140, 'SHA Sum 0 Function', 'Use the Sigma0 function.', 0, 230, 'SHA_ZERO', 0, 0);
+
+INSERT INTO Step (Id, TaskId, Title, Description, SequenceIndex, ExercisedComponentId, StepSubType, SubTypeId, TimeoutId)
+ VALUES (230, 230, 'SHA Sum 1 Function', 'Use the Sigma1 function.', 0, 240, 'SHA_ONE', 0, 0);
+
+ALTER Table CompletedStep
+ADD CONSTRAINT fk_completedstep_userid
+FOREIGN KEY (UserId) REFERENCES Account(UserId)
+ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER Table CompletedStep
+ADD CONSTRAINT fk_completedstep_unitid
+FOREIGN KEY (UnitId) REFERENCES Unit(Id)
+ON UPDATE CASCADE ON DELETE SET NULL;
+
+ALTER Table CompletedStep
+ADD CONSTRAINT fk_completedstep_taskid
+FOREIGN KEY (TaskId) REFERENCES Task(Id)
+ON UPDATE CASCADE ON DELETE SET NULL;
+
+ALTER Table CompletedStep
+ADD CONSTRAINT fk_completedstep_stepid
+FOREIGN KEY (StepId) REFERENCES Step(Id)
+ON UPDATE CASCADE ON DELETE SET NULL;

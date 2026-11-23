@@ -798,7 +798,21 @@ public class ShaTuTutor implements TutorSvc {
             default:
                 ProblemType pType = convertStepToProblemType(step.getSubType());
                 currObjective = getCurrentObjectiveByProbelmType(pType);
+
+                // The mode in effect when the student answered, before it is re-synced below.
+                // The session is rebuilt from the DB on every request (the mode isn't stored),
+                // so derive the mode from the assessment level, as the client is told to.
+                TutoringMode modeAtCompletion = syncSessionTutoringMode(pType);
+                if (modeAtCompletion == null && session != null) {
+                    modeAtCompletion = session.getTutoringMode();
+                }
+
                 TutorReply reply = currObjective.completeStep(completion);
+
+                // Persist the step as completed for this student if the answer was correct.
+                if (isCorrectCompletion(reply)) {
+                    recordCompletedStep(completion, modeAtCompletion);
+                }
 
                 // Sync the mode after the step is graded
                 TutoringMode syncedMode = syncSessionTutoringMode(pType);
@@ -811,6 +825,58 @@ public class ShaTuTutor implements TutorSvc {
                     reply.setTutoringMode(syncedMode);
                 }
                 return reply;
+        }
+    }
+
+    /**
+     * Returns whether the reply produced by an objective's completeStep()
+     * says the student's answer was correct.
+     *
+     * @param reply the TutorReply returned by an objective
+     * @return true only if the reply holds a StepCompletionReply marked correct
+     */
+    private boolean isCorrectCompletion(TutorReply reply) {
+        try {
+            PendingTask replyTask = gson.fromJson(reply.getData(), PendingTask.class);
+
+            if (replyTask == null || replyTask.getCurrentStep() == null
+                    || replyTask.getCurrentStep().getStep() == null) {
+                return false;
+            }
+
+            Step replyStep = replyTask.getCurrentStep().getStep();
+            if (replyStep.getSubType() != StepSubType.STEP_COMPLETION_REPLY) {
+                return false;
+            }
+
+            StepCompletionReply stepReply = gson.fromJson(replyStep.getData(), StepCompletionReply.class);
+            return stepReply != null && stepReply.isCorrect();
+        } catch (RuntimeException ex) {
+            return false; // e.g., an ":ERR" reply whose data is not a PendingTask
+        }
+    }
+
+    /**
+     * Persists that the current student completed the given step, for the unit
+     * matching the tutoring mode (See One, Do One, Teach One).
+     *
+     * A failure to record is logged but never fails the student's request,
+     * since the answer has already been graded and the assessment updated.
+     *
+     * @param completion the completion submitted by the GUI
+     * @param mode the tutoring mode when the step was completed
+     */
+    private void recordCompletedStep(StepCompletion completion, TutoringMode mode) {
+        if (session == null || student == null || mode == null) {
+            return;
+        }
+
+        try {
+            ServiceFactory.findCompletedStepSvc().record(
+                    student.getAccount().getUserId(), session.getCourse().getId(), mode, completion);
+        } catch (Exception ex) {
+            Logger.getLogger(ShaTuTutor.class.getName())
+                    .log(Level.WARNING, "Unable to record completed step " + completion.getStep().getId(), ex);
         }
     }
 
@@ -1011,6 +1077,9 @@ public class ShaTuTutor implements TutorSvc {
                 modelSvc.updateAssessment(studentModel, welcomeAssessment, StudentModelFieldKind.ATTEMPTS);
                 modelSvc.updateAssessment(studentModel, welcomeAssessment, StudentModelFieldKind.SUCCESSES);
                 modelSvc.updateAssessment(studentModel, welcomeAssessment, StudentModelFieldKind.ASSESSMENT_LEVEL);
+
+                // Acknowledging the welcome message completes its step, once.
+                recordCompletedStep(completion, session != null ? session.getTutoringMode() : null);
             }
         } catch (NonRecoverableException ex) {
             return createError("Failed to update welcome acknowledgement assessment", ex);
