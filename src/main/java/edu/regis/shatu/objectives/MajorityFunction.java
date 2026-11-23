@@ -72,10 +72,8 @@ public class MajorityFunction extends Objective {
         String operand3 = example.getOperandC();
         int bitLength = example.getBitLength();
         String result = example.getResult();
-        // System.out.println("Result: " + example.getResult());
 
         String expectedResult = majorityFunction(operand1, operand2, operand3, bitLength);
-        System.out.println("Expected result: " + expectedResult);
 
         return genericComplete(expectedResult, result, KnowledgeComponentKind.MAJORITY_FUNCTION);
     }

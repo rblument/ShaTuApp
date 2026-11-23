@@ -70,7 +70,6 @@ public class ShaOne extends Objective {
         String result = example.getResult();
 
         String expectedResult = calculateSigma(operand1, bitLength);
-        System.out.println("Expected result: " + expectedResult);
 
         return genericComplete(expectedResult, result, KnowledgeComponentKind.SHA_ONE);
     }

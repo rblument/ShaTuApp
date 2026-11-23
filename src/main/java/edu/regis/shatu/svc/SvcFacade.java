@@ -121,14 +121,15 @@ public class SvcFacade {
      */
     public TutorReply tutorRequest(ClientRequest request) {
         Gson gson = new Gson();
-        // ToDo: remove debugging stmt.
         String jsonRequest = gson.toJson(request);
-        System.out.println("\n*** jsonRequest *" + jsonRequest + "*");
-  
+
+        // Only the request type is logged. The request and the reply carry the
+        // security token and account data (password hash, security answer),
+        // which must never be written to the console or a log.
+        LOGGER.fine("Sending request: " + request.getRequestType());
+
         String jsonReply = send(jsonRequest);
-        
-        System.out.println("*** jsonReply: " + jsonReply + "\n");
-        
+
         return parseReply(jsonReply);
     }
     
@@ -155,14 +156,16 @@ public class SvcFacade {
             // e.g., the reply was the JSon literal null, or had "status":null,
             // which callers would throw on when they switch on the status
             if (reply == null || reply.getStatus() == null) {
-                LOGGER.warning("Unusable reply from the tutor: " + jsonReply);
+                // The reply body is not logged because it may hold account data
+                LOGGER.warning("Unusable reply from the tutor, length: " + jsonReply.length());
                 return new TutorReply(":ERR", BAD_REPLY_MESSAGE);
             }
             
             return reply;
             
         } catch (JsonSyntaxException e) {
-            LOGGER.log(Level.SEVERE, "Malformed reply from the tutor: " + jsonReply, e);
+            // The reply body is not logged because it may hold account data
+            LOGGER.log(Level.SEVERE, "Malformed reply from the tutor, length: " + jsonReply.length(), e);
             return new TutorReply(":ERR", BAD_REPLY_MESSAGE);
         }
     }

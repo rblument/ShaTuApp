@@ -92,16 +92,10 @@ public class ResetPasswordAction extends ShaTuGuiAction {
         request.setUserId(account.getUserId()); //required for session tracking
         request.setData(gson.toJson(account));
 
-        System.out.println(">>> Submitting RESET_PASSWORD request for: " + account.getUserId());
-        System.out.println(">>> Security token: " + token);
-        System.out.println(">>> Full JSON account data: " + gson.toJson(account));
-  
         TutorReply reply = SvcFacade.instance().tutorRequest(request);
 
         String msg;
         String status = reply.getStatus();
-        System.out.println("ResetPasswordAction: Server reply status = " + status);
-        System.out.println("Account JSON sent: " + gson.toJson(account));
 
         if (status == null) {
             msg = "Server response was invalid. Please try again or contact support.";

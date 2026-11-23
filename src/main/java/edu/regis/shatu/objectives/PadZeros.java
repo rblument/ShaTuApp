@@ -41,8 +41,6 @@ public class PadZeros extends Objective {
                                                                                             // zeros needed to pad the
                                                                                             // message correctly
 
-        System.out.println(subStep.getResult()); // Error checking
-
         return genericExample(subStep, StepSubType.PAD_ZEROS, ProblemType.PAD_ZEROS, KnowledgeComponentKind.PAD_ZEROS,
                 "Calculate zeroes needed to pad the message");
     }
@@ -77,9 +75,6 @@ public class PadZeros extends Objective {
         String userAnswer = completedPadZeroStep.getUserAnswer() == null ? "" : completedPadZeroStep.getUserAnswer();
         int messageLength = completedPadZeroStep.getQuestion().length();
         String correctAnswer = Integer.toString(calculateZerosNeededForPadding(messageLength));
-
-        System.out.println("user answer: " + userAnswer); // Error checking
-        System.out.println("Correct answer: " + correctAnswer); // Error checking
 
         return genericComplete(correctAnswer, userAnswer, KnowledgeComponentKind.PAD_ZEROS);
     }
